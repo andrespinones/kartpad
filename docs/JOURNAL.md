@@ -101,3 +101,18 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - Inventory: reproducible search script and source-complete first-party ownership table recorded in `docs/PORTABILITY.md`.
 - Classification: G3 Pass. A Windows execution result is not claimed; its baseline source graph remains isolated and reproducible at the pin.
 - Next lowest unmet goal: G4 Darwin guest-memory model, beginning with the checked oracle and scalar/endian/alias contract fixtures.
+
+## 2026-08-28 — G4 checked guest memory and Darwin reservation probe
+
+- Goal: select and prove a safe macOS guest-memory path before scheduler or full runtime bring-up.
+- Selected path: checked/table memory, preserving the full 32-bit guest address domain sparsely and using shared backing IDs for guest aliases.
+- Immediate command: `./scripts/test-guest-memory.sh`.
+- Release result: Pass. Signed/unsigned scalar widths, every alignment, endian layout, cross-page access, boundary/domain faults, alias coherence, overlap rejection, MMIO dispatch, executable-write guard, fault diagnostics, concurrency, lifecycle, randomized stress, and guest microprogram passed.
+- Sanitizer result: Pass under AddressSanitizer and UndefinedBehaviorSanitizer with no finding.
+- Stress: four ordered worker threads plus 100,000 seeded random 64-bit writes/reads and full retained-state verification.
+- Diagnostics: a failing access carries the translated function, guest PC, guest LR, and register dump supplied by the active CPU context provider.
+- Microprogram: fetched bytecode from guest memory, performed a big-endian store, took a branch, invoked a host-call fixture, and halted with the expected result.
+- Flat candidate probe: non-overwriting fixed reservation of 4 GiB plus guard at 16 TiB succeeded, as did protect/deallocate and a two-launch base-relative lifecycle. No destructive fixed overwrite flag was used.
+- Decision: G4 Pass on the checked backend. Mach VM flat memory remains an optimization experiment until alias/protection/fault/differential evidence matches the checked oracle.
+- Evidence: `docs/artifacts/2026-08-28/g4-guest-memory.md`.
+- Next lowest unmet goal: G5 portable guest scheduler/context backend.

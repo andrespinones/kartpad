@@ -19,7 +19,7 @@ The unmodified Windows baseline remains isolated at WiiCompiled commit `1912292c
 | Build flags | Windows/LLVM-MinGW/x86-64 gate; unconditional Win32 libraries | Explicit `MKW_HOST_*`, architecture, renderer, product, Apple-target, and memory switches; generated manifest | G3 Pass — build system |
 | Paths/logging/files | Win32 module/path/console/file attributes | `HostPaths`, durable `AtomicWriteFile`; diagnostic sink follows the same platform split | Paths/files Pass; logging integration G6 — platform |
 | Clocks/threads | Win32 waitable timers, thread metadata | monotonic nanoseconds, deadline sleep, bounded thread naming | G3 Pass — platform |
-| Guest memory | `VirtualAlloc2`, placeholder views, shared mappings, `VirtualProtect`, VEH | checked oracle plus Darwin Mach VM backend | G4 active — memory |
+| Guest memory | `VirtualAlloc2`, placeholder views, shared mappings, `VirtualProtect`, VEH | checked oracle plus Darwin Mach VM backend | G4 checked path Pass; optimized flat differential pending — memory |
 | Scheduler | Windows fibers | portable scheduler/context backend with ABI preservation stress | G5 — scheduler |
 | Renderer/window | Aurora/Dawn Win32 surfaces, D3D/Vulkan defaults | Dawn Metal surface and Retina lifecycle | G6 — graphics |
 | Audio/media | host audio path and Windows media ducking | CoreAudio-compatible narrow output and media/session adapter | G6 — audio |
@@ -43,3 +43,9 @@ Run `./scripts/list-upstream-windows-sources.sh` to reproduce the inventory. Thi
 | G6 Aurora/Metal/window | `aurora-main/lib/aurora.cpp`; `internal.hpp`; `logging.cpp`; `system_info.cpp`; `window.cpp`; `card/DolphinCardPath.cpp`; `dawn/BackendBinding.cpp`; `webgpu/gpu.cpp` |
 
 No file in this inventory is treated as fixed merely because a non-Windows branch exists. Each moves to Pass only when its owning goal's contract and immediate Apple test pass.
+
+## G4 memory decision
+
+The checked/table backend is selected for correctness and likely mobile compatibility. It uses sparse owned backings, explicit guest mappings, and shared backing IDs for aliases; it never derives an unchecked host pointer from a guest address. Its full conformance suite passes Release and ASan/UBSan on arm64.
+
+The first Darwin flat candidate was evaluated safely. A 4 GiB-plus-guard reservation at `0x0000100000000000` succeeded with `mach_vm_allocate(..., VM_FLAGS_FIXED)` and was protected/deallocated successfully; a base-relative reservation lifecycle also passed twice. `VM_FLAGS_OVERWRITE` was never used. This proves reservation feasibility only. Flat aliases, page protections, fault classification/resume, and checked differential equivalence remain open optimization work and cannot replace the checked backend yet.
