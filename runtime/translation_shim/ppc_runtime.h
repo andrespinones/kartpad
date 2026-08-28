@@ -191,6 +191,7 @@ extern "C" inline void PPC_Stswi(std::uint32_t reg,std::uint32_t address,std::ui
 extern "C" inline void PPC_Stswx(std::uint32_t reg,std::uint32_t address){PpcStoreString(reg,address,g_currentCpuContext?g_currentCpuContext->xer&0x7fu:0u);}
 
 inline float PpcGetPs0Inline(double value);
+inline double PpcPack(kartpad::semantics::PairedSingle value);
 inline float PpcGetPs1Inline(double value);
 inline double PpcFmulsInline(double a,double c);
 inline float PpcForceSingleValueInline(double value);
@@ -242,6 +243,8 @@ inline bool PpcFmaddsStateInline(double& d,double a,double c,double b){return Pp
 inline bool PpcFmsubsStateInline(double& d,double a,double c,double b){return PpcCommitScalarFpInline(d,kartpad::semantics::EvaluatePpcFused(g_currentCpuContext?g_currentCpuContext->fpscr:0u,a,c,b,true,true,false));}
 inline bool PpcFnmaddsStateInline(double& d,double a,double c,double b){return PpcCommitScalarFpInline(d,kartpad::semantics::EvaluatePpcFused(g_currentCpuContext?g_currentCpuContext->fpscr:0u,a,c,b,false,true,true));}
 inline bool PpcFnmsubsStateInline(double& d,double a,double c,double b){return PpcCommitScalarFpInline(d,kartpad::semantics::EvaluatePpcFused(g_currentCpuContext?g_currentCpuContext->fpscr:0u,a,c,b,true,true,true));}
+inline bool PpcFrsqrteStateInline(double& destination,double value){return PpcCommitScalarFpInline(destination,kartpad::semantics::EvaluatePpcEstimate(g_currentCpuContext?g_currentCpuContext->fpscr:0u,value,true));}
+inline double PpcFresValueStateInline(double current,double value){const auto outcome=kartpad::semantics::EvaluatePpcEstimate(g_currentCpuContext?g_currentCpuContext->fpscr:0u,value,false);if(g_currentCpuContext)g_currentCpuContext->fpscr=outcome.fpscr;if(!outcome.write_destination)return current;const auto lane=static_cast<float>(outcome.value);return PpcPack({lane,lane});}
 extern "C" inline double PPC_Fadds(double a,double b){double result=0;PpcFaddsStateInline(result,a,b);return result;}
 extern "C" inline double PPC_Fsubs(double a,double b){double result=0;PpcFsubsStateInline(result,a,b);return result;}
 extern "C" inline double PPC_Fmuls(double a,double b){return PpcFmulsInline(a,b);}
@@ -306,7 +309,7 @@ inline double PpcFnmsubInline(double a,double c,double b) { const auto value=std
 inline double PpcFmulsInline(double a,double c) { return static_cast<double>(kartpad::semantics::ForceSingle(a*kartpad::semantics::Force25Bit(c))); }
 inline double PpcFmaddsInline(double a,double c,double b) { return static_cast<double>(kartpad::semantics::ForceSingle(std::fma(a,kartpad::semantics::Force25Bit(c),b))); }
 inline double PpcFmsubsInline(double a,double c,double b) { return static_cast<double>(kartpad::semantics::ForceSingle(std::fma(a,kartpad::semantics::Force25Bit(c),-b))); }
-inline double PPC_Frsqrte(double value) { return kartpad::semantics::ApproximateReciprocalSquareRoot(value); }
+inline double PPC_Frsqrte(double value) { double result=0;PpcFrsqrteStateInline(result,value);return result; }
 inline double PPC_Fctiwz(double value) { double result=0;PpcFctiwzStateInline(result,value);return result; }
 
 #define PPC_PsAddNoNiInline PPC_PsAddInline

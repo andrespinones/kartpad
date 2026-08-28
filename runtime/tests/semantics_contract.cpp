@@ -206,6 +206,18 @@ void ScalarSuite() {
   const auto fusedNegated=EvaluatePpcFused(0u,2.0,3.0,1.0,false,false,true);
   Check("fnmadd negated",0xc01c000000000000ULL,
         std::bit_cast<std::uint64_t>(fusedNegated.value));
+  const auto fresZero=EvaluatePpcEstimate(fpscr::ZE,0.0,false);
+  Check("fres zero cause",fpscr::ZX,fresZero.exception&fpscr::ZX);
+  Check("fres ZE suppress",0u,fresZero.write_destination?1u:0u);
+  const auto frsqrteNegative=EvaluatePpcEstimate(fpscr::VE,-1.0,true);
+  Check("frsqrte negative cause",fpscr::VXSQRT,
+        frsqrteNegative.exception&fpscr::VX_ANY);
+  Check("frsqrte VE suppress",0u,frsqrteNegative.write_destination?1u:0u);
+  const auto estimateSnan=EvaluatePpcEstimate(0u,snan,true);
+  Check("frsqrte sNaN cause",fpscr::VXSNAN,
+        estimateSnan.exception&fpscr::VX_ANY);
+  Check("frsqrte sNaN payload",0x7ff8000000000042ULL,
+        std::bit_cast<std::uint64_t>(estimateSnan.value));
 }
 
 void EstimateSuite() {

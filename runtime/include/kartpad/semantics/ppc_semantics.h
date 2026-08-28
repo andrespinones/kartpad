@@ -130,6 +130,8 @@ inline constexpr std::uint32_t SetFprf(std::uint32_t fpscr_value,
 
 inline float ForceSingle(double value, bool non_ieee) noexcept;
 inline double Force25Bit(double value) noexcept;
+inline double ApproximateReciprocal(double value) noexcept;
+inline double ApproximateReciprocalSquareRoot(double value) noexcept;
 
 struct ScalarFpResult {
   double value{};
@@ -364,6 +366,25 @@ inline ScalarFpResult EvaluatePpcFused(std::uint32_t fpscr_value, double a,
     exception |= fpscr::XX;
   std::feclearexcept(FE_ALL_EXCEPT);
   return FinishScalarFp(fpscr_value, value, exception, single_precision);
+}
+
+inline ScalarFpResult EvaluatePpcEstimate(std::uint32_t fpscr_value,
+                                          double input,
+                                          bool reciprocal_sqrt) noexcept {
+  std::uint32_t exception = 0;
+  if (reciprocal_sqrt && input < 0.0)
+    exception |= fpscr::VXSQRT;
+  else if (input == 0.0)
+    exception |= fpscr::ZX;
+  else if (IsSignalingNan(input))
+    exception |= fpscr::VXSNAN;
+
+  if (exception != 0 || std::isnan(input) || std::isinf(input))
+    fpscr_value &= ~(fpscr::FR | fpscr::FI);
+  const double value = reciprocal_sqrt
+      ? ApproximateReciprocalSquareRoot(input)
+      : ApproximateReciprocal(input);
+  return FinishScalarFp(fpscr_value, value, exception, !reciprocal_sqrt);
 }
 
 template <typename T> struct Result {

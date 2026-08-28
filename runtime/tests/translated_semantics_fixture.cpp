@@ -81,6 +81,11 @@ int main() {
     if(context.fpr[16].raw!=0x4045000000000000ULL ||
        (context.fpscr&kartpad::semantics::fpscr::VXIMZ)==0)
       throw std::runtime_error("translated fused invalid suppression mismatch");
+    if(context.fpr[17].raw!=0x4045000000000000ULL ||
+       context.fpr[18].raw!=0x4045000000000000ULL ||
+       (context.fpscr&kartpad::semantics::fpscr::VXSQRT)==0 ||
+       (context.fpscr&kartpad::semantics::fpscr::ZE)==0)
+      throw std::runtime_error("translated estimate suppression mismatch");
     const auto overflow=PPC_Addo(0x7fffffffu,1u);
     if(overflow!=0x80000000u||(context.xer&0xc0000000u)!=0xc0000000u)
       throw std::runtime_error("XER overflow mismatch");

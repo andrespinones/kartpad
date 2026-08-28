@@ -203,3 +203,11 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - Expanded the translated DOL with invalid `fmadds` under VE. The runtime keeps the destination at 42.0 while setting VXIMZ; arm64/x86_64 and ASan/UBSan agree.
 - Result: 250,202 checks, identical hash `0x8947f7ff3d2e35f4`, translated final FPSCR `0xe7911183`, and all 10,836 real-title units regenerate and strict-FP syntax-compile.
 - Classification: G6 remains In progress. Estimate/paired exception aggregation, callbacks, and NI scheduler persistence remain.
+
+### G6 translated scalar-estimate state
+
+- Routed `fres` and `frsqrte` through stateful lowering while retaining the compiled-Dolphin bit-exact estimate algorithms. The model now raises ZX for reciprocal zero, VXSQRT for negative reciprocal-square-root, and VXSNAN for signaling NaNs, while updating summaries/FPRF and clearing FI/FR on exceptional results.
+- Expanded the translated DOL with zero `fres` under ZE and negative `frsqrte` under VE. Both destinations remain 42.0 while ZE and VXSQRT become sticky; direct contracts also cover their disabled-enable results and signaling-NaN payload behavior.
+- Regenerated the tracked translator patch as a zero-context diff and made its disposable-copy preparation explicitly apply zero-context patches; the immutable pinned checkout remains untouched.
+- Result: 250,208 checks, identical arm64/x86_64 hash `0x6ca6a115ecbe463e`, translated final FPSCR `0xe7911393`, ASan/UBSan Pass, patched translator 579/579, and all 10,836 real-title units regenerate and strict-FP syntax-compile.
+- Classification: G6 remains In progress. Paired-lane exception aggregation, callbacks, and NI scheduler persistence remain.

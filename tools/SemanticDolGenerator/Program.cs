@@ -14,6 +14,8 @@ static uint Fdivs(int fd,int fa,int fb)=> (59u<<26)|((uint)fd<<21)|((uint)fa<<16
 static uint Mtfsb1(int bit)=>(63u<<26)|((uint)bit<<21)|(38u<<1);
 static uint Fctiw(int fd,int fb,bool towardZero)=>(63u<<26)|((uint)fd<<21)|((uint)fb<<11)|((towardZero?15u:14u)<<1);
 static uint Fmadds(int fd,int fa,int fc,int fb)=>(59u<<26)|((uint)fd<<21)|((uint)fa<<16)|((uint)fb<<11)|((uint)fc<<6)|(29u<<1);
+static uint Fres(int fd,int fb)=>(59u<<26)|((uint)fd<<21)|((uint)fb<<11)|(24u<<1);
+static uint Frsqrte(int fd,int fb)=>(63u<<26)|((uint)fd<<21)|((uint)fb<<11)|(26u<<1);
 static uint PsqL(int fd,int ra,int d)=>(56u<<26)|((uint)fd<<21)|((uint)ra<<16)|(uint)(d&0xfff);
 static uint PsqSt(int fs,int ra,int d)=>(60u<<26)|((uint)fs<<21)|((uint)ra<<16)|(uint)(d&0xfff);
 static uint PsAdd(int fd,int fa,int fb)=>(4u<<26)|((uint)fd<<21)|((uint)fa<<16)|((uint)fb<<11)|(21u<<1);
@@ -27,6 +29,8 @@ var words=new uint[] {
   Mtfsb1(24),Lfs(12,6,36),Fadds(12,9,10),Stfs(12,3,24),
   Lfs(13,6,40),Fctiw(14,13,true),Fctiw(15,13,false),Fctiw(13,9,false),
   Lfs(16,6,36),Fmadds(16,9,7,1),
+  Mtfsb1(27),Lfs(17,6,36),Fres(17,7),
+  Lfs(18,6,36),Lfs(19,6,12),Frsqrte(18,19),
   0x4e800020u
 };
 const int header=0x100;
