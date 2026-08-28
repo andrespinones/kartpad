@@ -16,7 +16,7 @@ Updated: 2026-08-28
 | G3 Host portability | Pass | Native arm64 host library/contracts pass; Darwin graph contains no Win32/x86-only link token; manifest recorded |
 | G4 Guest memory | Pass | Checked Darwin path passes conformance, lifecycle, randomized stress, microprogram, ASan/UBSan; safe Mach VM feasibility probe passes |
 | G5 Guest scheduler | Pass | Explicit state machine passes lifecycle/priority/VI/register tests and two deterministic million-operation runs under Release and ASan/UBSan |
-| G6 PPC/AArch64 semantics | In progress | 250,208-check arm64/x86 differential hashes match; Dolphin estimates, sanitizers, patched translator 579/579, translated invalid/conversion/fused/estimate write suppression, and all 10,836 real-DOL emitted units pass; paired flags and callback execution remain open |
+| G6 PPC/AArch64 semantics | In progress | 250,214-check arm64/x86 differential hashes match; Dolphin estimates, sanitizers, patched translator 579/579, translated scalar suppression/paired-estimate aggregation, and all 10,836 real-DOL emitted units pass; paired arithmetic flags and callback execution remain open |
 | G7–G18 | Gated | Provisional direct-Metal translated command frame exists, but it is not Dawn/Aurora, GX, or a game frame |
 
 ## Known-good state
@@ -32,7 +32,7 @@ Updated: 2026-08-28
 - Memory baseline: checked/table guest memory is the accepted correctness path; evidence is `docs/artifacts/2026-08-28/g4-guest-memory.md`.
 - Scheduler baseline: explicit cooperative state machine, deterministic hash `0x7287563387fb1677`; evidence is `docs/artifacts/2026-08-28/g5-guest-scheduler.md`.
 - Native subsystem preparation: validated Metal/CoreAudio/GameController/storage/network smoke; useful for later gates but not a substitute for G6 semantics.
-- Semantic subset: arm64/x86_64 complete 250,208 checks with state hash `0x6ca6a115ecbe463e`; the translated fixture proves VXISI/VXCVI/VXIMZ/VXSQRT/ZE, FEX, FPRF, FI/FR/XX, enabled-VE suppression, and enabled-ZE `fres` suppression. Evidence is `docs/artifacts/2026-08-28/g6-ppc-semantics.md` and `docs/SEMANTICS.md`.
+- Semantic subset: arm64/x86_64 complete 250,214 checks with state hash `0x1f462e0cd4bbd7cb`; the translated fixture proves VXISI/VXCVI/VXIMZ/VXSQRT/ZX/ZE, FEX, FPRF, FI/FR/XX, scalar enabled-exception suppression, and paired-estimate cross-lane exception aggregation. Evidence is `docs/artifacts/2026-08-28/g6-ppc-semantics.md` and `docs/SEMANTICS.md`.
 - Real DOL surface: user-owned `main.dol` matches the pinned PAL hash, translates into 10,836 functions with unsupported instructions disabled, and every emitted unit compiles against the portable shim.
 - Original icon: editable default/dark/tinted SVG masters and opaque exports exist; 1024 px and 16 px visual QA passed. Asset-catalog validation awaits application targets.
 
@@ -44,7 +44,7 @@ Updated: 2026-08-28
 - WiiCompiled's bundled `MAP.txt` may be used as an ignored local reference, but independent provenance for republishing it is not established; do not copy it into public KartPad sources/artifacts.
 - Dolphin pipe input is accepted for deterministic menus. Live race acceleration/brake semantics remain deliberately unclaimed until a narrow controller fixture distinguishes the observed behavior.
 - G2 audio evidence is limited to emulator execution; subjective audio quality is a future hands-on row and is not claimed.
-- Basic scalar, fused, conversion, and estimate operations now classify the covered Broadway causes and suppress enabled-exception writes. Paired-lane exception state plus scheduler/callback persistence still need the same proof. G6 remains open.
+- Basic scalar, fused, conversion, and estimate operations now classify the covered Broadway causes and suppress enabled-exception writes. Paired estimates aggregate lane exceptions and always write like hardware. Paired arithmetic/comparison state plus scheduler/callback persistence still need proof. G6 remains open.
 
 ## UI reference commitment
 

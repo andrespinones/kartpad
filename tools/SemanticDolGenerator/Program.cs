@@ -19,6 +19,8 @@ static uint Frsqrte(int fd,int fb)=>(63u<<26)|((uint)fd<<21)|((uint)fb<<11)|(26u
 static uint PsqL(int fd,int ra,int d)=>(56u<<26)|((uint)fd<<21)|((uint)ra<<16)|(uint)(d&0xfff);
 static uint PsqSt(int fs,int ra,int d)=>(60u<<26)|((uint)fs<<21)|((uint)ra<<16)|(uint)(d&0xfff);
 static uint PsAdd(int fd,int fa,int fb)=>(4u<<26)|((uint)fd<<21)|((uint)fa<<16)|((uint)fb<<11)|(21u<<1);
+static uint PsRes(int fd,int fb)=>(4u<<26)|((uint)fd<<21)|((uint)fb<<11)|(24u<<1);
+static uint PsRsqrte(int fd,int fb)=>(4u<<26)|((uint)fd<<21)|((uint)fb<<11)|(26u<<1);
 
 var words=new uint[] {
   Lis(3,output),Ori(3,3,output),Addi(4,0,0x7fff),Add(5,4,4),Stw(5,3,0),
@@ -31,6 +33,7 @@ var words=new uint[] {
   Lfs(16,6,36),Fmadds(16,9,7,1),
   Mtfsb1(27),Lfs(17,6,36),Fres(17,7),
   Lfs(18,6,36),Lfs(19,6,12),Frsqrte(18,19),
+  PsqL(20,6,24),PsRes(21,20),PsRsqrte(22,4),
   0x4e800020u
 };
 const int header=0x100;

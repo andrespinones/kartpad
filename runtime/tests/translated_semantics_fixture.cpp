@@ -70,8 +70,7 @@ int main() {
     constexpr std::uint32_t invalidState=kartpad::semantics::fpscr::FX|
       kartpad::semantics::fpscr::FEX|kartpad::semantics::fpscr::VX|
       kartpad::semantics::fpscr::VXISI|kartpad::semantics::fpscr::VE;
-    if((context.fpscr&invalidState)!=invalidState ||
-       (context.fpscr&kartpad::semantics::fpscr::FPRF)!=0x00011000u)
+    if((context.fpscr&invalidState)!=invalidState)
       throw std::runtime_error("translated invalid FPSCR mismatch");
     if(context.fpr[14].raw!=0xfff8000000000002ULL ||
        context.fpr[15].raw!=0xfff8000000000003ULL ||
@@ -86,6 +85,11 @@ int main() {
        (context.fpscr&kartpad::semantics::fpscr::VXSQRT)==0 ||
        (context.fpscr&kartpad::semantics::fpscr::ZE)==0)
       throw std::runtime_error("translated estimate suppression mismatch");
+    if(context.fpr[21].raw!=0x7f80000000000000ULL ||
+       (context.fpr[22].raw&0xffffffffULL)!=0x7fc00000ULL ||
+       (context.fpscr&kartpad::semantics::fpscr::ZX)==0 ||
+       (context.fpscr&kartpad::semantics::fpscr::FPRF)!=0x00004000u)
+      throw std::runtime_error("translated paired estimate state mismatch");
     const auto overflow=PPC_Addo(0x7fffffffu,1u);
     if(overflow!=0x80000000u||(context.xer&0xc0000000u)!=0xc0000000u)
       throw std::runtime_error("XER overflow mismatch");

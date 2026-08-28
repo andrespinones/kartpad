@@ -256,6 +256,19 @@ void PairedAndQuantizedSuite() {
   Check("quant unsigned16",0x180u,Quantize<std::uint16_t>(1.5f,8));
   Check("ps compare less",8u,ComparePairedLane(-1.0f,1.0f));
   Check("ps compare unordered",1u,ComparePairedLane(std::numeric_limits<float>::quiet_NaN(),1.0f));
+  const auto psRes=EvaluatePpcPairedEstimate(fpscr::ZE,
+      PairedSingle{0.0f,std::numeric_limits<float>::infinity()},false);
+  Check("ps res lane exception",fpscr::ZX,psRes.exception);
+  Check("ps res always writes",0x7f80000000000000ULL,PairBits(psRes.value));
+  Check("ps res FPRF",0x00005000u,psRes.fpscr&fpscr::FPRF);
+  const auto psRsqrt=EvaluatePpcPairedEstimate(fpscr::VE,
+      PairedSingle{1.5f,-2.0f},true);
+  Check("ps rsqrte lane exception",fpscr::VXSQRT,psRsqrt.exception);
+  Check("ps rsqrte invalid lane",0x7fc00000u,
+        std::bit_cast<std::uint32_t>(psRsqrt.value.ps1));
+  const auto psSnan=EvaluatePpcPairedEstimate(0u,
+      PairedSingle{std::bit_cast<float>(0x7f800042u),1.0f},false);
+  Check("ps res sNaN",fpscr::VXSNAN,psSnan.exception);
   std::array<std::uint8_t,8> quantized{};
   const std::array<QuantizedType,5> types={QuantizedType::Float,QuantizedType::Unsigned8,
     QuantizedType::Unsigned16,QuantizedType::Signed8,QuantizedType::Signed16};

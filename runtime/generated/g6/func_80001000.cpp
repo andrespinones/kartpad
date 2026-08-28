@@ -9,6 +9,7 @@ extern "C" void func_80001000(CpuContext* MKW_RESTRICT ctx)
     uint32_t r3_psq_tmp_0 = 0;
     uint32_t r6_psq_tmp_0 = 0;
     uint32_t r6_psq_tmp_1 = 0;
+    uint32_t r6_psq_tmp_2 = 0;
 
     uint32_t r3 = ctx->gpr[3];
     uint32_t r4 = ctx->gpr[4];
@@ -33,6 +34,9 @@ extern "C" void func_80001000(CpuContext* MKW_RESTRICT ctx)
     PPC_FPR f17 = ctx->fpr[17];
     PPC_FPR f18 = ctx->fpr[18];
     PPC_FPR f19 = ctx->fpr[19];
+    PPC_FPR f20 = ctx->fpr[20];
+    PPC_FPR f21 = ctx->fpr[21];
+    PPC_FPR f22 = ctx->fpr[22];
 
     [[maybe_unused]] uint32_t mkw_gqr0 = ctx->gqr[0];
 
@@ -87,6 +91,11 @@ loc_80001000:
     f18.d = MemoryInline::FlatReadFloat32((r6 + 36));
     f19.d = MemoryInline::FlatReadFloat32((r6 + 12));
     PpcFrsqrteStateInline(f18.d, f19.d);
+    // psq_load w=0 quant=0 (using PPC_PsqL)
+    r6_psq_tmp_2 = (r6 + 24);
+    PpcSetPairedFprInline(f20, PPC_PsqLGqrInline<0u, 0u>(ctx, mkw_gqr0, r6_psq_tmp_2));
+    PpcSetPairedFprInline(f21, PPC_PsRes(f20.d));
+    PpcSetPairedFprInline(f22, PPC_PsRsqrte(f4.d));
     ctx->gpr[3] = r3;
     ctx->gpr[4] = r4;
     ctx->gpr[5] = r5;
@@ -110,10 +119,13 @@ loc_80001000:
     ctx->fpr[17] = f17;
     ctx->fpr[18] = f18;
     ctx->fpr[19] = f19;
+    ctx->fpr[20] = f20;
+    ctx->fpr[21] = f21;
+    ctx->fpr[22] = f22;
     return;
 }
 
 }
 
 // RECOMP_GUEST_ABI gpr_read=0xFFFFFF87 gpr_write=0xFFFFFFFF gpr_return=0x00000018 fpr_read=0xFFFFC001 fpr_write=0xFFFFFFFF fpr_return=0x00000002 cr_read=0xFF cr_write=0xFF xer_read=1 xer_write=1 fence=1
-// RECOMP_REGISTRATION base 0x80001000 func_80001000 preserves=false fpr_mask=0x000FC000
+// RECOMP_REGISTRATION base 0x80001000 func_80001000 preserves=false fpr_mask=0x007FC000

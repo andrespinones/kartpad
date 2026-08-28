@@ -211,3 +211,11 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - Regenerated the tracked translator patch as a zero-context diff and made its disposable-copy preparation explicitly apply zero-context patches; the immutable pinned checkout remains untouched.
 - Result: 250,208 checks, identical arm64/x86_64 hash `0x6ca6a115ecbe463e`, translated final FPSCR `0xe7911393`, ASan/UBSan Pass, patched translator 579/579, and all 10,836 real-title units regenerate and strict-FP syntax-compile.
 - Classification: G6 remains In progress. Paired-lane exception aggregation, callbacks, and NI scheduler persistence remain.
+
+### G6 translated paired-estimate state
+
+- Added raw-float signaling-NaN classification and a paired-estimate state result that aggregates ZX, VXSQRT, and VXSNAN across both lanes, clears FI/FR on exceptional inputs, applies NI rounding, and derives FPRF from PS0.
+- Updated the existing `PPC_PsRes` and `PPC_PsRsqrte` runtime helpers without changing their translator ABI. Unlike scalar enabled exceptions, paired estimates retain the hardware behavior of always writing both lanes under VE/ZE.
+- Expanded the translated DOL with `{0,+inf}` `ps_res` and `{1.5,-2}` `ps_rsqrte`; runtime evidence proves the results, sticky cross-lane causes, and final PS0 classification.
+- Result: 250,214 checks, identical arm64/x86_64 hash `0x1f462e0cd4bbd7cb`, translated final FPSCR `0xe7904393`, ASan/UBSan Pass, patched translator 579/579, and all 10,836 real-title units strict-FP syntax-compile.
+- Classification: G6 remains In progress. Paired arithmetic/fused exception aggregation, exact comparisons, callbacks, and NI scheduler persistence remain.

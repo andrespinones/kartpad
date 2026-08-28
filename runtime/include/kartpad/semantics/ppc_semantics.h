@@ -89,6 +89,12 @@ inline constexpr bool IsSignalingNan(double value) noexcept {
          (bits & 0x0008000000000000ULL) == 0;
 }
 
+inline constexpr bool IsSignalingNan(float value) noexcept {
+  const auto bits = std::bit_cast<std::uint32_t>(value);
+  return (bits & 0x7f800000u) == 0x7f800000u &&
+         (bits & 0x007fffffu) != 0 && (bits & 0x00400000u) == 0;
+}
+
 inline constexpr double QuietNan(double value) noexcept {
   return std::bit_cast<double>(std::bit_cast<std::uint64_t>(value) |
                                0x0008000000000000ULL);
@@ -717,6 +723,42 @@ inline PairedSingle PsReciprocal(PairedSingle value) noexcept {
 inline PairedSingle PsReciprocalSquareRoot(PairedSingle value) noexcept {
   return {static_cast<float>(ApproximateReciprocalSquareRoot(value.ps0)),
           static_cast<float>(ApproximateReciprocalSquareRoot(value.ps1))};
+}
+
+struct PairedFpResult {
+  PairedSingle value{};
+  std::uint32_t fpscr{};
+  std::uint32_t exception{};
+};
+
+inline PairedFpResult EvaluatePpcPairedEstimate(
+    std::uint32_t fpscr_value, PairedSingle input,
+    bool reciprocal_sqrt) noexcept {
+  std::uint32_t exception = 0;
+  const auto classify_lane = [&](float lane) {
+    if (reciprocal_sqrt && lane < 0.0f)
+      exception |= fpscr::VXSQRT;
+    else if (lane == 0.0f)
+      exception |= fpscr::ZX;
+    if (IsSignalingNan(lane))
+      exception |= fpscr::VXSNAN;
+  };
+  classify_lane(input.ps0);
+  classify_lane(input.ps1);
+  if (exception != 0 || std::isnan(input.ps0) || std::isinf(input.ps0) ||
+      std::isnan(input.ps1) || std::isinf(input.ps1))
+    fpscr_value &= ~(fpscr::FR | fpscr::FI);
+  if (exception != 0)
+    fpscr_value = SetFpscrException(fpscr_value, exception);
+  const bool non_ieee = (fpscr_value & fpscr::NI) != 0;
+  const PairedSingle value = reciprocal_sqrt
+      ? PairedSingle{
+            ForceSingle(ApproximateReciprocalSquareRoot(input.ps0), non_ieee),
+            ForceSingle(ApproximateReciprocalSquareRoot(input.ps1), non_ieee)}
+      : PairedSingle{ForceSingle(ApproximateReciprocal(input.ps0), non_ieee),
+                     ForceSingle(ApproximateReciprocal(input.ps1), non_ieee)};
+  fpscr_value = SetFprf(fpscr_value, ClassifyFloat(value.ps0));
+  return {value, fpscr_value, exception};
 }
 
 inline std::uint32_t ComparePairedLane(float lhs,float rhs) noexcept {

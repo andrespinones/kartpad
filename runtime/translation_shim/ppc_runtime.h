@@ -415,8 +415,8 @@ extern "C" inline double PPC_PsMerge11(double a,double b){return PPC_PsMerge11In
 extern "C" inline double PPC_PsSel(double p,double c,double n){return PPC_PsSelInline(p,c,n);}
 extern "C" inline double PPC_PsFromScalar(double v){return PPC_PsFromScalarInline(v);}
 extern "C" inline double PPC_PsToScalar(double v){return PPC_PsToScalarInline(v);}
-extern "C" inline double PPC_PsRes(double v){return PpcPack(kartpad::semantics::PsReciprocal(PpcUnpack(v)));}
-extern "C" inline double PPC_PsRsqrte(double v){return PpcPack(kartpad::semantics::PsReciprocalSquareRoot(PpcUnpack(v)));}
+extern "C" inline double PPC_PsRes(double v){const auto result=kartpad::semantics::EvaluatePpcPairedEstimate(g_currentCpuContext?g_currentCpuContext->fpscr:0u,PpcUnpack(v),false);if(g_currentCpuContext)g_currentCpuContext->fpscr=result.fpscr;return PpcPack(result.value);}
+extern "C" inline double PPC_PsRsqrte(double v){const auto result=kartpad::semantics::EvaluatePpcPairedEstimate(g_currentCpuContext?g_currentCpuContext->fpscr:0u,PpcUnpack(v),true);if(g_currentCpuContext)g_currentCpuContext->fpscr=result.fpscr;return PpcPack(result.value);}
 extern "C" inline double PPC_Fres(double v){const auto r=static_cast<float>(kartpad::semantics::ApproximateReciprocal(PpcGetPs0Inline(v)));return PpcPack({r,r});}
 extern "C" inline double PPC_Fsel(double control,double negative,double positive){return control>=-0.0?positive:negative;}
 extern "C" inline double PPC_Fnmadd(double a,double c,double b){const auto v=PPC_Fmadd(a,c,b);return std::isnan(v)?v:-v;}
