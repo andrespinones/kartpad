@@ -169,3 +169,12 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - First FPSCR run produced the correct infinity but left FPSCR zero. Root cause: ordinary optimized FP mode did not guarantee host exception observation around the translated expression. Semantic targets now use strict FP mode in addition to no-fast-math/no-contraction; the changed arm64 and x86_64 runs both produce FPSCR `0x84000000` (FX|ZX).
 - Result: Pass for the expanded subset — 250,155 checks, identical state hash `0xb332d343c4e3dc81`, translated paired/GQR/flag fixture identical on arm64 and x86_64, sanitizers green, translator 570/570.
 - Classification remains In progress pending the stateful helper inventory in `docs/SEMANTICS.md`.
+
+### G6 real Mario Kart Wii translation surface
+
+- Built pinned Wiimms ISO Tools in an ignored disposable copy. First macOS build failed because setup used GNU-only `awk gensub`, leaving the host type unset and adding `-static-libgcc`; the corrected portable `awk gsub` setup identified macOS. Native arm64 linking then rejected legacy unaligned common pointers, so the changed build targeted x86_64 and ran successfully under Rosetta.
+- Extracted only `sys/main.dol` from the read-only supplied WBFS into ignored `private/` data. Its SHA-256 is `80d18895b39c63bd80f457398bfcbb91b7d16ac116a41a88967e954080155b05`, exactly WiiCompiled's pinned PAL DOL.
+- Recursive translation from `0x800060A4` with unsupported instructions disabled emitted 10,836 functions. The 29,792-entry pinned map supplied boundaries; 802 functions were reached by the call graph and 10,034 additional valid entries were seeded from the map.
+- First whole-surface compile exposed stack/resolved/state PSQ forms, state-free ABI guards, CR/XER helpers, time-base/MSR state, GX FIFO calls, cache-line zero, system calls, and fused negative multiply-subtract not represented by the microfixture. Each changed compile moved past the prior signature; no unchanged failed run was repeated.
+- Final strict-FP AppleClang pass syntax-compiled all 10,836 emitted units. The full arm64/x86 semantic suite remained green at 250,155 checks and hash `0xb332d343c4e3dc81`; the stateful translated fixture matched with FPSCR `0xa7000003`; sanitizers, Dolphin oracle, and translator 570/570 passed.
+- Classification remains In progress. Whole-title compilation proves portable surface ownership, not exact invalid-subcause/enabled-exception state or callback/scheduler execution.

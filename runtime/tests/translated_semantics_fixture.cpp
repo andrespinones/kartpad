@@ -17,13 +17,22 @@ namespace MemoryInline {
 std::uint8_t FlatReadRam8(std::uint32_t address) {
   return static_cast<std::uint8_t>(guest_memory->LoadUnsigned(address,1));
 }
+std::uint16_t FlatReadRam16(std::uint32_t address) {
+  return static_cast<std::uint16_t>(guest_memory->LoadUnsigned(address,2));
+}
+std::uint32_t FlatReadRam32(std::uint32_t address) {
+  return static_cast<std::uint32_t>(guest_memory->LoadUnsigned(address,4));
+}
 void FlatWriteRam8(std::uint32_t address,std::uint8_t value) {
   guest_memory->Store(address,1,value);
+}
+void FlatWriteRam16(std::uint32_t address,std::uint16_t value) {
+  guest_memory->Store(address,2,value);
 }
 void FlatWriteRam32(std::uint32_t address, std::uint32_t value) {
   guest_memory->Store(address, 4, value);
 }
-double FlatReadFloat32(std::uint32_t address) {
+float FlatReadFloat32(std::uint32_t address) {
   const auto bits=static_cast<std::uint32_t>(guest_memory->LoadUnsigned(address,4));
   return static_cast<double>(std::bit_cast<float>(bits));
 }
@@ -44,7 +53,42 @@ int main() {
   memory.Store(0x80011018u,4,0u);
   guest_memory=&memory;
   CpuContext context{};
-  { CpuContextScope scope(&context); func_80001000(&context); }
+  { CpuContextScope scope(&context);
+    func_80001000(&context);
+    const auto overflow=PPC_Addo(0x7fffffffu,1u);
+    if(overflow!=0x80000000u||(context.xer&0xc0000000u)!=0xc0000000u)
+      throw std::runtime_error("XER overflow mismatch");
+    PPC_UpdateCarryAdd(0xffffffffu,1u,0u);
+    if(PPC_GetCarry()!=1u) throw std::runtime_error("XER carry mismatch");
+    context.cr=0;
+    PPC_CrSetBit(0,1); PPC_CrSetBit(31,1); PPC_CrLogical(7,1,0,31);
+    if(context.cr!=0xc0000001u) throw std::runtime_error("CR logical mismatch");
+    memory.Store(0x80010100u,4,0x11223344u);
+    if(PPC_LoadWordByteReverse(0x80010100u)!=0x44332211u)
+      throw std::runtime_error("byte reverse mismatch");
+    if(PPC_Lwarx(0x80010100u)!=0x11223344u||PPC_Stwcx(0x80010100u,0xaabbccddu)!=1u||
+       memory.LoadUnsigned(0x80010100u,4)!=0xaabbccddu)
+      throw std::runtime_error("reservation mismatch");
+    PPC_WriteSpr(8,0x12345678u); PPC_WriteSpr(9,0x87654321u);
+    PPC_WriteSpr(912,0x3d040000u);
+    if(PPC_ReadSpr(8)!=0x12345678u||PPC_ReadSpr(9)!=0x87654321u||
+       PPC_ReadSpr(912)!=0x3d040000u)
+      throw std::runtime_error("SPR mismatch");
+    context.gpr[10]=0x11223344u; context.gpr[11]=0x55667788u;
+    PPC_Stswi(10,0x80010120u,7u);
+    context.gpr[12]=0; context.gpr[13]=0;
+    PPC_Lswi(12,0x80010120u,7u);
+    if(context.gpr[12]!=0x11223344u||context.gpr[13]!=0x55667700u)
+      throw std::runtime_error("string load/store mismatch");
+    PPC_Mtfsb1(6); PPC_Mtfsfi(7,3);
+    if((context.fpscr&0x02000003u)!=0x02000003u||
+       static_cast<std::uint32_t>(std::bit_cast<std::uint64_t>(PPC_Mffs()))!=context.fpscr)
+      throw std::runtime_error("FPSCR move mismatch");
+    const double signaling=std::bit_cast<double>(0x7ff0000000000001ULL);
+    PPC_Fcmp(2,signaling,0.0);
+    if(((context.cr>>20)&0xfu)!=1u||(context.fpscr&0xa1000000u)!=0xa1000000u)
+      throw std::runtime_error("FP compare state mismatch");
+  }
   guest_memory=nullptr;
   const auto integer=memory.LoadUnsigned(0x80010000u,4);
   const auto single=memory.LoadUnsigned(0x80010004u,4);

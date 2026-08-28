@@ -72,6 +72,16 @@
       "pushDisabled": true
     },
     {
+      "name": "Wiimms ISO Tools",
+      "repository": "https://github.com/Wiimm/wiimms-iso-tools.git",
+      "commit": "fc1c0b840cb3ac41ca6e4f1d5e16da12b47eab58",
+      "tree": "c6ab6de655bc3b756c2c8b2719e8b111fdebb792",
+      "path": "ref/upstream/wiimms-iso-tools",
+      "license": "GPL-2.0-or-later",
+      "role": "Read-only extraction of the supplied WBFS into ignored private workspace data",
+      "pushDisabled": true
+    },
+    {
       "name": "Aurora",
       "path": "ref/upstream/Wiicompiled/aurora-main",
       "vendoredInCommit": "1912292c804ff9b1b79938de89369ec4496f9fff",

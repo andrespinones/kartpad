@@ -60,6 +60,9 @@ check_reference ref/upstream/wfc-patcher-wii \
 check_reference ref/upstream/dolphin \
   4f8af23db516d8b6e9cd00e7b261a65b026514a8 \
   f44613fc11ba82c609e12b434e0d7bc80c11ac01
+check_reference ref/upstream/wiimms-iso-tools \
+  fc1c0b840cb3ac41ca6e4f1d5e16da12b47eab58 \
+  c6ab6de655bc3b756c2c8b2719e8b111fdebb792
 
 disc_path='ref/Mario Kart Wii.wbfs'
 [[ -f "$disc_path" ]] || {
