@@ -503,6 +503,33 @@ inline constexpr std::uint32_t ConditionFieldFloat(double lhs,
          (lhs == rhs ? 2u : 0u);
 }
 
+struct FloatCompareResult {
+  std::uint32_t condition{};
+  std::uint32_t fpscr{};
+  std::uint32_t exception{};
+};
+
+inline constexpr FloatCompareResult EvaluatePpcFloatCompare(
+    std::uint32_t fpscr_value, double lhs, double rhs,
+    bool ordered) noexcept {
+  const std::uint32_t condition = ConditionFieldFloat(lhs, rhs);
+  std::uint32_t exception = 0;
+  if (std::isnan(lhs) || std::isnan(rhs)) {
+    if (IsSignalingNan(lhs) || IsSignalingNan(rhs)) {
+      exception |= fpscr::VXSNAN;
+      if (ordered && (fpscr_value & fpscr::VE) == 0)
+        exception |= fpscr::VXVC;
+    } else if (ordered) {
+      exception |= fpscr::VXVC;
+    }
+  }
+  if (exception != 0)
+    fpscr_value = SetFpscrException(fpscr_value, exception);
+  fpscr_value = (fpscr_value & ~0x0000f000u) |
+                ((condition & 0xfu) << 12);
+  return {condition, fpscr_value, exception};
+}
+
 inline double Force25Bit(double value) noexcept {
   constexpr std::uint64_t exponent_mask = 0x7ff0000000000000ULL;
   constexpr std::uint64_t fraction_mask = 0x000fffffffffffffULL;

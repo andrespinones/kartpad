@@ -210,11 +210,13 @@ extern "C" inline std::uint32_t PPC_Mcrfs(std::uint32_t dst,std::uint32_t src){i
 
 inline bool PpcIsSignalingNan(double value){const auto bits=std::bit_cast<std::uint64_t>(value);return (bits&0x7ff0000000000000ULL)==0x7ff0000000000000ULL&&(bits&0x000fffffffffffffULL)!=0&&(bits&0x0008000000000000ULL)==0;}
 inline void PpcSetCrField(std::uint32_t field,std::uint32_t value){if(!g_currentCpuContext)return;const auto shift=(7u-(field&7u))*4u;g_currentCpuContext->cr=(g_currentCpuContext->cr&~(0xfu<<shift))|((value&0xfu)<<shift);}
-extern "C" inline void PPC_Fcmp(std::uint32_t field,double a,double b){PpcSetCrField(field,kartpad::semantics::ConditionFieldFloat(a,b));if(g_currentCpuContext&&(PpcIsSignalingNan(a)||PpcIsSignalingNan(b))){g_currentCpuContext->fpscr|=0xa1000000u;PpcUpdateFpscrSummary();}}
-extern "C" inline void PPC_PsCmpo0(std::uint32_t field,double a,double b){PpcSetCrField(field,kartpad::semantics::ComparePairedLane(PpcGetPs0Inline(a),PpcGetPs0Inline(b)));}
-extern "C" inline void PPC_PsCmpu0(std::uint32_t field,double a,double b){PPC_PsCmpo0(field,a,b);}
-extern "C" inline void PPC_PsCmpo1(std::uint32_t field,double a,double b){PpcSetCrField(field,kartpad::semantics::ComparePairedLane(PpcGetPs1Inline(a),PpcGetPs1Inline(b)));}
-extern "C" inline void PPC_PsCmpu1(std::uint32_t field,double a,double b){PPC_PsCmpo1(field,a,b);}
+inline std::uint32_t PpcCompareStateInline(bool ordered,double a,double b){const auto result=kartpad::semantics::EvaluatePpcFloatCompare(g_currentCpuContext?g_currentCpuContext->fpscr:0u,a,b,ordered);if(g_currentCpuContext)g_currentCpuContext->fpscr=result.fpscr;return result.condition;}
+extern "C" inline void PPC_Fcmp(std::uint32_t field,double a,double b){PpcSetCrField(field,PpcCompareStateInline(true,a,b));}
+inline void PpcPairedCompareInline(std::uint32_t field,double a,double b,bool lane1,bool ordered){const auto lhs=lane1?PpcGetPs1Inline(a):PpcGetPs0Inline(a);const auto rhs=lane1?PpcGetPs1Inline(b):PpcGetPs0Inline(b);PpcSetCrField(field,PpcCompareStateInline(ordered,lhs,rhs));}
+extern "C" inline void PPC_PsCmpo0(std::uint32_t field,double a,double b){PpcPairedCompareInline(field,a,b,false,true);}
+extern "C" inline void PPC_PsCmpu0(std::uint32_t field,double a,double b){PpcPairedCompareInline(field,a,b,false,false);}
+extern "C" inline void PPC_PsCmpo1(std::uint32_t field,double a,double b){PpcPairedCompareInline(field,a,b,true,true);}
+extern "C" inline void PPC_PsCmpu1(std::uint32_t field,double a,double b){PpcPairedCompareInline(field,a,b,true,false);}
 
 inline bool PpcCommitScalarFpInline(double& destination,
                                     kartpad::semantics::ScalarFpResult result){

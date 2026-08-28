@@ -11,7 +11,7 @@ G6 remains **In progress**. The portable contract is green on arm64 and x86_64/R
 | Family | Coverage | Result |
 |---|---|---|
 | Integer | rotate/mask/shift, signed/unsigned divide edges, count-leading-zero, CR signed/unordered, add/sub carry/borrow/overflow, 100,000 seeded rotate/mask pairs | Pass on arm64 and x86_64 |
-| Scalar FP | f32 rounding, signed zero, NI single-subnormal flush, all four float-to-word rounding modes and result encoding, scalar and fused VXSNAN/VXISI/VXIDI/VXZDZ/VXIMZ/VXSQRT/VXCVI/ZX causes, fused NaN operand priority/negative forms, FEX/VX/FX summaries, FPRF classes, FI/FR/XX conversion state, enabled VE/ZE destination suppression, overflow/underflow/inexact flags, fused rounding point, 25-bit multiplier rounding | Pass on arm64 and x86_64 for the listed operations |
+| Scalar FP | f32 rounding, signed zero, NI single-subnormal flush, all four float-to-word rounding modes and result encoding, scalar and fused VXSNAN/VXISI/VXIDI/VXZDZ/VXIMZ/VXSQRT/VXCVI/VXVC/ZX causes, exact ordered/unordered NaN compares and FPCC, fused NaN operand priority/negative forms, FEX/VX/FX summaries, FPRF classes, FI/FR/XX conversion state, enabled VE/ZE destination suppression, overflow/underflow/inexact flags, fused rounding point, 25-bit multiplier rounding | Pass on arm64 and x86_64 for the listed operations |
 | Estimates | fres/frsqrte zeros, infinities, normal, subnormal, NaN payload, negative and boundary vectors | Bit-exact against compiled pinned Dolphin `FloatUtils.cpp` |
 | Paired-single | all arithmetic/fused/negate/absolute/sum/merge/select forms, comparison, estimates, 50,000 seeded finite randomized triplets, plus paired-estimate ZX/VXSQRT/VXSNAN lane aggregation and lane-0 FPRF | Identical raw-bit state hash on arm64 and x86_64; estimate state translated and runtime-proven |
 | GQR arithmetic | all five formats, paired and W=1, scales 0/1/31/32/57/63, signed/unsigned clamp, endian layout, NaN quieting and subnormal store flush | Pass |
@@ -19,7 +19,7 @@ G6 remains **In progress**. The portable contract is green on arm64 and x86_64/R
 | Real title surface | supplied PAL DOL hash matches WiiCompiled's pin; strict translation from `0x800060A4` emitted 10,836 functions with unsupported instructions disabled; all emitted units syntax-compile against KartPad's portable state/memory/ABI shim | Pass on native arm64 AppleClang |
 | Sanitizers | complete arm64 contract and translated fixture | ASan/UBSan Pass |
 
-Both Release architectures report 250,214 checks and state hash `0x1f462e0cd4bbd7cb`. The translated/stateful fixture reports integer `65534`, `fadds` raw bits `0x40700000`, paired-add bits `0x4080000040000000`, divide-by-zero result `0x7f800000`, canonical invalid add NaN, preserved destinations under VE for scalar add/conversion/fused multiply-add and negative `frsqrte`, preserved destination under ZE for zero `fres`, always-written paired `ps_res`/`ps_rsqrte` with cross-lane ZX/VXSQRT and lane-0 FPRF, `fctiwz(2.75)=2`, nearest-even `fctiw(2.75)=3`, final FPSCR `0xe7904393`, and checked-memory Pass. KartPad's patch is applied only to an ignored copy of the immutable pin and its adjusted translator suite passes 579/579.
+Both Release architectures report 250,220 checks and state hash `0x5a58605df18e5d1e`. The translated/stateful fixture adds ordered/unordered scalar and paired NaN comparisons with CR fields 3–6 unordered, VXVC sticky only from ordered qNaN, and FPCC unordered; final FPSCR is `0xe7981393`. All prior scalar/paired-estimate, conversion, suppression, and checked-memory assertions remain green. KartPad's patch is applied only to an ignored copy of the immutable pin and its adjusted translator suite passes 579/579.
 
 ## Oracle boundary
 
@@ -39,7 +39,7 @@ The compile pass forced ownership of the emitted state-free ABI, CR/XER, time-ba
 
 ## Remaining G6 work
 
-- Extend the exact FPSCR model through paired arithmetic/fused lane aggregation and ordered/unordered comparisons; paired estimates now aggregate exceptions and update lane-0 FPRF.
+- Extend the exact FPSCR model through paired arithmetic/fused lane aggregation; scalar and paired ordered/unordered comparisons now preserve their FPSCR effects through translation and optimization.
 - Execute translated fixtures for non-float GQR types, LR/CTR/stack/varargs, reservations, time-base/system state, and host callbacks; the real-title surface pass currently proves compilation only.
 - Prove NI state across actual scheduler callbacks and persistence boundaries.
 - Keep game/ghost state-hash acceptance pending until a real game runtime exists; any later divergence reopens G6 immediately.

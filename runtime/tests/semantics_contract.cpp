@@ -206,6 +206,18 @@ void ScalarSuite() {
   const auto fusedNegated=EvaluatePpcFused(0u,2.0,3.0,1.0,false,false,true);
   Check("fnmadd negated",0xc01c000000000000ULL,
         std::bit_cast<std::uint64_t>(fusedNegated.value));
+  const auto qnan=std::numeric_limits<double>::quiet_NaN();
+  const auto orderedQnan=EvaluatePpcFloatCompare(0u,qnan,1.0,true);
+  Check("fcmpo qNaN cause",fpscr::VXVC,orderedQnan.exception);
+  Check("fcmpo unordered result",1u,orderedQnan.condition);
+  Check("fcmpo FPCC",0x00001000u,orderedQnan.fpscr&0x0000f000u);
+  const auto unorderedQnan=EvaluatePpcFloatCompare(0u,qnan,1.0,false);
+  Check("fcmpu qNaN no cause",0u,unorderedQnan.exception);
+  const auto orderedSnanVe=EvaluatePpcFloatCompare(fpscr::VE,snan,1.0,true);
+  Check("fcmpo sNaN VE cause",fpscr::VXSNAN,orderedSnanVe.exception);
+  const auto orderedSnan=EvaluatePpcFloatCompare(0u,snan,1.0,true);
+  Check("fcmpo sNaN causes",fpscr::VXSNAN|fpscr::VXVC,
+        orderedSnan.exception);
   const auto fresZero=EvaluatePpcEstimate(fpscr::ZE,0.0,false);
   Check("fres zero cause",fpscr::ZX,fresZero.exception&fpscr::ZX);
   Check("fres ZE suppress",0u,fresZero.write_destination?1u:0u);

@@ -55,6 +55,7 @@ int main() {
   memory.Store(0x80011020u,4,0xff800000u);
   memory.Store(0x80011024u,4,0x42280000u);
   memory.Store(0x80011028u,4,0x40300000u);
+  memory.Store(0x8001102cu,4,0x7fc00042u);
   guest_memory=&memory;
   CpuContext context{};
   { CpuContextScope scope(&context);
@@ -87,9 +88,14 @@ int main() {
       throw std::runtime_error("translated estimate suppression mismatch");
     if(context.fpr[21].raw!=0x7f80000000000000ULL ||
        (context.fpr[22].raw&0xffffffffULL)!=0x7fc00000ULL ||
-       (context.fpscr&kartpad::semantics::fpscr::ZX)==0 ||
-       (context.fpscr&kartpad::semantics::fpscr::FPRF)!=0x00004000u)
+       (context.fpscr&kartpad::semantics::fpscr::ZX)==0)
       throw std::runtime_error("translated paired estimate state mismatch");
+    for(std::uint32_t field=3;field<=6;++field)
+      if(((context.cr>>((7u-field)*4u))&0xfu)!=1u)
+        throw std::runtime_error("translated FP compare CR mismatch");
+    if((context.fpscr&kartpad::semantics::fpscr::VXVC)==0 ||
+       (context.fpscr&0x0000f000u)!=0x00001000u)
+      throw std::runtime_error("translated FP compare FPSCR mismatch");
     const auto overflow=PPC_Addo(0x7fffffffu,1u);
     if(overflow!=0x80000000u||(context.xer&0xc0000000u)!=0xc0000000u)
       throw std::runtime_error("XER overflow mismatch");

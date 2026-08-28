@@ -219,3 +219,11 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - Expanded the translated DOL with `{0,+inf}` `ps_res` and `{1.5,-2}` `ps_rsqrte`; runtime evidence proves the results, sticky cross-lane causes, and final PS0 classification.
 - Result: 250,214 checks, identical arm64/x86_64 hash `0x1f462e0cd4bbd7cb`, translated final FPSCR `0xe7904393`, ASan/UBSan Pass, patched translator 579/579, and all 10,836 real-title units strict-FP syntax-compile.
 - Classification: G6 remains In progress. Paired arithmetic/fused exception aggregation, exact comparisons, callbacks, and NI scheduler persistence remain.
+
+### G6 exact translated comparisons
+
+- Added an exact comparison result model: CR/FPCC unordered for NaNs, VXSNAN for signaling NaNs, ordered VXVC for qNaN, and the Broadway rule that ordered sNaN omits VXVC when VE is enabled.
+- Preserved scalar `fcmpo` versus `fcmpu` in the existing compare IR and made scalar/paired code generation update FPSCR before CR. Float compares are no longer removed or branch-fused because their FPSCR side effects are architecturally observable.
+- Straight-line compare fixtures exposed legitimate fallthrough labels that Clang diagnosed as unused under `-Werror`; generated local labels are now explicitly `[[maybe_unused]]`, and every one of the 10,836 title units still strict-FP syntax-compiles.
+- Result: 250,220 checks, identical arm64/x86_64 hash `0x5a58605df18e5d1e`, translated final FPSCR `0xe7981393`, ASan/UBSan Pass, and patched translator 579/579.
+- Classification: G6 remains In progress. Paired arithmetic/fused exception aggregation, callbacks, and NI scheduler persistence remain.

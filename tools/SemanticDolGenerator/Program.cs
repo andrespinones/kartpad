@@ -21,6 +21,8 @@ static uint PsqSt(int fs,int ra,int d)=>(60u<<26)|((uint)fs<<21)|((uint)ra<<16)|
 static uint PsAdd(int fd,int fa,int fb)=>(4u<<26)|((uint)fd<<21)|((uint)fa<<16)|((uint)fb<<11)|(21u<<1);
 static uint PsRes(int fd,int fb)=>(4u<<26)|((uint)fd<<21)|((uint)fb<<11)|(24u<<1);
 static uint PsRsqrte(int fd,int fb)=>(4u<<26)|((uint)fd<<21)|((uint)fb<<11)|(26u<<1);
+static uint Fcmp(int crfd,int fa,int fb,bool ordered)=>(63u<<26)|((uint)crfd<<23)|((uint)fa<<16)|((uint)fb<<11)|((ordered?32u:0u)<<1);
+static uint PsCmp0(int crfd,int fa,int fb,bool ordered)=>(4u<<26)|((uint)crfd<<23)|((uint)fa<<16)|((uint)fb<<11)|((ordered?32u:0u)<<1);
 
 var words=new uint[] {
   Lis(3,output),Ori(3,3,output),Addi(4,0,0x7fff),Add(5,4,4),Stw(5,3,0),
@@ -34,17 +36,19 @@ var words=new uint[] {
   Mtfsb1(27),Lfs(17,6,36),Fres(17,7),
   Lfs(18,6,36),Lfs(19,6,12),Frsqrte(18,19),
   PsqL(20,6,24),PsRes(21,20),PsRsqrte(22,4),
+  Lfs(23,6,44),Fcmp(3,23,1,true),Fcmp(4,23,1,false),
+  PsCmp0(5,23,1,true),PsCmp0(6,23,1,false),
   0x4e800020u
 };
 const int header=0x100;
 var codeBytes=words.Length*4;
-var image=new byte[header+codeBytes+44];
+var image=new byte[header+codeBytes+48];
 BinaryPrimitives.WriteUInt32BigEndian(image.AsSpan(0x00,4),(uint)header);
 BinaryPrimitives.WriteUInt32BigEndian(image.AsSpan(0x1c,4),(uint)(header+codeBytes));
 BinaryPrimitives.WriteUInt32BigEndian(image.AsSpan(0x48,4),entry);
 BinaryPrimitives.WriteUInt32BigEndian(image.AsSpan(0x64,4),data);
 BinaryPrimitives.WriteUInt32BigEndian(image.AsSpan(0x90,4),(uint)codeBytes);
-BinaryPrimitives.WriteUInt32BigEndian(image.AsSpan(0xac,4),44u);
+BinaryPrimitives.WriteUInt32BigEndian(image.AsSpan(0xac,4),48u);
 BinaryPrimitives.WriteUInt32BigEndian(image.AsSpan(0xe0,4),entry);
 for(int i=0;i<words.Length;++i) BinaryPrimitives.WriteUInt32BigEndian(image.AsSpan(header+i*4,4),words[i]);
 BinaryPrimitives.WriteUInt32BigEndian(image.AsSpan(header+codeBytes,4),0x3fc00000u); // 1.5
@@ -58,6 +62,7 @@ BinaryPrimitives.WriteUInt32BigEndian(image.AsSpan(header+codeBytes+28,4),0x7f80
 BinaryPrimitives.WriteUInt32BigEndian(image.AsSpan(header+codeBytes+32,4),0xff800000u); // -inf
 BinaryPrimitives.WriteUInt32BigEndian(image.AsSpan(header+codeBytes+36,4),0x42280000u); // 42.0
 BinaryPrimitives.WriteUInt32BigEndian(image.AsSpan(header+codeBytes+40,4),0x40300000u); // 2.75
+BinaryPrimitives.WriteUInt32BigEndian(image.AsSpan(header+codeBytes+44,4),0x7fc00042u); // qNaN
 var path=Path.GetFullPath(args[0]); Directory.CreateDirectory(Path.GetDirectoryName(path)!); File.WriteAllBytes(path,image);
 Console.WriteLine($"semanticFixture={path} entry=0x{entry:X8} bytes={image.Length}");
 return 0;

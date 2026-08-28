@@ -1,5 +1,5 @@
 diff --git a/translator/src/Translator.Core/Lifting/PpcLifter.Floating.cs b/translator/src/Translator.Core/Lifting/PpcLifter.Floating.cs
-index e6ee396..e5e4d28 100644
+index e6ee396..aff96b0 100644
 --- a/translator/src/Translator.Core/Lifting/PpcLifter.Floating.cs
 +++ b/translator/src/Translator.Core/Lifting/PpcLifter.Floating.cs
 @@ -47 +47 @@ public sealed partial class PpcLifter
@@ -20,21 +20,25 @@ index e6ee396..e5e4d28 100644
 @@ -171 +171 @@ public sealed partial class PpcLifter
 -                return new[] { new IrBinary(operands[0], IrValue.Register(operands[1]), IrValue.Imm(0), "fctiwz") };
 +                return new[] { new IrCall(operands[0], "PPC_Fctiwz", new[] { IrValue.Register(operands[1]) }) };
-@@ -226 +226 @@ public sealed partial class PpcLifter
+@@ -206 +206,2 @@ public sealed partial class PpcLifter
+-                            IrValue.Register(operands[2]), false)
++                            IrValue.Register(operands[2]),
++                            ins.Mnemonic.StartsWith("fcmpo", StringComparison.Ordinal))
+@@ -226 +227 @@ public sealed partial class PpcLifter
 -                        22 => new[] { new IrCall($"f{rD}", "PPC_Fsqrt", new[] { IrValue.Register($"f{rB}") }) }, // fsqrts
 +                        22 => new[] { new IrCall($"f{rD}", "PPC_Fsqrts", new[] { IrValue.Register($"f{rB}") }) }, // fsqrts
-@@ -252,3 +252,3 @@ public sealed partial class PpcLifter
+@@ -252,3 +253,3 @@ public sealed partial class PpcLifter
 -                        18 => new[] { new IrBinary($"f{rD}", IrValue.Register($"f{rA}"), IrValue.Register($"f{rB}"), "fdiv") },
 -                        20 => new[] { new IrBinary($"f{rD}", IrValue.Register($"f{rA}"), IrValue.Register($"f{rB}"), "sub") },
 -                        21 => new[] { new IrBinary($"f{rD}", IrValue.Register($"f{rA}"), IrValue.Register($"f{rB}"), "add") },
 +                        18 => new[] { new IrCall($"f{rD}", "PPC_Fdiv", new[] { IrValue.Register($"f{rA}"), IrValue.Register($"f{rB}") }) },
 +                        20 => new[] { new IrCall($"f{rD}", "PPC_Fsub", new[] { IrValue.Register($"f{rA}"), IrValue.Register($"f{rB}") }) },
 +                        21 => new[] { new IrCall($"f{rD}", "PPC_Fadd", new[] { IrValue.Register($"f{rA}"), IrValue.Register($"f{rB}") }) },
-@@ -258 +258 @@ public sealed partial class PpcLifter
+@@ -258 +259 @@ public sealed partial class PpcLifter
 -                        25 => new[] { new IrBinary($"f{rD}", IrValue.Register($"f{rA}"), IrValue.Register($"f{rC}"), "mul") }, // fmul uses A and C
 +                        25 => new[] { new IrCall($"f{rD}", "PPC_Fmul", new[] { IrValue.Register($"f{rA}"), IrValue.Register($"f{rC}") }) }, // fmul uses A and C
 diff --git a/translator/src/Translator.Core/CodeGen/CxxLinearCodeGenerator.Inlines.cs b/translator/src/Translator.Core/CodeGen/CxxLinearCodeGenerator.Inlines.cs
-index 5ea4077..e749c6f 100644
+index 5ea4077..e26db2c 100644
 --- a/translator/src/Translator.Core/CodeGen/CxxLinearCodeGenerator.Inlines.cs
 +++ b/translator/src/Translator.Core/CodeGen/CxxLinearCodeGenerator.Inlines.cs
 @@ -175,0 +176 @@ public sealed partial class CxxLinearCodeGenerator
@@ -50,9 +54,12 @@ index 5ea4077..e749c6f 100644
 +                    EmitPairedResult($"PpcFresValueStateInline({dest}, {WrapForScalar(0)})");
 +                return true;
 +
-@@ -357,0 +366 @@ public sealed partial class CxxLinearCodeGenerator
+@@ -310,0 +319,2 @@ public sealed partial class CxxLinearCodeGenerator
++                    var ordered = target.Contains("CMPO", StringComparison.OrdinalIgnoreCase) ? "true" : "false";
++                    sb.AppendLine($"{pad}(void)PpcCompareStateInline({ordered}, {laneHelper}({left}), {laneHelper}({right}));");
+@@ -357,0 +368 @@ public sealed partial class CxxLinearCodeGenerator
 +        StatefulCall,
-@@ -457,15 +466 @@ public sealed partial class CxxLinearCodeGenerator
+@@ -457,15 +468 @@ public sealed partial class CxxLinearCodeGenerator
 -        static void AddHelper(
 -            Dictionary<string, ScalarInlineSpec> destination,
 -            string target,
@@ -69,11 +76,11 @@ index 5ea4077..e749c6f 100644
 -
 -        static void AddHelperNoNi(
 +        static void AddStateful(
-@@ -474 +468,0 @@ public sealed partial class CxxLinearCodeGenerator
+@@ -474 +470,0 @@ public sealed partial class CxxLinearCodeGenerator
 -            string noNiTarget,
-@@ -476 +469,0 @@ public sealed partial class CxxLinearCodeGenerator
+@@ -476 +471,0 @@ public sealed partial class CxxLinearCodeGenerator
 -            string noNiHelper,
-@@ -479,9 +472,3 @@ public sealed partial class CxxLinearCodeGenerator
+@@ -479,9 +474,3 @@ public sealed partial class CxxLinearCodeGenerator
 -            AddHelper(destination, target, helper, argumentOrder);
 -            destination.Add(
 -                noNiTarget,
@@ -86,14 +93,14 @@ index 5ea4077..e749c6f 100644
 +            destination.Add(target, new ScalarInlineSpec(
 +                ScalarInlineKind.StatefulCall, helper, Operator: null,
 +                NoNiVariant: false, ArgumentOrder: argumentOrder));
-@@ -490 +477 @@ public sealed partial class CxxLinearCodeGenerator
+@@ -490 +479 @@ public sealed partial class CxxLinearCodeGenerator
 -        static void AddRoundedBinary(
 +        static void AddStatefulNoNi(
-@@ -494 +481,2 @@ public sealed partial class CxxLinearCodeGenerator
+@@ -494 +483,2 @@ public sealed partial class CxxLinearCodeGenerator
 -            string @operator)
 +            string helper,
 +            params int[] argumentOrder)
-@@ -496,16 +484,4 @@ public sealed partial class CxxLinearCodeGenerator
+@@ -496,16 +486,4 @@ public sealed partial class CxxLinearCodeGenerator
 -            destination.Add(
 -                target,
 -                new ScalarInlineSpec(
@@ -114,7 +121,7 @@ index 5ea4077..e749c6f 100644
 +            destination.Add(noNiTarget, new ScalarInlineSpec(
 +                ScalarInlineKind.StatefulCall, helper, Operator: null,
 +                NoNiVariant: true, ArgumentOrder: argumentOrder));
-@@ -514,12 +490,22 @@ public sealed partial class CxxLinearCodeGenerator
+@@ -514,12 +492,22 @@ public sealed partial class CxxLinearCodeGenerator
 -        AddRoundedBinary(specs, "PPC_FADDS", "PPC_FADDSNONI", "+");
 -        AddRoundedBinary(specs, "PPC_FSUBS", "PPC_FSUBSNONI", "-");
 -        AddHelperNoNi(
@@ -149,9 +156,37 @@ index 5ea4077..e749c6f 100644
 +        AddStateful(specs, "PPC_FMSUBS", "PpcFmsubsStateInline", 0, 1, 2);
 +        AddStateful(specs, "PPC_FNMADDS", "PpcFnmaddsStateInline", 0, 1, 2);
 +        AddStateful(specs, "PPC_FNMSUBS", "PpcFnmsubsStateInline", 0, 1, 2);
-@@ -538 +524 @@ public sealed partial class CxxLinearCodeGenerator
+@@ -538 +526 @@ public sealed partial class CxxLinearCodeGenerator
 -        "PPC_PSTOSCALAR", "PPC_PSMR", "PPC_PSCMPO0", "PPC_PSCMPU0", "PPC_PSCMPO1", "PPC_PSCMPU1",
 +        "PPC_PSTOSCALAR", "PPC_FRES", "PPC_PSMR", "PPC_PSCMPO0", "PPC_PSCMPU0", "PPC_PSCMPO1", "PPC_PSCMPU1",
+diff --git a/translator/src/Translator.Core/CodeGen/CxxLinearCodeGenerator.EmitInstruction.cs b/translator/src/Translator.Core/CodeGen/CxxLinearCodeGenerator.EmitInstruction.cs
+index 6c2e0eb..fcca96b 100644
+--- a/translator/src/Translator.Core/CodeGen/CxxLinearCodeGenerator.EmitInstruction.cs
++++ b/translator/src/Translator.Core/CodeGen/CxxLinearCodeGenerator.EmitInstruction.cs
+@@ -552,0 +553 @@ public sealed partial class CxxLinearCodeGenerator
++                        sb.AppendLine($"{pad}(void)PpcCompareStateInline({(setCr.IsUnsigned ? "true" : "false")}, {leftExpr}, {rightExpr});");
+diff --git a/translator/src/Translator.Core/CodeGen/CxxLinearCodeGenerator.FlagElision.cs b/translator/src/Translator.Core/CodeGen/CxxLinearCodeGenerator.FlagElision.cs
+index 695a715..2faa701 100644
+--- a/translator/src/Translator.Core/CodeGen/CxxLinearCodeGenerator.FlagElision.cs
++++ b/translator/src/Translator.Core/CodeGen/CxxLinearCodeGenerator.FlagElision.cs
+@@ -162 +162,4 @@ public sealed partial class CxxLinearCodeGenerator
+-                            case IrSetCrField setCr when !live.HasCrField(setCr.FieldIndex & 7):
++                            case IrSetCrField setCr when
++                                !IsFloatValue(setCr.Left, types) &&
++                                !IsFloatValue(setCr.Right, types) &&
++                                !live.HasCrField(setCr.FieldIndex & 7):
+@@ -484,0 +488,4 @@ public sealed partial class CxxLinearCodeGenerator
++        if (isFloat)
++        {
++            return null;
++        }
+diff --git a/translator/src/Translator.Core/CodeGen/CxxLinearCodeGenerator.cs b/translator/src/Translator.Core/CodeGen/CxxLinearCodeGenerator.cs
+index 17b7fe4..b44f463 100644
+--- a/translator/src/Translator.Core/CodeGen/CxxLinearCodeGenerator.cs
++++ b/translator/src/Translator.Core/CodeGen/CxxLinearCodeGenerator.cs
+@@ -334 +334 @@ public sealed partial class CxxLinearCodeGenerator
+-                    body.AppendLine($"{label}:");
++                    body.AppendLine($"[[maybe_unused]] {label}:");
 diff --git a/translator/tests/Translator.Tests/FloatingLifterTests.cs b/translator/tests/Translator.Tests/FloatingLifterTests.cs
 index 366f0d1..e43e64f 100644
 --- a/translator/tests/Translator.Tests/FloatingLifterTests.cs
@@ -227,6 +262,26 @@ index 366f0d1..e43e64f 100644
 +    [InlineData(18u, "call", "PPC_Fdiv")]
 +    [InlineData(20u, "call", "PPC_Fsub")]
 +    [InlineData(21u, "call", "PPC_Fadd")]
+diff --git a/translator/tests/Translator.Tests/FlagElisionCodeGenTests.cs b/translator/tests/Translator.Tests/FlagElisionCodeGenTests.cs
+index 71ae2ca..96ecc5c 100644
+--- a/translator/tests/Translator.Tests/FlagElisionCodeGenTests.cs
++++ b/translator/tests/Translator.Tests/FlagElisionCodeGenTests.cs
+@@ -142,5 +142,5 @@ public class FlagElisionCodeGenTests
+-    [InlineData("blt", "if ((f1.d < f2.d))")]
+-    [InlineData("bge", "if ((!(f1.d < f2.d)))")]
+-    [InlineData("beq", "if ((f1.d == f2.d))")]
+-    [InlineData("ble", "if ((!(f1.d > f2.d)))")]
+-    public void FloatCompareFusionKeepsThePowerPcBitSemantics(string condition, string expected)
++    [InlineData("blt")]
++    [InlineData("bge")]
++    [InlineData("beq")]
++    [InlineData("ble")]
++    public void FloatCompareKeepsArchitecturalFpscrState(string condition)
+@@ -163,2 +163,2 @@ public class FlagElisionCodeGenTests
+-        Assert.Contains(expected, code, StringComparison.Ordinal);
+-        Assert.DoesNotContain("SetCRFloatResident(", code, StringComparison.Ordinal);
++        Assert.Contains("PpcCompareStateInline(false, f1.d, f2.d)", code, StringComparison.Ordinal);
++        Assert.Contains("SetCRFloatResident(cr, 0, f1.d, f2.d)", code, StringComparison.Ordinal);
 diff --git a/translator/tests/Translator.Tests/InlineArithmeticTableCodeGenTests.cs b/translator/tests/Translator.Tests/InlineArithmeticTableCodeGenTests.cs
 index df79821..2f1e7bc 100644
 --- a/translator/tests/Translator.Tests/InlineArithmeticTableCodeGenTests.cs
