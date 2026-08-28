@@ -249,3 +249,11 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - The finite host fixture selected `BACKEND_METAL`; Dawn reported the Apple M2 Metal adapter, BGRA8 surface, and Immediate presentation mode.
 - Aurora's GPU readback captured the frame-2 `GXSetCopyClear` result at 1164x960. Both captured corners are exact BGRA `56 34 12 ff`; BMP SHA-256 is `8881f050f2df9a16ce38565f8a33830fdf649a5d00268322699a7cd06e218596`.
 - Host-frame portion: **Pass**. G7 remains in progress pending translated GX geometry and the first game frame.
+
+### G7 translated GX geometry
+
+- Expanded the generated PowerPC fixture from a four-word direct-Metal clear command to a versioned 64-byte `KPGX` payload containing a clear color and three XYZ vertices. Exact pinned-translator regeneration is required by the test.
+- The translated function executes within `CpuContextScope` and writes through checked guest memory. Resolved-range stores retain address-by-address checked semantics in the fixture backend instead of exposing raw backing pointers.
+- The native bridge validates the command and issues real Dolphin GX projection, matrix, vertex-format, TEV, and triangle commands. Aurora decodes the FIFO, builds the GX pipeline, Dawn submits it to Metal, and Aurora captures the presentation texture.
+- The logical 640x480 GX viewport maps to the 1164x960 Retina EFB. The captured corners are exact clear BGRA `30 20 10 ff`, while the center is exact triangle BGRA `00 00 00 ff`; BMP SHA-256 is `799af319cb7bdbbc3ce6371b00d3dad1a5c47a8a14c6108f2271b0210777477e`.
+- Translated-GX portion: **Pass**. The first Mario Kart Wii frame is the remaining G7 condition.

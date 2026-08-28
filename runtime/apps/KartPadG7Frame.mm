@@ -89,11 +89,13 @@ void RenderTranslatedFrame(const std::filesystem::path& output) {
   }
   kartpad::translation::UnbindFixtureMemory();
 
-  Require(memory.LoadUnsigned(kCommandAddress, 4) == 0x4B504446, "translated command magic mismatch");
-  const auto width = static_cast<std::uint32_t>(memory.LoadUnsigned(kCommandAddress + 4, 4));
-  const auto height = static_cast<std::uint32_t>(memory.LoadUnsigned(kCommandAddress + 8, 4));
-  const auto rgba = static_cast<std::uint32_t>(memory.LoadUnsigned(kCommandAddress + 12, 4));
-  Require(width == 256 && height == 192 && rgba == 0x2458A8FF,
+  Require(memory.LoadUnsigned(kCommandAddress, 4) == 0x4B504758, "translated command magic mismatch");
+  const std::uint32_t width = 256;
+  const std::uint32_t height = 192;
+  const auto rgba = static_cast<std::uint32_t>(memory.LoadUnsigned(kCommandAddress + 4, 4));
+  Require(memory.LoadUnsigned(kCommandAddress + 8, 4) == 3 &&
+              memory.LoadUnsigned(kCommandAddress + 12, 4) == 0x47583031 &&
+              rgba == 0x102030FF,
           "translated frame command mismatch");
 
   [NSApplication sharedApplication];
@@ -157,7 +159,7 @@ destinationBytesPerImage:width * height * 4];
 
   const auto* bytes = static_cast<const std::uint8_t*>(readback.contents);
   std::vector<std::uint8_t> pixels(bytes, bytes + width * height * 4);
-  const std::array<std::uint8_t, 4> expected = {0xA8, 0x58, 0x24, 0xFF};
+  const std::array<std::uint8_t, 4> expected = {0x30, 0x20, 0x10, 0xFF};
   for (std::size_t index = 0; index < pixels.size(); index += 4) {
     for (std::size_t channel = 0; channel < 4; ++channel) {
       Require(std::abs(static_cast<int>(pixels[index + channel]) - expected[channel]) <= 1,
@@ -167,8 +169,8 @@ destinationBytesPerImage:width * height * 4];
   WritePng(output, width, height, pixels);
   PumpEvents(0.5);
   [window orderOut:nil];
-  std::cout << "translatedFunction=0x80001000 command=KPDF drawable=" << width << 'x' << height
-            << " rgba=2458A8FF pixelCompare=pass output=" << output << '\n';
+  std::cout << "translatedFunction=0x80001000 command=KPGX drawable=" << width << 'x' << height
+            << " rgba=102030FF pixelCompare=pass output=" << output << '\n';
 }
 
 }  // namespace

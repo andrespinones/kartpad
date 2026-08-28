@@ -4,7 +4,7 @@ Updated: 2026-08-28
 
 ## Current goal
 
-**G7 — Native Metal frame** is the lowest unmet goal. G0–G6 pass. The pinned Aurora/Dawn graph now presents and GPU-captures an exact host GX clear through Metal. Translated GX geometry and the first game frame remain.
+**G7 — Native Metal frame** is the lowest unmet goal. G0–G6 pass. The pinned Aurora/Dawn graph now GPU-captures both the exact host clear and translated PPC-authored GX geometry through Metal. The first game frame remains.
 
 ## Goal ledger
 
@@ -17,7 +17,7 @@ Updated: 2026-08-28
 | G4 Guest memory | Pass | Checked Darwin path passes conformance, lifecycle, randomized stress, microprogram, ASan/UBSan; safe Mach VM feasibility probe passes |
 | G5 Guest scheduler | Pass | Explicit state machine passes lifecycle/priority/VI/register tests and two deterministic million-operation runs under Release and ASan/UBSan |
 | G6 PPC/AArch64 semantics | Pass | 250,227-check arm64/x86 hashes match; Dolphin oracle, sanitizers, translator 579/579, translated scalar/paired state, scheduler/callback persistence, and all 10,836 title units pass |
-| G7 Native Metal frame | In progress | Aurora/Dawn Metal host clear Pass; translated GX geometry and first game frame remain |
+| G7 Native Metal frame | In progress | Aurora/Dawn Metal host clear and translated GX geometry Pass; first game frame remains |
 | G8–G18 | Gated | Await G7 |
 
 ## Known-good state

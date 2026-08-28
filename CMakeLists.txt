@@ -171,6 +171,16 @@ if(MKW_HOST_DARWIN)
     target_compile_features(kartpad_g7_aurora_host_frame PRIVATE cxx_std_20)
     target_compile_options(kartpad_g7_aurora_host_frame PRIVATE
       -Wall -Wextra -Wpedantic -Werror)
+
+    add_executable(kartpad_g7_aurora_translated_gx
+      runtime/apps/g7_aurora_translated_gx.cpp)
+    target_include_directories(kartpad_g7_aurora_translated_gx PRIVATE
+      runtime/translation_shim)
+    target_link_libraries(kartpad_g7_aurora_translated_gx PRIVATE
+      kartpad_g7_translated aurora::core aurora::gx aurora::main aurora::vi)
+    target_compile_features(kartpad_g7_aurora_translated_gx PRIVATE cxx_std_20)
+    target_compile_options(kartpad_g7_aurora_translated_gx PRIVATE
+      -Wall -Wextra -Wpedantic -Werror -fno-fast-math -ffp-contract=off)
   endif()
 endif()
 target_include_directories(kartpad_host PUBLIC runtime/include)
