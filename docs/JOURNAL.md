@@ -241,3 +241,11 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - Extended `GuestCpuContext` through CTR/XER/GQR/system/time-base state. A two-step scheduler fixture enables VE, performs a suppressed translated invalid add, yields, verifies NI/VXISI, enables ZE, performs suppressed reciprocal zero, and exits with NI/VE/ZE/VXISI/ZX plus the original destination intact. Nested host code observes the active context; code outside the callback observes none.
 - Release and ASan/UBSan scheduler suites pass with the unchanged million-operation hash `0x7287563387fb1677`. The G7 translated-frame dispatcher now establishes the same scope and its app target builds cleanly.
 - G6 classification: **Pass**. The 250,227-check arm64/x86_64 differential hash is `0xccd5757c4c0643d4`; Dolphin estimates, sanitizers, patched translator 579/579, translated semantic execution, scheduled persistence, and the complete 10,836-unit PAL title surface have zero unexplained mismatches. G7 becomes the lowest unmet goal.
+
+### G7 pinned Aurora/Dawn Metal host frame
+
+- Resolved Aurora's declared Dawn `v20260603.191052` Darwin arm64 archive to SHA-256 `084ffd2ef500d614e443e3d494738272134628867bad3270d67ee8b0fb5f0838` and added configure-time hash enforcement.
+- Built the immutable WiiCompiled-vendored Aurora source with GX enabled and Dawn's Metal backend, then linked it into the KartPad graph through public Aurora targets.
+- The finite host fixture selected `BACKEND_METAL`; Dawn reported the Apple M2 Metal adapter, BGRA8 surface, and Immediate presentation mode.
+- Aurora's GPU readback captured the frame-2 `GXSetCopyClear` result at 1164x960. Both captured corners are exact BGRA `56 34 12 ff`; BMP SHA-256 is `8881f050f2df9a16ce38565f8a33830fdf649a5d00268322699a7cd06e218596`.
+- Host-frame portion: **Pass**. G7 remains in progress pending translated GX geometry and the first game frame.

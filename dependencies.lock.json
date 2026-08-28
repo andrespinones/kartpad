@@ -92,8 +92,10 @@
       "name": "Dawn prebuilt",
       "repository": "https://github.com/encounter/dawn-build",
       "version": "v20260603.191052",
+      "darwinArm64Artifact": "dawn-darwin-arm64.tar.gz",
+      "darwinArm64Sha256": "084ffd2ef500d614e443e3d494738272134628867bad3270d67ee8b0fb5f0838",
       "declaredAt": "ref/upstream/Wiicompiled/aurora-main/CMakeLists.txt",
-      "role": "Pinned WebGPU implementation used by vendored Aurora; artifact hashes resolve during the Apple build"
+      "role": "Pinned WebGPU implementation used by vendored Aurora; Darwin arm64 artifact is hash-verified at configure time"
     },
     {
       "name": "Mario Kart Wii function map",

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.27)
 
-project(KartPad VERSION 0.1.0 LANGUAGES CXX)
+project(KartPad VERSION 0.1.0 LANGUAGES C CXX)
 
 include(CTest)
 
@@ -17,6 +17,7 @@ option(MKW_PRODUCT_RETRO_REWIND "Build the Retro Rewind product" OFF)
 option(MKW_BUILD_MACOS "Build the native macOS host" OFF)
 option(MKW_BUILD_IOS_SIMULATOR "Build the iOS Simulator host" OFF)
 option(MKW_BUILD_IOS_DEVICE "Build the physical iOS/iPadOS host" OFF)
+option(MKW_BUILD_AURORA_G7_FIXTURES "Build the pinned Aurora/Dawn G7 validation fixtures" OFF)
 option(MKW_GUEST_MEMORY_FLAT "Select the flat guest-memory backend" OFF)
 option(MKW_GUEST_MEMORY_CHECKED "Select the checked guest-memory backend" ON)
 
@@ -146,6 +147,31 @@ if(MKW_HOST_DARWIN)
     MACOSX_BUNDLE_SHORT_VERSION_STRING "0.1"
     MACOSX_BUNDLE_BUNDLE_VERSION "1"
   )
+
+  if(MKW_BUILD_AURORA_G7_FIXTURES)
+    set(AURORA_ENABLE_GX ON CACHE BOOL "Enable Aurora GX" FORCE)
+    set(AURORA_ENABLE_CARD OFF CACHE BOOL "Disable CARD for the G7 graphics fixture" FORCE)
+    set(AURORA_ENABLE_DVD OFF CACHE BOOL "Disable DVD for the G7 graphics fixture" FORCE)
+    set(AURORA_DAWN_PROVIDER package CACHE STRING "Use the pinned Dawn package" FORCE)
+    set(AURORA_DAWN_VERSION v20260603.191052 CACHE STRING "Pinned Dawn version" FORCE)
+    set(AURORA_DAWN_PACKAGE_URL
+      "https://github.com/encounter/dawn-build/releases/download/v20260603.191052/dawn-darwin-arm64.tar.gz"
+      CACHE STRING "Pinned Darwin arm64 Dawn package")
+    set(AURORA_DAWN_PACKAGE_URL_HASH
+      "SHA256=084ffd2ef500d614e443e3d494738272134628867bad3270d67ee8b0fb5f0838"
+      CACHE STRING "Pinned Darwin arm64 Dawn package digest" FORCE)
+    set(AURORA_SDL3_PROVIDER system CACHE STRING "Use the host SDL3 package" FORCE)
+
+    add_subdirectory(ref/upstream/Wiicompiled/aurora-main
+      "${CMAKE_BINARY_DIR}/aurora" EXCLUDE_FROM_ALL)
+
+    add_executable(kartpad_g7_aurora_host_frame runtime/apps/g7_aurora_host_frame.cpp)
+    target_link_libraries(kartpad_g7_aurora_host_frame PRIVATE
+      aurora::core aurora::gx aurora::main aurora::vi)
+    target_compile_features(kartpad_g7_aurora_host_frame PRIVATE cxx_std_20)
+    target_compile_options(kartpad_g7_aurora_host_frame PRIVATE
+      -Wall -Wextra -Wpedantic -Werror)
+  endif()
 endif()
 target_include_directories(kartpad_host PUBLIC runtime/include)
 target_compile_features(kartpad_host PUBLIC cxx_std_20)
