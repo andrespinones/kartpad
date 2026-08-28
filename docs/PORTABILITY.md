@@ -20,7 +20,7 @@ The unmodified Windows baseline remains isolated at WiiCompiled commit `1912292c
 | Paths/logging/files | Win32 module/path/console/file attributes | `HostPaths`, durable `AtomicWriteFile`; diagnostic sink follows the same platform split | Paths/files Pass; logging integration G6 — platform |
 | Clocks/threads | Win32 waitable timers, thread metadata | monotonic nanoseconds, deadline sleep, bounded thread naming | G3 Pass — platform |
 | Guest memory | `VirtualAlloc2`, placeholder views, shared mappings, `VirtualProtect`, VEH | checked oracle plus Darwin Mach VM backend | G4 checked path Pass; optimized flat differential pending — memory |
-| Scheduler | Windows fibers | portable scheduler/context backend with ABI preservation stress | G5 — scheduler |
+| Scheduler | Windows fibers | explicit cooperative scheduler/state machine with owned guest contexts | G5 Pass — scheduler |
 | Renderer/window | Aurora/Dawn Win32 surfaces, D3D/Vulkan defaults | Dawn Metal surface and Retina lifecycle | G6 — graphics |
 | Audio/media | host audio path and Windows media ducking | CoreAudio-compatible narrow output and media/session adapter | G6 — audio |
 | Input/raw adapter | SDL plus SetupAPI/WinUSB WUP-028 | SDL/GameController; separate macOS USB adapter backend or explicit limitation | G6/G10 — input |
@@ -49,3 +49,9 @@ No file in this inventory is treated as fixed merely because a non-Windows branc
 The checked/table backend is selected for correctness and likely mobile compatibility. It uses sparse owned backings, explicit guest mappings, and shared backing IDs for aliases; it never derives an unchecked host pointer from a guest address. Its full conformance suite passes Release and ASan/UBSan on arm64.
 
 The first Darwin flat candidate was evaluated safely. A 4 GiB-plus-guard reservation at `0x0000100000000000` succeeded with `mach_vm_allocate(..., VM_FLAGS_FIXED)` and was protected/deallocated successfully; a base-relative reservation lifecycle also passed twice. `VM_FLAGS_OVERWRITE` was never used. This proves reservation feasibility only. Flat aliases, page protections, fault classification/resume, and checked differential equivalence remain open optimization work and cannot replace the checked backend yet.
+
+## G5 scheduler decision
+
+The explicit state-machine strategy is selected because translated code can yield at the modeled OS/HLE boundaries. It stores the entire guest CPU snapshot per guest thread and therefore does not depend on Windows fibers, arbitrary host-stack preservation, deprecated Darwin contexts, or unaudited assembly. A scheduler mutex protects metadata but is released around every guest step and callback.
+
+Release and ASan/UBSan suites cover start/yield/sleep/wake/queue/join/cancel/exit, simultaneous alarms, priority order, nested callbacks, VI cadence, repeated lifecycle, idle/deadlock behavior, background suspension, and shutdown from waiting/running states. Two independent million-operation fixtures produced the same state hash with exact distribution and register/FP/SIMD preservation. Wii OS HLE integration remains G6 work; physical mobile lifecycle remains G15/G16.

@@ -116,3 +116,17 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - Decision: G4 Pass on the checked backend. Mach VM flat memory remains an optimization experiment until alias/protection/fault/differential evidence matches the checked oracle.
 - Evidence: `docs/artifacts/2026-08-28/g4-guest-memory.md`.
 - Next lowest unmet goal: G5 portable guest scheduler/context backend.
+
+## 2026-08-28 — G5 explicit portable guest scheduler
+
+- Goal: replace the Windows-fiber dependency with a deterministic arm64-safe guest execution contract.
+- Strategy: explicit cooperative state machine. A translated step owns no persistent host stack; it returns yield, sleep, queue-wait, join-wait, or exit. Each guest thread stores a complete CPU context.
+- Lock boundary: the scheduler selects/updates metadata under its mutex, releases it for guest/host/retrace callbacks, then applies the returned action. A nested callback inspection test passes.
+- Immediate command: `./scripts/test-guest-scheduler.sh`.
+- Lifecycle result: create suspended, resume, priority order, yield, sleep/alarm, simultaneous wake, queue, join, cancel, exit, 10,000 create/reap cycles, background suspension, idle/deadlock return, and shutdown while waiting/running all pass.
+- Context result: GPRs, PC/LR/CR, FPSCR, every FP register bit pattern including NaN payloads, and 128 bytes of SIMD state persist across switches.
+- Determinism result: two independent 1,000,000-operation runs distributed exactly 250,000 steps to each of four peers, emitted exactly 10,000 VI callbacks, and produced identical state hash `0x7287563387fb1677`.
+- Sanitizer result: Pass under ASan/UBSan with no finding.
+- Classification: G5 Pass for the backend contract. Wii OS HLE/translated-boundary integration is G6; physical mobile backgrounding remains a later device test.
+- Evidence: `docs/artifacts/2026-08-28/g5-guest-scheduler.md`.
+- Next lowest unmet goal: G6 native renderer/audio/input/storage/network subsystem initialization.

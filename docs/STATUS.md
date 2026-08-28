@@ -4,7 +4,7 @@ Updated: 2026-08-28
 
 ## Current goal
 
-**G5 — Guest scheduler correctness on macOS** is the lowest unmet goal. G0–G4 pass. The next gate is a portable guest execution/scheduler backend with deterministic ordering, lifecycle, register/FP preservation, and million-operation stress.
+**G6 — Runtime subsystems initialize natively** is the lowest unmet goal. G0–G5 pass. The next gate integrates memory/scheduler with renderer, audio, input, storage, and networking smoke paths on arm64 macOS.
 
 ## Goal ledger
 
@@ -15,7 +15,8 @@ Updated: 2026-08-28
 | G2 Baseline oracle | Pass | Translator 570/570; isolated Dolphin boot/license/menu/race/staff-ghost oracle in `docs/artifacts/2026-08-28/dolphin-oracle/` |
 | G3 Host portability | Pass | Native arm64 host library/contracts pass; Darwin graph contains no Win32/x86-only link token; manifest recorded |
 | G4 Guest memory | Pass | Checked Darwin path passes conformance, lifecycle, randomized stress, microprogram, ASan/UBSan; safe Mach VM feasibility probe passes |
-| G5–G18 | Not started | G5 scheduler is now active; later goals remain gated in order |
+| G5 Guest scheduler | Pass | Explicit state machine passes lifecycle/priority/VI/register tests and two deterministic million-operation runs under Release and ASan/UBSan |
+| G6–G18 | Not started | G6 native subsystem initialization is now active; later goals remain gated in order |
 
 ## Known-good state
 
@@ -28,6 +29,7 @@ Updated: 2026-08-28
 - Gameplay baseline: hashed Dolphin 5.0-17995 arm64/Vulkan/HLE binary boots `RMCP01`, creates an isolated license/save, reaches Luigi Circuit and its official staff ghost, and recovers to 60 FPS/VPS after shader warmup.
 - Portability baseline: `kartpad_host` and its contract suite compile/link/run natively for arm64 macOS; manifest is under `docs/artifacts/2026-08-28/`.
 - Memory baseline: checked/table guest memory is the accepted correctness path; evidence is `docs/artifacts/2026-08-28/g4-guest-memory.md`.
+- Scheduler baseline: explicit cooperative state machine, deterministic hash `0x7287563387fb1677`; evidence is `docs/artifacts/2026-08-28/g5-guest-scheduler.md`.
 - Original icon: editable default/dark/tinted SVG masters and opaque exports exist; 1024 px and 16 px visual QA passed. Asset-catalog validation awaits application targets.
 
 ## Active risks and blockers
