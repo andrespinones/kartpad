@@ -23,6 +23,238 @@ struct PpcFlags {
   }
 };
 
+namespace fpscr {
+inline constexpr std::uint32_t FX = 0x80000000u;
+inline constexpr std::uint32_t FEX = 0x40000000u;
+inline constexpr std::uint32_t VX = 0x20000000u;
+inline constexpr std::uint32_t OX = 0x10000000u;
+inline constexpr std::uint32_t UX = 0x08000000u;
+inline constexpr std::uint32_t ZX = 0x04000000u;
+inline constexpr std::uint32_t XX = 0x02000000u;
+inline constexpr std::uint32_t VXSNAN = 0x01000000u;
+inline constexpr std::uint32_t VXISI = 0x00800000u;
+inline constexpr std::uint32_t VXIDI = 0x00400000u;
+inline constexpr std::uint32_t VXZDZ = 0x00200000u;
+inline constexpr std::uint32_t VXIMZ = 0x00100000u;
+inline constexpr std::uint32_t VXVC = 0x00080000u;
+inline constexpr std::uint32_t FR = 0x00040000u;
+inline constexpr std::uint32_t FI = 0x00020000u;
+inline constexpr std::uint32_t FPRF = 0x0001f000u;
+inline constexpr std::uint32_t VXSOFT = 0x00000400u;
+inline constexpr std::uint32_t VXSQRT = 0x00000200u;
+inline constexpr std::uint32_t VXCVI = 0x00000100u;
+inline constexpr std::uint32_t VE = 0x00000080u;
+inline constexpr std::uint32_t OE = 0x00000040u;
+inline constexpr std::uint32_t UE = 0x00000020u;
+inline constexpr std::uint32_t ZE = 0x00000010u;
+inline constexpr std::uint32_t XE = 0x00000008u;
+inline constexpr std::uint32_t NI = 0x00000004u;
+inline constexpr std::uint32_t RN = 0x00000003u;
+inline constexpr std::uint32_t VX_ANY = VXSNAN | VXISI | VXIDI | VXZDZ |
+                                                VXIMZ | VXVC | VXSOFT |
+                                                VXSQRT | VXCVI;
+inline constexpr std::uint32_t ANY_X = OX | UX | ZX | XX | VX_ANY;
+inline constexpr std::uint32_t ANY_E = VE | OE | UE | ZE | XE;
+}  // namespace fpscr
+
+inline constexpr std::uint32_t UpdateFpscrSummaries(
+    std::uint32_t value) noexcept {
+  value = (value & ~fpscr::VX) |
+          ((value & fpscr::VX_ANY) != 0 ? fpscr::VX : 0u);
+  const bool enabled = (((value >> 22) & (value & fpscr::ANY_E)) != 0);
+  return (value & ~fpscr::FEX) | (enabled ? fpscr::FEX : 0u);
+}
+
+inline constexpr std::uint32_t SetFpscrException(
+    std::uint32_t value, std::uint32_t exception) noexcept {
+  if ((value & exception) != exception)
+    value |= fpscr::FX;
+  value |= exception;
+  return UpdateFpscrSummaries(value);
+}
+
+inline constexpr bool FpscrExceptionEnabled(
+    std::uint32_t value, std::uint32_t exception) noexcept {
+  return (((exception & fpscr::VX_ANY) != 0) && (value & fpscr::VE) != 0) ||
+         (((exception & fpscr::OX) != 0) && (value & fpscr::OE) != 0) ||
+         (((exception & fpscr::UX) != 0) && (value & fpscr::UE) != 0) ||
+         (((exception & fpscr::ZX) != 0) && (value & fpscr::ZE) != 0) ||
+         (((exception & fpscr::XX) != 0) && (value & fpscr::XE) != 0);
+}
+
+inline constexpr bool IsSignalingNan(double value) noexcept {
+  const auto bits = std::bit_cast<std::uint64_t>(value);
+  return (bits & 0x7ff0000000000000ULL) == 0x7ff0000000000000ULL &&
+         (bits & 0x000fffffffffffffULL) != 0 &&
+         (bits & 0x0008000000000000ULL) == 0;
+}
+
+inline constexpr double QuietNan(double value) noexcept {
+  return std::bit_cast<double>(std::bit_cast<std::uint64_t>(value) |
+                               0x0008000000000000ULL);
+}
+
+inline constexpr std::uint32_t ClassifyDouble(double value) noexcept {
+  const auto bits = std::bit_cast<std::uint64_t>(value);
+  const auto sign = bits & 0x8000000000000000ULL;
+  const auto exponent = bits & 0x7ff0000000000000ULL;
+  const auto fraction = bits & 0x000fffffffffffffULL;
+  if (exponent != 0 && exponent != 0x7ff0000000000000ULL)
+    return sign != 0 ? 0x08u : 0x04u;
+  if (fraction != 0)
+    return exponent != 0 ? 0x11u : (sign != 0 ? 0x18u : 0x14u);
+  if (exponent != 0)
+    return sign != 0 ? 0x09u : 0x05u;
+  return sign != 0 ? 0x12u : 0x02u;
+}
+
+inline constexpr std::uint32_t ClassifyFloat(float value) noexcept {
+  const auto bits = std::bit_cast<std::uint32_t>(value);
+  const auto sign = bits & 0x80000000u;
+  const auto exponent = bits & 0x7f800000u;
+  const auto fraction = bits & 0x007fffffu;
+  if (exponent != 0 && exponent != 0x7f800000u)
+    return sign != 0 ? 0x08u : 0x04u;
+  if (fraction != 0)
+    return exponent != 0 ? 0x11u : (sign != 0 ? 0x18u : 0x14u);
+  if (exponent != 0)
+    return sign != 0 ? 0x09u : 0x05u;
+  return sign != 0 ? 0x12u : 0x02u;
+}
+
+inline constexpr std::uint32_t SetFprf(std::uint32_t fpscr_value,
+                                       std::uint32_t classification) noexcept {
+  return (fpscr_value & ~fpscr::FPRF) |
+         ((classification & 0x1fu) << 12);
+}
+
+inline float ForceSingle(double value, bool non_ieee) noexcept;
+
+struct ScalarFpResult {
+  double value{};
+  std::uint32_t fpscr{};
+  std::uint32_t exception{};
+  bool write_destination{true};
+};
+
+inline ScalarFpResult FinishScalarFp(std::uint32_t fpscr_value, double value,
+                                     std::uint32_t exception,
+                                     bool single_precision) noexcept {
+  if (exception != 0)
+    fpscr_value = SetFpscrException(fpscr_value, exception);
+
+  // Invalid and divide-by-zero enables suppress the architectural register
+  // write. The exception and summary bits remain sticky either way.
+  const bool write_destination =
+      !FpscrExceptionEnabled(fpscr_value, exception);
+  if (!write_destination)
+    return {value, fpscr_value, exception, false};
+
+  if (single_precision) {
+    volatile float rounded = ForceSingle(
+        value, (fpscr_value & fpscr::NI) != 0);
+    value = static_cast<double>(rounded);
+    fpscr_value = SetFprf(fpscr_value, ClassifyFloat(rounded));
+  } else {
+    fpscr_value = SetFprf(fpscr_value, ClassifyDouble(value));
+  }
+  return {value, fpscr_value, exception, true};
+}
+
+enum class ScalarFpBinaryOperation { Add, Subtract, Multiply, Divide };
+
+inline ScalarFpResult EvaluatePpcScalarBinary(
+    std::uint32_t fpscr_value, ScalarFpBinaryOperation operation, double a,
+    double b, bool single_precision) noexcept {
+  std::feclearexcept(FE_ALL_EXCEPT);
+  volatile double computed = 0.0;
+  switch (operation) {
+  case ScalarFpBinaryOperation::Add:
+    computed = a + b;
+    break;
+  case ScalarFpBinaryOperation::Subtract:
+    computed = a - b;
+    break;
+  case ScalarFpBinaryOperation::Multiply:
+    computed = a * b;
+    break;
+  case ScalarFpBinaryOperation::Divide:
+    computed = a / b;
+    break;
+  }
+
+  double value = computed;
+  std::uint32_t exception = 0;
+  const bool a_snan = IsSignalingNan(a);
+  const bool b_snan = IsSignalingNan(b);
+  if (a_snan || b_snan)
+    exception |= fpscr::VXSNAN;
+
+  if (std::isnan(value)) {
+    fpscr_value &= ~(fpscr::FR | fpscr::FI);
+    if (std::isnan(a))
+      value = QuietNan(a);
+    else if (std::isnan(b))
+      value = QuietNan(b);
+    else {
+      value = std::bit_cast<double>(0x7ff8000000000000ULL);
+      switch (operation) {
+      case ScalarFpBinaryOperation::Add:
+      case ScalarFpBinaryOperation::Subtract:
+        exception |= fpscr::VXISI;
+        break;
+      case ScalarFpBinaryOperation::Multiply:
+        exception |= fpscr::VXIMZ;
+        break;
+      case ScalarFpBinaryOperation::Divide:
+        exception |= b == 0.0 ? fpscr::VXZDZ : fpscr::VXIDI;
+        break;
+      }
+    }
+  } else if (operation == ScalarFpBinaryOperation::Divide && b == 0.0) {
+    exception |= fpscr::ZX;
+  }
+
+  const int host_flags = std::fetestexcept(FE_OVERFLOW | FE_UNDERFLOW | FE_INEXACT);
+  if ((host_flags & FE_OVERFLOW) != 0)
+    exception |= fpscr::OX;
+  if ((host_flags & FE_UNDERFLOW) != 0)
+    exception |= fpscr::UX;
+  if ((host_flags & FE_INEXACT) != 0)
+    exception |= fpscr::XX;
+  std::feclearexcept(FE_ALL_EXCEPT);
+  return FinishScalarFp(fpscr_value, value, exception, single_precision);
+}
+
+inline ScalarFpResult EvaluatePpcSqrt(std::uint32_t fpscr_value, double input,
+                                      bool single_precision = false) noexcept {
+  std::uint32_t exception = 0;
+  double value;
+  if (std::isnan(input)) {
+    if (IsSignalingNan(input))
+      exception |= fpscr::VXSNAN;
+    fpscr_value &= ~(fpscr::FR | fpscr::FI);
+    value = QuietNan(input);
+  } else if (input < 0.0) {
+    exception |= fpscr::VXSQRT;
+    fpscr_value &= ~(fpscr::FR | fpscr::FI);
+    value = std::bit_cast<double>(0x7ff8000000000000ULL);
+  } else {
+    std::feclearexcept(FE_ALL_EXCEPT);
+    volatile double computed = std::sqrt(input);
+    value = computed;
+    const int flags = std::fetestexcept(FE_OVERFLOW | FE_UNDERFLOW | FE_INEXACT);
+    if ((flags & FE_OVERFLOW) != 0)
+      exception |= fpscr::OX;
+    if ((flags & FE_UNDERFLOW) != 0)
+      exception |= fpscr::UX;
+    if ((flags & FE_INEXACT) != 0)
+      exception |= fpscr::XX;
+    std::feclearexcept(FE_ALL_EXCEPT);
+  }
+  return FinishScalarFp(fpscr_value, value, exception, single_precision);
+}
+
 template <typename T> struct Result {
   T value{};
   PpcFlags flags{};

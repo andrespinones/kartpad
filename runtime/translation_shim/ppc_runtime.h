@@ -88,12 +88,13 @@ inline void PpcApplyHostFpFlags() {
   if(g_currentCpuContext==nullptr) return;
   const auto flags=kartpad::semantics::CaptureFlags();
   std::uint32_t bits=0;
-  if(flags.invalid) bits|=0x80000000u|0x20000000u|0x00080000u;
-  if(flags.overflow) bits|=0x80000000u|0x10000000u;
-  if(flags.underflow) bits|=0x80000000u|0x08000000u;
-  if(flags.divide_by_zero) bits|=0x80000000u|0x04000000u;
-  if(flags.inexact) bits|=0x80000000u|0x02000000u;
-  g_currentCpuContext->fpscr|=bits;
+  if(flags.invalid) bits|=kartpad::semantics::fpscr::VXVC;
+  if(flags.overflow) bits|=kartpad::semantics::fpscr::OX;
+  if(flags.underflow) bits|=kartpad::semantics::fpscr::UX;
+  if(flags.divide_by_zero) bits|=kartpad::semantics::fpscr::ZX;
+  if(flags.inexact) bits|=kartpad::semantics::fpscr::XX;
+  if(bits!=0)g_currentCpuContext->fpscr=kartpad::semantics::SetFpscrException(
+    g_currentCpuContext->fpscr,bits);
   std::feclearexcept(FE_ALL_EXCEPT);
 }
 
@@ -196,9 +197,8 @@ inline float PpcForceSingleValueInline(double value);
 
 inline void PpcUpdateFpscrSummary() {
   if(!g_currentCpuContext)return;
-  constexpr std::uint32_t anyInvalid=0x01f80700u;
-  if(g_currentCpuContext->fpscr&anyInvalid)g_currentCpuContext->fpscr|=0x20000000u;
-  else g_currentCpuContext->fpscr&=~0x20000000u;
+  g_currentCpuContext->fpscr=kartpad::semantics::UpdateFpscrSummaries(
+    g_currentCpuContext->fpscr);
 }
 extern "C" inline void PPC_Mtfsb1(std::uint32_t bit){if(!g_currentCpuContext)return;bit&=31u;if(bit!=1&&bit!=2)g_currentCpuContext->fpscr|=1u<<(31u-bit);PpcUpdateFpscrSummary();}
 extern "C" inline void PPC_Mtfsb0(std::uint32_t bit){if(!g_currentCpuContext)return;g_currentCpuContext->fpscr&=~(1u<<(31u-(bit&31u)));PpcUpdateFpscrSummary();}
@@ -215,13 +215,29 @@ extern "C" inline void PPC_PsCmpu0(std::uint32_t field,double a,double b){PPC_Ps
 extern "C" inline void PPC_PsCmpo1(std::uint32_t field,double a,double b){PpcSetCrField(field,kartpad::semantics::ComparePairedLane(PpcGetPs1Inline(a),PpcGetPs1Inline(b)));}
 extern "C" inline void PPC_PsCmpu1(std::uint32_t field,double a,double b){PPC_PsCmpo1(field,a,b);}
 
-extern "C" inline double PPC_Fadds(double a,double b){return static_cast<double>(PpcForceSingleValueInline(a+b));}
-extern "C" inline double PPC_Fsubs(double a,double b){return static_cast<double>(PpcForceSingleValueInline(a-b));}
+inline bool PpcCommitScalarFpInline(double& destination,
+                                    kartpad::semantics::ScalarFpResult result){
+  if(g_currentCpuContext)g_currentCpuContext->fpscr=result.fpscr;
+  if(result.write_destination)destination=result.value;
+  return result.write_destination;
+}
+inline bool PpcFaddsStateInline(double& destination,double a,double b){return PpcCommitScalarFpInline(destination,kartpad::semantics::EvaluatePpcScalarBinary(g_currentCpuContext?g_currentCpuContext->fpscr:0u,kartpad::semantics::ScalarFpBinaryOperation::Add,a,b,true));}
+inline bool PpcFsubsStateInline(double& destination,double a,double b){return PpcCommitScalarFpInline(destination,kartpad::semantics::EvaluatePpcScalarBinary(g_currentCpuContext?g_currentCpuContext->fpscr:0u,kartpad::semantics::ScalarFpBinaryOperation::Subtract,a,b,true));}
+inline bool PpcFmulsStateInline(double& destination,double a,double b){return PpcCommitScalarFpInline(destination,kartpad::semantics::EvaluatePpcScalarBinary(g_currentCpuContext?g_currentCpuContext->fpscr:0u,kartpad::semantics::ScalarFpBinaryOperation::Multiply,a,kartpad::semantics::Force25Bit(b),true));}
+inline bool PpcFdivsStateInline(double& destination,double a,double b){return PpcCommitScalarFpInline(destination,kartpad::semantics::EvaluatePpcScalarBinary(g_currentCpuContext?g_currentCpuContext->fpscr:0u,kartpad::semantics::ScalarFpBinaryOperation::Divide,a,b,true));}
+inline bool PpcFaddStateInline(double& destination,double a,double b){return PpcCommitScalarFpInline(destination,kartpad::semantics::EvaluatePpcScalarBinary(g_currentCpuContext?g_currentCpuContext->fpscr:0u,kartpad::semantics::ScalarFpBinaryOperation::Add,a,b,false));}
+inline bool PpcFsubStateInline(double& destination,double a,double b){return PpcCommitScalarFpInline(destination,kartpad::semantics::EvaluatePpcScalarBinary(g_currentCpuContext?g_currentCpuContext->fpscr:0u,kartpad::semantics::ScalarFpBinaryOperation::Subtract,a,b,false));}
+inline bool PpcFmulStateInline(double& destination,double a,double b){return PpcCommitScalarFpInline(destination,kartpad::semantics::EvaluatePpcScalarBinary(g_currentCpuContext?g_currentCpuContext->fpscr:0u,kartpad::semantics::ScalarFpBinaryOperation::Multiply,a,b,false));}
+inline bool PpcFdivStateInline(double& destination,double a,double b){return PpcCommitScalarFpInline(destination,kartpad::semantics::EvaluatePpcScalarBinary(g_currentCpuContext?g_currentCpuContext->fpscr:0u,kartpad::semantics::ScalarFpBinaryOperation::Divide,a,b,false));}
+inline bool PpcFsqrtStateInline(double& destination,double value){return PpcCommitScalarFpInline(destination,kartpad::semantics::EvaluatePpcSqrt(g_currentCpuContext?g_currentCpuContext->fpscr:0u,value,false));}
+inline bool PpcFsqrtsStateInline(double& destination,double value){return PpcCommitScalarFpInline(destination,kartpad::semantics::EvaluatePpcSqrt(g_currentCpuContext?g_currentCpuContext->fpscr:0u,value,true));}
+extern "C" inline double PPC_Fadds(double a,double b){double result=0;PpcFaddsStateInline(result,a,b);return result;}
+extern "C" inline double PPC_Fsubs(double a,double b){double result=0;PpcFsubsStateInline(result,a,b);return result;}
 extern "C" inline double PPC_Fmuls(double a,double b){return PpcFmulsInline(a,b);}
-extern "C" inline double PPC_Fdivs(double a,double b){return static_cast<double>(PpcForceSingleValueInline(a/b));}
+extern "C" inline double PPC_Fdivs(double a,double b){double result=0;PpcFdivsStateInline(result,a,b);return result;}
 extern "C" inline double PPC_Fmadd(double a,double c,double b){const auto v=std::fma(a,c,b);PpcApplyHostFpFlags();return v;}
 extern "C" inline double PPC_Fmsub(double a,double c,double b){const auto v=std::fma(a,c,-b);PpcApplyHostFpFlags();return v;}
-extern "C" inline double PPC_Fsqrt(double value){const auto result=std::sqrt(value);PpcApplyHostFpFlags();return result;}
+extern "C" inline double PPC_Fsqrt(double value){double result=0;PpcFsqrtStateInline(result,value);return result;}
 extern "C" inline double PPC_Fctiw(double value){const auto mode=g_currentCpuContext?g_currentCpuContext->fpscr&3u:0u;const int hostMode=mode==1?FE_TOWARDZERO:mode==2?FE_UPWARD:mode==3?FE_DOWNWARD:FE_TONEAREST;return std::bit_cast<double>(static_cast<std::uint64_t>(static_cast<std::uint32_t>(kartpad::semantics::ConvertToIntegerWord(value,hostMode))));}
 
 inline thread_local std::array<std::uint32_t,1024> g_ppcSprShadow{};

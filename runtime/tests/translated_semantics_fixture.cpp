@@ -51,10 +51,27 @@ int main() {
   memory.Store(0x80011010u,4,0x40200000u);
   memory.Store(0x80011014u,4,0x40800000u);
   memory.Store(0x80011018u,4,0u);
+  memory.Store(0x8001101cu,4,0x7f800000u);
+  memory.Store(0x80011020u,4,0xff800000u);
+  memory.Store(0x80011024u,4,0x42280000u);
   guest_memory=&memory;
   CpuContext context{};
   { CpuContextScope scope(&context);
     func_80001000(&context);
+    const auto invalidBits=memory.LoadUnsigned(0x80010014u,4);
+    const auto suppressedBits=memory.LoadUnsigned(0x80010018u,4);
+    if(invalidBits!=0x7fc00000u || suppressedBits!=0x42280000u){
+      std::cerr<<"invalidBits=0x"<<std::hex<<invalidBits
+               <<" suppressedBits=0x"<<suppressedBits
+               <<" fpscr=0x"<<context.fpscr<<'\n';
+      throw std::runtime_error("translated invalid-result suppression mismatch");
+    }
+    constexpr std::uint32_t invalidState=kartpad::semantics::fpscr::FX|
+      kartpad::semantics::fpscr::FEX|kartpad::semantics::fpscr::VX|
+      kartpad::semantics::fpscr::VXISI|kartpad::semantics::fpscr::VE;
+    if((context.fpscr&invalidState)!=invalidState ||
+       (context.fpscr&kartpad::semantics::fpscr::FPRF)!=0x00011000u)
+      throw std::runtime_error("translated invalid FPSCR mismatch");
     const auto overflow=PPC_Addo(0x7fffffffu,1u);
     if(overflow!=0x80000000u||(context.xer&0xc0000000u)!=0xc0000000u)
       throw std::runtime_error("XER overflow mismatch");

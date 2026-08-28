@@ -47,7 +47,7 @@ cmp fixtures/g6/dolphin-estimates.txt build/dolphin-float-oracle.txt
 
 dotnet_bin=/opt/homebrew/opt/dotnet@8/bin/dotnet
 "$dotnet_bin" test \
-  ref/upstream/wiicompiled/translator/tests/Translator.Tests/Translator.Tests.csproj \
-  -c Release --no-restore
+  build/wiicompiled-fpscr/translator/tests/Translator.Tests/Translator.Tests.csproj \
+  -c Release
 
 echo 'G6 PPC semantic differential: pass'

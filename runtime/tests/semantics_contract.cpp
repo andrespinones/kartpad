@@ -80,6 +80,87 @@ void ScalarSuite() {
   Check("inexact flag",1u,inexact.flags.inexact?1u:0u);
   Check("fma single rounding",0x3f800000u,std::bit_cast<std::uint32_t>(std::fma(0x1.000002p0f,0x1.fffffep-1f,-0x1p-24f)));
   Check("force25",0x3ff0000010000000ULL,std::bit_cast<std::uint64_t>(Force25Bit(0x1.0000008000001p0)));
+
+  Check("FPSCR first invalid",0xa0800000u,
+        SetFpscrException(0u,fpscr::VXISI));
+  Check("FPSCR repeated invalid sticky FX",0xa0800000u,
+        SetFpscrException(0xa0800000u,fpscr::VXISI));
+  Check("FPSCR invalid enabled summary",0xe0800080u,
+        SetFpscrException(fpscr::VE,fpscr::VXISI));
+  Check("FPSCR divide enabled summary",0xc4000010u,
+        SetFpscrException(fpscr::ZE,fpscr::ZX));
+  Check("FPSCR mixed summaries",0xfe8000f8u,
+        SetFpscrException(fpscr::VE|fpscr::OE|fpscr::UE|fpscr::ZE|fpscr::XE,
+                          fpscr::VXISI|fpscr::OX|fpscr::UX|fpscr::ZX|fpscr::XX));
+  Check("FPSCR invalid write suppressed",1u,
+        FpscrExceptionEnabled(fpscr::VE,fpscr::VXIMZ)?1u:0u);
+  Check("FPSCR disabled write allowed",0u,
+        FpscrExceptionEnabled(0u,fpscr::VXIMZ)?1u:0u);
+  Check("FPRF qnan",0x00011000u,SetFprf(0u,ClassifyDouble(
+        std::numeric_limits<double>::quiet_NaN())));
+  Check("FPRF negative infinity",0x00009000u,SetFprf(0u,ClassifyDouble(
+        -std::numeric_limits<double>::infinity())));
+  Check("FPRF negative normal",0x00008000u,SetFprf(0u,ClassifyDouble(-1.0)));
+  Check("FPRF negative denormal",0x00018000u,SetFprf(0u,ClassifyDouble(
+        -std::numeric_limits<double>::denorm_min())));
+  Check("FPRF negative zero",0x00012000u,SetFprf(0u,ClassifyDouble(-0.0)));
+  Check("FPRF positive zero",0x00002000u,SetFprf(0u,ClassifyDouble(0.0)));
+  Check("FPRF positive denormal",0x00014000u,SetFprf(0u,ClassifyFloat(
+        std::numeric_limits<float>::denorm_min())));
+  Check("FPRF positive normal",0x00004000u,SetFprf(0u,ClassifyFloat(1.0f)));
+  Check("FPRF positive infinity",0x00005000u,SetFprf(0u,ClassifyFloat(
+        std::numeric_limits<float>::infinity())));
+  const auto snan=std::bit_cast<double>(0x7ff0000000000042ULL);
+  Check("sNaN detect",1u,IsSignalingNan(snan)?1u:0u);
+  Check("sNaN quiet payload",0x7ff8000000000042ULL,
+        std::bit_cast<std::uint64_t>(QuietNan(snan)));
+
+  const auto invalidAdd=EvaluatePpcScalarBinary(
+      0u,ScalarFpBinaryOperation::Add,
+      std::numeric_limits<double>::infinity(),
+      -std::numeric_limits<double>::infinity(),false);
+  Check("fadd invalid cause",fpscr::FX|fpscr::VX|fpscr::VXISI,
+        invalidAdd.fpscr&~fpscr::FPRF);
+  Check("fadd canonical NaN",0x7ff8000000000000ULL,
+        std::bit_cast<std::uint64_t>(invalidAdd.value));
+  Check("fadd disabled writes",1u,invalidAdd.write_destination?1u:0u);
+  const auto suppressedAdd=EvaluatePpcScalarBinary(
+      fpscr::VE,ScalarFpBinaryOperation::Add,
+      std::numeric_limits<double>::infinity(),
+      -std::numeric_limits<double>::infinity(),false);
+  Check("fadd enabled suppresses",0u,suppressedAdd.write_destination?1u:0u);
+  Check("fadd enabled summary",fpscr::FX|fpscr::FEX|fpscr::VX|fpscr::VXISI|fpscr::VE,
+        suppressedAdd.fpscr);
+  const auto invalidMultiply=EvaluatePpcScalarBinary(
+      0u,ScalarFpBinaryOperation::Multiply,
+      std::numeric_limits<double>::infinity(),0.0,false);
+  Check("fmul invalid cause",fpscr::VXIMZ,invalidMultiply.exception&fpscr::VX_ANY);
+  const auto invalidZeroDivide=EvaluatePpcScalarBinary(
+      0u,ScalarFpBinaryOperation::Divide,0.0,0.0,false);
+  Check("fdiv zero zero cause",fpscr::VXZDZ,
+        invalidZeroDivide.exception&fpscr::VX_ANY);
+  const auto invalidInfinityDivide=EvaluatePpcScalarBinary(
+      0u,ScalarFpBinaryOperation::Divide,
+      std::numeric_limits<double>::infinity(),
+      std::numeric_limits<double>::infinity(),false);
+  Check("fdiv infinity cause",fpscr::VXIDI,
+        invalidInfinityDivide.exception&fpscr::VX_ANY);
+  const auto divideEnabled=EvaluatePpcScalarBinary(
+      fpscr::ZE,ScalarFpBinaryOperation::Divide,1.0,0.0,false);
+  Check("fdiv zero cause",fpscr::ZX,divideEnabled.exception&fpscr::ZX);
+  Check("fdiv enabled suppresses",0u,divideEnabled.write_destination?1u:0u);
+  const auto snanAdd=EvaluatePpcScalarBinary(
+      0u,ScalarFpBinaryOperation::Add,snan,1.0,false);
+  Check("fadd sNaN cause",fpscr::VXSNAN,snanAdd.exception&fpscr::VX_ANY);
+  Check("fadd sNaN payload",0x7ff8000000000042ULL,
+        std::bit_cast<std::uint64_t>(snanAdd.value));
+  const auto negativeSqrt=EvaluatePpcSqrt(fpscr::VE,-1.0);
+  Check("fsqrt cause",fpscr::VXSQRT,negativeSqrt.exception&fpscr::VX_ANY);
+  Check("fsqrt enabled suppresses",0u,negativeSqrt.write_destination?1u:0u);
+  const auto positiveSingle=EvaluatePpcScalarBinary(
+      0u,ScalarFpBinaryOperation::Add,1.0,2.0,true);
+  Check("single result FPRF",0x00004000u,
+        positiveSingle.fpscr&fpscr::FPRF);
 }
 
 void EstimateSuite() {

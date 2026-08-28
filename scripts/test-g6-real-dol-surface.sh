@@ -17,11 +17,10 @@ actual_dol=$(shasum -a 256 "$dol" | awk '{print $1}')
 }
 
 dotnet_bin=/opt/homebrew/opt/dotnet@8/bin/dotnet
-translator_project=ref/upstream/Wiicompiled/translator/src/Translator.Cli/Translator.Cli.csproj
-translator_dll=ref/upstream/Wiicompiled/translator/src/Translator.Cli/bin/Release/net8.0/Translator.Cli.dll
+translator_dll=build/wiicompiled-fpscr/translator/src/Translator.Cli/bin/Release/net8.0/Translator.Cli.dll
 manifest=tools/g6-real-mkwii.yml
 
-"$dotnet_bin" build "$translator_project" -c Release --no-restore
+./scripts/prepare-patched-translator.sh
 "$dotnet_bin" "$translator_dll" translate-recursive 0x800060A4 \
   --project "$manifest" --threads 8 --prune-stale
 

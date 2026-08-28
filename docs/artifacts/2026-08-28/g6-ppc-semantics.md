@@ -14,16 +14,17 @@ Commands: `./scripts/test-ppc-semantics.sh`; `./scripts/test-g6-real-dol-surface
 
 Observed results:
 
-- arm64 Release: 250,155 checks, state hash `0xb332d343c4e3dc81`;
+- arm64 Release: 250,188 checks, state hash `0x09ff7940379dd04a`;
 - x86_64/Rosetta Release: identical check count and raw-result state hash;
 - arm64 ASan/UBSan: Pass;
 - compiled Dolphin fres/frsqrte oracle: byte-identical to the checked corpus;
-- pinned translator suite: 570 passed, 0 failed, 0 skipped;
-- actual translated DOL microfixture on both architectures: integer `65534`, `fadds` `0x40700000`, `ps_add` `0x4080000040000000`, divide-by-zero `0x7f800000`, final stateful FPSCR `0xa7000003`, checked guest memory Pass;
+- immutable pinned translator suite: 570 passed; KartPad FPSCR-lowering patch suite: 571 passed, 0 failed, 0 skipped;
+- actual translated DOL microfixture on both architectures: integer `65534`, `fadds` `0x40700000`, `ps_add` `0x4080000040000000`, divide-by-zero `0x7f800000`, canonical invalid-add NaN, enabled-VE destination preserved at `42.0`, final stateful FPSCR `0xe7811083`, checked guest memory Pass;
 - supplied user-owned PAL `main.dol`: SHA-256 `80d18895b39c63bd80f457398bfcbb91b7d16ac116a41a88967e954080155b05`, exactly matching WiiCompiled's project pin;
 - real-title translation: 10,836 functions emitted from entry `0x800060A4`, unsupported instructions disabled, with the bundled 29,792-entry map used for boundaries;
 - real-title surface compile: all 10,836 emitted C++ units pass AppleClang strict-FP syntax compilation against KartPad's portable shim;
-- generated semantic DOL SHA-256: `e7c68311a1f7b10712f85cea4b80477e0075f109904de3c2e5c7c1a7f8bdb61a`;
-- exact emitted C++ SHA-256: `f02a3f5e9eea524247a99b8ff969dca3225e125d890c742072703cf2d6eed939`.
+- generated semantic DOL SHA-256: `08a2e99feaf55f8d203d0ce6696c4c496fad7e7743fe92a58f316e46e7cf833f`;
+- exact emitted C++ SHA-256: `0728d661659cf6c728d6625111ae6b08b79abac674fa23fa6f1a7523adc49ac0`;
+- reproducible WiiCompiled FPSCR patch SHA-256: `2667f269e021cb56f38aa9dbaad2a22c174cadbaaff8ecfec628c75ace6c01fc`.
 
-Classification: **In progress**, not Pass. The full emitted helper surface is now owned and compile-proven. Exact FPSCR invalid-subcause/enabled-exception behavior, translated host-callback execution, and NI persistence across scheduler boundaries remain required, so G6 stays the lowest unmet goal.
+Classification: **In progress**, not Pass. Basic scalar invalid-subcause, summary, FPRF, and enabled-write behavior is now translated and runtime-proven. Fused/conversion/estimate/paired exception state, translated host-callback execution, and NI persistence across scheduler boundaries remain required, so G6 stays the lowest unmet goal.
