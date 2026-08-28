@@ -2,14 +2,13 @@
 
 ## Current state
 
-G0 is at its repository-safety/checkpoint gate. The approved PRD and execution loop were read completely, the repository and host were inventoried, no Simulator is booted, and the evidence/safety scaffolding exists. The WBFS is a verified read-only `RMCP01` revision 0 input. WiiCompiled is pinned at the required commit/tree with push disabled.
+G0 and G1 pass. The WBFS is a verified read-only `RMCP01` revision 0 input. WiiCompiled and all required reference repositories are pinned with push disabled, and the full source/disc verifier passes. The pinned translator suite passes 570/570 on arm64. Original editable icon masters and opaque exports exist under `branding/`; target asset-catalog validation remains future work. G2 is active.
 
 ## Next executable step
 
-1. Run `./scripts/check-repo-safety.sh` and `git diff --check`.
-2. Create and push the first reviewed GitHub checkpoint.
-3. Inspect WiiCompiled's required source surface and licenses.
-4. Pin the remaining required reference repositories without exceeding safe host storage.
+1. Run repository safety and diff checks, then push the pin/test/icon checkpoint.
+2. Capture the Dolphin baseline oracle without running it concurrently with KartPad.
+3. Complete the Windows-only portability inventory and start host contract tests.
 
 ## Known constraints
 

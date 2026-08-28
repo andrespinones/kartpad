@@ -15,9 +15,81 @@
       "name": "SunPad",
       "repository": "https://github.com/chrissotraidis/sunpad.git",
       "commit": "e43f0ea6b797e5110787171957c9dc3c6213269c",
+      "tree": "9166b0109bc549c0ba3199ac0c42f5226ff4ed04",
       "path": "ref/sunpad",
+      "license": "GPL-3.0",
       "role": "Direct touch-interface, three-dot-menu, Apple integration, and README reference",
       "pushDisabled": true
+    },
+    {
+      "name": "WheelWizard",
+      "repository": "https://github.com/TeamWheelWizard/WheelWizard.git",
+      "commit": "945ba734c60c492f97e2921f1284dbfd00a79132",
+      "tree": "e51fe2fc48fbf67ccd64c350cc5e9a50f13fcdb2",
+      "path": "ref/upstream/WheelWizard",
+      "license": "GPL-3.0",
+      "role": "Installer, update, and WiiCompiled integration reference",
+      "pushDisabled": true
+    },
+    {
+      "name": "Retro Rewind Pulsar",
+      "repository": "https://github.com/Retro-Rewind-Team/rr-pulsar.git",
+      "commit": "b566a5db70c92321d310059565e41aacadcdf04b",
+      "tree": "d8cdd663ac3d7a3d5b5275bae4d0a5549f9679db",
+      "path": "ref/upstream/rr-pulsar",
+      "license": "GPL-3.0 with documented MIT-origin components",
+      "role": "Retro Rewind product/profile and online client reference",
+      "pushDisabled": true
+    },
+    {
+      "name": "Retro Rewind WFC server",
+      "repository": "https://github.com/Retro-Rewind-Team/wfc-server.git",
+      "commit": "fbd30fa41a35fe8a407e3a49bc83fe4ff91fd35b",
+      "tree": "a36a2ae07e9e86f8f199aa275caede19a118731f",
+      "path": "ref/upstream/wfc-server",
+      "license": "AGPL-3.0",
+      "role": "Authorized local WFC-compatible server reference and future harness base",
+      "pushDisabled": true
+    },
+    {
+      "name": "Retro Rewind WFC patcher",
+      "repository": "https://github.com/Retro-Rewind-Team/wfc-patcher-wii.git",
+      "commit": "7751ec3df82b22bbaf8169e948a6bb5e75dc3aa0",
+      "tree": "198d0df0b3758c4bff14d11d1df003d2156ec3f2",
+      "path": "ref/upstream/wfc-patcher-wii",
+      "license": "Custom BSD-style attribution license or GPL-2.0-or-later election",
+      "role": "Client protocol and security-patch reference; local test keys must never ship",
+      "pushDisabled": true
+    },
+    {
+      "name": "Dolphin",
+      "repository": "https://github.com/dolphin-emu/dolphin.git",
+      "commit": "4f8af23db516d8b6e9cd00e7b261a65b026514a8",
+      "tree": "f44613fc11ba82c609e12b434e0d7bc80c11ac01",
+      "path": "ref/upstream/dolphin",
+      "license": "GPL-2.0-or-later aggregate compatible with GPL-3.0; per-file SPDX applies",
+      "role": "Behavioral oracle and hardware/HLE implementation reference",
+      "pushDisabled": true
+    },
+    {
+      "name": "Aurora",
+      "path": "ref/upstream/Wiicompiled/aurora-main",
+      "vendoredInCommit": "1912292c804ff9b1b79938de89369ec4496f9fff",
+      "license": "MIT",
+      "role": "Pinned GX compatibility layer vendored by WiiCompiled"
+    },
+    {
+      "name": "Dawn prebuilt",
+      "repository": "https://github.com/encounter/dawn-build",
+      "version": "v20260603.191052",
+      "declaredAt": "ref/upstream/Wiicompiled/aurora-main/CMakeLists.txt",
+      "role": "Pinned WebGPU implementation used by vendored Aurora; artifact hashes resolve during the Apple build"
+    },
+    {
+      "name": "Mario Kart Wii function map",
+      "path": "ref/upstream/Wiicompiled/projects/mkwii/MAP.txt",
+      "vendoredInCommit": "1912292c804ff9b1b79938de89369ec4496f9fff",
+      "role": "Bundled crash symbolization/translation map; publishable reuse remains subject to WiiCompiled provenance and package audit"
     }
   ]
 }

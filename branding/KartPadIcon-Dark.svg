@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <radialGradient id="background" cx="50%" cy="44%" r="72%">
+      <stop offset="0" stop-color="#15264a"/>
+      <stop offset="1" stop-color="#010612"/>
+    </radialGradient>
+    <linearGradient id="mark" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#ff315f"/>
+      <stop offset="1" stop-color="#ffc24a"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="1024" fill="url(#background)"/>
+  <circle cx="516" cy="514" r="332" fill="none" stroke="url(#mark)" stroke-width="70"
+          stroke-dasharray="760 54 315 75 490 95" transform="rotate(-18 516 514)"/>
+  <path d="M270 783 C292 620 370 492 494 411 C585 351 678 306 789 266"
+        fill="none" stroke="#07152d" stroke-width="122" stroke-linecap="round"/>
+  <path d="M270 783 C292 620 370 492 494 411 C585 351 678 306 789 266"
+        fill="none" stroke="url(#mark)" stroke-width="88" stroke-linecap="round"/>
+  <path d="M516 554 L738 795" stroke="#07152d" stroke-width="118" stroke-linecap="square"/>
+  <path d="M516 554 L738 795" stroke="url(#mark)" stroke-width="82" stroke-linecap="square"/>
+  <path d="M122 677 H263 M85 731 H232 M140 781 H218" stroke="url(#mark)" stroke-width="18" stroke-linecap="round"/>
+</svg>

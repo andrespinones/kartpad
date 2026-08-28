@@ -19,7 +19,7 @@ ref/sunpad/
 # Local build products and packages
 build-*/
 DerivedData/
-artifacts/
+/artifacts/
 *.app
 *.ipa
 *.dSYM

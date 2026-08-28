@@ -4,15 +4,16 @@ Updated: 2026-08-28
 
 ## Current goal
 
-**G0 — Workspace and evidence system ready** is ready for its checkpoint gate. The PRD and goal loop have been read completely, the initial repository/host inventory is recorded, no Simulator is booted, and the safety/evidence system exists.
+**G2 — Baseline oracle captured** is the lowest unmet goal. G0 and G1 pass. The pinned no-game-data translator suite passes, while the Dolphin gameplay oracle remains to be captured.
 
 ## Goal ledger
 
 | Goal | Status | Evidence / next gate |
 |---|---|---|
-| G0 Workspace/evidence | In progress | Repository safety check and pushed checkpoint remain |
-| G1 Inputs/pins | In progress | Disc and WiiCompiled pin verified; remaining required references/licenses must be pinned |
-| G2–G18 | Not started | Blocked by the preceding evidence gates |
+| G0 Workspace/evidence | Pass | Safety audit passed; checkpoint `2f3bf40` pushed |
+| G1 Inputs/pins | Pass | Full source/disc verifier passed; locked checkpoint pending push |
+| G2 Baseline oracle | In progress | Translator tests 570/570 pass; Dolphin boot/race/save/ghost oracle remains |
+| G3–G18 | Not started | Blocked by the preceding evidence gates |
 
 ## Known-good state
 
@@ -21,12 +22,15 @@ Updated: 2026-08-28
 - Buildable KartPad targets: none yet.
 - Input profile: WBFS containing clean PAL `RMCP01`, revision 0; original is read-only.
 - WiiCompiled baseline: required commit/tree verified in a detached, push-disabled partial clone.
+- Translator baseline: 570 passed, 0 failed, 0 skipped on native arm64 with .NET SDK 8.0.130.
+- Original icon: editable default/dark/tinted SVG masters and opaque exports exist; 1024 px and 16 px visual QA passed. Asset-catalog validation awaits application targets.
 
 ## Active risks and blockers
 
 - Only about 21 GiB of host storage was free at session start. WiiCompiled's source/dependency graph and translated/build products may exceed that; capacity must be managed before large builds.
 - No human-only prerequisite currently blocks G0 or the independent parts of G1.
 - Physical-device, public-service, account, and hands-on acceptance rows remain future external prerequisites and are not claimed.
+- WiiCompiled's bundled `MAP.txt` may be used as an ignored local reference, but independent provenance for republishing it is not established; do not copy it into public KartPad sources/artifacts.
 
 ## UI reference commitment
 

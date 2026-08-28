@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <radialGradient id="background" cx="50%" cy="42%" r="72%">
+      <stop offset="0" stop-color="#102b5b"/>
+      <stop offset="0.58" stop-color="#071a3c"/>
+      <stop offset="1" stop-color="#030d22"/>
+    </radialGradient>
+    <linearGradient id="hot" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#e52255"/>
+      <stop offset="0.48" stop-color="#ff4f52"/>
+      <stop offset="1" stop-color="#ffb52e"/>
+    </linearGradient>
+    <linearGradient id="warm" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffd05a"/>
+      <stop offset="1" stop-color="#ff741c"/>
+    </linearGradient>
+    <filter id="shadow" x="-25%" y="-25%" width="150%" height="160%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="14" result="blur"/>
+      <feOffset dy="18" result="offset"/>
+      <feColorMatrix in="offset" type="matrix" values="0 0 0 0 0.01 0 0 0 0 0.02 0 0 0 0 0.08 0 0 0 .72 0"/>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="1024" height="1024" fill="url(#background)"/>
+
+  <g filter="url(#shadow)">
+    <circle cx="516" cy="514" r="332" fill="none" stroke="url(#hot)" stroke-width="70"
+            stroke-linecap="butt" stroke-dasharray="760 54 315 75 490 95" transform="rotate(-18 516 514)"/>
+    <circle cx="516" cy="514" r="250" fill="none" stroke="url(#warm)" stroke-width="50"
+            stroke-linecap="butt" stroke-dasharray="360 58 255 760" transform="rotate(203 516 514)"/>
+
+    <path d="M 270 783 C 292 620, 370 492, 494 411 C 585 351, 678 306, 789 266"
+          fill="none" stroke="#05152f" stroke-width="122" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M 270 783 C 292 620, 370 492, 494 411 C 585 351, 678 306, 789 266"
+          fill="none" stroke="url(#hot)" stroke-width="88" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M 289 760 C 319 608, 390 510, 512 428 C 598 371, 688 327, 766 296"
+          fill="none" stroke="#ff8a4f" stroke-opacity="0.62" stroke-width="7" stroke-linecap="round"/>
+
+    <path d="M 516 554 L 738 795" fill="none" stroke="#05152f" stroke-width="118" stroke-linecap="square"/>
+    <path d="M 516 554 L 738 795" fill="none" stroke="url(#warm)" stroke-width="82" stroke-linecap="square"/>
+    <path d="M 540 579 L 750 786" fill="none" stroke="#ffd15a" stroke-opacity="0.55" stroke-width="7"/>
+
+    <path d="M 122 677 H 263" stroke="url(#hot)" stroke-width="22" stroke-linecap="round"/>
+    <path d="M 85 731 H 232" stroke="url(#hot)" stroke-width="18" stroke-linecap="round"/>
+    <path d="M 140 781 H 218" stroke="url(#hot)" stroke-width="15" stroke-linecap="round"/>
+  </g>
+</svg>
