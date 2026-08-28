@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "kartpadRevision": "@KARTPAD_GIT_REVISION@",
+  "generator": "@CMAKE_GENERATOR@",
+  "compilerId": "@CMAKE_CXX_COMPILER_ID@",
+  "compilerVersion": "@CMAKE_CXX_COMPILER_VERSION@",
+  "compilerPath": "@CMAKE_CXX_COMPILER@",
+  "systemName": "@CMAKE_SYSTEM_NAME@",
+  "systemProcessor": "@CMAKE_SYSTEM_PROCESSOR@",
+  "deploymentTarget": "@CMAKE_OSX_DEPLOYMENT_TARGET@",
+  "architectures": "@CMAKE_OSX_ARCHITECTURES@",
+  "buildType": "@CMAKE_BUILD_TYPE@",
+  "hostDarwin": "@MKW_HOST_DARWIN@",
+  "hostWindows": "@MKW_HOST_WINDOWS@",
+  "hostArm64": "@MKW_HOST_ARM64@",
+  "hostX86_64": "@MKW_HOST_X86_64@",
+  "rendererMetal": "@MKW_RENDER_METAL@",
+  "rendererD3D12": "@MKW_RENDER_D3D12@",
+  "guestMemoryFlat": "@MKW_GUEST_MEMORY_FLAT@",
+  "guestMemoryChecked": "@MKW_GUEST_MEMORY_CHECKED@"
+}

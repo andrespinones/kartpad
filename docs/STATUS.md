@@ -4,7 +4,7 @@ Updated: 2026-08-28
 
 ## Current goal
 
-**G3 — Host portability layer** is the lowest unmet goal. G0–G2 pass. The next gate is a no-game-data, host-neutral memory/thread/event/file contract with arm64 tests before translated game code is attempted.
+**G4 — Guest memory correctness on macOS** is the lowest unmet goal. G0–G3 pass. The next gate compares a checked oracle with a Darwin guest-memory backend across scalar/endian/alias/guard/fault/lifecycle/stress tests.
 
 ## Goal ledger
 
@@ -13,7 +13,8 @@ Updated: 2026-08-28
 | G0 Workspace/evidence | Pass | Safety audit passed; checkpoint `2f3bf40` pushed |
 | G1 Inputs/pins | Pass | Full source/disc verifier passed; checkpoint `94f6e79` is on GitHub |
 | G2 Baseline oracle | Pass | Translator 570/570; isolated Dolphin boot/license/menu/race/staff-ghost oracle in `docs/artifacts/2026-08-28/dolphin-oracle/` |
-| G3–G18 | Not started | G3 host portability is now active; later goals remain gated in order |
+| G3 Host portability | Pass | Native arm64 host library/contracts pass; Darwin graph contains no Win32/x86-only link token; manifest recorded |
+| G4–G18 | Not started | G4 guest memory is now active; later goals remain gated in order |
 
 ## Known-good state
 
@@ -24,6 +25,7 @@ Updated: 2026-08-28
 - WiiCompiled baseline: required commit/tree verified in a detached, push-disabled partial clone.
 - Translator baseline: 570 passed, 0 failed, 0 skipped on native arm64 with .NET SDK 8.0.130.
 - Gameplay baseline: hashed Dolphin 5.0-17995 arm64/Vulkan/HLE binary boots `RMCP01`, creates an isolated license/save, reaches Luigi Circuit and its official staff ghost, and recovers to 60 FPS/VPS after shader warmup.
+- Portability baseline: `kartpad_host` and its contract suite compile/link/run natively for arm64 macOS; manifest is under `docs/artifacts/2026-08-28/`.
 - Original icon: editable default/dark/tinted SVG masters and opaque exports exist; 1024 px and 16 px visual QA passed. Asset-catalog validation awaits application targets.
 
 ## Active risks and blockers

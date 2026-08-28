@@ -17,6 +17,7 @@ ref/upstream/
 ref/sunpad/
 
 # Local build products and packages
+/build/
 build-*/
 DerivedData/
 /artifacts/

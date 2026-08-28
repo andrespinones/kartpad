@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "kartpadRevision": "5a33d25fd3d53fc96c1661210d1b6b58b5fc9ab7",
+  "generator": "Ninja",
+  "compilerId": "AppleClang",
+  "compilerVersion": "21.0.0.21000101",
+  "compilerPath": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++",
+  "systemName": "Darwin",
+  "systemProcessor": "arm64",
+  "deploymentTarget": "14.0",
+  "architectures": "arm64",
+  "buildType": "RelWithDebInfo",
+  "hostDarwin": "ON",
+  "hostWindows": "OFF",
+  "hostArm64": "ON",
+  "hostX86_64": "OFF",
+  "rendererMetal": "ON",
+  "rendererD3D12": "OFF",
+  "guestMemoryFlat": "OFF",
+  "guestMemoryChecked": "ON"
+}

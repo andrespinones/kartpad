@@ -87,3 +87,17 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - Cleanup: Dolphin completed its save shutdown. The user's global `WiimoteNew.ini`, `GCPadNew.ini`, and `Dolphin.ini` matched their pre-session SHA-256 values exactly; no restore write was necessary.
 - Classification: G2 Pass. The installed binary is labeled a hashed preliminary oracle distinct from the newer pinned Dolphin source checkout.
 - Next lowest unmet goal: G3 host portability contract and no-game-data tests.
+
+## 2026-08-28 — G3 host portability boundary
+
+- Goal: compile a host-neutral utility boundary on arm64 macOS without Win32 libraries or x86-only flags while leaving the pinned Windows baseline untouched.
+- Smallest implementation: explicit CMake capability switches and a `kartpad_host` library for monotonic time/deadline sleep, thread naming, application/cache/temp paths, directory creation, and durable atomic replacement.
+- Separation: Darwin and Windows implementations are separate translation units selected by the target graph. Public headers contain standard C++ types only.
+- Immediate test: `./scripts/test-host-portability.sh` with AppleClang 21.0.0, Ninja, arm64, deployment target 14.0, RelWithDebInfo.
+- Result: Pass — host library and contract executable compiled/linked, CTest 1/1 passed, and the generated Darwin graph contained none of the forbidden Win32 libraries or `-march=x86-64`.
+- Contract assertions: capability selection, monotonic advance, non-early deadline sleep, thread-name round trip, standard macOS path domains, first/replacement atomic writes, and no temporary sibling leakage.
+- Build evidence: `docs/artifacts/2026-08-28/g3-host-portability-build-manifest.json`.
+- Windows baseline: pinned WiiCompiled checkout remained clean at commit `1912292c804ff9b1b79938de89369ec4496f9fff`, tree `34f9deda094915e12f47316059911b28c6812964`; no upstream file was edited.
+- Inventory: reproducible search script and source-complete first-party ownership table recorded in `docs/PORTABILITY.md`.
+- Classification: G3 Pass. A Windows execution result is not claimed; its baseline source graph remains isolated and reproducible at the pin.
+- Next lowest unmet goal: G4 Darwin guest-memory model, beginning with the checked oracle and scalar/endian/alias contract fixtures.
