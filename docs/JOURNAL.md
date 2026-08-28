@@ -69,3 +69,21 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - Result: Pass. All seven Git references matched their locked commit/tree, were clean, and had disabled push URLs. The WBFS remained read-only, retained its expected size/header/revision, and matched the full locked SHA-256.
 - Classification: G1 Pass.
 - Next lowest unmet goal: G2 baseline oracle. Capture a pinned Dolphin boot/title/menu, Time Trial, staff ghost, Grand Prix, audio, and save/relaunch evidence set where automation and available inputs permit.
+
+## 2026-08-28 — G2 isolated Dolphin gameplay oracle
+
+- Goal: establish a reproducible boot/save/menu/race/ghost behavioral oracle without modifying the supplied WBFS or the user's Dolphin profile.
+- Target/profile: Dolphin 5.0-17995, arm64 JIT, Vulkan, HLE, private user directory; clean PAL `RMCP01` revision 0.
+- Oracle executable SHA-256: `818bc7f1d344f4cf0a0ac78ee6c72dbf7800f3ad3ceebdc0c91f72aff7de4fe8`.
+- Instance discipline: one Dolphin game instance and no KartPad instance. No additional Simulator was launched.
+- Input attempt 1: isolated Quartz keyboard configuration. Expected synthesized A input to advance the wrist-strap screen; actual accessibility key events were not visible to Dolphin's polled keyboard backend. Reproduction 2/2. The unchanged approach was stopped.
+- Escalation: inspected the pinned Dolphin input implementation and selected its built-in named-pipe controller backend. The private FIFO and mappings remain ignored under `private/oracle/`.
+- Input result: Pass. Pipe A advanced wrist strap/title and drove the complete first-run license flow, main menu, Single Player, Time Trials, Luigi Circuit, and staff ghost selection deterministically.
+- Save result: Pass. A new `Player` license was created in the isolated user directory. Evidence includes pre-create confirmation and created-license screens.
+- Race/ghost result: Pass for the G2 baseline. The official Nin★sato Luigi Circuit staff ghost (`01:29.670`) was identified; a live challenge and deterministic staff replay rendered successfully. After first-shader warmup, the replay repeatedly reported `60 FPS / 60 VPS / 100%`.
+- Control-semantics caveat: the exploratory live drive did not establish an unambiguous acceleration/brake mapping, so no completed human-controlled lap or steering-feel claim is made. The deterministic staff replay is the accepted complete-course behavioral reference; a smaller fixture remains required for KartPad input semantics.
+- Audio caveat: subjective audio quality was not assessed and remains hands-on.
+- Evidence: `docs/artifacts/2026-08-28/dolphin-oracle/README.md` and indexed screenshots in the same directory.
+- Cleanup: Dolphin completed its save shutdown. The user's global `WiimoteNew.ini`, `GCPadNew.ini`, and `Dolphin.ini` matched their pre-session SHA-256 values exactly; no restore write was necessary.
+- Classification: G2 Pass. The installed binary is labeled a hashed preliminary oracle distinct from the newer pinned Dolphin source checkout.
+- Next lowest unmet goal: G3 host portability contract and no-game-data tests.
