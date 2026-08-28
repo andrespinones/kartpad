@@ -8,7 +8,7 @@ add_executable(kartpad_semantics_contract runtime/tests/semantics_contract.cpp)
 target_include_directories(kartpad_semantics_contract PRIVATE runtime/include)
 target_compile_features(kartpad_semantics_contract PRIVATE cxx_std_20)
 target_compile_options(kartpad_semantics_contract PRIVATE
-  -Wall -Wextra -Wpedantic -Werror -fno-fast-math -ffp-contract=off
+  -Wall -Wextra -Wpedantic -Werror -fno-fast-math -ffp-contract=off -ffp-model=strict
 )
 add_test(NAME kartpad_semantics_contract COMMAND kartpad_semantics_contract)
 
@@ -109,7 +109,7 @@ target_include_directories(kartpad_translated_semantics_fixture PRIVATE
 target_link_libraries(kartpad_translated_semantics_fixture PRIVATE kartpad_memory)
 target_compile_features(kartpad_translated_semantics_fixture PRIVATE cxx_std_20)
 target_compile_options(kartpad_translated_semantics_fixture PRIVATE
-  -Wall -Wextra -Wpedantic -Werror -fno-fast-math -ffp-contract=off)
+  -Wall -Wextra -Wpedantic -Werror -fno-fast-math -ffp-contract=off -ffp-model=strict)
 add_test(NAME kartpad_translated_semantics_fixture COMMAND kartpad_translated_semantics_fixture)
 
 add_library(kartpad_scheduler STATIC runtime/src/scheduler/guest_scheduler.cpp)

@@ -62,6 +62,6 @@ With Metal API Validation enabled, the Apple M2 device/queue completed an offscr
 
 ## G6 semantic portability — in progress
 
-The locked upstream ISA package assumes SSE intrinsics, MXCSR, `__regcall`, and Microsoft force-inline syntax. KartPad now has a first standard-C++ semantic layer and a dual-architecture differential harness. Release arm64 and x86_64/Rosetta produce the same 250,080-check raw-result hash, pinned Dolphin's estimate implementation is compiled as the oracle, and an actual translator-emitted integer/`fadds` fixture executes through checked memory on both architectures. The full upstream helper surface is not ported yet, so G6 remains open; see `docs/SEMANTICS.md`.
+The locked upstream ISA package assumes SSE intrinsics, MXCSR, `__regcall`, and Microsoft force-inline syntax. KartPad now has a standard-C++ semantic layer and a dual-architecture differential harness. Release arm64 and x86_64/Rosetta produce the same 250,155-check raw-result hash, pinned Dolphin's estimate implementation is compiled as the oracle, and an actual translator-emitted integer/scalar/paired/GQR/FPSCR fixture executes through checked memory on both architectures. Stateful edge helpers remain open, so G6 is not yet accepted; see `docs/SEMANTICS.md`.
 
 The provisional G7 app proves AppKit/CAMetalLayer presentation from a translated checked-memory command. It intentionally does not claim Dawn, Aurora, GX, or game-frame acceptance.

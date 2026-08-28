@@ -161,3 +161,11 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - A pinned-translator synthetic command function drove a real AppKit/CAMetalLayer drawable with Metal validation and every-pixel comparison. The output is `docs/artifacts/2026-08-28/g7-translated-frame.png`.
 - First build failure: strict CoreGraphics enum/integer bitwise mismatch. Explicit integer conversions fixed it; the changed build and UI run passed.
 - Classification: preparatory only. No Dawn/Aurora, GX geometry, or game frame is claimed, and G7 remains gated behind G6.
+
+### G6 paired/GQR/FPSCR expansion
+
+- Added the complete portable paired-single operation family, all five GQR data encodings across paired and W=1 forms, representative wrapped scales, endian/NaN/subnormal rules, and broader randomized architecture differential coverage.
+- Expanded the generated DOL itself: pinned translator output now performs real `psq_l`, `ps_add`, `psq_st`, and `fdivs` operations in addition to integer/`fadds`, then routes results through checked guest memory.
+- First FPSCR run produced the correct infinity but left FPSCR zero. Root cause: ordinary optimized FP mode did not guarantee host exception observation around the translated expression. Semantic targets now use strict FP mode in addition to no-fast-math/no-contraction; the changed arm64 and x86_64 runs both produce FPSCR `0x84000000` (FX|ZX).
+- Result: Pass for the expanded subset — 250,155 checks, identical state hash `0xb332d343c4e3dc81`, translated paired/GQR/flag fixture identical on arm64 and x86_64, sanitizers green, translator 570/570.
+- Classification remains In progress pending the stateful helper inventory in `docs/SEMANTICS.md`.

@@ -97,12 +97,43 @@ void PairedAndQuantizedSuite() {
   Check("ps mul",0x4040000000000000ULL,PairBits(PsMul(a,b)));
   Check("ps div",0x3f40000000000000ULL,PairBits(PsDiv(a,b)));
   Check("ps madd",0x40a0000041800000ULL,PairBits(PsMadd(a,b,PairedSingle{2.0f,16.0f})));
+  Check("ps msub",0x3f800000c1800000ULL,PairBits(PsMsub(a,b,PairedSingle{2.0f,16.0f})));
+  Check("ps madds0",0x40a0000041800000ULL,PairBits(PsMadds0(a,b,PairedSingle{2.0f,16.0f})));
+  Check("ps madds1",0xc080000041800000ULL,PairBits(PsMadds1(a,b,PairedSingle{2.0f,16.0f})));
+  Check("ps muls0",0x4040000080000000ULL,PairBits(PsMuls0(a,b)));
+  Check("ps muls1",0xc0c0000000000000ULL,PairBits(PsMuls1(a,b)));
+  Check("ps neg",0xbfc0000000000000ULL,PairBits(PsNeg(a)));
+  Check("ps abs",0x3fc0000000000000ULL,PairBits(PsAbs(a)));
+  Check("ps nabs",0xbfc0000080000000ULL,PairBits(PsNabs(a)));
+  Check("ps sum0",0xc020000041800000ULL,PairBits(PsSum0(a,b,PairedSingle{2.0f,16.0f})));
+  Check("ps sum1",0x40000000c0200000ULL,PairBits(PsSum1(a,b,PairedSingle{2.0f,16.0f})));
+  Check("ps merge00",0x3fc0000040000000ULL,PairBits(PsMerge00(a,b)));
   Check("ps merge01",0x3fc00000c0800000ULL,PairBits(PsMerge01(a,b)));
+  Check("ps merge10",0x8000000040000000ULL,PairBits(PsMerge10(a,b)));
+  Check("ps merge11",0x80000000c0800000ULL,PairBits(PsMerge11(a,b)));
   Check("ps select",0x3fc00000c0800000ULL,PairBits(PsSelect(a,PairedSingle{0.0f,-1.0f},b)));
   Check("dequant signed16",0xc2480000u,std::bit_cast<std::uint32_t>(Dequantize(-100,1)));
   Check("dequant wrapped scale",0x43000000u,std::bit_cast<std::uint32_t>(Dequantize(1,57)));
   Check("quant signed8 clamp",0x7fu,static_cast<std::uint8_t>(Quantize<std::int8_t>(100.0f,1)));
   Check("quant unsigned16",0x180u,Quantize<std::uint16_t>(1.5f,8));
+  Check("ps compare less",8u,ComparePairedLane(-1.0f,1.0f));
+  Check("ps compare unordered",1u,ComparePairedLane(std::numeric_limits<float>::quiet_NaN(),1.0f));
+  std::array<std::uint8_t,8> quantized{};
+  const std::array<QuantizedType,5> types={QuantizedType::Float,QuantizedType::Unsigned8,
+    QuantizedType::Unsigned16,QuantizedType::Signed8,QuantizedType::Signed16};
+  for(const auto type:types) for(const std::uint32_t scale:{0u,1u,31u,32u,57u,63u}) {
+    quantized.fill(0xccu);
+    const PairedSingle source=type==QuantizedType::Unsigned8||type==QuantizedType::Unsigned16
+      ? PairedSingle{1.0f,2.0f}:PairedSingle{-1.0f,2.0f};
+    StoreQuantizedPair(quantized.data(),{type,scale},false,source);
+    const auto loaded=LoadQuantizedPair(quantized.data(),{type,scale},false);
+    if(type==QuantizedType::Float) Check("GQR float roundtrip",PairBits(source),PairBits(loaded));
+    else { Mix(PairBits(loaded)); ++g_checks; }
+    quantized.fill(0xccu);
+    StoreQuantizedPair(quantized.data(),{type,scale},true,source);
+    const auto single=LoadQuantizedPair(quantized.data(),{type,scale},true);
+    Check("GQR W=1 second lane",0x3f800000u,std::bit_cast<std::uint32_t>(single.ps1));
+  }
 
   // Differential/property corpus. Inputs stay finite so NaN payload selection
   // does not obscure a genuine host-architecture mismatch.
@@ -118,6 +149,13 @@ void PairedAndQuantizedSuite() {
     Mix(PairBits(PsAdd(x,y)));
     Mix(PairBits(PsMul(x,y)));
     Mix(PairBits(PsMadd(x,y,z)));
+    Mix(PairBits(PsMsub(x,y,z)));
+    Mix(PairBits(PsNmadd(x,y,z)));
+    Mix(PairBits(PsNmsub(x,y,z)));
+    Mix(PairBits(PsMadds0(x,y,z)));
+    Mix(PairBits(PsMadds1(x,y,z)));
+    Mix(PairBits(PsMuls0(x,y)));
+    Mix(PairBits(PsMuls1(x,y)));
     ++g_checks;
   }
 }

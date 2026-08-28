@@ -16,7 +16,7 @@ Updated: 2026-08-28
 | G3 Host portability | Pass | Native arm64 host library/contracts pass; Darwin graph contains no Win32/x86-only link token; manifest recorded |
 | G4 Guest memory | Pass | Checked Darwin path passes conformance, lifecycle, randomized stress, microprogram, ASan/UBSan; safe Mach VM feasibility probe passes |
 | G5 Guest scheduler | Pass | Explicit state machine passes lifecycle/priority/VI/register tests and two deterministic million-operation runs under Release and ASan/UBSan |
-| G6 PPC/AArch64 semantics | In progress | 250,080-check arm64/x86 differential hashes match; Dolphin estimates, sanitizers, translator 570/570, and translated scalar fixture pass; full helper surface remains |
+| G6 PPC/AArch64 semantics | In progress | 250,155-check arm64/x86 differential hashes match; Dolphin estimates, sanitizers, translator 570/570, and translated scalar/paired/GQR/FPSCR fixture pass; remaining stateful helper surface is open |
 | G7–G18 | Gated | Provisional direct-Metal translated command frame exists, but it is not Dawn/Aurora, GX, or a game frame |
 
 ## Known-good state
@@ -32,7 +32,7 @@ Updated: 2026-08-28
 - Memory baseline: checked/table guest memory is the accepted correctness path; evidence is `docs/artifacts/2026-08-28/g4-guest-memory.md`.
 - Scheduler baseline: explicit cooperative state machine, deterministic hash `0x7287563387fb1677`; evidence is `docs/artifacts/2026-08-28/g5-guest-scheduler.md`.
 - Native subsystem preparation: validated Metal/CoreAudio/GameController/storage/network smoke; useful for later gates but not a substitute for G6 semantics.
-- Semantic subset: arm64/x86_64 state hash `0xca5a9534a8da687b`; evidence is `docs/artifacts/2026-08-28/g6-ppc-semantics.md` and `docs/SEMANTICS.md`.
+- Semantic subset: arm64/x86_64 state hash `0xb332d343c4e3dc81`; evidence is `docs/artifacts/2026-08-28/g6-ppc-semantics.md` and `docs/SEMANTICS.md`.
 - Original icon: editable default/dark/tinted SVG masters and opaque exports exist; 1024 px and 16 px visual QA passed. Asset-catalog validation awaits application targets.
 
 ## Active risks and blockers

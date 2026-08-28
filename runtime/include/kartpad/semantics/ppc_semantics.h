@@ -287,13 +287,83 @@ inline PairedSingle PsMadd(PairedSingle a, PairedSingle c,
                            PairedSingle b) noexcept {
   return {std::fma(a.ps0, c.ps0, b.ps0), std::fma(a.ps1, c.ps1, b.ps1)};
 }
+inline PairedSingle PsMsub(PairedSingle a, PairedSingle c,
+                           PairedSingle b) noexcept {
+  return {std::fma(a.ps0, c.ps0, -b.ps0), std::fma(a.ps1, c.ps1, -b.ps1)};
+}
+inline PairedSingle PsNmadd(PairedSingle a, PairedSingle c,
+                            PairedSingle b) noexcept {
+  const auto value=PsMadd(a,c,b);
+  return {std::isnan(value.ps0)?value.ps0:-value.ps0,
+          std::isnan(value.ps1)?value.ps1:-value.ps1};
+}
+inline PairedSingle PsNmsub(PairedSingle a, PairedSingle c,
+                            PairedSingle b) noexcept {
+  const auto value=PsMsub(a,c,b);
+  return {std::isnan(value.ps0)?value.ps0:-value.ps0,
+          std::isnan(value.ps1)?value.ps1:-value.ps1};
+}
+inline PairedSingle PsMadds0(PairedSingle a, PairedSingle c,
+                             PairedSingle b) noexcept {
+  return {std::fma(a.ps0,c.ps0,b.ps0),std::fma(a.ps1,c.ps0,b.ps1)};
+}
+inline PairedSingle PsMadds1(PairedSingle a, PairedSingle c,
+                             PairedSingle b) noexcept {
+  return {std::fma(a.ps0,c.ps1,b.ps0),std::fma(a.ps1,c.ps1,b.ps1)};
+}
+inline PairedSingle PsMuls0(PairedSingle a, PairedSingle c) noexcept {
+  return {a.ps0*c.ps0,a.ps1*c.ps0};
+}
+inline PairedSingle PsMuls1(PairedSingle a, PairedSingle c) noexcept {
+  return {a.ps0*c.ps1,a.ps1*c.ps1};
+}
+inline PairedSingle PsNeg(PairedSingle value) noexcept {
+  return {-value.ps0,-value.ps1};
+}
+inline PairedSingle PsAbs(PairedSingle value) noexcept {
+  return {std::abs(value.ps0),std::abs(value.ps1)};
+}
+inline PairedSingle PsNabs(PairedSingle value) noexcept {
+  return {-std::abs(value.ps0),-std::abs(value.ps1)};
+}
+inline PairedSingle PsSum0(PairedSingle a,PairedSingle b,
+                           PairedSingle c) noexcept {
+  return {static_cast<float>(static_cast<double>(a.ps0)+b.ps1),c.ps1};
+}
+inline PairedSingle PsSum1(PairedSingle a,PairedSingle b,
+                           PairedSingle c) noexcept {
+  return {c.ps0,static_cast<float>(static_cast<double>(a.ps0)+b.ps1)};
+}
+inline PairedSingle PsMerge00(PairedSingle a,PairedSingle b) noexcept {
+  return {a.ps0,b.ps0};
+}
 inline PairedSingle PsMerge01(PairedSingle a, PairedSingle b) noexcept {
   return {a.ps0, b.ps1};
+}
+inline PairedSingle PsMerge10(PairedSingle a,PairedSingle b) noexcept {
+  return {a.ps1,b.ps0};
+}
+inline PairedSingle PsMerge11(PairedSingle a,PairedSingle b) noexcept {
+  return {a.ps1,b.ps1};
 }
 inline PairedSingle PsSelect(PairedSingle positive, PairedSingle control,
                              PairedSingle negative) noexcept {
   return {control.ps0 >= -0.0f ? positive.ps0 : negative.ps0,
           control.ps1 >= -0.0f ? positive.ps1 : negative.ps1};
+}
+
+inline PairedSingle PsReciprocal(PairedSingle value) noexcept {
+  return {static_cast<float>(ApproximateReciprocal(value.ps0)),
+          static_cast<float>(ApproximateReciprocal(value.ps1))};
+}
+inline PairedSingle PsReciprocalSquareRoot(PairedSingle value) noexcept {
+  return {static_cast<float>(ApproximateReciprocalSquareRoot(value.ps0)),
+          static_cast<float>(ApproximateReciprocalSquareRoot(value.ps1))};
+}
+
+inline std::uint32_t ComparePairedLane(float lhs,float rhs) noexcept {
+  if(std::isnan(lhs)||std::isnan(rhs)) return 1u;
+  return (lhs<rhs?8u:0u)|(lhs>rhs?4u:0u)|(lhs==rhs?2u:0u);
 }
 
 enum class QuantizedType : std::uint32_t {
@@ -314,6 +384,77 @@ template <typename T> inline T Quantize(float value, std::uint32_t scale) noexce
   const float low = static_cast<float>(std::numeric_limits<T>::min());
   const float high = static_cast<float>(std::numeric_limits<T>::max());
   return static_cast<T>(std::fmin(std::fmax(scaled, low), high));
+}
+
+inline std::uint32_t QuietFloatBits(std::uint32_t value) noexcept {
+  return (value&0x7fffffffu)>0x7f800000u ? value|0x00400000u:value;
+}
+inline std::uint32_t StoreFloatBits(std::uint32_t value) noexcept {
+  const auto magnitude=value&0x7fffffffu;
+  if(magnitude<0x00800000u) return value&0x80000000u;
+  return QuietFloatBits(value);
+}
+
+inline std::uint32_t ReadBigEndian32(const std::uint8_t* source) noexcept {
+  return (static_cast<std::uint32_t>(source[0])<<24)|
+         (static_cast<std::uint32_t>(source[1])<<16)|
+         (static_cast<std::uint32_t>(source[2])<<8)|source[3];
+}
+inline std::uint16_t ReadBigEndian16(const std::uint8_t* source) noexcept {
+  return static_cast<std::uint16_t>((source[0]<<8)|source[1]);
+}
+inline void WriteBigEndian16(std::uint8_t* destination,std::uint16_t value) noexcept {
+  destination[0]=static_cast<std::uint8_t>(value>>8); destination[1]=static_cast<std::uint8_t>(value);
+}
+inline void WriteBigEndian32(std::uint8_t* destination,std::uint32_t value) noexcept {
+  destination[0]=static_cast<std::uint8_t>(value>>24); destination[1]=static_cast<std::uint8_t>(value>>16);
+  destination[2]=static_cast<std::uint8_t>(value>>8); destination[3]=static_cast<std::uint8_t>(value);
+}
+
+inline PairedSingle LoadQuantizedPair(const std::uint8_t* source,Gqr gqr,
+                                      bool one) noexcept {
+  switch(gqr.type) {
+    case QuantizedType::Float: {
+      const float first=std::bit_cast<float>(QuietFloatBits(ReadBigEndian32(source)));
+      const float second=one?1.0f:std::bit_cast<float>(QuietFloatBits(ReadBigEndian32(source+4)));
+      return {first,second};
+    }
+    case QuantizedType::Unsigned8:
+      return {Dequantize(source[0],gqr.scale),one?1.0f:Dequantize(source[1],gqr.scale)};
+    case QuantizedType::Unsigned16:
+      return {Dequantize(ReadBigEndian16(source),gqr.scale),one?1.0f:Dequantize(ReadBigEndian16(source+2),gqr.scale)};
+    case QuantizedType::Signed8:
+      return {Dequantize(static_cast<std::int8_t>(source[0]),gqr.scale),one?1.0f:Dequantize(static_cast<std::int8_t>(source[1]),gqr.scale)};
+    case QuantizedType::Signed16:
+      return {Dequantize(static_cast<std::int16_t>(ReadBigEndian16(source)),gqr.scale),one?1.0f:Dequantize(static_cast<std::int16_t>(ReadBigEndian16(source+2)),gqr.scale)};
+  }
+  return {};
+}
+
+inline void StoreQuantizedPair(std::uint8_t* destination,Gqr gqr,bool one,
+                               PairedSingle value) noexcept {
+  switch(gqr.type) {
+    case QuantizedType::Float:
+      WriteBigEndian32(destination,StoreFloatBits(std::bit_cast<std::uint32_t>(value.ps0)));
+      if(!one) WriteBigEndian32(destination+4,StoreFloatBits(std::bit_cast<std::uint32_t>(value.ps1)));
+      break;
+    case QuantizedType::Unsigned8:
+      destination[0]=Quantize<std::uint8_t>(value.ps0,gqr.scale);
+      if(!one) destination[1]=Quantize<std::uint8_t>(value.ps1,gqr.scale);
+      break;
+    case QuantizedType::Unsigned16:
+      WriteBigEndian16(destination,Quantize<std::uint16_t>(value.ps0,gqr.scale));
+      if(!one) WriteBigEndian16(destination+2,Quantize<std::uint16_t>(value.ps1,gqr.scale));
+      break;
+    case QuantizedType::Signed8:
+      destination[0]=static_cast<std::uint8_t>(Quantize<std::int8_t>(value.ps0,gqr.scale));
+      if(!one) destination[1]=static_cast<std::uint8_t>(Quantize<std::int8_t>(value.ps1,gqr.scale));
+      break;
+    case QuantizedType::Signed16:
+      WriteBigEndian16(destination,static_cast<std::uint16_t>(Quantize<std::int16_t>(value.ps0,gqr.scale)));
+      if(!one) WriteBigEndian16(destination+2,static_cast<std::uint16_t>(Quantize<std::int16_t>(value.ps1,gqr.scale)));
+      break;
+  }
 }
 
 }  // namespace kartpad::semantics
