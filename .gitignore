@@ -1,0 +1,37 @@
+# macOS metadata
+.DS_Store
+
+# User-owned and private game data
+ref/*.iso
+ref/*.gcm
+ref/*.gcz
+ref/*.ciso
+ref/*.wbfs
+ref/*.wia
+ref/*.rvz
+private/
+generated/
+
+# Reference checkouts are pinned locally and described by lock files.
+ref/upstream/
+ref/sunpad/
+
+# Local build products and packages
+build-*/
+DerivedData/
+artifacts/
+*.app
+*.ipa
+*.dSYM
+
+# Signing material, logs, saves, and captures
+*.mobileprovision
+*.p12
+*.key
+*.pem
+*.log
+*.sav
+*.gci
+*.dtm
+*.pcap
+*.pcapng

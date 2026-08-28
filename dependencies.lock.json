@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-28",
+  "dependencies": [
+    {
+      "name": "WiiCompiled",
+      "repository": "https://github.com/patchzyy/Wiicompiled.git",
+      "commit": "1912292c804ff9b1b79938de89369ec4496f9fff",
+      "tree": "34f9deda094915e12f47316059911b28c6812964",
+      "path": "ref/upstream/Wiicompiled",
+      "role": "Primary static translator and runtime baseline",
+      "pushDisabled": true
+    },
+    {
+      "name": "SunPad",
+      "repository": "https://github.com/chrissotraidis/sunpad.git",
+      "commit": "e43f0ea6b797e5110787171957c9dc3c6213269c",
+      "path": "ref/sunpad",
+      "role": "Direct touch-interface, three-dot-menu, Apple integration, and README reference",
+      "pushDisabled": true
+    }
+  ]
+}
