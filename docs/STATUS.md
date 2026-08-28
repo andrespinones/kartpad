@@ -4,7 +4,7 @@ Updated: 2026-08-28
 
 ## Current goal
 
-**G7 — First translated rendered frame** is the lowest unmet goal. G0–G6 pass. The next gate is a real app/window surface and translated fixture through the renderer bridge, compared against a reference rather than an offscreen host-only clear.
+**G6 — PPC/AArch64 semantics are exact** is the lowest unmet goal. G0–G5 pass. A first portable differential subset and translated scalar microfixture are green, but the complete translator-emitted helper surface is not yet ported or proven.
 
 ## Goal ledger
 
@@ -16,14 +16,14 @@ Updated: 2026-08-28
 | G3 Host portability | Pass | Native arm64 host library/contracts pass; Darwin graph contains no Win32/x86-only link token; manifest recorded |
 | G4 Guest memory | Pass | Checked Darwin path passes conformance, lifecycle, randomized stress, microprogram, ASan/UBSan; safe Mach VM feasibility probe passes |
 | G5 Guest scheduler | Pass | Explicit state machine passes lifecycle/priority/VI/register tests and two deterministic million-operation runs under Release and ASan/UBSan |
-| G6 Native subsystems | Pass | Metal validation clear/readback, CoreAudio init, GameController discovery, atomic storage, DNS and loopback TCP pass |
-| G7–G18 | Not started | G7 first translated rendered frame is now active; later goals remain gated in order |
+| G6 PPC/AArch64 semantics | In progress | 250,080-check arm64/x86 differential hashes match; Dolphin estimates, sanitizers, translator 570/570, and translated scalar fixture pass; full helper surface remains |
+| G7–G18 | Gated | Provisional direct-Metal translated command frame exists, but it is not Dawn/Aurora, GX, or a game frame |
 
 ## Known-good state
 
-- Repository checkpoint: `94f6e79` (`origin/main`), pins/evidence/branding baseline.
+- Repository checkpoint: `3fc612b` (`origin/main`), native subsystem smoke baseline.
 - Simulator state: the user's existing Simulator application is running; KartPad has not booted an additional simulator or app instance.
-- Buildable KartPad targets: none yet.
+- Buildable KartPad targets: host, memory, scheduler, semantic contracts, native subsystem smoke, translated semantic fixture, and provisional translated-frame app.
 - Input profile: WBFS containing clean PAL `RMCP01`, revision 0; original is read-only.
 - WiiCompiled baseline: required commit/tree verified in a detached, push-disabled partial clone.
 - Translator baseline: 570 passed, 0 failed, 0 skipped on native arm64 with .NET SDK 8.0.130.
@@ -31,7 +31,8 @@ Updated: 2026-08-28
 - Portability baseline: `kartpad_host` and its contract suite compile/link/run natively for arm64 macOS; manifest is under `docs/artifacts/2026-08-28/`.
 - Memory baseline: checked/table guest memory is the accepted correctness path; evidence is `docs/artifacts/2026-08-28/g4-guest-memory.md`.
 - Scheduler baseline: explicit cooperative state machine, deterministic hash `0x7287563387fb1677`; evidence is `docs/artifacts/2026-08-28/g5-guest-scheduler.md`.
-- Native subsystem baseline: validated Metal/CoreAudio/GameController/storage/network smoke; evidence is `docs/artifacts/2026-08-28/g6-native-subsystems.md`.
+- Native subsystem preparation: validated Metal/CoreAudio/GameController/storage/network smoke; useful for later gates but not a substitute for G6 semantics.
+- Semantic subset: arm64/x86_64 state hash `0xca5a9534a8da687b`; evidence is `docs/artifacts/2026-08-28/g6-ppc-semantics.md` and `docs/SEMANTICS.md`.
 - Original icon: editable default/dark/tinted SVG masters and opaque exports exist; 1024 px and 16 px visual QA passed. Asset-catalog validation awaits application targets.
 
 ## Active risks and blockers
@@ -42,6 +43,7 @@ Updated: 2026-08-28
 - WiiCompiled's bundled `MAP.txt` may be used as an ignored local reference, but independent provenance for republishing it is not established; do not copy it into public KartPad sources/artifacts.
 - Dolphin pipe input is accepted for deterministic menus. Live race acceleration/brake semantics remain deliberately unclaimed until a narrow controller fixture distinguishes the observed behavior.
 - G2 audio evidence is limited to emulator execution; subjective audio quality is a future hands-on row and is not claimed.
+- Upstream PPC helpers are x86/SSE/MXCSR-shaped. KartPad's portable layer currently proves only the inventoried subset, so G6 remains open.
 
 ## UI reference commitment
 

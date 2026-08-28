@@ -1,0 +1,23 @@
+schema_version: 1
+workspace_root: ../..
+project:
+  id: kartpad-g6-semantics
+  display_name: KartPad G6 Translated Semantics Fixture
+memory:
+  base: 0x80000000
+  size: 0x01800000
+  sda_base: 0x00000000
+  sda2_base: 0x00000000
+inputs:
+  dol:
+    path: generated/g6/semantic-fixture.dol
+translation:
+  allow_unsupported_instructions: false
+runtime:
+  native_abi_directories: []
+output:
+  root: generated/g6/translation
+  functions: functions
+  runtime_config: RuntimeConfig.h
+  data_initializer: data_sections_init.cpp
+  base_manifest: base/base_manifest.json

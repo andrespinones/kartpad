@@ -143,3 +143,21 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - Classification: G6 Pass for native synthetic subsystem initialization. Dawn/Aurora surface integration, translated rendering, streaming audio, physical input, TLS, and external services remain gated later.
 - Evidence: `docs/artifacts/2026-08-28/g6-native-subsystems.md`.
 - Next lowest unmet goal: G7 first translated rendered frame through the real application surface/renderer bridge.
+
+## 2026-08-28 — G6 gate correction and semantic differential
+
+- Review correction: the native Apple subsystem smoke was useful preparation but had been mislabeled as G6. `GOAL-LOOP.md` defines G6 as exact PPC/AArch64 semantics. The error was caught before the next checkpoint; G6 was reopened and remains the lowest unmet goal.
+- Smallest implementation: a standard-C++ semantics layer, a curated/seeded no-game-data harness built for arm64 and x86_64/Rosetta, and a real pinned-translator DOL microfixture executing integer add plus `fadds` through checked guest memory.
+- Oracle: pinned Dolphin `FloatUtils.cpp` is compiled directly and its fres/frsqrte raw bits are compared byte-for-byte with the checked corpus.
+- Result: arm64 and x86_64 each completed 250,080 checks with identical state hash `0xca5a9534a8da687b`; arm64 ASan/UBSan passed; translator suite remained 570/570; translated fixture matched on both architectures.
+- Failure 1: upward float-to-word vector returned 2 instead of 3. First failing subsystem: guest rounding-mode selection. The optimized ambient-fenv approach was replaced with explicit guest-mode `trunc`/`ceil`/`floor`/nearest selection; changed run passed.
+- Failure 2: initial `Force25Bit`, estimate, and wrapped-scale expected values disagreed. The implementations were not changed. Independent source inspection and compiled pinned-Dolphin output showed the hand-entered expectations were wrong; corrected corpora passed.
+- Failure 3: sanitizer run exited because macOS ASan reports leak detection unsupported. The changed run disabled only unsupported leak detection; ASan/UBSan passed.
+- Classification: In progress. The tested subset is green, but the complete translator-emitted helper surface is not yet portable/proven. Exact inventory and remaining work are in `docs/SEMANTICS.md`.
+- Next step: port and test the remaining ISA/helper surface, with translated paired-single/GQR/FPSCR/ABI fixtures.
+
+### Provisional G7 experiment (not gate acceptance)
+
+- A pinned-translator synthetic command function drove a real AppKit/CAMetalLayer drawable with Metal validation and every-pixel comparison. The output is `docs/artifacts/2026-08-28/g7-translated-frame.png`.
+- First build failure: strict CoreGraphics enum/integer bitwise mismatch. Explicit integer conversions fixed it; the changed build and UI run passed.
+- Classification: preparatory only. No Dawn/Aurora, GX geometry, or game frame is claimed, and G7 remains gated behind G6.

@@ -59,3 +59,9 @@ Release and ASan/UBSan suites cover start/yield/sleep/wake/queue/join/cancel/exi
 ## G6 Apple subsystem smoke
 
 With Metal API Validation enabled, the Apple M2 device/queue completed an offscreen RGBA8 clear and every pixel read back correctly. Apple's default output Audio Unit initialized and reported a valid 48 kHz/eight-channel stream, GameController discovery initialized with a valid zero-device list, durable storage passed, and BSD DNS/loopback TCP exchanged a verified payload. These are native host-adapter smokes only; Dawn/Aurora presentation and translated renderer integration remain G7.
+
+## G6 semantic portability — in progress
+
+The locked upstream ISA package assumes SSE intrinsics, MXCSR, `__regcall`, and Microsoft force-inline syntax. KartPad now has a first standard-C++ semantic layer and a dual-architecture differential harness. Release arm64 and x86_64/Rosetta produce the same 250,080-check raw-result hash, pinned Dolphin's estimate implementation is compiled as the oracle, and an actual translator-emitted integer/`fadds` fixture executes through checked memory on both architectures. The full upstream helper surface is not ported yet, so G6 remains open; see `docs/SEMANTICS.md`.
+
+The provisional G7 app proves AppKit/CAMetalLayer presentation from a translated checked-memory command. It intentionally does not claim Dawn, Aurora, GX, or game-frame acceptance.

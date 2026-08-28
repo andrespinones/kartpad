@@ -19,6 +19,8 @@ ref/sunpad/
 # Local build products and packages
 /build/
 build-*/
+**/bin/
+**/obj/
 DerivedData/
 /artifacts/
 *.app

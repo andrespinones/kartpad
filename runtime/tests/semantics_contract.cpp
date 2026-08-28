@@ -1,0 +1,139 @@
+#include "kartpad/semantics/ppc_semantics.h"
+
+#include <array>
+#include <bit>
+#include <cfenv>
+#include <cmath>
+#include <cstdint>
+#include <cstdlib>
+#include <iomanip>
+#include <iostream>
+#include <limits>
+#include <random>
+#include <string_view>
+
+#pragma STDC FENV_ACCESS ON
+
+using namespace kartpad::semantics;
+
+namespace {
+std::uint64_t g_hash = 1469598103934665603ULL;
+std::uint64_t g_checks = 0;
+void Mix(std::uint64_t value) { for (unsigned s=0;s<64;s+=8) { g_hash^=(value>>s)&0xffu; g_hash*=1099511628211ULL; } }
+[[noreturn]] void Fail(std::string_view name,std::uint64_t expected,std::uint64_t actual) { std::cerr<<"FAIL "<<name<<" expected=0x"<<std::hex<<expected<<" actual=0x"<<actual<<'\n'; std::exit(1); }
+void Check(std::string_view name,std::uint64_t expected,std::uint64_t actual) { ++g_checks; Mix(actual); if(expected!=actual) Fail(name,expected,actual); }
+
+std::uint32_t ReferenceRotate(std::uint32_t value,std::uint32_t shift) { shift&=31u; return shift==0?value:(value<<shift)|(value>>(32u-shift)); }
+std::uint32_t ReferenceMask(std::uint32_t mb,std::uint32_t me) { std::uint32_t result=0; for(std::uint32_t bit=0;bit<32;++bit) { const bool selected=mb<=me?(bit>=mb&&bit<=me):(bit>=mb||bit<=me); if(selected) result|=1u<<(31u-bit); } return result; }
+
+void IntegerSuite() {
+  Check("rotl zero",0x12345678u,RotateLeft32(0x12345678u,0));
+  Check("rotl eight",0x34567812u,RotateLeft32(0x12345678u,8));
+  Check("slw out",0u,ShiftLeftWord(0xffffffffu,32));
+  Check("srw out",0u,ShiftRightWord(0xffffffffu,63));
+  Check("sraw negative",0xffffffffu,ShiftRightAlgebraic(0x80000000u,32));
+  Check("divw zero negative",0xffffffffu,static_cast<std::uint32_t>(DivideWord(-3,0)));
+  Check("divw overflow",0xffffffffu,static_cast<std::uint32_t>(DivideWord(std::numeric_limits<std::int32_t>::min(),-1)));
+  Check("divwu zero",0u,DivideWordUnsigned(42,0));
+  Check("cntlzw zero",32u,CountLeadingZero(0));
+  Check("cntlzw",8u,CountLeadingZero(0x00800000u));
+  Check("cr signed",9u,ConditionFieldSigned(-1,2,0x80000000u));
+  Check("cr unordered",1u,ConditionFieldFloat(std::numeric_limits<double>::quiet_NaN(),0.0));
+  const auto add=AddWord(0xffffffffu,1u);
+  Check("add value",0u,add.value); Check("add carry",1u,add.carry?1u:0u);
+  const auto addOverflow=AddWord(0x7fffffffu,1u);
+  Check("add overflow value",0x80000000u,addOverflow.value);
+  Check("add overflow",1u,addOverflow.overflow?1u:0u);
+  const auto subtract=SubtractWord(1u,0u);
+  Check("sub value",0xffffffffu,subtract.value);
+  Check("sub borrow",0u,subtract.carry?1u:0u);
+  const auto subOverflow=SubtractWord(0xffffffffu,0x7fffffffu);
+  Check("sub overflow value",0x80000000u,subOverflow.value);
+  Check("sub overflow",1u,subOverflow.overflow?1u:0u);
+  std::mt19937_64 rng(0x4b617274506164ULL);
+  for(std::uint32_t i=0;i<100000;++i) { const auto value=static_cast<std::uint32_t>(rng()); const auto shift=static_cast<std::uint32_t>(rng()); Check("rotl random",ReferenceRotate(value,shift),RotateLeft32(value,shift)); const auto mb=shift&31u; const auto me=static_cast<std::uint32_t>(rng())&31u; Check("mask random",ReferenceMask(mb,me),Mask32(mb,me)); }
+}
+
+void ScalarSuite() {
+  Check("force single 1/3",0x3eaaaaabu,std::bit_cast<std::uint32_t>(ForceSingle(1.0/3.0)));
+  Check("force single negative zero",0x80000000u,std::bit_cast<std::uint32_t>(ForceSingle(-0.0)));
+  Check("NI positive subnormal",0u,std::bit_cast<std::uint32_t>(ForceSingle(0x1p-149,true)));
+  Check("NI negative subnormal",0x80000000u,std::bit_cast<std::uint32_t>(ForceSingle(-0x1p-149,true)));
+  Check("fctiwz NaN",0x80000000u,static_cast<std::uint32_t>(ConvertToIntegerWord(std::numeric_limits<double>::quiet_NaN(),FE_TOWARDZERO)));
+  Check("fctiw nearest even",2u,static_cast<std::uint32_t>(ConvertToIntegerWord(2.5,FE_TONEAREST)));
+  Check("fctiw up",3u,static_cast<std::uint32_t>(ConvertToIntegerWord(2.1,FE_UPWARD)));
+  Check("fctiw down",0xfffffffdu,static_cast<std::uint32_t>(ConvertToIntegerWord(-2.1,FE_DOWNWARD)));
+  const auto divideZero=EvaluateScalar([] { volatile double one=1.0,zero=0.0; return one/zero; });
+  Check("divide zero result",0x7ff0000000000000ULL,std::bit_cast<std::uint64_t>(divideZero.value));
+  Check("divide zero flag",1u<<3,divideZero.flags.bits());
+  const auto invalid=EvaluateScalar([] { volatile double zero=0.0; return zero/zero; });
+  Check("invalid class",1u,std::isnan(invalid.value)?1u:0u);
+  Check("invalid flag",1u,invalid.flags.bits()&1u);
+  const auto overflow=EvaluateScalar([] { volatile double value=std::numeric_limits<double>::max(); return value*2.0; });
+  Check("overflow class",1u,std::isinf(overflow.value)?1u:0u);
+  Check("overflow flag",1u,overflow.flags.overflow?1u:0u);
+  const auto underflow=EvaluateScalar([] { volatile double value=std::numeric_limits<double>::min(); return value*value; });
+  Check("underflow result",0u,std::bit_cast<std::uint64_t>(underflow.value));
+  Check("underflow flag",1u,underflow.flags.underflow?1u:0u);
+  Check("underflow inexact",1u,underflow.flags.inexact?1u:0u);
+  const auto inexact=EvaluateScalar([] { volatile double one=1.0,three=3.0; return one/three; });
+  Check("inexact flag",1u,inexact.flags.inexact?1u:0u);
+  Check("fma single rounding",0x3f800000u,std::bit_cast<std::uint32_t>(std::fma(0x1.000002p0f,0x1.fffffep-1f,-0x1p-24f)));
+  Check("force25",0x3ff0000010000000ULL,std::bit_cast<std::uint64_t>(Force25Bit(0x1.0000008000001p0)));
+}
+
+void EstimateSuite() {
+  const std::array<std::uint64_t,14> values={0x0000000000000000ULL,0x8000000000000000ULL,0x3ff0000000000000ULL,0x4000000000000000ULL,0x3fd5555555555555ULL,0x0010000000000000ULL,0x0000000000000001ULL,0x7fefffffffffffffULL,0x7ff0000000000000ULL,0xfff0000000000000ULL,0x7ff0000000000001ULL,0x7ff8000012345678ULL,0xbff0000000000000ULL,0x4010000000000000ULL};
+  const std::array<std::uint64_t,14> fres={0x7ff0000000000000ULL,0xfff0000000000000ULL,0x3fefff0000000000ULL,0x3fdfff0000000000ULL,0x40080042e0000000ULL,0x47efffffe0000000ULL,0x47efffffe0000000ULL,0x0000000000000000ULL,0x0000000000000000ULL,0x8000000000000000ULL,0x7ff8000000000001ULL,0x7ff8000012345678ULL,0xbfefff0000000000ULL,0x3fcfff0000000000ULL};
+  const std::array<std::uint64_t,14> frsqrte={0x7ff0000000000000ULL,0xfff0000000000000ULL,0x3feffe8000000000ULL,0x3fe69fa000000000ULL,0x3ffbb6f860000000ULL,0x5fdffe8000000000ULL,0x617ffe8000000000ULL,0x1ff000082c000000ULL,0x0000000000000000ULL,0x7ff8000000000000ULL,0x7ff8000000000001ULL,0x7ff8000012345678ULL,0x7ff8000000000000ULL,0x3fdffe8000000000ULL};
+  for(std::size_t i=0;i<values.size();++i) { const double input=std::bit_cast<double>(values[i]); Check("Dolphin fres oracle",fres[i],std::bit_cast<std::uint64_t>(ApproximateReciprocal(input))); Check("Dolphin frsqrte oracle",frsqrte[i],std::bit_cast<std::uint64_t>(ApproximateReciprocalSquareRoot(input))); }
+}
+
+std::uint64_t PairBits(PairedSingle value) { return (static_cast<std::uint64_t>(std::bit_cast<std::uint32_t>(value.ps0))<<32)|std::bit_cast<std::uint32_t>(value.ps1); }
+void PairedAndQuantizedSuite() {
+  const PairedSingle a{1.5f,-0.0f},b{2.0f,-4.0f};
+  Check("ps add",0x40600000c0800000ULL,PairBits(PsAdd(a,b)));
+  Check("ps sub",0xbf00000040800000ULL,PairBits(PsSub(a,b)));
+  Check("ps mul",0x4040000000000000ULL,PairBits(PsMul(a,b)));
+  Check("ps div",0x3f40000000000000ULL,PairBits(PsDiv(a,b)));
+  Check("ps madd",0x40a0000041800000ULL,PairBits(PsMadd(a,b,PairedSingle{2.0f,16.0f})));
+  Check("ps merge01",0x3fc00000c0800000ULL,PairBits(PsMerge01(a,b)));
+  Check("ps select",0x3fc00000c0800000ULL,PairBits(PsSelect(a,PairedSingle{0.0f,-1.0f},b)));
+  Check("dequant signed16",0xc2480000u,std::bit_cast<std::uint32_t>(Dequantize(-100,1)));
+  Check("dequant wrapped scale",0x43000000u,std::bit_cast<std::uint32_t>(Dequantize(1,57)));
+  Check("quant signed8 clamp",0x7fu,static_cast<std::uint8_t>(Quantize<std::int8_t>(100.0f,1)));
+  Check("quant unsigned16",0x180u,Quantize<std::uint16_t>(1.5f,8));
+
+  // Differential/property corpus. Inputs stay finite so NaN payload selection
+  // does not obscure a genuine host-architecture mismatch.
+  std::mt19937 rng(0x504f5745u);
+  for(std::uint32_t i=0;i<50000;++i) {
+    const auto finite=[](std::uint32_t bits) {
+      bits=(bits&0x807fffffu)|(((bits>>23)%254u+1u)<<23);
+      return std::bit_cast<float>(bits);
+    };
+    const PairedSingle x{finite(rng()),finite(rng())};
+    const PairedSingle y{finite(rng()),finite(rng())};
+    const PairedSingle z{finite(rng()),finite(rng())};
+    Mix(PairBits(PsAdd(x,y)));
+    Mix(PairBits(PsMul(x,y)));
+    Mix(PairBits(PsMadd(x,y,z)));
+    ++g_checks;
+  }
+}
+
+extern "C" std::uint64_t AbiHostCall(std::uint32_t a,std::uint64_t b,double c,PairedSingle d) { return static_cast<std::uint64_t>(a)+b+static_cast<std::uint64_t>(c)+std::bit_cast<std::uint32_t>(d.ps0)+std::bit_cast<std::uint32_t>(d.ps1); }
+void AbiSuite() { Check("host ABI",0x801000008000000bULL,AbiHostCall(7,0x8010000000000000ULL,4.0,{0.0f,-0.0f})); }
+}
+
+int main() {
+  IntegerSuite(); ScalarSuite(); EstimateSuite(); PairedAndQuantizedSuite(); AbiSuite();
+#if defined(__aarch64__)
+  constexpr std::string_view architecture="arm64";
+#elif defined(__x86_64__)
+  constexpr std::string_view architecture="x86_64";
+#else
+  constexpr std::string_view architecture="unknown";
+#endif
+  std::cout<<"architecture="<<architecture<<" checks="<<std::dec<<g_checks<<" stateHash=0x"<<std::hex<<std::setw(16)<<std::setfill('0')<<g_hash<<" fpContract=off fastMath=off\n";
+}

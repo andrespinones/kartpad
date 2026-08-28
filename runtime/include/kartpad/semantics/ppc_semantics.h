@@ -1,0 +1,319 @@
+#pragma once
+
+#include <array>
+#include <bit>
+#include <cfenv>
+#include <cmath>
+#include <cstdint>
+#include <limits>
+
+namespace kartpad::semantics {
+
+struct PpcFlags {
+  bool invalid{};
+  bool overflow{};
+  bool underflow{};
+  bool divide_by_zero{};
+  bool inexact{};
+
+  [[nodiscard]] constexpr std::uint32_t bits() const noexcept {
+    return (invalid ? 1u << 0 : 0u) | (overflow ? 1u << 1 : 0u) |
+           (underflow ? 1u << 2 : 0u) | (divide_by_zero ? 1u << 3 : 0u) |
+           (inexact ? 1u << 4 : 0u);
+  }
+};
+
+template <typename T> struct Result {
+  T value{};
+  PpcFlags flags{};
+};
+
+inline PpcFlags CaptureFlags() noexcept {
+  const int flags = std::fetestexcept(FE_ALL_EXCEPT);
+  return {.invalid = (flags & FE_INVALID) != 0,
+          .overflow = (flags & FE_OVERFLOW) != 0,
+          .underflow = (flags & FE_UNDERFLOW) != 0,
+          .divide_by_zero = (flags & FE_DIVBYZERO) != 0,
+          .inexact = (flags & FE_INEXACT) != 0};
+}
+
+template <typename Operation>
+inline Result<double> EvaluateScalar(Operation operation) noexcept {
+  std::feclearexcept(FE_ALL_EXCEPT);
+  volatile double value = operation();
+  return {value, CaptureFlags()};
+}
+
+inline constexpr std::uint32_t RotateLeft32(std::uint32_t value,
+                                            std::uint32_t shift) noexcept {
+  return std::rotl(value, static_cast<int>(shift & 31u));
+}
+
+inline constexpr std::uint32_t Mask32(std::uint32_t mb,
+                                      std::uint32_t me) noexcept {
+  const std::uint32_t left = 0xffffffffu >> (mb & 31u);
+  const std::uint32_t right = 0xffffffffu << (31u - (me & 31u));
+  return mb <= me ? left & right : left | right;
+}
+
+inline constexpr std::uint32_t ShiftLeftWord(std::uint32_t value,
+                                             std::uint32_t shift) noexcept {
+  return (shift & 0x20u) != 0 ? 0u : value << (shift & 31u);
+}
+
+inline constexpr std::uint32_t ShiftRightWord(std::uint32_t value,
+                                              std::uint32_t shift) noexcept {
+  return (shift & 0x20u) != 0 ? 0u : value >> (shift & 31u);
+}
+
+inline constexpr std::uint32_t ShiftRightAlgebraic(std::uint32_t value,
+                                                   std::uint32_t shift) noexcept {
+  if ((shift & 0x20u) != 0)
+    return (value & 0x80000000u) != 0 ? 0xffffffffu : 0u;
+  return static_cast<std::uint32_t>(
+      static_cast<std::int32_t>(value) >> (shift & 31u));
+}
+
+inline constexpr std::uint32_t DivideWordUnsigned(std::uint32_t dividend,
+                                                  std::uint32_t divisor) noexcept {
+  return divisor == 0 ? 0u : dividend / divisor;
+}
+
+inline constexpr std::int32_t DivideWord(std::int32_t dividend,
+                                         std::int32_t divisor) noexcept {
+  if (divisor == 0 ||
+      (dividend == std::numeric_limits<std::int32_t>::min() && divisor == -1))
+    return dividend < 0 ? -1 : 0;
+  return dividend / divisor;
+}
+
+inline constexpr std::uint32_t CountLeadingZero(std::uint32_t value) noexcept {
+  return static_cast<std::uint32_t>(std::countl_zero(value));
+}
+
+struct IntegerResult32 {
+  std::uint32_t value{};
+  bool carry{};
+  bool overflow{};
+};
+
+inline constexpr IntegerResult32 AddWord(std::uint32_t lhs, std::uint32_t rhs,
+                                         bool carry_in = false) noexcept {
+  const std::uint64_t wide = static_cast<std::uint64_t>(lhs) + rhs +
+                             static_cast<std::uint32_t>(carry_in);
+  const auto value = static_cast<std::uint32_t>(wide);
+  const bool overflow = ((~(lhs ^ rhs) & (lhs ^ value)) & 0x80000000u) != 0;
+  return {value, (wide >> 32) != 0, overflow};
+}
+
+inline constexpr IntegerResult32 SubtractWord(std::uint32_t subtrahend,
+                                              std::uint32_t minuend,
+                                              bool carry_in = true) noexcept {
+  const std::uint64_t wide = static_cast<std::uint64_t>(minuend) +
+      static_cast<std::uint32_t>(~subtrahend) +
+      static_cast<std::uint32_t>(carry_in);
+  const auto value = static_cast<std::uint32_t>(wide);
+  const bool overflow = (((minuend ^ subtrahend) & (minuend ^ value)) &
+                         0x80000000u) != 0;
+  return {value, (wide >> 32) != 0, overflow};
+}
+
+inline constexpr std::uint32_t ConditionFieldSigned(std::int32_t lhs,
+                                                    std::int32_t rhs,
+                                                    std::uint32_t xer) noexcept {
+  return (lhs < rhs ? 8u : 0u) | (lhs > rhs ? 4u : 0u) |
+         (lhs == rhs ? 2u : 0u) | ((xer >> 31) & 1u);
+}
+
+inline constexpr std::uint32_t ConditionFieldFloat(double lhs,
+                                                   double rhs) noexcept {
+  if (std::isnan(lhs) || std::isnan(rhs))
+    return 1u;
+  return (lhs < rhs ? 8u : 0u) | (lhs > rhs ? 4u : 0u) |
+         (lhs == rhs ? 2u : 0u);
+}
+
+inline double Force25Bit(double value) noexcept {
+  constexpr std::uint64_t exponent_mask = 0x7ff0000000000000ULL;
+  constexpr std::uint64_t fraction_mask = 0x000fffffffffffffULL;
+  std::uint64_t bits = std::bit_cast<std::uint64_t>(value);
+  const std::uint64_t exponent = bits & exponent_mask;
+  const std::uint64_t fraction = bits & fraction_mask;
+  if (exponent == 0 && fraction != 0) {
+    std::int64_t keep_mask = 0xfffffffff8000000LL;
+    std::uint64_t round = 0x8000000ULL;
+    std::uint32_t leading = 0;
+    std::uint64_t normalized = fraction;
+    while ((normalized & (1ULL << 63)) == 0) {
+      normalized <<= 1;
+      ++leading;
+    }
+    const std::uint32_t shift = leading - 11u;
+    keep_mask >>= shift;
+    round >>= shift;
+    bits = (bits & static_cast<std::uint64_t>(keep_mask)) + (bits & round);
+  } else {
+    bits = (bits & 0xfffffffff8000000ULL) + (bits & 0x8000000ULL);
+  }
+  return std::bit_cast<double>(bits);
+}
+
+inline float ForceSingle(double value, bool non_ieee = false) noexcept {
+  if (non_ieee && std::abs(value) < 0x1p-126)
+    return std::copysign(0.0f, static_cast<float>(value));
+  return static_cast<float>(value);
+}
+
+inline std::int32_t ConvertToIntegerWord(double value, int rounding_mode) noexcept {
+  if (std::isnan(value))
+    return std::numeric_limits<std::int32_t>::min();
+  if (value >= 2147483647.0)
+    return std::numeric_limits<std::int32_t>::max();
+  if (value <= -2147483648.0)
+    return std::numeric_limits<std::int32_t>::min();
+  double rounded = value;
+  switch (rounding_mode) {
+    case FE_TOWARDZERO: rounded = std::trunc(value); break;
+    case FE_UPWARD: rounded = std::ceil(value); break;
+    case FE_DOWNWARD: rounded = std::floor(value); break;
+    default: rounded = std::nearbyint(value); break;
+  }
+  return static_cast<std::int32_t>(rounded);
+}
+
+struct EstimateEntry { std::int32_t base; std::int32_t decrement; };
+
+inline constexpr std::array<EstimateEntry, 32> kFres = {{
+    {0x7ff800,0x3e1},{0x783800,0x3a7},{0x70ea00,0x371},{0x6a0800,0x340},
+    {0x638800,0x313},{0x5d6200,0x2ea},{0x579000,0x2c4},{0x520800,0x2a0},
+    {0x4cc800,0x27f},{0x47ca00,0x261},{0x430800,0x245},{0x3e8000,0x22a},
+    {0x3a2c00,0x212},{0x360800,0x1fb},{0x321400,0x1e5},{0x2e4a00,0x1d1},
+    {0x2aa800,0x1be},{0x272c00,0x1ac},{0x23d600,0x19b},{0x209e00,0x18b},
+    {0x1d8800,0x17c},{0x1a9000,0x16e},{0x17ae00,0x15b},{0x14f800,0x15b},
+    {0x124400,0x143},{0x0fbe00,0x143},{0x0d3800,0x12d},{0x0ade00,0x12d},
+    {0x088400,0x11a},{0x065000,0x11a},{0x041c00,0x108},{0x020c00,0x106}}};
+
+inline constexpr std::array<EstimateEntry, 32> kFrsqrte = {{
+    {0x1a7e800,-0x568},{0x17cb800,-0x4f3},{0x1552800,-0x48d},{0x130c000,-0x435},
+    {0x10f2000,-0x3e7},{0x0eff000,-0x3a2},{0x0d2e000,-0x365},{0x0b7c000,-0x32e},
+    {0x09e5000,-0x2fc},{0x0867000,-0x2d0},{0x06ff000,-0x2a8},{0x05ab800,-0x283},
+    {0x046a000,-0x261},{0x0339800,-0x243},{0x0218800,-0x226},{0x0105800,-0x20b},
+    {0x3ffa000,-0x7a4},{0x3c29000,-0x700},{0x38aa000,-0x670},{0x3572000,-0x5f2},
+    {0x3279000,-0x584},{0x2fb7000,-0x524},{0x2d26000,-0x4cc},{0x2ac0000,-0x47e},
+    {0x2881000,-0x43a},{0x2665000,-0x3fa},{0x2468000,-0x3c2},{0x2287000,-0x38e},
+    {0x20c1000,-0x35e},{0x1f12000,-0x332},{0x1d79000,-0x30a},{0x1bf4000,-0x2e6}}};
+
+inline double ApproximateReciprocal(double value) noexcept {
+  constexpr std::uint64_t sign_mask = 1ULL << 63;
+  constexpr std::uint64_t exponent_mask = 0x7ffULL << 52;
+  constexpr std::uint64_t fraction_mask = (1ULL << 52) - 1;
+  constexpr std::uint64_t quiet = 1ULL << 51;
+  const auto input = std::bit_cast<std::uint64_t>(value);
+  const auto mantissa = input & fraction_mask;
+  const auto sign = input & sign_mask;
+  auto exponent = input & exponent_mask;
+  if (mantissa == 0 && exponent == 0)
+    return std::bit_cast<double>(sign | exponent_mask);
+  if (exponent == exponent_mask)
+    return mantissa == 0 ? std::bit_cast<double>(sign)
+                         : std::bit_cast<double>(input | quiet);
+  if (exponent < (895ULL << 52))
+    return std::copysign(static_cast<double>(std::numeric_limits<float>::max()), value);
+  if (exponent >= (1149ULL << 52))
+    return std::copysign(0.0, value);
+  exponent = (0x7fdULL << 52) - exponent;
+  const int index = static_cast<int>(mantissa >> 37);
+  const auto &entry = kFres[static_cast<std::size_t>(index / 1024)];
+  const std::int64_t estimate = entry.base -
+      (static_cast<std::int64_t>(entry.decrement) * (index % 1024) + 1) / 2;
+  return std::bit_cast<double>(sign | exponent |
+                               (static_cast<std::uint64_t>(estimate) << 29));
+}
+
+inline double ApproximateReciprocalSquareRoot(double value) noexcept {
+  constexpr std::uint64_t sign_mask = 1ULL << 63;
+  constexpr std::uint64_t exponent_mask = 0x7ffULL << 52;
+  constexpr std::uint64_t fraction_mask = (1ULL << 52) - 1;
+  constexpr std::uint64_t quiet = 1ULL << 51;
+  const auto input = std::bit_cast<std::uint64_t>(value);
+  auto mantissa = input & fraction_mask;
+  const auto sign = input & sign_mask;
+  std::int64_t exponent = static_cast<std::int64_t>(input & exponent_mask);
+  if (mantissa == 0 && exponent == 0)
+    return std::bit_cast<double>(sign | exponent_mask);
+  if (static_cast<std::uint64_t>(exponent) == exponent_mask) {
+    if (mantissa == 0)
+      return sign ? std::bit_cast<double>(exponent_mask | quiet) : 0.0;
+    return std::bit_cast<double>(input | quiet);
+  }
+  if (sign)
+    return std::bit_cast<double>(exponent_mask | quiet);
+  if (exponent == 0) {
+    do {
+      exponent -= std::int64_t{1} << 52;
+      mantissa <<= 1;
+    } while ((mantissa & (1ULL << 52)) == 0);
+    mantissa &= fraction_mask;
+    exponent += std::int64_t{1} << 52;
+  }
+  const auto exponent_lsb = exponent & (std::int64_t{1} << 52);
+  exponent = (((std::int64_t{0x3ff} << 52) -
+               ((exponent - (std::int64_t{0x3fe} << 52)) / 2)) &
+              static_cast<std::int64_t>(exponent_mask));
+  const int index = static_cast<int>(
+      (static_cast<std::uint64_t>(exponent_lsb) | mantissa) >> 37);
+  const auto &entry = kFrsqrte[static_cast<std::size_t>(index / 2048)];
+  const std::int64_t estimate = entry.base +
+      static_cast<std::int64_t>(entry.decrement) * (index % 2048);
+  return std::bit_cast<double>(static_cast<std::uint64_t>(exponent) |
+                               (static_cast<std::uint64_t>(estimate) << 26));
+}
+
+struct PairedSingle { float ps0{}; float ps1{}; };
+
+inline PairedSingle PsAdd(PairedSingle a, PairedSingle b) noexcept {
+  return {a.ps0 + b.ps0, a.ps1 + b.ps1};
+}
+inline PairedSingle PsSub(PairedSingle a, PairedSingle b) noexcept {
+  return {a.ps0 - b.ps0, a.ps1 - b.ps1};
+}
+inline PairedSingle PsMul(PairedSingle a, PairedSingle b) noexcept {
+  return {a.ps0 * b.ps0, a.ps1 * b.ps1};
+}
+inline PairedSingle PsDiv(PairedSingle a, PairedSingle b) noexcept {
+  return {a.ps0 / b.ps0, a.ps1 / b.ps1};
+}
+inline PairedSingle PsMadd(PairedSingle a, PairedSingle c,
+                           PairedSingle b) noexcept {
+  return {std::fma(a.ps0, c.ps0, b.ps0), std::fma(a.ps1, c.ps1, b.ps1)};
+}
+inline PairedSingle PsMerge01(PairedSingle a, PairedSingle b) noexcept {
+  return {a.ps0, b.ps1};
+}
+inline PairedSingle PsSelect(PairedSingle positive, PairedSingle control,
+                             PairedSingle negative) noexcept {
+  return {control.ps0 >= -0.0f ? positive.ps0 : negative.ps0,
+          control.ps1 >= -0.0f ? positive.ps1 : negative.ps1};
+}
+
+enum class QuantizedType : std::uint32_t {
+  Float = 0, Unsigned8 = 4, Unsigned16 = 5, Signed8 = 6, Signed16 = 7
+};
+struct Gqr { QuantizedType type{QuantizedType::Float}; std::uint32_t scale{}; };
+
+inline float Dequantize(std::int32_t value, std::uint32_t scale) noexcept {
+  const int exponent = scale < 32 ? -static_cast<int>(scale)
+                                  : static_cast<int>(64u - scale);
+  return std::ldexp(static_cast<float>(value), exponent);
+}
+
+template <typename T> inline T Quantize(float value, std::uint32_t scale) noexcept {
+  const int exponent = scale < 32 ? static_cast<int>(scale)
+                                  : -static_cast<int>(64u - scale);
+  const float scaled = std::ldexp(value, exponent);
+  const float low = static_cast<float>(std::numeric_limits<T>::min());
+  const float high = static_cast<float>(std::numeric_limits<T>::max());
+  return static_cast<T>(std::fmin(std::fmax(scaled, low), high));
+}
+
+}  // namespace kartpad::semantics

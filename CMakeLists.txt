@@ -4,6 +4,14 @@ project(KartPad VERSION 0.1.0 LANGUAGES CXX)
 
 include(CTest)
 
+add_executable(kartpad_semantics_contract runtime/tests/semantics_contract.cpp)
+target_include_directories(kartpad_semantics_contract PRIVATE runtime/include)
+target_compile_features(kartpad_semantics_contract PRIVATE cxx_std_20)
+target_compile_options(kartpad_semantics_contract PRIVATE
+  -Wall -Wextra -Wpedantic -Werror -fno-fast-math -ffp-contract=off
+)
+add_test(NAME kartpad_semantics_contract COMMAND kartpad_semantics_contract)
+
 option(MKW_PRODUCT_BASE "Build the original-disc base product" ON)
 option(MKW_PRODUCT_RETRO_REWIND "Build the Retro Rewind product" OFF)
 option(MKW_BUILD_MACOS "Build the native macOS host" OFF)
@@ -92,10 +100,51 @@ target_include_directories(kartpad_memory PUBLIC runtime/include)
 target_compile_features(kartpad_memory PUBLIC cxx_std_20)
 target_compile_options(kartpad_memory PRIVATE -Wall -Wextra -Wpedantic -Werror)
 
+add_executable(kartpad_translated_semantics_fixture
+  runtime/generated/g6/func_80001000.cpp
+  runtime/tests/translated_semantics_fixture.cpp
+)
+target_include_directories(kartpad_translated_semantics_fixture PRIVATE
+  runtime/include runtime/translation_shim)
+target_link_libraries(kartpad_translated_semantics_fixture PRIVATE kartpad_memory)
+target_compile_features(kartpad_translated_semantics_fixture PRIVATE cxx_std_20)
+target_compile_options(kartpad_translated_semantics_fixture PRIVATE
+  -Wall -Wextra -Wpedantic -Werror -fno-fast-math -ffp-contract=off)
+add_test(NAME kartpad_translated_semantics_fixture COMMAND kartpad_translated_semantics_fixture)
+
 add_library(kartpad_scheduler STATIC runtime/src/scheduler/guest_scheduler.cpp)
 target_include_directories(kartpad_scheduler PUBLIC runtime/include)
 target_compile_features(kartpad_scheduler PUBLIC cxx_std_20)
 target_compile_options(kartpad_scheduler PRIVATE -Wall -Wextra -Wpedantic -Werror)
+
+if(MKW_HOST_DARWIN)
+  add_library(kartpad_g7_translated STATIC
+    runtime/generated/g7/func_80001000.cpp
+    runtime/src/translation/fixture_runtime.cpp
+  )
+  target_include_directories(kartpad_g7_translated
+    PUBLIC runtime/include runtime/translation_shim)
+  target_link_libraries(kartpad_g7_translated PUBLIC kartpad_memory)
+  target_compile_features(kartpad_g7_translated PUBLIC cxx_std_20)
+  target_compile_options(kartpad_g7_translated PRIVATE
+    -Wall -Wextra -Wpedantic -Werror -fno-fast-math -ffp-contract=off)
+
+  add_executable(KartPadG7Frame MACOSX_BUNDLE runtime/apps/KartPadG7Frame.mm)
+  target_include_directories(KartPadG7Frame PRIVATE runtime/translation_shim)
+  target_link_libraries(KartPadG7Frame PRIVATE kartpad_g7_translated)
+  target_compile_features(KartPadG7Frame PRIVATE cxx_std_20)
+  target_compile_options(KartPadG7Frame PRIVATE -fobjc-arc -Wall -Wextra -Wpedantic -Werror)
+  foreach(framework IN ITEMS AppKit Foundation Metal QuartzCore ImageIO UniformTypeIdentifiers)
+    find_library(G7_${framework}_FRAMEWORK ${framework} REQUIRED)
+    target_link_libraries(KartPadG7Frame PRIVATE "${G7_${framework}_FRAMEWORK}")
+  endforeach()
+  set_target_properties(KartPadG7Frame PROPERTIES
+    MACOSX_BUNDLE_BUNDLE_NAME "KartPad G7 Frame"
+    MACOSX_BUNDLE_GUI_IDENTIFIER "com.kartpad.g7-frame"
+    MACOSX_BUNDLE_SHORT_VERSION_STRING "0.1"
+    MACOSX_BUNDLE_BUNDLE_VERSION "1"
+  )
+endif()
 target_include_directories(kartpad_host PUBLIC runtime/include)
 target_compile_features(kartpad_host PUBLIC cxx_std_20)
 target_compile_options(kartpad_host PRIVATE -Wall -Wextra -Wpedantic -Werror)
