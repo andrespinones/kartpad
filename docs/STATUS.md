@@ -4,7 +4,7 @@ Updated: 2026-08-28
 
 ## Current goal
 
-**G6 — Runtime subsystems initialize natively** is the lowest unmet goal. G0–G5 pass. The next gate integrates memory/scheduler with renderer, audio, input, storage, and networking smoke paths on arm64 macOS.
+**G7 — First translated rendered frame** is the lowest unmet goal. G0–G6 pass. The next gate is a real app/window surface and translated fixture through the renderer bridge, compared against a reference rather than an offscreen host-only clear.
 
 ## Goal ledger
 
@@ -16,7 +16,8 @@ Updated: 2026-08-28
 | G3 Host portability | Pass | Native arm64 host library/contracts pass; Darwin graph contains no Win32/x86-only link token; manifest recorded |
 | G4 Guest memory | Pass | Checked Darwin path passes conformance, lifecycle, randomized stress, microprogram, ASan/UBSan; safe Mach VM feasibility probe passes |
 | G5 Guest scheduler | Pass | Explicit state machine passes lifecycle/priority/VI/register tests and two deterministic million-operation runs under Release and ASan/UBSan |
-| G6–G18 | Not started | G6 native subsystem initialization is now active; later goals remain gated in order |
+| G6 Native subsystems | Pass | Metal validation clear/readback, CoreAudio init, GameController discovery, atomic storage, DNS and loopback TCP pass |
+| G7–G18 | Not started | G7 first translated rendered frame is now active; later goals remain gated in order |
 
 ## Known-good state
 
@@ -30,6 +31,7 @@ Updated: 2026-08-28
 - Portability baseline: `kartpad_host` and its contract suite compile/link/run natively for arm64 macOS; manifest is under `docs/artifacts/2026-08-28/`.
 - Memory baseline: checked/table guest memory is the accepted correctness path; evidence is `docs/artifacts/2026-08-28/g4-guest-memory.md`.
 - Scheduler baseline: explicit cooperative state machine, deterministic hash `0x7287563387fb1677`; evidence is `docs/artifacts/2026-08-28/g5-guest-scheduler.md`.
+- Native subsystem baseline: validated Metal/CoreAudio/GameController/storage/network smoke; evidence is `docs/artifacts/2026-08-28/g6-native-subsystems.md`.
 - Original icon: editable default/dark/tinted SVG masters and opaque exports exist; 1024 px and 16 px visual QA passed. Asset-catalog validation awaits application targets.
 
 ## Active risks and blockers

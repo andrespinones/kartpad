@@ -130,3 +130,16 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - Classification: G5 Pass for the backend contract. Wii OS HLE/translated-boundary integration is G6; physical mobile backgrounding remains a later device test.
 - Evidence: `docs/artifacts/2026-08-28/g5-guest-scheduler.md`.
 - Next lowest unmet goal: G6 native renderer/audio/input/storage/network subsystem initialization.
+
+## 2026-08-28 — G6 native Apple subsystem smoke
+
+- Goal: initialize renderer, audio, input, storage, and networking through native macOS APIs before translated-frame work.
+- Immediate command: `./scripts/test-native-subsystems.sh` with `MTL_DEBUG_LAYER=1`.
+- Renderer result: Pass. Metal API Validation enabled; Apple M2 device/queue cleared an 8×8 RGBA8 render target, completed normally, and all pixels matched the expected 0.25/0.5/0.75/1.0 color.
+- Audio result: Pass for initialization. Apple's default output component instantiated, reported 48 kHz/eight channels, and disposed cleanly. No audible-quality claim is made.
+- Input result: Pass for discovery initialization. GameController returned a valid zero-controller collection; physical mapping remains a later row.
+- Storage result: Pass through durable atomic replacement and cleanup in the app-specific temporary domain.
+- Network result: Pass for host smoke. `localhost` DNS and an actual IPv4 loopback bind/listen/connect/accept/send/receive payload passed.
+- Classification: G6 Pass for native synthetic subsystem initialization. Dawn/Aurora surface integration, translated rendering, streaming audio, physical input, TLS, and external services remain gated later.
+- Evidence: `docs/artifacts/2026-08-28/g6-native-subsystems.md`.
+- Next lowest unmet goal: G7 first translated rendered frame through the real application surface/renderer bridge.

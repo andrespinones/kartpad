@@ -73,6 +73,7 @@ configure_file(
 
 add_library(kartpad_host STATIC)
 if(MKW_HOST_DARWIN)
+  enable_language(OBJCXX)
   target_sources(kartpad_host PRIVATE
     runtime/src/platform/host_clock.cpp
     runtime/src/platform/host_files.cpp
@@ -141,5 +142,16 @@ if(BUILD_TESTING)
     target_compile_features(kartpad_darwin_vm_probe PRIVATE cxx_std_20)
     target_compile_options(kartpad_darwin_vm_probe PRIVATE -Wall -Wextra -Wpedantic -Werror)
     add_test(NAME kartpad.memory.darwin-vm-probe COMMAND kartpad_darwin_vm_probe)
+
+    add_executable(kartpad_apple_subsystem_smoke runtime/tests/apple_subsystem_smoke.mm)
+    target_link_libraries(kartpad_apple_subsystem_smoke PRIVATE kartpad_host)
+    target_compile_features(kartpad_apple_subsystem_smoke PRIVATE cxx_std_20)
+    target_compile_options(kartpad_apple_subsystem_smoke PRIVATE
+      -fobjc-arc -Wall -Wextra -Wpedantic -Werror)
+    foreach(framework IN ITEMS Foundation Metal AudioToolbox AudioUnit GameController)
+      find_library(${framework}_FRAMEWORK ${framework} REQUIRED)
+      target_link_libraries(kartpad_apple_subsystem_smoke PRIVATE "${${framework}_FRAMEWORK}")
+    endforeach()
+    add_test(NAME kartpad.subsystems.apple-smoke COMMAND kartpad_apple_subsystem_smoke)
   endif()
 endif()

@@ -21,10 +21,10 @@ The unmodified Windows baseline remains isolated at WiiCompiled commit `1912292c
 | Clocks/threads | Win32 waitable timers, thread metadata | monotonic nanoseconds, deadline sleep, bounded thread naming | G3 Pass — platform |
 | Guest memory | `VirtualAlloc2`, placeholder views, shared mappings, `VirtualProtect`, VEH | checked oracle plus Darwin Mach VM backend | G4 checked path Pass; optimized flat differential pending — memory |
 | Scheduler | Windows fibers | explicit cooperative scheduler/state machine with owned guest contexts | G5 Pass — scheduler |
-| Renderer/window | Aurora/Dawn Win32 surfaces, D3D/Vulkan defaults | Dawn Metal surface and Retina lifecycle | G6 — graphics |
-| Audio/media | host audio path and Windows media ducking | CoreAudio-compatible narrow output and media/session adapter | G6 — audio |
-| Input/raw adapter | SDL plus SetupAPI/WinUSB WUP-028 | SDL/GameController; separate macOS USB adapter backend or explicit limitation | G6/G10 — input |
-| Networking/TLS | WinSock, Windows trust/interface APIs | BSD sockets, Network/Security framework adapters, local-server tests | G6/G12 — network |
+| Renderer/window | Aurora/Dawn Win32 surfaces, D3D/Vulkan defaults | Dawn Metal surface and Retina lifecycle | Metal host adapter smoke Pass; surface/translated bridge G7 — graphics |
+| Audio/media | host audio path and Windows media ducking | CoreAudio-compatible narrow output and media/session adapter | CoreAudio init Pass; streaming/quality G8+ — audio |
+| Input/raw adapter | SDL plus SetupAPI/WinUSB WUP-028 | SDL/GameController; separate macOS USB adapter backend or explicit limitation | GameController discovery Pass; mappings/devices G8/G10 — input |
+| Networking/TLS | WinSock, Windows trust/interface APIs | BSD sockets, Network/Security framework adapters, local-server tests | DNS/loopback TCP Pass; protocol/TLS/external G12 — network |
 | Packaging/crash UI | Win32 executable/DLL copying, DbgHelp, Windows dialogs | native app bundle, Apple crash/symbol paths, safe diagnostics | G13 — application |
 
 ## Source-complete upstream Windows inventory
@@ -54,4 +54,8 @@ The first Darwin flat candidate was evaluated safely. A 4 GiB-plus-guard reserva
 
 The explicit state-machine strategy is selected because translated code can yield at the modeled OS/HLE boundaries. It stores the entire guest CPU snapshot per guest thread and therefore does not depend on Windows fibers, arbitrary host-stack preservation, deprecated Darwin contexts, or unaudited assembly. A scheduler mutex protects metadata but is released around every guest step and callback.
 
-Release and ASan/UBSan suites cover start/yield/sleep/wake/queue/join/cancel/exit, simultaneous alarms, priority order, nested callbacks, VI cadence, repeated lifecycle, idle/deadlock behavior, background suspension, and shutdown from waiting/running states. Two independent million-operation fixtures produced the same state hash with exact distribution and register/FP/SIMD preservation. Wii OS HLE integration remains G6 work; physical mobile lifecycle remains G15/G16.
+Release and ASan/UBSan suites cover start/yield/sleep/wake/queue/join/cancel/exit, simultaneous alarms, priority order, nested callbacks, VI cadence, repeated lifecycle, idle/deadlock behavior, background suspension, and shutdown from waiting/running states. Two independent million-operation fixtures produced the same state hash with exact distribution and register/FP/SIMD preservation. Wii OS HLE integration continues through G7/G8; physical mobile lifecycle remains G15/G16.
+
+## G6 Apple subsystem smoke
+
+With Metal API Validation enabled, the Apple M2 device/queue completed an offscreen RGBA8 clear and every pixel read back correctly. Apple's default output Audio Unit initialized and reported a valid 48 kHz/eight-channel stream, GameController discovery initialized with a valid zero-device list, durable storage passed, and BSD DNS/loopback TCP exchanged a verified payload. These are native host-adapter smokes only; Dawn/Aurora presentation and translated renderer integration remain G7.
