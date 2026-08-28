@@ -281,22 +281,23 @@ inline void PpcSetPairedFprInline(PPC_FPR& destination,double value) { destinati
 inline float PpcGetPs0Inline(double value) { return PpcUnpack(value).ps0; }
 inline float PpcGetPs1Inline(double value) { return PpcUnpack(value).ps1; }
 inline double PpcPackPairedInline(float ps0,float ps1) { return PpcPack({ps0,ps1}); }
-inline double PPC_PsAddInline(double a,double b) { return PpcPack(kartpad::semantics::PsAdd(PpcUnpack(a),PpcUnpack(b))); }
-inline double PPC_PsSubInline(double a,double b) { return PpcPack(kartpad::semantics::PsSub(PpcUnpack(a),PpcUnpack(b))); }
-inline double PPC_PsMulInline(double a,double b) { return PpcPack(kartpad::semantics::PsMul(PpcUnpack(a),PpcUnpack(b))); }
-inline double PPC_PsDivInline(double a,double b) { return PpcPack(kartpad::semantics::PsDiv(PpcUnpack(a),PpcUnpack(b))); }
-inline double PPC_PsMaddInline(double a,double c,double b) { return PpcPack(kartpad::semantics::PsMadd(PpcUnpack(a),PpcUnpack(c),PpcUnpack(b))); }
-inline double PPC_PsMsubInline(double a,double c,double b) { return PpcPack(kartpad::semantics::PsMsub(PpcUnpack(a),PpcUnpack(c),PpcUnpack(b))); }
-inline double PPC_PsNmaddInline(double a,double c,double b) { return PpcPack(kartpad::semantics::PsNmadd(PpcUnpack(a),PpcUnpack(c),PpcUnpack(b))); }
-inline double PPC_PsNmsubInline(double a,double c,double b) { return PpcPack(kartpad::semantics::PsNmsub(PpcUnpack(a),PpcUnpack(c),PpcUnpack(b))); }
-inline double PPC_PsMadds0Inline(double a,double c,double b) { return PpcPack(kartpad::semantics::PsMadds0(PpcUnpack(a),PpcUnpack(c),PpcUnpack(b))); }
-inline double PPC_PsMadds1Inline(double a,double c,double b) { return PpcPack(kartpad::semantics::PsMadds1(PpcUnpack(a),PpcUnpack(c),PpcUnpack(b))); }
-inline double PPC_PsMuls0Inline(double a,double c) { return PpcPack(kartpad::semantics::PsMuls0(PpcUnpack(a),PpcUnpack(c))); }
-inline double PPC_PsMuls1Inline(double a,double c) { return PpcPack(kartpad::semantics::PsMuls1(PpcUnpack(a),PpcUnpack(c))); }
+inline double PpcCommitPairedFpInline(kartpad::semantics::PairedFpResult result){if(g_currentCpuContext)g_currentCpuContext->fpscr=result.fpscr;return PpcPack(result.value);}
+inline double PPC_PsAddInline(double a,double b) { return PpcCommitPairedFpInline(kartpad::semantics::EvaluatePpcPairedBinary(g_currentCpuContext?g_currentCpuContext->fpscr:0u,kartpad::semantics::ScalarFpBinaryOperation::Add,PpcUnpack(a),PpcUnpack(b))); }
+inline double PPC_PsSubInline(double a,double b) { return PpcCommitPairedFpInline(kartpad::semantics::EvaluatePpcPairedBinary(g_currentCpuContext?g_currentCpuContext->fpscr:0u,kartpad::semantics::ScalarFpBinaryOperation::Subtract,PpcUnpack(a),PpcUnpack(b))); }
+inline double PPC_PsMulInline(double a,double b) { return PpcCommitPairedFpInline(kartpad::semantics::EvaluatePpcPairedBinary(g_currentCpuContext?g_currentCpuContext->fpscr:0u,kartpad::semantics::ScalarFpBinaryOperation::Multiply,PpcUnpack(a),PpcUnpack(b))); }
+inline double PPC_PsDivInline(double a,double b) { return PpcCommitPairedFpInline(kartpad::semantics::EvaluatePpcPairedBinary(g_currentCpuContext?g_currentCpuContext->fpscr:0u,kartpad::semantics::ScalarFpBinaryOperation::Divide,PpcUnpack(a),PpcUnpack(b))); }
+inline double PPC_PsMaddInline(double a,double c,double b) { return PpcCommitPairedFpInline(kartpad::semantics::EvaluatePpcPairedFused(g_currentCpuContext?g_currentCpuContext->fpscr:0u,PpcUnpack(a),PpcUnpack(c),PpcUnpack(b),false,false)); }
+inline double PPC_PsMsubInline(double a,double c,double b) { return PpcCommitPairedFpInline(kartpad::semantics::EvaluatePpcPairedFused(g_currentCpuContext?g_currentCpuContext->fpscr:0u,PpcUnpack(a),PpcUnpack(c),PpcUnpack(b),true,false)); }
+inline double PPC_PsNmaddInline(double a,double c,double b) { return PpcCommitPairedFpInline(kartpad::semantics::EvaluatePpcPairedFused(g_currentCpuContext?g_currentCpuContext->fpscr:0u,PpcUnpack(a),PpcUnpack(c),PpcUnpack(b),false,true)); }
+inline double PPC_PsNmsubInline(double a,double c,double b) { return PpcCommitPairedFpInline(kartpad::semantics::EvaluatePpcPairedFused(g_currentCpuContext?g_currentCpuContext->fpscr:0u,PpcUnpack(a),PpcUnpack(c),PpcUnpack(b),true,true)); }
+inline double PPC_PsMadds0Inline(double a,double c,double b) { const auto lane=PpcGetPs0Inline(c);return PpcCommitPairedFpInline(kartpad::semantics::EvaluatePpcPairedFused(g_currentCpuContext?g_currentCpuContext->fpscr:0u,PpcUnpack(a),{lane,lane},PpcUnpack(b),false,false)); }
+inline double PPC_PsMadds1Inline(double a,double c,double b) { const auto lane=PpcGetPs1Inline(c);return PpcCommitPairedFpInline(kartpad::semantics::EvaluatePpcPairedFused(g_currentCpuContext?g_currentCpuContext->fpscr:0u,PpcUnpack(a),{lane,lane},PpcUnpack(b),false,false)); }
+inline double PPC_PsMuls0Inline(double a,double c) { const auto lane=PpcGetPs0Inline(c);return PpcCommitPairedFpInline(kartpad::semantics::EvaluatePpcPairedBinary(g_currentCpuContext?g_currentCpuContext->fpscr:0u,kartpad::semantics::ScalarFpBinaryOperation::Multiply,PpcUnpack(a),{lane,lane})); }
+inline double PPC_PsMuls1Inline(double a,double c) { const auto lane=PpcGetPs1Inline(c);return PpcCommitPairedFpInline(kartpad::semantics::EvaluatePpcPairedBinary(g_currentCpuContext?g_currentCpuContext->fpscr:0u,kartpad::semantics::ScalarFpBinaryOperation::Multiply,PpcUnpack(a),{lane,lane})); }
 inline double PPC_PsNegInline(double v) { return PpcPack(kartpad::semantics::PsNeg(PpcUnpack(v))); }
 inline double PPC_PsAbsInline(double v) { return PpcPack(kartpad::semantics::PsAbs(PpcUnpack(v))); }
-inline double PPC_PsSum0Inline(double a,double b,double c) { return PpcPack(kartpad::semantics::PsSum0(PpcUnpack(a),PpcUnpack(b),PpcUnpack(c))); }
-inline double PPC_PsSum1Inline(double a,double b,double c) { return PpcPack(kartpad::semantics::PsSum1(PpcUnpack(a),PpcUnpack(b),PpcUnpack(c))); }
+inline double PPC_PsSum0Inline(double a,double b,double c) { return PpcCommitPairedFpInline(kartpad::semantics::EvaluatePpcPairedSum(g_currentCpuContext?g_currentCpuContext->fpscr:0u,PpcUnpack(a),PpcUnpack(b),PpcUnpack(c),false)); }
+inline double PPC_PsSum1Inline(double a,double b,double c) { return PpcCommitPairedFpInline(kartpad::semantics::EvaluatePpcPairedSum(g_currentCpuContext?g_currentCpuContext->fpscr:0u,PpcUnpack(a),PpcUnpack(b),PpcUnpack(c),true)); }
 inline double PPC_PsMerge00Inline(double a,double b) { return PpcPack(kartpad::semantics::PsMerge00(PpcUnpack(a),PpcUnpack(b))); }
 inline double PPC_PsMerge01Inline(double a,double b) { return PpcPack(kartpad::semantics::PsMerge01(PpcUnpack(a),PpcUnpack(b))); }
 inline double PPC_PsMerge10Inline(double a,double b) { return PpcPack(kartpad::semantics::PsMerge10(PpcUnpack(a),PpcUnpack(b))); }

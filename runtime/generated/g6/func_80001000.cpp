@@ -10,6 +10,7 @@ extern "C" void func_80001000(CpuContext* MKW_RESTRICT ctx)
     uint32_t r6_psq_tmp_0 = 0;
     uint32_t r6_psq_tmp_1 = 0;
     uint32_t r6_psq_tmp_2 = 0;
+    uint32_t r6_psq_tmp_3 = 0;
 
     uint32_t r3 = ctx->gpr[3];
     uint32_t r4 = ctx->gpr[4];
@@ -38,6 +39,9 @@ extern "C" void func_80001000(CpuContext* MKW_RESTRICT ctx)
     PPC_FPR f21 = ctx->fpr[21];
     PPC_FPR f22 = ctx->fpr[22];
     PPC_FPR f23 = ctx->fpr[23];
+    PPC_FPR f24 = ctx->fpr[24];
+    PPC_FPR f25 = ctx->fpr[25];
+    PPC_FPR f26 = ctx->fpr[26];
     uint32_t cr = ctx->cr;
 
     [[maybe_unused]] uint32_t mkw_gqr0 = ctx->gqr[0];
@@ -98,30 +102,35 @@ extern "C" void func_80001000(CpuContext* MKW_RESTRICT ctx)
     PpcSetPairedFprInline(f20, PPC_PsqLGqrInline<0u, 0u>(ctx, mkw_gqr0, r6_psq_tmp_2));
     PpcSetPairedFprInline(f21, PPC_PsRes(f20.d));
     PpcSetPairedFprInline(f22, PPC_PsRsqrte(f4.d));
+    // psq_load w=0 quant=0 (using PPC_PsqL)
+    r6_psq_tmp_3 = (r6 + 28);
+    PpcSetPairedFprInline(f24, PPC_PsqLGqrInline<0u, 0u>(ctx, mkw_gqr0, r6_psq_tmp_3));
+    PpcSetPairedFprInline(f25, PPC_PsNegInline(f24.d));
+    PpcSetPairedFprInline(f26, PPC_PsAddInline(f24.d, f25.d));
     f23.d = MemoryInline::FlatReadFloat32((r6 + 44));
     (void)PpcCompareStateInline(true, f23.d, f1.d);
     SetCRFloatResident(cr, 3, f23.d, f1.d);
 }
 
-[[maybe_unused]] loc_800010AC:
+[[maybe_unused]] loc_800010B8:
 {
     (void)PpcCompareStateInline(false, f23.d, f1.d);
     SetCRFloatResident(cr, 4, f23.d, f1.d);
 }
 
-[[maybe_unused]] loc_800010B0:
+[[maybe_unused]] loc_800010BC:
 {
     (void)PpcCompareStateInline(true, PpcGetPs0Inline(PPC_PsFromScalarInline(f23.d)), PpcGetPs0Inline(PPC_PsFromScalarInline(f1.d)));
     SetCRFloatResident(cr, static_cast<uint32_t>(5) & 7u, PpcGetPs0Inline(PPC_PsFromScalarInline(f23.d)), PpcGetPs0Inline(PPC_PsFromScalarInline(f1.d)));
 }
 
-[[maybe_unused]] loc_800010B4:
+[[maybe_unused]] loc_800010C0:
 {
     (void)PpcCompareStateInline(false, PpcGetPs0Inline(PPC_PsFromScalarInline(f23.d)), PpcGetPs0Inline(PPC_PsFromScalarInline(f1.d)));
     SetCRFloatResident(cr, static_cast<uint32_t>(6) & 7u, PpcGetPs0Inline(PPC_PsFromScalarInline(f23.d)), PpcGetPs0Inline(PPC_PsFromScalarInline(f1.d)));
 }
 
-[[maybe_unused]] loc_800010B8:
+[[maybe_unused]] loc_800010C4:
 {
     ctx->gpr[3] = r3;
     ctx->gpr[4] = r4;
@@ -150,6 +159,9 @@ extern "C" void func_80001000(CpuContext* MKW_RESTRICT ctx)
     ctx->fpr[21] = f21;
     ctx->fpr[22] = f22;
     ctx->fpr[23] = f23;
+    ctx->fpr[24] = f24;
+    ctx->fpr[25] = f25;
+    ctx->fpr[26] = f26;
     ctx->cr = cr;
     return;
 }
@@ -157,4 +169,4 @@ extern "C" void func_80001000(CpuContext* MKW_RESTRICT ctx)
 }
 
 // RECOMP_GUEST_ABI gpr_read=0xFFFFFF87 gpr_write=0xFFFFFFFF gpr_return=0x00000018 fpr_read=0xFFFFC003 fpr_write=0xFFFFFFFF fpr_return=0x00000002 cr_read=0xFF cr_write=0xFF xer_read=1 xer_write=1 fence=1
-// RECOMP_REGISTRATION base 0x80001000 func_80001000 preserves=false fpr_mask=0x00FFC000
+// RECOMP_REGISTRATION base 0x80001000 func_80001000 preserves=false fpr_mask=0x07FFC000

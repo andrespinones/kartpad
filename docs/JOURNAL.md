@@ -227,3 +227,10 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - Straight-line compare fixtures exposed legitimate fallthrough labels that Clang diagnosed as unused under `-Werror`; generated local labels are now explicitly `[[maybe_unused]]`, and every one of the 10,836 title units still strict-FP syntax-compiles.
 - Result: 250,220 checks, identical arm64/x86_64 hash `0x5a58605df18e5d1e`, translated final FPSCR `0xe7981393`, ASan/UBSan Pass, and patched translator 579/579.
 - Classification: G6 remains In progress. Paired arithmetic/fused exception aggregation, callbacks, and NI scheduler persistence remain.
+
+### G6 paired arithmetic exception aggregation
+
+- Routed every paired add/sub/mul/div, fused/negative-fused, splat multiply/add, and sum inline through shared state results. Both lane exceptions accumulate with original enables restored, results always write like Broadway paired instructions, NI rounding applies per lane, and FPRF follows the hardware-selected result lane.
+- Added direct state checks for VE-enabled invalid add, ZE-enabled divide-by-zero, and fused VXIMZ with a finite second lane. Expanded the translated DOL with `ps_add` of `{+inf,-inf}` and its negation under VE; both canonical NaN lanes are written and VXISI becomes sticky.
+- Result: 250,227 checks, identical arm64/x86_64 hash `0xccd5757c4c0643d4`, translated final FPSCR `0xe7991393`, ASan/UBSan Pass, patched translator 579/579, and all 10,836 title units strict-FP syntax-compile.
+- Classification: G6 remains In progress. Translated callback execution and NI scheduler persistence are the next semantic-boundary work.

@@ -90,6 +90,9 @@ int main() {
        (context.fpr[22].raw&0xffffffffULL)!=0x7fc00000ULL ||
        (context.fpscr&kartpad::semantics::fpscr::ZX)==0)
       throw std::runtime_error("translated paired estimate state mismatch");
+    if(context.fpr[26].raw!=0x7fc000007fc00000ULL ||
+       (context.fpscr&kartpad::semantics::fpscr::VXISI)==0)
+      throw std::runtime_error("translated paired arithmetic state mismatch");
     for(std::uint32_t field=3;field<=6;++field)
       if(((context.cr>>((7u-field)*4u))&0xfu)!=1u)
         throw std::runtime_error("translated FP compare CR mismatch");

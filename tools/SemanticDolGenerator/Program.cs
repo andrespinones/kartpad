@@ -23,6 +23,7 @@ static uint PsRes(int fd,int fb)=>(4u<<26)|((uint)fd<<21)|((uint)fb<<11)|(24u<<1
 static uint PsRsqrte(int fd,int fb)=>(4u<<26)|((uint)fd<<21)|((uint)fb<<11)|(26u<<1);
 static uint Fcmp(int crfd,int fa,int fb,bool ordered)=>(63u<<26)|((uint)crfd<<23)|((uint)fa<<16)|((uint)fb<<11)|((ordered?32u:0u)<<1);
 static uint PsCmp0(int crfd,int fa,int fb,bool ordered)=>(4u<<26)|((uint)crfd<<23)|((uint)fa<<16)|((uint)fb<<11)|((ordered?32u:0u)<<1);
+static uint PsNeg(int fd,int fb)=>(4u<<26)|((uint)fd<<21)|((uint)fb<<11)|(40u<<1);
 
 var words=new uint[] {
   Lis(3,output),Ori(3,3,output),Addi(4,0,0x7fff),Add(5,4,4),Stw(5,3,0),
@@ -36,6 +37,7 @@ var words=new uint[] {
   Mtfsb1(27),Lfs(17,6,36),Fres(17,7),
   Lfs(18,6,36),Lfs(19,6,12),Frsqrte(18,19),
   PsqL(20,6,24),PsRes(21,20),PsRsqrte(22,4),
+  PsqL(24,6,28),PsNeg(25,24),PsAdd(26,24,25),
   Lfs(23,6,44),Fcmp(3,23,1,true),Fcmp(4,23,1,false),
   PsCmp0(5,23,1,true),PsCmp0(6,23,1,false),
   0x4e800020u

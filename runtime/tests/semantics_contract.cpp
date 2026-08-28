@@ -281,6 +281,24 @@ void PairedAndQuantizedSuite() {
   const auto psSnan=EvaluatePpcPairedEstimate(0u,
       PairedSingle{std::bit_cast<float>(0x7f800042u),1.0f},false);
   Check("ps res sNaN",fpscr::VXSNAN,psSnan.exception);
+  const auto psInvalid=EvaluatePpcPairedBinary(fpscr::VE,
+      ScalarFpBinaryOperation::Add,
+      PairedSingle{std::numeric_limits<float>::infinity(),1.0f},
+      PairedSingle{-std::numeric_limits<float>::infinity(),2.0f});
+  Check("ps add lane invalid",fpscr::VXISI,psInvalid.exception);
+  Check("ps add always writes",0x7fc0000040400000ULL,PairBits(psInvalid.value));
+  Check("ps add enabled FEX",fpscr::FEX,psInvalid.fpscr&fpscr::FEX);
+  const auto psDivide=EvaluatePpcPairedBinary(fpscr::ZE,
+      ScalarFpBinaryOperation::Divide,PairedSingle{1.0f,1.0f},
+      PairedSingle{0.0f,2.0f});
+  Check("ps div lane zero",fpscr::ZX,psDivide.exception);
+  Check("ps div always writes",0x7f8000003f000000ULL,PairBits(psDivide.value));
+  const auto psFused=EvaluatePpcPairedFused(fpscr::VE,
+      PairedSingle{std::numeric_limits<float>::infinity(),2.0f},
+      PairedSingle{0.0f,3.0f},PairedSingle{1.0f,4.0f},false,false);
+  Check("ps madd lane invalid",fpscr::VXIMZ,psFused.exception);
+  Check("ps madd finite lane",0x41200000u,
+        std::bit_cast<std::uint32_t>(psFused.value.ps1));
   std::array<std::uint8_t,8> quantized{};
   const std::array<QuantizedType,5> types={QuantizedType::Float,QuantizedType::Unsigned8,
     QuantizedType::Unsigned16,QuantizedType::Signed8,QuantizedType::Signed16};

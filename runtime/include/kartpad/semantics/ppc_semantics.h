@@ -758,6 +758,66 @@ struct PairedFpResult {
   std::uint32_t exception{};
 };
 
+inline PairedFpResult FinishPpcPairedArithmetic(
+    std::uint32_t original_fpscr, ScalarFpResult lane0,
+    ScalarFpResult lane1) noexcept {
+  const bool non_ieee = (original_fpscr & fpscr::NI) != 0;
+  const PairedSingle value{ForceSingle(lane0.value, non_ieee),
+                           ForceSingle(lane1.value, non_ieee)};
+  auto final_fpscr = (lane1.fpscr & ~fpscr::ANY_E) |
+                     (original_fpscr & fpscr::ANY_E);
+  final_fpscr = SetFprf(final_fpscr, ClassifyFloat(value.ps0));
+  final_fpscr = UpdateFpscrSummaries(final_fpscr);
+  return {value, final_fpscr, lane0.exception | lane1.exception};
+}
+
+inline PairedFpResult EvaluatePpcPairedBinary(
+    std::uint32_t fpscr_value, ScalarFpBinaryOperation operation,
+    PairedSingle a, PairedSingle b) noexcept {
+  const auto original_fpscr = fpscr_value;
+  fpscr_value &= ~fpscr::ANY_E;
+  if (operation == ScalarFpBinaryOperation::Multiply) {
+    b.ps0 = static_cast<float>(Force25Bit(b.ps0));
+    b.ps1 = static_cast<float>(Force25Bit(b.ps1));
+  }
+  const auto lane0 = EvaluatePpcScalarBinary(
+      fpscr_value, operation, a.ps0, b.ps0, true);
+  const auto lane1 = EvaluatePpcScalarBinary(
+      lane0.fpscr, operation, a.ps1, b.ps1, true);
+  return FinishPpcPairedArithmetic(original_fpscr, lane0, lane1);
+}
+
+inline PairedFpResult EvaluatePpcPairedFused(
+    std::uint32_t fpscr_value, PairedSingle a, PairedSingle c,
+    PairedSingle b, bool subtract, bool negative) noexcept {
+  const auto original_fpscr = fpscr_value;
+  fpscr_value &= ~fpscr::ANY_E;
+  const auto lane0 = EvaluatePpcFused(fpscr_value, a.ps0, c.ps0, b.ps0,
+                                      subtract, true, negative);
+  const auto lane1 = EvaluatePpcFused(lane0.fpscr, a.ps1, c.ps1, b.ps1,
+                                      subtract, true, negative);
+  return FinishPpcPairedArithmetic(original_fpscr, lane0, lane1);
+}
+
+inline PairedFpResult EvaluatePpcPairedSum(
+    std::uint32_t fpscr_value, PairedSingle a, PairedSingle b,
+    PairedSingle c, bool sum1) noexcept {
+  const auto original_fpscr = fpscr_value;
+  const auto arithmetic = EvaluatePpcScalarBinary(
+      fpscr_value & ~fpscr::ANY_E, ScalarFpBinaryOperation::Add,
+      a.ps0, b.ps1, true);
+  const bool non_ieee = (original_fpscr & fpscr::NI) != 0;
+  const float sum = ForceSingle(arithmetic.value, non_ieee);
+  const PairedSingle value = sum1
+      ? PairedSingle{ForceSingle(c.ps0, non_ieee), sum}
+      : PairedSingle{sum, ForceSingle(c.ps1, non_ieee)};
+  auto final_fpscr = (arithmetic.fpscr & ~fpscr::ANY_E) |
+                     (original_fpscr & fpscr::ANY_E);
+  final_fpscr = SetFprf(final_fpscr, ClassifyFloat(sum));
+  final_fpscr = UpdateFpscrSummaries(final_fpscr);
+  return {value, final_fpscr, arithmetic.exception};
+}
+
 inline PairedFpResult EvaluatePpcPairedEstimate(
     std::uint32_t fpscr_value, PairedSingle input,
     bool reciprocal_sqrt) noexcept {
