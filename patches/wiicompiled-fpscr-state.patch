@@ -68,7 +68,7 @@ index e6ee396..e5e4d28 100644
                          28 => new[] { new IrCall($"f{rD}", "PPC_Fmsub", new[] { IrValue.Register($"f{rA}"), IrValue.Register($"f{rC}"), IrValue.Register($"f{rB}") }) }, // fmsub
                          29 => new[] { new IrCall($"f{rD}", "PPC_Fmadd", new[] { IrValue.Register($"f{rA}"), IrValue.Register($"f{rC}"), IrValue.Register($"f{rB}") }) }, // fmadd
 diff --git a/translator/src/Translator.Core/CodeGen/CxxLinearCodeGenerator.Inlines.cs b/translator/src/Translator.Core/CodeGen/CxxLinearCodeGenerator.Inlines.cs
-index 5ea4077..1bb8b7f 100644
+index 5ea4077..e416420 100644
 --- a/translator/src/Translator.Core/CodeGen/CxxLinearCodeGenerator.Inlines.cs
 +++ b/translator/src/Translator.Core/CodeGen/CxxLinearCodeGenerator.Inlines.cs
 @@ -173,10 +173,13 @@ public sealed partial class CxxLinearCodeGenerator
@@ -94,16 +94,30 @@ index 5ea4077..1bb8b7f 100644
      }
 
      private readonly record struct PairedInlineSpec(
-@@ -468,57 +472,43 @@ public sealed partial class CxxLinearCodeGenerator
-                     NoNiVariant: false,
-                     ArgumentOrder: argumentOrder));
+@@ -454,75 +458,51 @@ public sealed partial class CxxLinearCodeGenerator
+     {
+         var specs = new Dictionary<string, ScalarInlineSpec>(StringComparer.OrdinalIgnoreCase);
 
--        static void AddHelperNoNi(
+-        static void AddHelper(
 +        static void AddStateful(
              Dictionary<string, ScalarInlineSpec> destination,
              string target,
--            string noNiTarget,
              string helper,
+-            params int[] argumentOrder) =>
+-            destination.Add(
+-                target,
+-                new ScalarInlineSpec(
+-                    ScalarInlineKind.HelperCall,
+-                    helper,
+-                    Operator: null,
+-                    NoNiVariant: false,
+-                    ArgumentOrder: argumentOrder));
+-
+-        static void AddHelperNoNi(
+-            Dictionary<string, ScalarInlineSpec> destination,
+-            string target,
+-            string noNiTarget,
+-            string helper,
 -            string noNiHelper,
              params int[] argumentOrder)
          {
@@ -160,6 +174,10 @@ index 5ea4077..1bb8b7f 100644
 -        AddRoundedBinary(specs, "PPC_FDIVS", "PPC_FDIVSNONI", "/");
 -
 -        AddHelper(specs, "PPC_FSQRT", "std::sqrt", 0);
+-        AddHelper(specs, "PPC_FMADD", "PpcFmaddInline", 0, 1, 2);
+-        AddHelper(specs, "PPC_FMSUB", "PpcFmsubInline", 0, 1, 2);
+-        AddHelper(specs, "PPC_FNMADD", "PpcFnmaddInline", 0, 1, 2);
+-        AddHelper(specs, "PPC_FNMSUB", "PpcFnmsubInline", 0, 1, 2);
 +        AddStatefulNoNi(specs, "PPC_FADDS", "PPC_FADDSNONI", "PpcFaddsStateInline", 0, 1);
 +        AddStatefulNoNi(specs, "PPC_FSUBS", "PPC_FSUBSNONI", "PpcFsubsStateInline", 0, 1);
 +        AddStatefulNoNi(specs, "PPC_FMULS", "PPC_FMULSNONI", "PpcFmulsStateInline", 0, 1);
@@ -173,9 +191,17 @@ index 5ea4077..1bb8b7f 100644
 +        AddStateful(specs, "PPC_FSQRTS", "PpcFsqrtsStateInline", 0);
 +        AddStateful(specs, "PPC_FCTIW", "PpcFctiwStateInline", 0);
 +        AddStateful(specs, "PPC_FCTIWZ", "PpcFctiwzStateInline", 0);
-         AddHelper(specs, "PPC_FMADD", "PpcFmaddInline", 0, 1, 2);
-         AddHelper(specs, "PPC_FMSUB", "PpcFmsubInline", 0, 1, 2);
-         AddHelper(specs, "PPC_FNMADD", "PpcFnmaddInline", 0, 1, 2);
++        AddStateful(specs, "PPC_FMADD", "PpcFmaddStateInline", 0, 1, 2);
++        AddStateful(specs, "PPC_FMSUB", "PpcFmsubStateInline", 0, 1, 2);
++        AddStateful(specs, "PPC_FNMADD", "PpcFnmaddStateInline", 0, 1, 2);
++        AddStateful(specs, "PPC_FNMSUB", "PpcFnmsubStateInline", 0, 1, 2);
++        AddStateful(specs, "PPC_FMADDS", "PpcFmaddsStateInline", 0, 1, 2);
++        AddStateful(specs, "PPC_FMSUBS", "PpcFmsubsStateInline", 0, 1, 2);
++        AddStateful(specs, "PPC_FNMADDS", "PpcFnmaddsStateInline", 0, 1, 2);
++        AddStateful(specs, "PPC_FNMSUBS", "PpcFnmsubsStateInline", 0, 1, 2);
+
+         return specs;
+     }
 diff --git a/translator/tests/Translator.Tests/FloatingLifterTests.cs b/translator/tests/Translator.Tests/FloatingLifterTests.cs
 index 366f0d1..e43e64f 100644
 --- a/translator/tests/Translator.Tests/FloatingLifterTests.cs
@@ -292,10 +318,10 @@ index 366f0d1..e43e64f 100644
      [InlineData(23u, "call", "PPC_Fsel")]
      [InlineData(24u, "call", "PPC_Fres")]
 diff --git a/translator/tests/Translator.Tests/InlineArithmeticTableCodeGenTests.cs b/translator/tests/Translator.Tests/InlineArithmeticTableCodeGenTests.cs
-index df79821..f431343 100644
+index df79821..7f2905d 100644
 --- a/translator/tests/Translator.Tests/InlineArithmeticTableCodeGenTests.cs
 +++ b/translator/tests/Translator.Tests/InlineArithmeticTableCodeGenTests.cs
-@@ -47,15 +47,18 @@ public sealed class InlineArithmeticTableCodeGenTests
+@@ -47,19 +47,26 @@ public sealed class InlineArithmeticTableCodeGenTests
 
      public static IEnumerable<object[]> ScalarCases()
      {
@@ -308,6 +334,10 @@ index df79821..f431343 100644
 -        yield return Case("PPC_Fdivs", "PpcForceSingleValueInline");
 -        yield return Case("PPC_FdivsNoNi", "static_cast<float>");
 -        yield return Case("PPC_Fsqrt", "std::sqrt");
+-        yield return Case("PPC_Fmadd", "PpcFmaddInline");
+-        yield return Case("PPC_Fmsub", "PpcFmsubInline");
+-        yield return Case("PPC_Fnmadd", "PpcFnmaddInline");
+-        yield return Case("PPC_Fnmsub", "PpcFnmsubInline");
 +        yield return Case("PPC_Fadds", "PpcFaddsStateInline");
 +        yield return Case("PPC_FaddsNoNi", "PpcFaddsStateInline");
 +        yield return Case("PPC_Fsubs", "PpcFsubsStateInline");
@@ -320,19 +350,43 @@ index df79821..f431343 100644
 +        yield return Case("PPC_Fsqrts", "PpcFsqrtsStateInline");
 +        yield return Case("PPC_Fctiw", "PpcFctiwStateInline");
 +        yield return Case("PPC_Fctiwz", "PpcFctiwzStateInline");
-         yield return Case("PPC_Fmadd", "PpcFmaddInline");
-         yield return Case("PPC_Fmsub", "PpcFmsubInline");
-         yield return Case("PPC_Fnmadd", "PpcFnmaddInline");
++        yield return Case("PPC_Fmadd", "PpcFmaddStateInline");
++        yield return Case("PPC_Fmsub", "PpcFmsubStateInline");
++        yield return Case("PPC_Fnmadd", "PpcFnmaddStateInline");
++        yield return Case("PPC_Fnmsub", "PpcFnmsubStateInline");
++        yield return Case("PPC_Fmadds", "PpcFmaddsStateInline");
++        yield return Case("PPC_Fmsubs", "PpcFmsubsStateInline");
++        yield return Case("PPC_Fnmadds", "PpcFnmaddsStateInline");
++        yield return Case("PPC_Fnmsubs", "PpcFnmsubsStateInline");
+     }
+
+     [Theory]
+@@ -116,7 +123,7 @@ public sealed class InlineArithmeticTableCodeGenTests
+             IrValue.Imm(2),
+             IrValue.Imm(3));
+
+-        Assert.Contains("PpcFmsubInline(1, 2, 3)", code, StringComparison.Ordinal);
++        Assert.Contains("PpcFmsubStateInline(f0.d, 1, 2, 3)", code, StringComparison.Ordinal);
+     }
+
+     [Fact]
 diff --git a/translator/tests/Translator.Tests/ScalarPairedBoundaryCodeGenTests.cs b/translator/tests/Translator.Tests/ScalarPairedBoundaryCodeGenTests.cs
-index c523a8c..42e3ff8 100644
+index c523a8c..052bd7a 100644
 --- a/translator/tests/Translator.Tests/ScalarPairedBoundaryCodeGenTests.cs
 +++ b/translator/tests/Translator.Tests/ScalarPairedBoundaryCodeGenTests.cs
-@@ -233,7 +233,7 @@ public class ScalarPairedBoundaryCodeGenTests
+@@ -233,11 +233,11 @@ public class ScalarPairedBoundaryCodeGenTests
                  IrValue.Imm(0),
                  "frsp"));
 
 -        Assert.Contains("PpcFmulsInline(", code, StringComparison.Ordinal);
+-        Assert.Contains("PpcFmaddInline(", code, StringComparison.Ordinal);
+-        Assert.Contains("PpcFmsubInline(", code, StringComparison.Ordinal);
+-        Assert.Contains("PpcFnmaddInline(", code, StringComparison.Ordinal);
+-        Assert.Contains("PpcFnmsubInline(", code, StringComparison.Ordinal);
 +        Assert.Contains("PpcFmulsStateInline(f2.d,", code, StringComparison.Ordinal);
-         Assert.Contains("PpcFmaddInline(", code, StringComparison.Ordinal);
-         Assert.Contains("PpcFmsubInline(", code, StringComparison.Ordinal);
-         Assert.Contains("PpcFnmaddInline(", code, StringComparison.Ordinal);
++        Assert.Contains("PpcFmaddStateInline(f5.d,", code, StringComparison.Ordinal);
++        Assert.Contains("PpcFmsubStateInline(f9.d,", code, StringComparison.Ordinal);
++        Assert.Contains("PpcFnmaddStateInline(f13.d,", code, StringComparison.Ordinal);
++        Assert.Contains("PpcFnmsubStateInline(f17.d,", code, StringComparison.Ordinal);
+         Assert.Contains("PpcForceSingleValueInline(", code, StringComparison.Ordinal);
+     }

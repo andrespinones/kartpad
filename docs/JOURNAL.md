@@ -195,3 +195,11 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - Expanded the generated DOL to translate both conversion instructions and an enabled invalid conversion. Runtime evidence proves truncation of 2.75 to word 2, nearest-even to word 3, and preservation of the original 2.75 destination when converting infinity with VE enabled.
 - Result: 250,197 arm64/x86_64 checks match at `0x817dafe156e3268c`; ASan/UBSan and patched translator 573/573 pass; all 10,836 real-title units regenerate and strict-FP syntax-compile.
 - Classification: G6 remains In progress. Fused, estimate, paired-lane exception aggregation, callback execution, and NI scheduler persistence remain.
+
+### G6 translated fused invalid state
+
+- Replaced all eight scalar fused helper emissions (`fmadd`, `fmsub`, `fnmadd`, `fnmsub` and single variants) with destination-by-reference stateful calls. The model preserves PowerPC NaN operand priority (a, b, c), distinguishes invalid product VXIMZ from invalid add VXISI, preserves NaN sign behavior for negative forms, updates FPRF, and suppresses the destination under VE.
+- First patched translator build failed because the last value-only scalar helper builder became unused under warnings-as-errors; removing it exposed one intentional operand-order assertion, which was updated to require the stateful destination-first shape. The changed suite passes 577/577.
+- Expanded the translated DOL with invalid `fmadds` under VE. The runtime keeps the destination at 42.0 while setting VXIMZ; arm64/x86_64 and ASan/UBSan agree.
+- Result: 250,202 checks, identical hash `0x8947f7ff3d2e35f4`, translated final FPSCR `0xe7911183`, and all 10,836 real-title units regenerate and strict-FP syntax-compile.
+- Classification: G6 remains In progress. Estimate/paired exception aggregation, callbacks, and NI scheduler persistence remain.

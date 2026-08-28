@@ -129,6 +129,7 @@ inline constexpr std::uint32_t SetFprf(std::uint32_t fpscr_value,
 }
 
 inline float ForceSingle(double value, bool non_ieee) noexcept;
+inline double Force25Bit(double value) noexcept;
 
 struct ScalarFpResult {
   double value{};
@@ -321,6 +322,48 @@ inline ScalarFpResult EvaluatePpcConvertToInteger(
     result_bits |= 0x0000000100000000ULL;
   return {std::bit_cast<double>(result_bits), fpscr_value, exception,
           !invalid || (fpscr_value & fpscr::VE) == 0};
+}
+
+inline ScalarFpResult EvaluatePpcFused(std::uint32_t fpscr_value, double a,
+                                       double c, double b, bool subtract,
+                                       bool single_precision,
+                                       bool negate_result) noexcept {
+  const double effective_c = single_precision ? Force25Bit(c) : c;
+  std::feclearexcept(FE_ALL_EXCEPT);
+  volatile double computed = std::fma(a, effective_c, subtract ? -b : b);
+  double value = computed;
+  std::uint32_t exception = 0;
+  if (IsSignalingNan(a) || IsSignalingNan(b) || IsSignalingNan(c))
+    exception |= fpscr::VXSNAN;
+
+  if (std::isnan(value)) {
+    fpscr_value &= ~(fpscr::FR | fpscr::FI);
+    if (std::isnan(a))
+      value = QuietNan(a);
+    else if (std::isnan(b))
+      value = QuietNan(b);
+    else if (std::isnan(c))
+      value = QuietNan(c);
+    else {
+      const bool invalid_product =
+          (std::isinf(a) && effective_c == 0.0) ||
+          (a == 0.0 && std::isinf(effective_c));
+      exception |= invalid_product ? fpscr::VXIMZ : fpscr::VXISI;
+      value = std::bit_cast<double>(0x7ff8000000000000ULL);
+    }
+  } else if (negate_result) {
+    value = -value;
+  }
+
+  const int flags = std::fetestexcept(FE_OVERFLOW | FE_UNDERFLOW | FE_INEXACT);
+  if ((flags & FE_OVERFLOW) != 0)
+    exception |= fpscr::OX;
+  if ((flags & FE_UNDERFLOW) != 0)
+    exception |= fpscr::UX;
+  if ((flags & FE_INEXACT) != 0)
+    exception |= fpscr::XX;
+  std::feclearexcept(FE_ALL_EXCEPT);
+  return FinishScalarFp(fpscr_value, value, exception, single_precision);
 }
 
 template <typename T> struct Result {

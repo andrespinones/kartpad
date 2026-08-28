@@ -234,6 +234,14 @@ inline bool PpcFsqrtsStateInline(double& destination,double value){return PpcCom
 inline bool PpcFctiwWithModeStateInline(double& destination,double value,bool towardZero){const auto fpscrValue=g_currentCpuContext?g_currentCpuContext->fpscr:0u;const auto mode=towardZero?FE_TOWARDZERO:((fpscrValue&3u)==1u?FE_TOWARDZERO:(fpscrValue&3u)==2u?FE_UPWARD:(fpscrValue&3u)==3u?FE_DOWNWARD:FE_TONEAREST);return PpcCommitScalarFpInline(destination,kartpad::semantics::EvaluatePpcConvertToInteger(fpscrValue,value,mode));}
 inline bool PpcFctiwStateInline(double& destination,double value){return PpcFctiwWithModeStateInline(destination,value,false);}
 inline bool PpcFctiwzStateInline(double& destination,double value){return PpcFctiwWithModeStateInline(destination,value,true);}
+inline bool PpcFmaddStateInline(double& d,double a,double c,double b){return PpcCommitScalarFpInline(d,kartpad::semantics::EvaluatePpcFused(g_currentCpuContext?g_currentCpuContext->fpscr:0u,a,c,b,false,false,false));}
+inline bool PpcFmsubStateInline(double& d,double a,double c,double b){return PpcCommitScalarFpInline(d,kartpad::semantics::EvaluatePpcFused(g_currentCpuContext?g_currentCpuContext->fpscr:0u,a,c,b,true,false,false));}
+inline bool PpcFnmaddStateInline(double& d,double a,double c,double b){return PpcCommitScalarFpInline(d,kartpad::semantics::EvaluatePpcFused(g_currentCpuContext?g_currentCpuContext->fpscr:0u,a,c,b,false,false,true));}
+inline bool PpcFnmsubStateInline(double& d,double a,double c,double b){return PpcCommitScalarFpInline(d,kartpad::semantics::EvaluatePpcFused(g_currentCpuContext?g_currentCpuContext->fpscr:0u,a,c,b,true,false,true));}
+inline bool PpcFmaddsStateInline(double& d,double a,double c,double b){return PpcCommitScalarFpInline(d,kartpad::semantics::EvaluatePpcFused(g_currentCpuContext?g_currentCpuContext->fpscr:0u,a,c,b,false,true,false));}
+inline bool PpcFmsubsStateInline(double& d,double a,double c,double b){return PpcCommitScalarFpInline(d,kartpad::semantics::EvaluatePpcFused(g_currentCpuContext?g_currentCpuContext->fpscr:0u,a,c,b,true,true,false));}
+inline bool PpcFnmaddsStateInline(double& d,double a,double c,double b){return PpcCommitScalarFpInline(d,kartpad::semantics::EvaluatePpcFused(g_currentCpuContext?g_currentCpuContext->fpscr:0u,a,c,b,false,true,true));}
+inline bool PpcFnmsubsStateInline(double& d,double a,double c,double b){return PpcCommitScalarFpInline(d,kartpad::semantics::EvaluatePpcFused(g_currentCpuContext?g_currentCpuContext->fpscr:0u,a,c,b,true,true,true));}
 extern "C" inline double PPC_Fadds(double a,double b){double result=0;PpcFaddsStateInline(result,a,b);return result;}
 extern "C" inline double PPC_Fsubs(double a,double b){double result=0;PpcFsubsStateInline(result,a,b);return result;}
 extern "C" inline double PPC_Fmuls(double a,double b){return PpcFmulsInline(a,b);}

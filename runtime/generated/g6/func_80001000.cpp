@@ -29,6 +29,7 @@ extern "C" void func_80001000(CpuContext* MKW_RESTRICT ctx)
     PPC_FPR f13 = ctx->fpr[13];
     PPC_FPR f14 = ctx->fpr[14];
     PPC_FPR f15 = ctx->fpr[15];
+    PPC_FPR f16 = ctx->fpr[16];
 
     [[maybe_unused]] uint32_t mkw_gqr0 = ctx->gqr[0];
 
@@ -75,6 +76,8 @@ loc_80001000:
     mkw_gqr0 = ctx->gqr[0];
     PpcFctiwStateInline(f13.d, f9.d);
     mkw_gqr0 = ctx->gqr[0];
+    f16.d = MemoryInline::FlatReadFloat32((r6 + 36));
+    PpcFmaddsStateInline(f16.d, f9.d, f7.d, f1.d);
     ctx->gpr[3] = r3;
     ctx->gpr[4] = r4;
     ctx->gpr[5] = r5;
@@ -94,10 +97,11 @@ loc_80001000:
     ctx->fpr[13] = f13;
     ctx->fpr[14] = f14;
     ctx->fpr[15] = f15;
+    ctx->fpr[16] = f16;
     return;
 }
 
 }
 
 // RECOMP_GUEST_ABI gpr_read=0xFFFFFF87 gpr_write=0xFFFFFFFF gpr_return=0x00000018 fpr_read=0xFFFFC001 fpr_write=0xFFFFFFFF fpr_return=0x00000002 cr_read=0xFF cr_write=0xFF xer_read=1 xer_write=1 fence=1
-// RECOMP_REGISTRATION base 0x80001000 func_80001000 preserves=false fpr_mask=0x0000C000
+// RECOMP_REGISTRATION base 0x80001000 func_80001000 preserves=false fpr_mask=0x0001C000

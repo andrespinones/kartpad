@@ -185,6 +185,27 @@ void ScalarSuite() {
   const auto convertSnan=EvaluatePpcConvertToInteger(0u,snan,FE_TONEAREST);
   Check("fctiw sNaN causes",fpscr::VXSNAN|fpscr::VXCVI,
         convertSnan.exception&fpscr::VX_ANY);
+  const auto fusedProductInvalid=EvaluatePpcFused(
+      0u,std::numeric_limits<double>::infinity(),0.0,1.0,false,false,false);
+  Check("fmadd product invalid",fpscr::VXIMZ,
+        fusedProductInvalid.exception&fpscr::VX_ANY);
+  const auto fusedAddInvalid=EvaluatePpcFused(
+      0u,std::numeric_limits<double>::infinity(),1.0,
+      -std::numeric_limits<double>::infinity(),false,false,false);
+  Check("fmadd add invalid",fpscr::VXISI,
+        fusedAddInvalid.exception&fpscr::VX_ANY);
+  const auto fusedSuppressed=EvaluatePpcFused(
+      fpscr::VE,std::numeric_limits<double>::infinity(),0.0,1.0,
+      false,true,false);
+  Check("fmadds enabled suppress",0u,fusedSuppressed.write_destination?1u:0u);
+  const auto fusedNanOrder=EvaluatePpcFused(
+      0u,std::bit_cast<double>(0x7ff8000000000011ULL),2.0,
+      std::bit_cast<double>(0x7ff8000000000022ULL),false,false,false);
+  Check("fmadd NaN operand order",0x7ff8000000000011ULL,
+        std::bit_cast<std::uint64_t>(fusedNanOrder.value));
+  const auto fusedNegated=EvaluatePpcFused(0u,2.0,3.0,1.0,false,false,true);
+  Check("fnmadd negated",0xc01c000000000000ULL,
+        std::bit_cast<std::uint64_t>(fusedNegated.value));
 }
 
 void EstimateSuite() {
