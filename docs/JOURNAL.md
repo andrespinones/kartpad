@@ -234,3 +234,10 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - Added direct state checks for VE-enabled invalid add, ZE-enabled divide-by-zero, and fused VXIMZ with a finite second lane. Expanded the translated DOL with `ps_add` of `{+inf,-inf}` and its negation under VE; both canonical NaN lanes are written and VXISI becomes sticky.
 - Result: 250,227 checks, identical arm64/x86_64 hash `0xccd5757c4c0643d4`, translated final FPSCR `0xe7991393`, ASan/UBSan Pass, patched translator 579/579, and all 10,836 title units strict-FP syntax-compile.
 - Classification: G6 remains In progress. Translated callback execution and NI scheduler persistence are the next semantic-boundary work.
+
+### G6 translated scheduler/callback boundary and gate pass
+
+- Added a production scheduled-execution bridge that copies every persisted guest CPU field into `CpuContext`, establishes `CpuContextScope`, runs translated/host code with the scheduler lock released, clears the thread-local scope, and commits the complete context before yielding.
+- Extended `GuestCpuContext` through CTR/XER/GQR/system/time-base state. A two-step scheduler fixture enables VE, performs a suppressed translated invalid add, yields, verifies NI/VXISI, enables ZE, performs suppressed reciprocal zero, and exits with NI/VE/ZE/VXISI/ZX plus the original destination intact. Nested host code observes the active context; code outside the callback observes none.
+- Release and ASan/UBSan scheduler suites pass with the unchanged million-operation hash `0x7287563387fb1677`. The G7 translated-frame dispatcher now establishes the same scope and its app target builds cleanly.
+- G6 classification: **Pass**. The 250,227-check arm64/x86_64 differential hash is `0xccd5757c4c0643d4`; Dolphin estimates, sanitizers, patched translator 579/579, translated semantic execution, scheduled persistence, and the complete 10,836-unit PAL title surface have zero unexplained mismatches. G7 becomes the lowest unmet goal.

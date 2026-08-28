@@ -4,7 +4,7 @@ Updated: 2026-08-28
 
 ## Current gate state
 
-G6 remains **In progress**. The portable contract is green on arm64 and x86_64/Rosetta, and every one of the 10,836 C++ units emitted from the exact pinned Mario Kart Wii DOL now compiles against the portable shim. Compilation proves surface ownership, not the remaining exception-state behavior or a running title.
+G6 is **Pass**. The portable contract is green on arm64 and x86_64/Rosetta, stateful translated fixtures pass under sanitizers, scheduled translated execution preserves CPU/FPSCR state across yields and callbacks, and every one of the 10,836 C++ units emitted from the exact pinned Mario Kart Wii DOL compiles against the portable shim. Later game or ghost divergence attributable to semantics reopens this gate immediately.
 
 ## Proven inventory
 
@@ -37,10 +37,10 @@ The read-only WBFS extractor wrote only `private/game-extract/sys/main.dol`; its
 
 The compile pass forced ownership of the emitted state-free ABI, CR/XER, time-base, reservation, string, byte-reverse, scalar/paired FP, stack/dynamic/resolved PSQ, memory-range, GX FIFO, system-register, and indirect-call shapes. Run `./scripts/test-g6-real-dol-surface.sh` after privately extracting the matching user-owned DOL.
 
-## Remaining G6 work
+## Continuing semantic regression requirements
 
-- Execute translated fixtures for non-float GQR types, LR/CTR/stack/varargs, reservations, time-base/system state, and host callbacks; the real-title surface pass currently proves compilation only.
-- Prove NI state across actual scheduler callbacks and persistence boundaries.
-- Keep game/ghost state-hash acceptance pending until a real game runtime exists; any later divergence reopens G6 immediately.
+- Keep the architecture/oracle, translated fixture, scheduler bridge, sanitizer, and complete real-title compile surface green after semantic changes.
+- Reopen G6 on any unexplained raw-result/flag mismatch or reproducible game/ghost state divergence attributable to ARM64 semantics.
+- Game/ghost state-hash acceptance remains a later runtime cross-check, not evidence that can exist before the game runtime.
 
 Run `./scripts/test-ppc-semantics.sh` for the architecture/oracle suite and `./scripts/test-g6-real-dol-surface.sh` for the private real-title compile surface.

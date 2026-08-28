@@ -35,6 +35,7 @@ void UnbindFixtureMemory() {
 }
 
 void RunG7TranslatedFrame(CpuContext& context) {
+  CpuContextScope scope(&context);
   func_80001000(&context);
 }
 

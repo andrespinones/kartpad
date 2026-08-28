@@ -31,5 +31,6 @@ Explicit cooperative guest scheduler/state machine. Translated steps return a ty
 - Shutdown while waiting and shutdown initiated from a running guest step; no state becomes runnable afterward.
 - GPR, PC/LR, CR, FPSCR, all FP bit patterns (including a NaN payload), and a 128-byte SIMD snapshot persist across switches.
 - Snapshot ordering and per-thread names provide bounded watchdog/logging diagnostics.
+- The G6 integration bridge copies the complete translated CPU state into an active scoped `CpuContext`, runs with no scheduler lock held, and commits it back before the step yields. Release and ASan/UBSan prove NI/FPSCR causes, enabled-exception suppression, and host-callback context visibility across two scheduled steps.
 
-Physical iOS background lifecycle remains a later device row. Integration with WiiCompiled's OS HLE and translated call boundaries begins at G6; this G5 result proves the scheduler contract and deterministic backend itself.
+Physical iOS background lifecycle remains a later device row. WiiCompiled translated-call persistence is now integrated and proven at G6; this G5 artifact continues to identify the scheduler's independent deterministic contract.

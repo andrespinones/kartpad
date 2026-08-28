@@ -112,8 +112,10 @@ target_compile_options(kartpad_translated_semantics_fixture PRIVATE
   -Wall -Wextra -Wpedantic -Werror -fno-fast-math -ffp-contract=off -ffp-model=strict)
 add_test(NAME kartpad_translated_semantics_fixture COMMAND kartpad_translated_semantics_fixture)
 
-add_library(kartpad_scheduler STATIC runtime/src/scheduler/guest_scheduler.cpp)
-target_include_directories(kartpad_scheduler PUBLIC runtime/include)
+add_library(kartpad_scheduler STATIC
+  runtime/src/scheduler/guest_scheduler.cpp
+  runtime/src/translation/scheduled_execution.cpp)
+target_include_directories(kartpad_scheduler PUBLIC runtime/include PRIVATE runtime/translation_shim)
 target_compile_features(kartpad_scheduler PUBLIC cxx_std_20)
 target_compile_options(kartpad_scheduler PRIVATE -Wall -Wextra -Wpedantic -Werror)
 
@@ -181,6 +183,7 @@ if(BUILD_TESTING)
   add_test(NAME kartpad.memory.checked COMMAND kartpad_checked_memory_tests)
 
   add_executable(kartpad_scheduler_tests runtime/tests/guest_scheduler_tests.cpp)
+  target_include_directories(kartpad_scheduler_tests PRIVATE runtime/translation_shim)
   target_link_libraries(kartpad_scheduler_tests PRIVATE kartpad_scheduler)
   target_compile_features(kartpad_scheduler_tests PRIVATE cxx_std_20)
   target_compile_options(kartpad_scheduler_tests PRIVATE -Wall -Wextra -Wpedantic -Werror)

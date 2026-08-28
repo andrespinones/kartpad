@@ -18,8 +18,18 @@ struct GuestCpuContext {
   std::array<std::uint8_t, 16 * 8> simd_state{};
   std::uint32_t pc = 0;
   std::uint32_t lr = 0;
+  std::uint32_t ctr = 0;
+  std::uint32_t xer = 0;
   std::uint32_t cr = 0;
   std::uint32_t fpscr = 0;
+  std::array<std::uint32_t, 8> gqr{};
+  std::uint32_t srr0 = 0;
+  std::uint32_t srr1 = 0;
+  std::uint32_t hid0 = 0;
+  std::uint32_t hid1 = 0;
+  std::uint32_t hid2 = 0;
+  std::uint32_t msr = 0;
+  std::uint64_t time_base = 0;
 };
 
 enum class ThreadState {

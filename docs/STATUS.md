@@ -4,7 +4,7 @@ Updated: 2026-08-28
 
 ## Current goal
 
-**G6 — PPC/AArch64 semantics are exact** is the lowest unmet goal. G0–G5 pass. The architecture differential, stateful translated invalid/suppression fixture, and complete 10,836-function Mario Kart Wii translation surface are green; paired-lane exception details and translated callback execution remain open.
+**G7 — Native Metal frame** is the lowest unmet goal. G0–G6 pass. A provisional translated direct-Metal command fixture exists, but Dawn Metal and Aurora/GX presentation are not yet integrated and no game frame is claimed.
 
 ## Goal ledger
 
@@ -16,12 +16,13 @@ Updated: 2026-08-28
 | G3 Host portability | Pass | Native arm64 host library/contracts pass; Darwin graph contains no Win32/x86-only link token; manifest recorded |
 | G4 Guest memory | Pass | Checked Darwin path passes conformance, lifecycle, randomized stress, microprogram, ASan/UBSan; safe Mach VM feasibility probe passes |
 | G5 Guest scheduler | Pass | Explicit state machine passes lifecycle/priority/VI/register tests and two deterministic million-operation runs under Release and ASan/UBSan |
-| G6 PPC/AArch64 semantics | In progress | 250,227-check arm64/x86 differential hashes match; translated scalar/paired arithmetic, estimates, compares, and all 10,836 real-DOL emitted units pass; callback execution and scheduler persistence remain open |
-| G7–G18 | Gated | Provisional direct-Metal translated command frame exists, but it is not Dawn/Aurora, GX, or a game frame |
+| G6 PPC/AArch64 semantics | Pass | 250,227-check arm64/x86 hashes match; Dolphin oracle, sanitizers, translator 579/579, translated scalar/paired state, scheduler/callback persistence, and all 10,836 title units pass |
+| G7 Native Metal frame | In progress | Provisional direct-Metal translated command frame builds; Dawn Metal, Aurora/GX presentation, and first game frame remain |
+| G8–G18 | Gated | Await G7 |
 
 ## Known-good state
 
-- Repository checkpoint: `ffe4a5b` (`origin/main`), translated scalar fused-exception baseline.
+- Repository checkpoint: `f633874` (`origin/main`), complete translated scalar/paired semantic baseline.
 - Simulator state: no Simulator device is booted. KartPad will boot exactly one when a mobile gate requires it.
 - Buildable KartPad targets: host, memory, scheduler, semantic contracts, native subsystem smoke, translated semantic fixture, and provisional translated-frame app.
 - Input profile: WBFS containing clean PAL `RMCP01`, revision 0; original is read-only.
@@ -30,8 +31,8 @@ Updated: 2026-08-28
 - Gameplay baseline: hashed Dolphin 5.0-17995 arm64/Vulkan/HLE binary boots `RMCP01`, creates an isolated license/save, reaches Luigi Circuit and its official staff ghost, and recovers to 60 FPS/VPS after shader warmup.
 - Portability baseline: `kartpad_host` and its contract suite compile/link/run natively for arm64 macOS; manifest is under `docs/artifacts/2026-08-28/`.
 - Memory baseline: checked/table guest memory is the accepted correctness path; evidence is `docs/artifacts/2026-08-28/g4-guest-memory.md`.
-- Scheduler baseline: explicit cooperative state machine, deterministic hash `0x7287563387fb1677`; evidence is `docs/artifacts/2026-08-28/g5-guest-scheduler.md`.
-- Native subsystem preparation: validated Metal/CoreAudio/GameController/storage/network smoke; useful for later gates but not a substitute for G6 semantics.
+- Scheduler baseline: explicit cooperative state machine, deterministic hash `0x7287563387fb1677`, plus translated CPU-context/NI/FPSCR persistence across yields and host callbacks; evidence is `docs/artifacts/2026-08-28/g5-guest-scheduler.md`.
+- Native subsystem preparation: validated Metal/CoreAudio/GameController/storage/network smoke; useful for G7 and later gates.
 - Semantic subset: arm64/x86_64 complete 250,227 checks with state hash `0xccd5757c4c0643d4`; the translated fixture additionally proves VE-enabled paired invalid arithmetic still writes both lanes while aggregating causes. Evidence is `docs/artifacts/2026-08-28/g6-ppc-semantics.md` and `docs/SEMANTICS.md`.
 - Real DOL surface: user-owned `main.dol` matches the pinned PAL hash, translates into 10,836 functions with unsupported instructions disabled, and every emitted unit compiles against the portable shim.
 - Original icon: editable default/dark/tinted SVG masters and opaque exports exist; 1024 px and 16 px visual QA passed. Asset-catalog validation awaits application targets.
@@ -44,7 +45,7 @@ Updated: 2026-08-28
 - WiiCompiled's bundled `MAP.txt` may be used as an ignored local reference, but independent provenance for republishing it is not established; do not copy it into public KartPad sources/artifacts.
 - Dolphin pipe input is accepted for deterministic menus. Live race acceleration/brake semantics remain deliberately unclaimed until a narrow controller fixture distinguishes the observed behavior.
 - G2 audio evidence is limited to emulator execution; subjective audio quality is a future hands-on row and is not claimed.
-- Scalar and paired arithmetic/fused, conversion, estimate, and compare operations now model the covered Broadway state, including paired always-write behavior and lane aggregation. Scheduler/callback execution and persistence still need proof. G6 remains open.
+- The current G7 frame is a deterministic translated command consumed by direct Metal. It is evidence for the translated-to-native boundary only, not Dawn/Aurora, GX correctness, or a Mario Kart Wii frame.
 
 ## UI reference commitment
 

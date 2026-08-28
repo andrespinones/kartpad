@@ -1,4 +1,6 @@
 #include "kartpad/scheduler/guest_scheduler.h"
+#include "kartpad/translation/scheduled_execution.h"
+#include "ppc_runtime.h"
 
 #include <cstdlib>
 #include <iostream>
@@ -246,6 +248,51 @@ void TestMillionOperationsDeterminismAndLifecycleStates() {
           "shutdown during running step was not safe");
 }
 
+void TestTranslatedContextAcrossYieldsAndCallbacks() {
+  GuestScheduler scheduler;
+  GuestCpuContext initial{};
+  initial.fpscr = kartpad::semantics::fpscr::NI;
+  initial.fpr_bits[1] = 0x4045000000000000ULL;
+  initial.fpr_bits[2] = 0x7ff0000000000000ULL;
+  initial.fpr_bits[3] = 0xfff0000000000000ULL;
+  int steps = 0;
+  bool host_callback_saw_context = false;
+  const auto id = scheduler.Create(
+      1, "translated-persistence", initial,
+      [&](GuestCpuContext& scheduled) {
+        kartpad::translation::RunScheduledTranslatedStep(
+            scheduled, [&](CpuContext& active) {
+              host_callback_saw_context = g_currentCpuContext == &active;
+              if (steps == 0) {
+                PPC_Mtfsb1(24);
+                PpcFaddsStateInline(active.fpr[1].d, active.fpr[2].d,
+                                    active.fpr[3].d);
+              } else {
+                Require((active.fpscr & kartpad::semantics::fpscr::NI) != 0,
+                        "NI did not survive scheduler yield");
+                Require((active.fpscr & kartpad::semantics::fpscr::VXISI) != 0,
+                        "FPSCR cause did not survive scheduler yield");
+                PPC_Mtfsb1(27);
+                PpcFresValueStateInline(active.fpr[1].d, 0.0);
+              }
+            });
+        Require(g_currentCpuContext == nullptr,
+                "translated scope leaked past scheduler callback");
+        return ++steps == 1 ? StepAction::Yield() : StepAction::Exit();
+      }, false);
+  Require(scheduler.Run(2) == 2, "translated scheduler fixture did not complete");
+  const auto snapshot = scheduler.Snapshot(id);
+  Require(snapshot.has_value(), "translated scheduler snapshot missing");
+  Require(host_callback_saw_context, "host callback did not inherit active CPU context");
+  Require(snapshot->context.fpr_bits[1] == 0x4045000000000000ULL,
+          "enabled exception destination changed across scheduler callbacks");
+  constexpr std::uint32_t expected = kartpad::semantics::fpscr::NI |
+      kartpad::semantics::fpscr::VE | kartpad::semantics::fpscr::ZE |
+      kartpad::semantics::fpscr::VXISI | kartpad::semantics::fpscr::ZX;
+  Require((snapshot->context.fpscr & expected) == expected,
+          "translated FPSCR state did not persist through scheduler callbacks");
+}
+
 }  // namespace
 
 int main() {
@@ -253,6 +300,7 @@ int main() {
     TestPriorityYieldSleepAlarmAndQueue();
     TestJoinCancelNestedCallbackAndLifecycle();
     TestMillionOperationsDeterminismAndLifecycleStates();
+    TestTranslatedContextAcrossYieldsAndCallbacks();
     std::cout << "KartPad portable guest-scheduler tests passed\n";
     return EXIT_SUCCESS;
   } catch (const std::exception& error) {
