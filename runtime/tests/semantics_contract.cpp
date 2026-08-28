@@ -161,6 +161,30 @@ void ScalarSuite() {
       0u,ScalarFpBinaryOperation::Add,1.0,2.0,true);
   Check("single result FPRF",0x00004000u,
         positiveSingle.fpscr&fpscr::FPRF);
+  const auto convertExact=EvaluatePpcConvertToInteger(
+      0x00005000u,2.0,FE_TONEAREST);
+  Check("fctiw exact bits",0xfff8000000000002ULL,
+        std::bit_cast<std::uint64_t>(convertExact.value));
+  Check("fctiw preserves FPRF",0x00005000u,
+        convertExact.fpscr&fpscr::FPRF);
+  const auto convertInexact=EvaluatePpcConvertToInteger(0u,2.75,FE_TOWARDZERO);
+  Check("fctiw inexact word",0x00000002u,
+        static_cast<std::uint32_t>(std::bit_cast<std::uint64_t>(convertInexact.value)));
+  Check("fctiw FI XX",fpscr::FX|fpscr::FI|fpscr::XX,
+        convertInexact.fpscr&(fpscr::FX|fpscr::FI|fpscr::FR|fpscr::XX));
+  const auto convertUp=EvaluatePpcConvertToInteger(0u,2.25,FE_UPWARD);
+  Check("fctiw FR",fpscr::FR,convertUp.fpscr&fpscr::FR);
+  const auto convertNegativeZero=EvaluatePpcConvertToInteger(0u,-0.0,FE_TOWARDZERO);
+  Check("fctiw negative zero tag",0xfff8000100000000ULL,
+        std::bit_cast<std::uint64_t>(convertNegativeZero.value));
+  const auto convertInvalid=EvaluatePpcConvertToInteger(
+      fpscr::VE,std::numeric_limits<double>::infinity(),FE_TONEAREST);
+  Check("fctiw invalid cause",fpscr::VXCVI,
+        convertInvalid.exception&fpscr::VX_ANY);
+  Check("fctiw invalid suppress",0u,convertInvalid.write_destination?1u:0u);
+  const auto convertSnan=EvaluatePpcConvertToInteger(0u,snan,FE_TONEAREST);
+  Check("fctiw sNaN causes",fpscr::VXSNAN|fpscr::VXCVI,
+        convertSnan.exception&fpscr::VX_ANY);
 }
 
 void EstimateSuite() {

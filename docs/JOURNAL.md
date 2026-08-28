@@ -187,3 +187,11 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - The first translated invalid fixture reported zeros because its checked-memory harness initialized only the older 28-byte data section. Adding +infinity, -infinity, and 42.0 to the harness made the changed run prove canonical invalid NaN with VE disabled, then preservation of 42.0 with VE enabled.
 - Result: arm64/x86_64 each pass 250,188 checks with identical hash `0x09ff7940379dd04a`; ASan/UBSan, Dolphin oracle, patched translator 571/571, and the translated suppression fixture pass. All 10,836 real-title units regenerate and syntax-compile with the patched translator.
 - Classification: G6 remains In progress. Next smallest work is fused/conversion/estimate/paired exception state, followed by translated host callbacks and NI scheduler persistence.
+
+### G6 translated float-to-word conversion state
+
+- Routed `fctiw` and `fctiwz` through stateful translated calls instead of unconditional expression assignments. The pure model now emits the PowerPC `0xfff8...` result layout, preserves FPRF, records FI/FR/XX, raises VXCVI and VXSNAN, and suppresses invalid writes under VE.
+- Replaced ambient-host nearest rounding with an explicit finite ties-to-even implementation, keeping all four guest rounding modes independent of host fenv state.
+- Expanded the generated DOL to translate both conversion instructions and an enabled invalid conversion. Runtime evidence proves truncation of 2.75 to word 2, nearest-even to word 3, and preservation of the original 2.75 destination when converting infinity with VE enabled.
+- Result: 250,197 arm64/x86_64 checks match at `0x817dafe156e3268c`; ASan/UBSan and patched translator 573/573 pass; all 10,836 real-title units regenerate and strict-FP syntax-compile.
+- Classification: G6 remains In progress. Fused, estimate, paired-lane exception aggregation, callback execution, and NI scheduler persistence remain.

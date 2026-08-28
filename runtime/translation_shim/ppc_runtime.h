@@ -231,6 +231,9 @@ inline bool PpcFmulStateInline(double& destination,double a,double b){return Ppc
 inline bool PpcFdivStateInline(double& destination,double a,double b){return PpcCommitScalarFpInline(destination,kartpad::semantics::EvaluatePpcScalarBinary(g_currentCpuContext?g_currentCpuContext->fpscr:0u,kartpad::semantics::ScalarFpBinaryOperation::Divide,a,b,false));}
 inline bool PpcFsqrtStateInline(double& destination,double value){return PpcCommitScalarFpInline(destination,kartpad::semantics::EvaluatePpcSqrt(g_currentCpuContext?g_currentCpuContext->fpscr:0u,value,false));}
 inline bool PpcFsqrtsStateInline(double& destination,double value){return PpcCommitScalarFpInline(destination,kartpad::semantics::EvaluatePpcSqrt(g_currentCpuContext?g_currentCpuContext->fpscr:0u,value,true));}
+inline bool PpcFctiwWithModeStateInline(double& destination,double value,bool towardZero){const auto fpscrValue=g_currentCpuContext?g_currentCpuContext->fpscr:0u;const auto mode=towardZero?FE_TOWARDZERO:((fpscrValue&3u)==1u?FE_TOWARDZERO:(fpscrValue&3u)==2u?FE_UPWARD:(fpscrValue&3u)==3u?FE_DOWNWARD:FE_TONEAREST);return PpcCommitScalarFpInline(destination,kartpad::semantics::EvaluatePpcConvertToInteger(fpscrValue,value,mode));}
+inline bool PpcFctiwStateInline(double& destination,double value){return PpcFctiwWithModeStateInline(destination,value,false);}
+inline bool PpcFctiwzStateInline(double& destination,double value){return PpcFctiwWithModeStateInline(destination,value,true);}
 extern "C" inline double PPC_Fadds(double a,double b){double result=0;PpcFaddsStateInline(result,a,b);return result;}
 extern "C" inline double PPC_Fsubs(double a,double b){double result=0;PpcFsubsStateInline(result,a,b);return result;}
 extern "C" inline double PPC_Fmuls(double a,double b){return PpcFmulsInline(a,b);}
@@ -238,7 +241,7 @@ extern "C" inline double PPC_Fdivs(double a,double b){double result=0;PpcFdivsSt
 extern "C" inline double PPC_Fmadd(double a,double c,double b){const auto v=std::fma(a,c,b);PpcApplyHostFpFlags();return v;}
 extern "C" inline double PPC_Fmsub(double a,double c,double b){const auto v=std::fma(a,c,-b);PpcApplyHostFpFlags();return v;}
 extern "C" inline double PPC_Fsqrt(double value){double result=0;PpcFsqrtStateInline(result,value);return result;}
-extern "C" inline double PPC_Fctiw(double value){const auto mode=g_currentCpuContext?g_currentCpuContext->fpscr&3u:0u;const int hostMode=mode==1?FE_TOWARDZERO:mode==2?FE_UPWARD:mode==3?FE_DOWNWARD:FE_TONEAREST;return std::bit_cast<double>(static_cast<std::uint64_t>(static_cast<std::uint32_t>(kartpad::semantics::ConvertToIntegerWord(value,hostMode))));}
+extern "C" inline double PPC_Fctiw(double value){double result=0;PpcFctiwStateInline(result,value);return result;}
 
 inline thread_local std::array<std::uint32_t,1024> g_ppcSprShadow{};
 extern "C" inline std::uint32_t PPC_ReadSpr(std::uint32_t spr){if(spr>=912u&&spr<=919u)return g_currentCpuContext?g_currentCpuContext->gqr[spr-912u]:0u;if(!g_currentCpuContext)return spr<g_ppcSprShadow.size()?g_ppcSprShadow[spr]:0u;switch(spr){case 1:return g_currentCpuContext->xer;case 8:return g_currentCpuContext->lr;case 9:return g_currentCpuContext->ctr;case 26:return g_currentCpuContext->srr0;case 27:return g_currentCpuContext->srr1;case 920:return g_currentCpuContext->hid2;case 1008:return g_currentCpuContext->hid0;case 1009:return g_currentCpuContext->hid1;default:return spr<g_ppcSprShadow.size()?g_ppcSprShadow[spr]:0u;}}
@@ -296,7 +299,7 @@ inline double PpcFmulsInline(double a,double c) { return static_cast<double>(kar
 inline double PpcFmaddsInline(double a,double c,double b) { return static_cast<double>(kartpad::semantics::ForceSingle(std::fma(a,kartpad::semantics::Force25Bit(c),b))); }
 inline double PpcFmsubsInline(double a,double c,double b) { return static_cast<double>(kartpad::semantics::ForceSingle(std::fma(a,kartpad::semantics::Force25Bit(c),-b))); }
 inline double PPC_Frsqrte(double value) { return kartpad::semantics::ApproximateReciprocalSquareRoot(value); }
-inline double PPC_Fctiwz(double value) { return std::bit_cast<double>(static_cast<std::uint64_t>(static_cast<std::uint32_t>(kartpad::semantics::ConvertToIntegerWord(value,FE_TOWARDZERO)))); }
+inline double PPC_Fctiwz(double value) { double result=0;PpcFctiwzStateInline(result,value);return result; }
 
 #define PPC_PsAddNoNiInline PPC_PsAddInline
 #define PPC_PsSubNoNiInline PPC_PsSubInline

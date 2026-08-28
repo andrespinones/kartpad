@@ -137,6 +137,27 @@ struct ScalarFpResult {
   bool write_destination{true};
 };
 
+inline double RoundToIntegerMode(double value, int rounding_mode) noexcept {
+  switch (rounding_mode) {
+  case FE_TOWARDZERO:
+    return std::trunc(value);
+  case FE_UPWARD:
+    return std::ceil(value);
+  case FE_DOWNWARD:
+    return std::floor(value);
+  default:
+    if (!std::isfinite(value) || std::abs(value) >= 0x1p52)
+      return value;
+    const double lower = std::floor(value);
+    const double fraction = value - lower;
+    if (fraction < 0.5)
+      return lower;
+    if (fraction > 0.5)
+      return lower + 1.0;
+    return std::fmod(std::abs(lower), 2.0) == 0.0 ? lower : lower + 1.0;
+  }
+}
+
 inline ScalarFpResult FinishScalarFp(std::uint32_t fpscr_value, double value,
                                      std::uint32_t exception,
                                      bool single_precision) noexcept {
@@ -253,6 +274,53 @@ inline ScalarFpResult EvaluatePpcSqrt(std::uint32_t fpscr_value, double input,
     std::feclearexcept(FE_ALL_EXCEPT);
   }
   return FinishScalarFp(fpscr_value, value, exception, single_precision);
+}
+
+inline ScalarFpResult EvaluatePpcConvertToInteger(
+    std::uint32_t fpscr_value, double input, int rounding_mode) noexcept {
+  const double rounded = RoundToIntegerMode(input, rounding_mode);
+
+  std::uint32_t word = 0;
+  std::uint32_t exception = 0;
+  bool invalid = false;
+  if (std::isnan(input)) {
+    if (IsSignalingNan(input))
+      exception |= fpscr::VXSNAN;
+    word = 0x80000000u;
+    invalid = true;
+  } else if (rounded >= 2147483648.0) {
+    word = 0x7fffffffu;
+    invalid = true;
+  } else if (rounded < -2147483648.0) {
+    word = 0x80000000u;
+    invalid = true;
+  } else {
+    const auto signed_word = static_cast<std::int32_t>(rounded);
+    word = static_cast<std::uint32_t>(signed_word);
+    if (rounded == input) {
+      fpscr_value &= ~(fpscr::FR | fpscr::FI);
+    } else {
+      exception |= fpscr::XX;
+      fpscr_value |= fpscr::FI;
+      if (std::abs(rounded) > std::abs(input))
+        fpscr_value |= fpscr::FR;
+      else
+        fpscr_value &= ~fpscr::FR;
+    }
+  }
+
+  if (invalid) {
+    exception |= fpscr::VXCVI;
+    fpscr_value &= ~(fpscr::FR | fpscr::FI);
+  }
+  if (exception != 0)
+    fpscr_value = SetFpscrException(fpscr_value, exception);
+
+  std::uint64_t result_bits = 0xfff8000000000000ULL | word;
+  if (word == 0 && std::signbit(input))
+    result_bits |= 0x0000000100000000ULL;
+  return {std::bit_cast<double>(result_bits), fpscr_value, exception,
+          !invalid || (fpscr_value & fpscr::VE) == 0};
 }
 
 template <typename T> struct Result {
@@ -403,13 +471,7 @@ inline std::int32_t ConvertToIntegerWord(double value, int rounding_mode) noexce
     return std::numeric_limits<std::int32_t>::max();
   if (value <= -2147483648.0)
     return std::numeric_limits<std::int32_t>::min();
-  double rounded = value;
-  switch (rounding_mode) {
-    case FE_TOWARDZERO: rounded = std::trunc(value); break;
-    case FE_UPWARD: rounded = std::ceil(value); break;
-    case FE_DOWNWARD: rounded = std::floor(value); break;
-    default: rounded = std::nearbyint(value); break;
-  }
+  const double rounded = RoundToIntegerMode(value, rounding_mode);
   return static_cast<std::int32_t>(rounded);
 }
 

@@ -54,6 +54,7 @@ int main() {
   memory.Store(0x8001101cu,4,0x7f800000u);
   memory.Store(0x80011020u,4,0xff800000u);
   memory.Store(0x80011024u,4,0x42280000u);
+  memory.Store(0x80011028u,4,0x40300000u);
   guest_memory=&memory;
   CpuContext context{};
   { CpuContextScope scope(&context);
@@ -72,6 +73,11 @@ int main() {
     if((context.fpscr&invalidState)!=invalidState ||
        (context.fpscr&kartpad::semantics::fpscr::FPRF)!=0x00011000u)
       throw std::runtime_error("translated invalid FPSCR mismatch");
+    if(context.fpr[14].raw!=0xfff8000000000002ULL ||
+       context.fpr[15].raw!=0xfff8000000000003ULL ||
+       context.fpr[13].raw!=0x4006000000000000ULL ||
+       (context.fpscr&kartpad::semantics::fpscr::VXCVI)==0)
+      throw std::runtime_error("translated fctiw state mismatch");
     const auto overflow=PPC_Addo(0x7fffffffu,1u);
     if(overflow!=0x80000000u||(context.xer&0xc0000000u)!=0xc0000000u)
       throw std::runtime_error("XER overflow mismatch");

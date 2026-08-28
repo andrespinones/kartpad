@@ -1,31 +1,45 @@
 diff --git a/translator/src/Translator.Core/Lifting/PpcLifter.Floating.cs b/translator/src/Translator.Core/Lifting/PpcLifter.Floating.cs
-index e6ee396..f2244ea 100644
+index e6ee396..e5e4d28 100644
 --- a/translator/src/Translator.Core/Lifting/PpcLifter.Floating.cs
 +++ b/translator/src/Translator.Core/Lifting/PpcLifter.Floating.cs
 @@ -44,19 +44,19 @@ public sealed partial class PpcLifter
- 
+
              case "fadd" when operands.Count == 3:
              case "fadd." when operands.Count == 3:
 -                return new[] { new IrBinary(operands[0], IrValue.Register(operands[1]), IrValue.Register(operands[2]), "add") };
 +                return new[] { new IrCall(operands[0], "PPC_Fadd", new[] { IrValue.Register(operands[1]), IrValue.Register(operands[2]) }) };
- 
+
              case "fsub" when operands.Count == 3:
              case "fsub." when operands.Count == 3:
 -                return new[] { new IrBinary(operands[0], IrValue.Register(operands[1]), IrValue.Register(operands[2]), "sub") };
 +                return new[] { new IrCall(operands[0], "PPC_Fsub", new[] { IrValue.Register(operands[1]), IrValue.Register(operands[2]) }) };
- 
+
              case "fmul" when operands.Count == 3:
              case "fmul." when operands.Count == 3:
 -                return new[] { new IrBinary(operands[0], IrValue.Register(operands[1]), IrValue.Register(operands[2]), "mul") };
 +                return new[] { new IrCall(operands[0], "PPC_Fmul", new[] { IrValue.Register(operands[1]), IrValue.Register(operands[2]) }) };
- 
+
              case "fdiv" when operands.Count == 3:
              case "fdiv." when operands.Count == 3:
 -                return new[] { new IrBinary(operands[0], IrValue.Register(operands[1]), IrValue.Register(operands[2]), "fdiv") };
 +                return new[] { new IrCall(operands[0], "PPC_Fdiv", new[] { IrValue.Register(operands[1]), IrValue.Register(operands[2]) }) };
- 
+
              case "fadds" when operands.Count == 3:
              case "fadds." when operands.Count == 3:
+@@ -164,11 +164,11 @@ public sealed partial class PpcLifter
+
+             case "fctiw" when operands.Count == 2:
+             case "fctiw." when operands.Count == 2:
+-                return new[] { new IrBinary(operands[0], IrValue.Register(operands[1]), IrValue.Imm(0), "fctiw") };
++                return new[] { new IrCall(operands[0], "PPC_Fctiw", new[] { IrValue.Register(operands[1]) }) };
+
+             case "fctiwz" when operands.Count == 2:
+             case "fctiwz." when operands.Count == 2:
+-                return new[] { new IrBinary(operands[0], IrValue.Register(operands[1]), IrValue.Imm(0), "fctiwz") };
++                return new[] { new IrCall(operands[0], "PPC_Fctiwz", new[] { IrValue.Register(operands[1]) }) };
+
+             case "fsel" when operands.Count == 4:
+             case "fsel." when operands.Count == 4:
 @@ -223,7 +223,7 @@ public sealed partial class PpcLifter
                          18 => new[] { new IrCall($"f{rD}", "PPC_Fdivs", new[] { IrValue.Register($"f{rA}"), IrValue.Register($"f{rB}") }) }, // fdivs
                          20 => new[] { new IrCall($"f{rD}", "PPC_Fsubs", new[] { IrValue.Register($"f{rA}"), IrValue.Register($"f{rB}") }) }, // fsubs
@@ -36,7 +50,7 @@ index e6ee396..f2244ea 100644
                          24 => new[] { new IrCall($"f{rD}", "PPC_Fres", new[] { IrValue.Register($"f{rB}") }) }, // fres
                          25 => new[] { new IrCall($"f{rD}", "PPC_Fmuls", new[] { IrValue.Register($"f{rA}"), IrValue.Register($"f{rC}") }) }, // fmuls (uses A and C)
 @@ -249,13 +249,13 @@ public sealed partial class PpcLifter
- 
+
                      return xo switch
                      {
 -                        18 => new[] { new IrBinary($"f{rD}", IrValue.Register($"f{rA}"), IrValue.Register($"f{rB}"), "fdiv") },
@@ -54,7 +68,7 @@ index e6ee396..f2244ea 100644
                          28 => new[] { new IrCall($"f{rD}", "PPC_Fmsub", new[] { IrValue.Register($"f{rA}"), IrValue.Register($"f{rC}"), IrValue.Register($"f{rB}") }) }, // fmsub
                          29 => new[] { new IrCall($"f{rD}", "PPC_Fmadd", new[] { IrValue.Register($"f{rA}"), IrValue.Register($"f{rC}"), IrValue.Register($"f{rB}") }) }, // fmadd
 diff --git a/translator/src/Translator.Core/CodeGen/CxxLinearCodeGenerator.Inlines.cs b/translator/src/Translator.Core/CodeGen/CxxLinearCodeGenerator.Inlines.cs
-index 5ea4077..14748ba 100644
+index 5ea4077..1bb8b7f 100644
 --- a/translator/src/Translator.Core/CodeGen/CxxLinearCodeGenerator.Inlines.cs
 +++ b/translator/src/Translator.Core/CodeGen/CxxLinearCodeGenerator.Inlines.cs
 @@ -173,10 +173,13 @@ public sealed partial class CxxLinearCodeGenerator
@@ -70,7 +84,7 @@ index 5ea4077..14748ba 100644
 +                    ? $"{pad}{scalarSpec.Helper}({dest}, {string.Join(", ", arguments)});"
 +                    : $"{pad}{dest} = {expression};");
              }
- 
+
              // Match the old scalar helper cases: a missing destination is a
 @@ -355,6 +358,7 @@ public sealed partial class CxxLinearCodeGenerator
      {
@@ -78,12 +92,12 @@ index 5ea4077..14748ba 100644
          RoundedBinary,
 +        StatefulCall,
      }
- 
+
      private readonly record struct PairedInlineSpec(
-@@ -468,57 +472,41 @@ public sealed partial class CxxLinearCodeGenerator
+@@ -468,57 +472,43 @@ public sealed partial class CxxLinearCodeGenerator
                      NoNiVariant: false,
                      ArgumentOrder: argumentOrder));
- 
+
 -        static void AddHelperNoNi(
 +        static void AddStateful(
              Dictionary<string, ScalarInlineSpec> destination,
@@ -106,7 +120,7 @@ index 5ea4077..14748ba 100644
 +                ScalarInlineKind.StatefulCall, helper, Operator: null,
 +                NoNiVariant: false, ArgumentOrder: argumentOrder));
          }
- 
+
 -        static void AddRoundedBinary(
 +        static void AddStatefulNoNi(
              Dictionary<string, ScalarInlineSpec> destination,
@@ -137,7 +151,7 @@ index 5ea4077..14748ba 100644
 +                ScalarInlineKind.StatefulCall, helper, Operator: null,
 +                NoNiVariant: true, ArgumentOrder: argumentOrder));
          }
- 
+
 -        AddRoundedBinary(specs, "PPC_FADDS", "PPC_FADDSNONI", "+");
 -        AddRoundedBinary(specs, "PPC_FSUBS", "PPC_FSUBSNONI", "-");
 -        AddHelperNoNi(
@@ -157,16 +171,18 @@ index 5ea4077..14748ba 100644
 +
 +        AddStateful(specs, "PPC_FSQRT", "PpcFsqrtStateInline", 0);
 +        AddStateful(specs, "PPC_FSQRTS", "PpcFsqrtsStateInline", 0);
++        AddStateful(specs, "PPC_FCTIW", "PpcFctiwStateInline", 0);
++        AddStateful(specs, "PPC_FCTIWZ", "PpcFctiwzStateInline", 0);
          AddHelper(specs, "PPC_FMADD", "PpcFmaddInline", 0, 1, 2);
          AddHelper(specs, "PPC_FMSUB", "PpcFmsubInline", 0, 1, 2);
          AddHelper(specs, "PPC_FNMADD", "PpcFnmaddInline", 0, 1, 2);
 diff --git a/translator/tests/Translator.Tests/FloatingLifterTests.cs b/translator/tests/Translator.Tests/FloatingLifterTests.cs
-index 366f0d1..f78b019 100644
+index 366f0d1..e43e64f 100644
 --- a/translator/tests/Translator.Tests/FloatingLifterTests.cs
 +++ b/translator/tests/Translator.Tests/FloatingLifterTests.cs
-@@ -53,35 +53,34 @@ public class FloatingLifterTests
+@@ -53,43 +53,40 @@ public class FloatingLifterTests
      }
- 
+
      [Theory]
 -    [InlineData("fadd", "add")]
 -    [InlineData("fsub", "sub")]
@@ -180,7 +196,7 @@ index 366f0d1..f78b019 100644
 +    public void LiftsFloatingBinaryMnemonics(string mnemonic, string target)
      {
          var instruction = FloatingInstruction(0, mnemonic, Fpr(1), Fpr(2), Fpr(3));
- 
+
          var ir = Assert.Single(new PpcLifter().Lift(new[] { instruction })).Ir;
 -        var binary = Assert.IsType<IrBinary>(Assert.Single(ir));
 -        Assert.Equal("f1", binary.Destination);
@@ -192,7 +208,7 @@ index 366f0d1..f78b019 100644
 +        Assert.Equal(target, call.Target);
 +        Assert.Equal(new[] { "f2", "f3" }, call.Arguments.Select(a => a.RegisterName));
      }
- 
+
      [Theory]
 -    [InlineData("fadd.", "add")]
 -    [InlineData("fsub.", "sub")]
@@ -206,7 +222,7 @@ index 366f0d1..f78b019 100644
 +    public void LiftsFloatingBinaryDotMnemonics(string mnemonic, string target)
      {
          var instruction = FloatingInstruction(0, mnemonic, Fpr(1), Fpr(2), Fpr(3));
- 
+
          var ir = Assert.Single(new PpcLifter().Lift(new[] { instruction })).Ir;
 -        var binary = Assert.IsType<IrBinary>(Assert.Single(ir));
 -        Assert.Equal("f1", binary.Destination);
@@ -215,20 +231,56 @@ index 366f0d1..f78b019 100644
 +        Assert.Equal("f1", call.Destination);
 +        Assert.Equal(target, call.Target);
      }
- 
+
      [Theory]
-@@ -205,7 +204,7 @@ public class FloatingLifterTests
+     [InlineData("frsp", "frsp")]
+     [InlineData("fneg", "fneg")]
+     [InlineData("fabs", "fabs")]
+-    [InlineData("fctiw", "fctiw")]
+-    [InlineData("fctiwz", "fctiwz")]
+     public void LiftsFloatingUnaryMnemonics(string mnemonic, string op)
+     {
+         var instruction = FloatingInstruction(0, mnemonic, Fpr(4), Fpr(7));
+@@ -102,12 +99,25 @@ public class FloatingLifterTests
+         Assert.Equal(0, binary.Right.Constant);
      }
- 
+
++    [Theory]
++    [InlineData("fctiw", "PPC_Fctiw")]
++    [InlineData("fctiwz", "PPC_Fctiwz")]
++    [InlineData("fctiw.", "PPC_Fctiw")]
++    [InlineData("fctiwz.", "PPC_Fctiwz")]
++    public void LiftsFloatingConversionsAsStatefulCalls(string mnemonic, string target)
++    {
++        var instruction = FloatingInstruction(0, mnemonic, Fpr(4), Fpr(7));
++        var ir = Assert.Single(new PpcLifter().Lift(new[] { instruction })).Ir;
++        var call = Assert.IsType<IrCall>(Assert.Single(ir));
++        Assert.Equal("f4", call.Destination);
++        Assert.Equal(target, call.Target);
++        Assert.Equal("f7", Assert.Single(call.Arguments).RegisterName);
++    }
++
+     [Theory]
+     [InlineData("frsp.", "frsp")]
+     [InlineData("fneg.", "fneg")]
+     [InlineData("fabs.", "fabs")]
+-    [InlineData("fctiw.", "fctiw")]
+-    [InlineData("fctiwz.", "fctiwz")]
+     public void LiftsFloatingUnaryDotMnemonics(string mnemonic, string op)
+     {
+         var instruction = FloatingInstruction(0, mnemonic, Fpr(4), Fpr(7));
+@@ -205,7 +215,7 @@ public class FloatingLifterTests
+     }
+
      [Theory]
 -    [InlineData(22u, "PPC_Fsqrt", "f2")]
 +    [InlineData(22u, "PPC_Fsqrts", "f2")]
      [InlineData(26u, "PPC_Frsqrte", "f2")]
      [InlineData(29u, "PPC_Fmadds", "f1")]
      [InlineData(30u, "PPC_Fnmsubs", "f1")]
-@@ -231,9 +230,9 @@ public class FloatingLifterTests
+@@ -231,9 +241,9 @@ public class FloatingLifterTests
      }
- 
+
      [Theory]
 -    [InlineData(18u, "binary", "fdiv")]
 -    [InlineData(20u, "binary", "sub")]
@@ -240,11 +292,11 @@ index 366f0d1..f78b019 100644
      [InlineData(23u, "call", "PPC_Fsel")]
      [InlineData(24u, "call", "PPC_Fres")]
 diff --git a/translator/tests/Translator.Tests/InlineArithmeticTableCodeGenTests.cs b/translator/tests/Translator.Tests/InlineArithmeticTableCodeGenTests.cs
-index df79821..3f92fc2 100644
+index df79821..f431343 100644
 --- a/translator/tests/Translator.Tests/InlineArithmeticTableCodeGenTests.cs
 +++ b/translator/tests/Translator.Tests/InlineArithmeticTableCodeGenTests.cs
-@@ -47,15 +47,16 @@ public sealed class InlineArithmeticTableCodeGenTests
- 
+@@ -47,15 +47,18 @@ public sealed class InlineArithmeticTableCodeGenTests
+
      public static IEnumerable<object[]> ScalarCases()
      {
 -        yield return Case("PPC_Fadds", "PpcForceSingleValueInline");
@@ -266,6 +318,8 @@ index df79821..3f92fc2 100644
 +        yield return Case("PPC_FdivsNoNi", "PpcFdivsStateInline");
 +        yield return Case("PPC_Fsqrt", "PpcFsqrtStateInline");
 +        yield return Case("PPC_Fsqrts", "PpcFsqrtsStateInline");
++        yield return Case("PPC_Fctiw", "PpcFctiwStateInline");
++        yield return Case("PPC_Fctiwz", "PpcFctiwzStateInline");
          yield return Case("PPC_Fmadd", "PpcFmaddInline");
          yield return Case("PPC_Fmsub", "PpcFmsubInline");
          yield return Case("PPC_Fnmadd", "PpcFnmaddInline");
@@ -276,7 +330,7 @@ index c523a8c..42e3ff8 100644
 @@ -233,7 +233,7 @@ public class ScalarPairedBoundaryCodeGenTests
                  IrValue.Imm(0),
                  "frsp"));
- 
+
 -        Assert.Contains("PpcFmulsInline(", code, StringComparison.Ordinal);
 +        Assert.Contains("PpcFmulsStateInline(f2.d,", code, StringComparison.Ordinal);
          Assert.Contains("PpcFmaddInline(", code, StringComparison.Ordinal);
