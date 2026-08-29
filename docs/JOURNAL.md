@@ -436,3 +436,15 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - Classification: **Diagnostic only.** PRD row 29 remains open because no two-player standings/result cycle has completed.
 - Evidence: `docs/artifacts/2026-08-29/g10-two-player-race/`.
 - Next step: pursue a normal retail completion path that preserves local-player ownership, then repeat the three/four-player full-race row.
+
+## 2026-08-29 — G10 normal two-player race completion
+
+- Root cause of the apparently unresponsive manual runs: the GUI launch helper retained obsolete `KARTPAD_RKG_AUTOSTART` and `KARTPAD_RKG_INPUT` values after the parent environment was cleared. Renamed the opt-in diagnostic variables to `_V2`; the stale names are inert in the candidate.
+- Tightened GUI keyboard steering independently of physical/touch analog sources: stick pulses are 120 ms at 0.22 normalized magnitude, while gameplay acceleration/reverse retain 500 ms holds and menu-safe keys retain 80 ms pulses.
+- Rebuilt, copied, ad-hoc signed, and strictly verified the native arm64 app. The public runtime patch dry-ran cleanly against the pinned WiiCompiled source.
+- Normal retail setup: two independently registered Classic channels, Mario and Luigi in Standard Kart M with Automatic drift, 100cc VS Solo Race on Luigi Circuit. P1 completed all three laps through live `U`/`M`/`A`/`D` input; P2 stayed independently connected in the lower pane.
+- Both panes reached the retail `FINISH!` transition. The complete standings table followed with Mario 11th/1 point and Luigi 12th/0 points. The active process was the sole KartPad instance; no Dolphin and no Simulator were present.
+- The process still exposed only the obsolete pre-rename diagnostic names inherited by the helper. No `_V2` variables were set and the complete console log contained zero `[input-fixture]` entries, proving the completion was not the RKG diagnostic path.
+- Focused interaction/captures repeatedly displayed 59.5–60.1 FPS, including 60.0 at finish and standings. This passes the functional two-player cadence observation; G11 retains the separate p99/worst-case qualification.
+- Classification: **Pass for PRD row 29.** Evidence and hashes are under `docs/artifacts/2026-08-29/g10-two-player-race/`.
+- Next step: complete PRD row 30 with normal three-player and four-player split-screen races, then continue the remaining G10 matrix.

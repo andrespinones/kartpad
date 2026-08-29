@@ -946,6 +946,7 @@ diff -ruN --exclude=.git --exclude=third_party --exclude=build a/src/hle/input/k
 +constexpr uint32_t kKpadUnifiedStatusSize = 0x38;
 +constexpr uint64_t kSyntheticHoldNs = 500'000'000;
 +constexpr uint64_t kSyntheticMenuHoldNs = 80'000'000;
++constexpr uint64_t kSyntheticStickHoldNs = 120'000'000;
 +constexpr uint8_t kWpadExtensionClassic = 0x02;
 +constexpr uint8_t kWpadFormatClassic = 0x06;
 +constexpr uint32_t kWpadButtonLeft = 0x0001;
@@ -990,13 +991,13 @@ diff -ruN --exclude=.git --exclude=third_party --exclude=build a/src/hle/input/k
 +
 +class RkgInputFixture {
 +public:
-+    bool Arm()
++    bool Arm(bool resume = false)
 +    {
 +        Load();
 +        if (!m_ready) {
 +            return false;
 +        }
-+        m_frame = 0;
++        m_frame = resume ? std::min(m_resumeFrame, m_face.size()) : 0;
 +        m_current = {};
 +        m_started = false;
 +        m_active = true;
@@ -1027,25 +1028,26 @@ diff -ruN --exclude=.git --exclude=third_party --exclude=build a/src/hle/input/k
 +    bool Active() const { return m_active; }
 +    bool AutoArmAtCountdown(uint32_t stage)
 +    {
-+        const char* autoStart = std::getenv("KARTPAD_RKG_AUTOSTART");
++        const char* autoStart = std::getenv("KARTPAD_RKG_AUTOSTART_V2");
 +        if (stage != 1 || autoStart == nullptr || std::strcmp(autoStart, "1") != 0) {
 +            return false;
 +        }
 +        return Arm();
 +    }
-+    bool BeginIfCountdown(uint32_t stage)
++    bool BeginIfRaceActive(uint32_t stage)
 +    {
-+        if (!m_started && stage == 1) {
-+            m_frame = 0;
++        if (!m_started && (stage == 1 || stage == 2)) {
 +            m_started = true;
 +            std::fprintf(stderr,
-+                         "[input-fixture] synchronized at RaceManager COUNTDOWN\n");
++                         "[input-fixture] synchronized at RaceManager stage=%u\n",
++                         stage);
 +        }
 +        return m_started;
 +    }
 +    void Disarm()
 +    {
 +        if (!m_active) return;
++        m_resumeFrame = m_frame;
 +        m_active = false;
 +        m_current = {};
 +        std::fprintf(stderr, "[input-fixture] disarmed at frame=%zu\n", m_frame);
@@ -1144,7 +1146,7 @@ diff -ruN --exclude=.git --exclude=third_party --exclude=build a/src/hle/input/k
 +    {
 +        if (m_loadAttempted) return;
 +        m_loadAttempted = true;
-+        const char* path = std::getenv("KARTPAD_RKG_INPUT");
++        const char* path = std::getenv("KARTPAD_RKG_INPUT_V2");
 +        if (path == nullptr || *path == '\0') return;
 +
 +        std::ifstream stream(path, std::ios::binary);
@@ -1206,6 +1208,7 @@ diff -ruN --exclude=.git --exclude=third_party --exclude=build a/src/hle/input/k
 +    bool m_started = false;
 +    uint8_t m_courseId = 0;
 +    size_t m_frame = 0;
++    size_t m_resumeFrame = 0;
 +    GhostSample m_current{};
 +    std::vector<uint8_t> m_face;
 +    std::vector<uint8_t> m_direction;
@@ -1369,8 +1372,8 @@ diff -ruN --exclude=.git --exclude=third_party --exclude=build a/src/hle/input/k
 +                event->key.scancode == SDL_SCANCODE_B ||
 +                event->key.scancode == SDL_SCANCODE_N;
 +            g_syntheticExpiryNs[scancode].store(
-+                SDL_GetTicksNS() + ((menuKey || stickKey) ?
-+                    kSyntheticMenuHoldNs : kSyntheticHoldNs),
++                SDL_GetTicksNS() + (menuKey ? kSyntheticMenuHoldNs :
++                    stickKey ? kSyntheticStickHoldNs : kSyntheticHoldNs),
 +                std::memory_order_release);
 +        }
 +    }
@@ -1424,7 +1427,7 @@ diff -ruN --exclude=.git --exclude=third_party --exclude=build a/src/hle/input/k
 +{
 +    int keyCount = 0;
 +    const bool* keys = SDL_GetKeyboardState(&keyCount);
-+    constexpr float kKeyboardStickScale = 0.35f;
++    constexpr float kKeyboardStickScale = 0.22f;
 +    const std::array<SDL_Scancode, 4> profile = chan == 0 ?
 +        std::array<SDL_Scancode, 4>{SDL_SCANCODE_A, SDL_SCANCODE_D, SDL_SCANCODE_S, SDL_SCANCODE_W} :
 +        chan == 1 ? std::array<SDL_Scancode, 4>{SDL_SCANCODE_T, SDL_SCANCODE_Y, SDL_SCANCODE_H, SDL_SCANCODE_G} :
@@ -1516,7 +1519,7 @@ diff -ruN --exclude=.git --exclude=third_party --exclude=build a/src/hle/input/k
 +        if (Fixture().Active()) {
 +            Fixture().Disarm();
 +        } else {
-+            Fixture().Arm();
++            Fixture().Arm(true);
 +        }
 +    }
 +    const bool fixtureActive = chan == 0 && Fixture().Active();
@@ -1635,8 +1638,8 @@ diff -ruN --exclude=.git --exclude=third_party --exclude=build a/src/hle/input/k
 +
 +    GhostSample sample;
 +    try {
-+        sample = Fixture().BeginIfCountdown(stage) ? Fixture().Next() :
-+                                                    Fixture().Current();
++        sample = Fixture().BeginIfRaceActive(stage) ? Fixture().Next() :
++                                                     Fixture().Current();
 +    } catch (const Memory::AccessViolation&) {
 +        Fixture().Disarm();
 +        return false;
