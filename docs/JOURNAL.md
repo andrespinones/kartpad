@@ -772,3 +772,10 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - Changed the reproducible Apple-runtime patch and the immediate private generated source to `1.0f`; the arm64 target rebuilt, the patch dry-ran against the pin, the app passed strict signature verification, and live three-player driving showed decisive turn and reverse-turn response.
 - Public patch SHA-256 is `9cda1217ab0f9d16549e19f288bd8c61d9ee38f6729eeb43f0a48700198b8fe5`; closed re-sealed executable SHA-256 is `dee991ea9596cf24b05c3329215722a52238d7c3faf5d4e236fcd157f07eee0f`. Evidence: `docs/artifacts/2026-08-29/g10-keyboard-steering-range.md`.
 - Three private traces remain rejected: the old 8%-range attempt, an over-steered retry with the obsolete cadence, and a calibrated GUI-tap attempt that entered runoff and struck scenery. None reached standings, so row 30 remains open without inflation.
+
+## 2026-08-29 — G10 obsolete-service graceful fallback
+
+- Exercised Nintendo WFC (1P) and Mario Kart Channel in the sole native process. WFC exposed the original data-sharing warning; the privacy-safe Do Not Allow path explicitly disabled WFC and returned to Main Menu. Channel local rankings opened normally.
+- No public-service connection, data consent, Dolphin, or Simulator was used. The private log contains DWC initialization with no error/panic signature; the app closed normally.
+- The live RKSYS remained byte-identical to the all-cups fixture at SHA-256 `f09f809cb13bedb6959cf05aeb550fe7c19db2ea74fcc3cf61665d5b0b7b90ec`. Private trace SHA-256 is `02eb3c43f1d10302301472ae38dadf976c568297aac639a4da28f6123c4fc186`; private log SHA-256 is `71269bd71150c5016ac5d5a252dba92acf9cf59d15340fcb52aeed2f5d5a2e6f`.
+- Evidence: `docs/artifacts/2026-08-29/g10-obsolete-services/`. Its 1,327 audio drops are rejected from audio/performance acceptance.
