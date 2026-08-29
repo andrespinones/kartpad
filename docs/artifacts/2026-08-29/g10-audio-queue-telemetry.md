@@ -17,6 +17,8 @@ The Apple runtime patch now records bounded cumulative telemetry every 8,192 que
 
 The counters add no game data or sample contents to the log. They do not alter queuing, conversion, gain, or timing behavior.
 
+`scripts/summarize-audio-queue.py` strictly parses these content-free lines, rejects malformed/non-monotonic counters and impossible ranges, emits JSON, and can fail a run with `--require-clean`. Its built-in self-test contains only synthetic telemetry.
+
 ## First diagnostic sample
 
 The initial instrumentation candidate built and ran in the signed native arm64 application. During an approximately six-minute title/attract/menu-transition session it recorded:
