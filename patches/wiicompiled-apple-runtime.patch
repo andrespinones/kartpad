@@ -1,4 +1,4 @@
-diff -ruN --exclude=third_party --exclude=build a/CMakeLists.txt b/CMakeLists.txt
+diff -ruN --exclude=.git --exclude=third_party --exclude=build a/CMakeLists.txt b/CMakeLists.txt
 --- a/CMakeLists.txt	2026-08-28 19:57:18
 +++ b/CMakeLists.txt	2026-08-28 19:57:18
 @@ -1,10 +1,9 @@
@@ -85,7 +85,7 @@ diff -ruN --exclude=third_party --exclude=build a/CMakeLists.txt b/CMakeLists.tx
 +endif()
 +include_directories(SYSTEM "${MKW_KARTPAD_RUNTIME_INCLUDE}")
  include("${CMAKE_CURRENT_LIST_DIR}/cmake/PublicProducts.cmake")
-diff -ruN --exclude=third_party --exclude=build a/cmake/PublicProducts.cmake b/cmake/PublicProducts.cmake
+diff -ruN --exclude=.git --exclude=third_party --exclude=build a/cmake/PublicProducts.cmake b/cmake/PublicProducts.cmake
 --- a/cmake/PublicProducts.cmake	2026-08-28 19:57:18
 +++ b/cmake/PublicProducts.cmake	2026-08-28 19:57:18
 @@ -44,7 +44,7 @@
@@ -154,7 +154,7 @@ diff -ruN --exclude=third_party --exclude=build a/cmake/PublicProducts.cmake b/c
 +        target_compile_options(${target} PRIVATE -mcpu=apple-m2)
      endif()
  endforeach()
-diff -ruN --exclude=third_party --exclude=build a/include/audio_backend.h b/include/audio_backend.h
+diff -ruN --exclude=.git --exclude=third_party --exclude=build a/include/audio_backend.h b/include/audio_backend.h
 --- a/include/audio_backend.h	2026-08-28 19:57:18
 +++ b/include/audio_backend.h	2026-08-28 19:57:18
 @@ -44,5 +44,6 @@
@@ -164,10 +164,18 @@ diff -ruN --exclude=third_party --exclude=build a/include/audio_backend.h b/incl
 +    bool m_reportedAudibleBlock = false;
      std::vector<int16_t> m_convertBuffer;
  };
-diff -ruN --exclude=third_party --exclude=build a/include/hle/controller_status_contract.h b/include/hle/controller_status_contract.h
+diff -ruN --exclude=.git --exclude=third_party --exclude=build a/include/hle/controller_status_contract.h b/include/hle/controller_status_contract.h
 --- a/include/hle/controller_status_contract.h	2026-08-28 19:57:18
 +++ b/include/hle/controller_status_contract.h	2026-08-28 19:57:18
-@@ -72,7 +72,8 @@
+@@ -51,6 +51,7 @@
+ inline constexpr int32_t kErrorNotReady = -2;
+ inline constexpr int32_t kErrorBadChannel = -6;
+ inline constexpr int32_t kExtensionCore = 0;
++inline constexpr int32_t kExtensionClassic = 2;
+
+ class State {
+ public:
+@@ -72,7 +73,8 @@
          if (chan >= kChannelCount) {
              return kErrorBadChannel;
          }
@@ -177,7 +185,7 @@ diff -ruN --exclude=third_party --exclude=build a/include/hle/controller_status_
      }
 
  private:
-diff -ruN --exclude=third_party --exclude=build a/include/isa/ppc_isa_config.h b/include/isa/ppc_isa_config.h
+diff -ruN --exclude=.git --exclude=third_party --exclude=build a/include/isa/ppc_isa_config.h b/include/isa/ppc_isa_config.h
 --- a/include/isa/ppc_isa_config.h	2026-08-28 19:57:18
 +++ b/include/isa/ppc_isa_config.h	2026-08-28 19:57:18
 @@ -4,18 +4,41 @@
@@ -223,7 +231,7 @@ diff -ruN --exclude=third_party --exclude=build a/include/isa/ppc_isa_config.h b
 
 
  using MkwStateFreeResult2 = uint64_t __attribute__((ext_vector_type(2)));
-diff -ruN --exclude=third_party --exclude=build a/include/memory_access.h b/include/memory_access.h
+diff -ruN --exclude=.git --exclude=third_party --exclude=build a/include/memory_access.h b/include/memory_access.h
 --- a/include/memory_access.h	2026-08-28 19:57:18
 +++ b/include/memory_access.h	2026-08-28 19:57:18
 @@ -18,8 +18,13 @@
@@ -240,7 +248,7 @@ diff -ruN --exclude=third_party --exclude=build a/include/memory_access.h b/incl
  #define MKW_MEMORY_COLD __attribute__((cold))
  inline constexpr uint32_t kPageShift = 20;
  inline constexpr uint32_t kPageSize = 1u << kPageShift;
-diff -ruN --exclude=third_party --exclude=build a/include/ppc_runtime.h b/include/ppc_runtime.h
+diff -ruN --exclude=.git --exclude=third_party --exclude=build a/include/ppc_runtime.h b/include/ppc_runtime.h
 --- a/include/ppc_runtime.h	2026-08-28 19:57:18
 +++ b/include/ppc_runtime.h	2026-08-28 19:57:18
 @@ -12,3 +12,58 @@
@@ -302,7 +310,7 @@ diff -ruN --exclude=third_party --exclude=build a/include/ppc_runtime.h b/includ
 +    const float lane = static_cast<float>(result.value);
 +    return PpcPackPairedInline(lane, lane);
 +}
-diff -ruN --exclude=third_party --exclude=build a/include/runtime_config.h b/include/runtime_config.h
+diff -ruN --exclude=.git --exclude=third_party --exclude=build a/include/runtime_config.h b/include/runtime_config.h
 --- a/include/runtime_config.h	2026-08-28 19:57:18
 +++ b/include/runtime_config.h	2026-08-28 19:57:18
 @@ -17,6 +17,9 @@
@@ -331,8 +339,8 @@ diff -ruN --exclude=third_party --exclude=build a/include/runtime_config.h b/inc
  #else
      return std::nullopt;
  #endif
-diff -ruN --exclude=third_party --exclude=build a/src/apple/guest_flat_memory_apple.cpp b/src/apple/guest_flat_memory_apple.cpp
---- a/src/apple/guest_flat_memory_apple.cpp	1969-12-31 18:00:00
+diff -ruN --exclude=.git --exclude=third_party --exclude=build a/src/apple/guest_flat_memory_apple.cpp b/src/apple/guest_flat_memory_apple.cpp
+--- a/src/apple/guest_flat_memory_apple.cpp	2026-08-28 19:57:18
 +++ b/src/apple/guest_flat_memory_apple.cpp	2026-08-28 19:57:18
 @@ -0,0 +1,229 @@
 +#include "guest_flat_memory.h"
@@ -564,15 +572,15 @@ diff -ruN --exclude=third_party --exclude=build a/src/apple/guest_flat_memory_ap
 +bool HandleAccessViolation(void*) noexcept { return false; }
 +
 +} // namespace GuestFlat
-diff -ruN --exclude=third_party --exclude=build a/src/apple/host_cpu_baseline_stub.cpp b/src/apple/host_cpu_baseline_stub.cpp
---- a/src/apple/host_cpu_baseline_stub.cpp	1969-12-31 18:00:00
+diff -ruN --exclude=.git --exclude=third_party --exclude=build a/src/apple/host_cpu_baseline_stub.cpp b/src/apple/host_cpu_baseline_stub.cpp
+--- a/src/apple/host_cpu_baseline_stub.cpp	2026-08-28 19:57:18
 +++ b/src/apple/host_cpu_baseline_stub.cpp	2026-08-28 19:57:18
 @@ -0,0 +1,3 @@
 +namespace {
 +[[maybe_unused]] const int kKartPadAppleArm64Baseline = 1;
 +}
-diff -ruN --exclude=third_party --exclude=build a/src/apple/wup028_adapter_stub.cpp b/src/apple/wup028_adapter_stub.cpp
---- a/src/apple/wup028_adapter_stub.cpp	1969-12-31 18:00:00
+diff -ruN --exclude=.git --exclude=third_party --exclude=build a/src/apple/wup028_adapter_stub.cpp b/src/apple/wup028_adapter_stub.cpp
+--- a/src/apple/wup028_adapter_stub.cpp	2026-08-28 19:57:18
 +++ b/src/apple/wup028_adapter_stub.cpp	2026-08-28 19:57:18
 @@ -0,0 +1,17 @@
 +#include "wup028_adapter.h"
@@ -592,7 +600,7 @@ diff -ruN --exclude=third_party --exclude=build a/src/apple/wup028_adapter_stub.
 +bool SetRumble(std::uint32_t, bool) { return false; }
 +
 +}  // namespace Wup028Adapter
-diff -ruN --exclude=third_party --exclude=build a/src/audio_backend.cpp b/src/audio_backend.cpp
+diff -ruN --exclude=.git --exclude=third_party --exclude=build a/src/audio_backend.cpp b/src/audio_backend.cpp
 --- a/src/audio_backend.cpp	2026-08-28 19:57:18
 +++ b/src/audio_backend.cpp	2026-08-28 19:57:18
 @@ -79,6 +79,9 @@
@@ -652,7 +660,7 @@ diff -ruN --exclude=third_party --exclude=build a/src/audio_backend.cpp b/src/au
      }
 
      return true;
-diff -ruN --exclude=third_party --exclude=build a/src/fiber_manager.cpp b/src/fiber_manager.cpp
+diff -ruN --exclude=.git --exclude=third_party --exclude=build a/src/fiber_manager.cpp b/src/fiber_manager.cpp
 --- a/src/fiber_manager.cpp	2026-08-28 19:57:18
 +++ b/src/fiber_manager.cpp	2026-08-28 19:57:18
 @@ -11,8 +11,68 @@
@@ -905,16 +913,17 @@ diff -ruN --exclude=third_party --exclude=build a/src/fiber_manager.cpp b/src/fi
  #else
      (void)guestThreadAddr;
      RT_LOG(RT_TAG_OS) << "Fibers not supported on this platform!" << std::endl;
-diff -ruN --exclude=third_party --exclude=build a/src/hle/input/kpad.cpp b/src/hle/input/kpad.cpp
+diff -ruN --exclude=.git --exclude=third_party --exclude=build a/src/hle/input/kpad.cpp b/src/hle/input/kpad.cpp
 --- a/src/hle/input/kpad.cpp	2026-08-28 19:57:18
 +++ b/src/hle/input/kpad.cpp	2026-08-28 19:57:18
-@@ -1,19 +1,141 @@
+@@ -1,22 +1,276 @@
  #include "hle_stubs.h"
 +#include "memory.h"
 
 +#include <SDL3/SDL_keyboard.h>
 +#include <SDL3/SDL_events.h>
 +#include <SDL3/SDL_scancode.h>
++#include <SDL3/SDL_timer.h>
 +
 +#include <array>
 +#include <atomic>
@@ -924,10 +933,13 @@ diff -ruN --exclude=third_party --exclude=build a/src/hle/input/kpad.cpp b/src/h
 
 +namespace {
 +
-+// Revolution SDK KPADStatus begins with three big-endian button masks.  The
-+// remaining core-remote fields occupy 0x60 bytes before extension data; Mario
-+// Kart's menu path only consumes these masks and the zero-valued status bytes.
-+constexpr uint32_t kKpadCoreStatusSize = 0x60;
++// Exact sizes and offsets from Mario Kart's own byte-matching Revolution SDK
++// headers (KPADStatus 0x84, KPADUnifiedWpadStatus 0x38).
++constexpr uint32_t kKpadStatusSize = 0x84;
++constexpr uint32_t kKpadUnifiedStatusSize = 0x38;
++constexpr uint64_t kSyntheticHoldNs = 500'000'000;
++constexpr uint8_t kWpadExtensionClassic = 0x02;
++constexpr uint8_t kWpadFormatClassic = 0x06;
 +constexpr uint32_t kWpadButtonLeft = 0x0001;
 +constexpr uint32_t kWpadButtonRight = 0x0002;
 +constexpr uint32_t kWpadButtonDown = 0x0004;
@@ -939,8 +951,26 @@ diff -ruN --exclude=third_party --exclude=build a/src/hle/input/kpad.cpp b/src/h
 +constexpr uint32_t kWpadButtonA = 0x0800;
 +constexpr uint32_t kWpadButtonMinus = 0x1000;
 +
++constexpr uint32_t kClassicButtonUp = 0x00000001;
++constexpr uint32_t kClassicButtonLeft = 0x00000002;
++constexpr uint32_t kClassicButtonZr = 0x00000004;
++constexpr uint32_t kClassicButtonX = 0x00000008;
++constexpr uint32_t kClassicButtonA = 0x00000010;
++constexpr uint32_t kClassicButtonY = 0x00000020;
++constexpr uint32_t kClassicButtonB = 0x00000040;
++constexpr uint32_t kClassicButtonZl = 0x00000080;
++constexpr uint32_t kClassicButtonR = 0x00000200;
++constexpr uint32_t kClassicButtonPlus = 0x00000400;
++constexpr uint32_t kClassicButtonMinus = 0x00001000;
++constexpr uint32_t kClassicButtonL = 0x00002000;
++constexpr uint32_t kClassicButtonDown = 0x00004000;
++constexpr uint32_t kClassicButtonRight = 0x00008000;
++
 +std::array<uint32_t, 4> g_previousButtons{};
++std::array<uint32_t, 4> g_previousClassicButtons{};
 +std::atomic<uint32_t> g_pendingPresses{0};
++std::atomic<uint32_t> g_pendingClassicPresses{0};
++std::array<std::atomic<uint64_t>, SDL_SCANCODE_COUNT> g_syntheticExpiryNs{};
 +
 +uint32_t ButtonForScancode(SDL_Scancode code)
 +{
@@ -959,11 +989,40 @@ diff -ruN --exclude=third_party --exclude=build a/src/hle/input/kpad.cpp b/src/h
 +    }
 +}
 +
++uint32_t ClassicButtonForScancode(SDL_Scancode code)
++{
++    switch (code) {
++    case SDL_SCANCODE_RETURN: return kClassicButtonA;
++    case SDL_SCANCODE_BACKSPACE: return kClassicButtonB;
++    case SDL_SCANCODE_SPACE: return kClassicButtonPlus;
++    case SDL_SCANCODE_Q: return kClassicButtonB;
++    case SDL_SCANCODE_E: return kClassicButtonR;
++    case SDL_SCANCODE_ESCAPE: return kClassicButtonMinus;
++    case SDL_SCANCODE_LEFT: return kClassicButtonLeft;
++    case SDL_SCANCODE_RIGHT: return kClassicButtonRight;
++    case SDL_SCANCODE_DOWN: return kClassicButtonDown;
++    case SDL_SCANCODE_UP: return kClassicButtonUp;
++    case SDL_SCANCODE_X: return kClassicButtonX;
++    case SDL_SCANCODE_C: return kClassicButtonY;
++    case SDL_SCANCODE_Z: return kClassicButtonZl;
++    case SDL_SCANCODE_V: return kClassicButtonZr;
++    default: return 0;
++    }
++}
++
 +bool SDLCALL WatchKeyboardEvent(void*, SDL_Event* event)
 +{
 +    if (event->type == SDL_EVENT_KEY_DOWN && !event->key.repeat) {
 +        g_pendingPresses.fetch_or(ButtonForScancode(event->key.scancode),
 +                                  std::memory_order_release);
++        g_pendingClassicPresses.fetch_or(
++            ClassicButtonForScancode(event->key.scancode),
++            std::memory_order_release);
++        const auto scancode = static_cast<size_t>(event->key.scancode);
++        if (scancode < g_syntheticExpiryNs.size()) {
++            g_syntheticExpiryNs[scancode].store(
++                SDL_GetTicksNS() + kSyntheticHoldNs, std::memory_order_release);
++        }
 +    }
 +    return true;
 +}
@@ -974,13 +1033,20 @@ diff -ruN --exclude=third_party --exclude=build a/src/hle/input/kpad.cpp b/src/h
 +    (void)installed;
 +}
 +
++bool IsKeyDown(const bool* keys, int keyCount, SDL_Scancode code)
++{
++    const auto scancode = static_cast<size_t>(code);
++    const bool physicallyDown = static_cast<int>(code) < keyCount && keys[code];
++    const bool syntheticallyDown = scancode < g_syntheticExpiryNs.size() &&
++        g_syntheticExpiryNs[scancode].load(std::memory_order_acquire) > SDL_GetTicksNS();
++    return physicallyDown || syntheticallyDown;
++}
++
 +uint32_t ReadKeyboardButtons()
 +{
 +    int keyCount = 0;
 +    const bool* keys = SDL_GetKeyboardState(&keyCount);
-+    const auto down = [&](SDL_Scancode code) {
-+        return static_cast<int>(code) < keyCount && keys[code];
-+    };
++    const auto down = [&](SDL_Scancode code) { return IsKeyDown(keys, keyCount, code); };
 +
 +    uint32_t buttons = 0;
 +    if (down(SDL_SCANCODE_RETURN)) buttons |= kWpadButtonA;
@@ -996,16 +1062,55 @@ diff -ruN --exclude=third_party --exclude=build a/src/hle/input/kpad.cpp b/src/h
 +    return buttons;
 +}
 +
-+void WriteCoreStatus(uint32_t address, uint32_t hold, uint32_t trigger,
-+                     uint32_t release)
++uint32_t ReadClassicButtons()
 +{
-+    auto* status = Memory::GetPointer(address, kKpadCoreStatusSize);
-+    std::memset(status, 0, kKpadCoreStatusSize);
++    int keyCount = 0;
++    const bool* keys = SDL_GetKeyboardState(&keyCount);
++    uint32_t buttons = 0;
++    for (const auto code : {SDL_SCANCODE_RETURN, SDL_SCANCODE_BACKSPACE,
++                            SDL_SCANCODE_SPACE, SDL_SCANCODE_Q, SDL_SCANCODE_E,
++                            SDL_SCANCODE_ESCAPE, SDL_SCANCODE_LEFT,
++                            SDL_SCANCODE_RIGHT, SDL_SCANCODE_DOWN, SDL_SCANCODE_UP,
++                            SDL_SCANCODE_X, SDL_SCANCODE_C, SDL_SCANCODE_Z,
++                            SDL_SCANCODE_V}) {
++        if (IsKeyDown(keys, keyCount, code)) {
++            buttons |= ClassicButtonForScancode(code);
++        }
++    }
++    return buttons;
++}
++
++std::array<float, 2> ReadClassicLeftStick()
++{
++    int keyCount = 0;
++    const bool* keys = SDL_GetKeyboardState(&keyCount);
++    constexpr float kKeyboardStickScale = 0.35f;
++    const float x = kKeyboardStickScale *
++                    ((IsKeyDown(keys, keyCount, SDL_SCANCODE_D) ? 1.0f : 0.0f) -
++                     (IsKeyDown(keys, keyCount, SDL_SCANCODE_A) ? 1.0f : 0.0f));
++    const float y = kKeyboardStickScale *
++                    ((IsKeyDown(keys, keyCount, SDL_SCANCODE_W) ? 1.0f : 0.0f) -
++                     (IsKeyDown(keys, keyCount, SDL_SCANCODE_S) ? 1.0f : 0.0f));
++    return {x, y};
++}
++
++void WriteClassicStatus(uint32_t address, uint32_t hold, uint32_t trigger,
++                        uint32_t release, uint32_t classicHold,
++                        uint32_t classicTrigger, uint32_t classicRelease)
++{
++    auto* status = Memory::GetPointer(address, kKpadStatusSize);
++    std::memset(status, 0, kKpadStatusSize);
 +    Memory::Write32(address + 0x00, hold);
 +    Memory::Write32(address + 0x04, trigger);
 +    Memory::Write32(address + 0x08, release);
-+    // 0x5c extension type = core, 0x5d error = success,
-+    // 0x5e DPD invalid, 0x5f core data format; memset supplied all four.
++    Memory::Write8(address + 0x5C, kWpadExtensionClassic);
++    Memory::Write8(address + 0x5F, kWpadFormatClassic);
++    Memory::Write32(address + 0x60, classicHold);
++    Memory::Write32(address + 0x64, classicTrigger);
++    Memory::Write32(address + 0x68, classicRelease);
++    const auto stick = ReadClassicLeftStick();
++    Memory::WriteFloat32(address + 0x6C, stick[0]);
++    Memory::WriteFloat32(address + 0x70, stick[1]);
 +}
 +
 +} // namespace
@@ -1028,14 +1133,30 @@ diff -ruN --exclude=third_party --exclude=build a/src/hle/input/kpad.cpp b/src/h
 +
 +    const uint32_t pending = chan == 0 ?
 +        g_pendingPresses.exchange(0, std::memory_order_acq_rel) : 0;
++    const uint32_t pendingClassic = chan == 0 ?
++        g_pendingClassicPresses.exchange(0, std::memory_order_acq_rel) : 0;
 +    const uint32_t hold = chan == 0 ? (ReadKeyboardButtons() | pending) : 0;
++    const uint32_t classicHold = chan == 0 ?
++        (ReadClassicButtons() | pendingClassic) : 0;
 +    const uint32_t previous = g_previousButtons[chan];
++    const uint32_t previousClassic = g_previousClassicButtons[chan];
 +    const uint32_t trigger = pending | (hold & ~previous);
 +    const uint32_t release = previous & ~hold;
++    const uint32_t classicTrigger = pendingClassic | (classicHold & ~previousClassic);
++    const uint32_t classicRelease = previousClassic & ~classicHold;
 +    g_previousButtons[chan] = hold;
++    g_previousClassicButtons[chan] = classicHold;
++
++    if (trigger != 0 || classicTrigger != 0) {
++        const auto stick = ReadClassicLeftStick();
++        std::fprintf(stderr,
++                     "[input] sample core=%08x classic=%08x stick=(%.1f,%.1f)\n",
++                     trigger, classicTrigger, stick[0], stick[1]);
++    }
 +
 +    try {
-+        WriteCoreStatus(statusPtr, hold, trigger, release);
++        WriteClassicStatus(statusPtr, hold, trigger, release, classicHold,
++                           classicTrigger, classicRelease);
 +    } catch (const Memory::AccessViolation&) {
 +        return 0;
 +    }
@@ -1046,15 +1167,40 @@ diff -ruN --exclude=third_party --exclude=build a/src/hle/input/kpad.cpp b/src/h
 
  extern "C" int32_t KPAD__GetUnifiedWpadStatus_HLE(uint32_t chan, uint32_t statusPtr, uint32_t count)
  {
+-    (void)chan;
+-    (void)statusPtr;
+-    (void)count;
 +    static bool logged = false;
 +    if (!logged) {
 +        std::fprintf(stderr, "[input] KPADGetUnifiedWpadStatus active: chan=%u count=%u\n", chan, count);
 +        logged = true;
 +    }
-     (void)chan;
-     (void)statusPtr;
-     (void)count;
-diff -ruN --exclude=third_party --exclude=build a/src/hle/input/pad.cpp b/src/hle/input/pad.cpp
++    if (chan != 0 || statusPtr == 0 || count == 0) {
++        return 0;
++    }
++    EnsureKeyboardWatch();
++    try {
++        auto* status = Memory::GetPointer(statusPtr, kKpadUnifiedStatusSize);
++        std::memset(status, 0, kKpadUnifiedStatusSize);
++        Memory::Write16(statusPtr + 0x00,
++                        static_cast<uint16_t>(ReadKeyboardButtons()));
++        Memory::Write8(statusPtr + 0x28, kWpadExtensionClassic);
++        Memory::Write16(statusPtr + 0x2A,
++                        static_cast<uint16_t>(ReadClassicButtons()));
++        const auto stick = ReadClassicLeftStick();
++        const auto stickX = static_cast<int16_t>(stick[0] * 511.0f);
++        const auto stickY = static_cast<int16_t>(stick[1] * 511.0f);
++        Memory::Write16(statusPtr + 0x2C, static_cast<uint16_t>(stickX));
++        Memory::Write16(statusPtr + 0x2E, static_cast<uint16_t>(stickY));
++        // In Mario Kart's 2008 SDK this byte follows the 0x36-byte WPADCLStatus.
++        Memory::Write8(statusPtr + 0x36, kWpadFormatClassic);
++    } catch (const Memory::AccessViolation&) {
++        return 0;
++    }
+     return 0;
+ }
+ PPC_NATIVE_OVERRIDE(8019812C, KPAD__GetUnifiedWpadStatus_HLE, int32_t,
+diff -ruN --exclude=.git --exclude=third_party --exclude=build a/src/hle/input/pad.cpp b/src/hle/input/pad.cpp
 --- a/src/hle/input/pad.cpp	2026-08-28 19:57:18
 +++ b/src/hle/input/pad.cpp	2026-08-28 19:57:18
 @@ -9,6 +9,7 @@
@@ -1120,7 +1266,7 @@ diff -ruN --exclude=third_party --exclude=build a/src/hle/input/pad.cpp b/src/hl
  }
  PPC_NATIVE_OVERRIDE(801AF2F0, PAD__Init_HLE, uint32_t, (), ());
 
-diff -ruN --exclude=third_party --exclude=build a/src/hle/input/wpad.cpp b/src/hle/input/wpad.cpp
+diff -ruN --exclude=.git --exclude=third_party --exclude=build a/src/hle/input/wpad.cpp b/src/hle/input/wpad.cpp
 --- a/src/hle/input/wpad.cpp	2026-08-28 19:57:18
 +++ b/src/hle/input/wpad.cpp	2026-08-28 19:57:18
 @@ -3,6 +3,7 @@
@@ -1131,9 +1277,12 @@ diff -ruN --exclude=third_party --exclude=build a/src/hle/input/wpad.cpp b/src/h
 
  void NandQueueIosCallback(uint32_t callbackPtr, int32_t result, uint32_t callbackArg);
 
-@@ -113,7 +114,7 @@
+@@ -111,9 +112,9 @@
+     }
+
      if (typePtr != 0) {
-         Memory::Write32(typePtr, WpadContract::kExtensionCore);
+-        Memory::Write32(typePtr, WpadContract::kExtensionCore);
++        Memory::Write32(typePtr, WpadContract::kExtensionClassic);
      }
 -    return WpadContract::kErrorNoController;
 +    return chan == 0 ? kStatusOk : WpadContract::kErrorNoController;
@@ -1169,7 +1318,7 @@ diff -ruN --exclude=third_party --exclude=build a/src/hle/input/wpad.cpp b/src/h
  }
  PPC_NATIVE_OVERRIDE(801C0FF8, WPADControlLed_HLE, int32_t,
           (uint32_t chan, uint32_t ledMask, uint32_t callback), (chan, ledMask, callback));
-diff -ruN --exclude=third_party --exclude=build a/src/memory.cpp b/src/memory.cpp
+diff -ruN --exclude=.git --exclude=third_party --exclude=build a/src/memory.cpp b/src/memory.cpp
 --- a/src/memory.cpp	2026-08-28 19:57:18
 +++ b/src/memory.cpp	2026-08-28 19:57:18
 @@ -23,8 +23,10 @@
@@ -1183,7 +1332,7 @@ diff -ruN --exclude=third_party --exclude=build a/src/memory.cpp b/src/memory.cp
 
  MemoryInline::PageEntry MemoryInline::g_pageTable[MemoryInline::kPageCount]{};
  uintptr_t MemoryInline::g_fullPageBias[MemoryInline::kPageCount]{};
-diff -ruN --exclude=third_party --exclude=build a/src/system_bridge.cpp b/src/system_bridge.cpp
+diff -ruN --exclude=.git --exclude=third_party --exclude=build a/src/system_bridge.cpp b/src/system_bridge.cpp
 --- a/src/system_bridge.cpp	2026-08-28 19:57:18
 +++ b/src/system_bridge.cpp	2026-08-28 19:57:18
 @@ -12,7 +12,9 @@
