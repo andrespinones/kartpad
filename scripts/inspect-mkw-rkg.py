@@ -201,6 +201,40 @@ def _self_test() -> None:
     assert _summarize_stream(b"\x20\x00", trick=True).frames == 1
     assert _summarize_stream(b"\x2f\xff", trick=True).frames == 4095
 
+    def summary(course_id: int, direction_frames: int = 60) -> RkgSummary:
+        stream = StreamSummary(sequences=1, frames=60)
+        return RkgSummary(
+            file=f"ghost_{course_id:02d}.rkg",
+            compressed=True,
+            race_time_ms=1000,
+            course_id=course_id,
+            vehicle_id=0,
+            character_id=0,
+            controller_id=0,
+            year=8,
+            month=1,
+            day=1,
+            ghost_type=1,
+            drift_is_auto=False,
+            inputs_size=16,
+            face=stream,
+            direction=StreamSummary(sequences=1, frames=direction_frames),
+            trick=stream,
+        )
+
+    require_course_matrix([summary(course) for course in range(32)])
+    for invalid in (
+        [summary(course) for course in range(31)],
+        [summary(course) for course in range(31)] + [summary(30)],
+        [summary(course, 59 if course == 7 else 60) for course in range(32)],
+    ):
+        try:
+            require_course_matrix(invalid)
+        except RkgError:
+            pass
+        else:
+            raise AssertionError("invalid course matrix was accepted")
+
 
 def _paths(source: Path) -> list[Path]:
     if source.is_file():
@@ -210,10 +244,53 @@ def _paths(source: Path) -> list[Path]:
     raise RkgError(f"path does not exist: {source}")
 
 
+def require_course_matrix(summaries: list[RkgSummary]) -> None:
+    """Require one structurally consistent staff ghost for every retail course."""
+    expected = set(range(32))
+    observed = [summary.course_id for summary in summaries]
+    duplicates = sorted({course for course in observed if observed.count(course) > 1})
+    missing = sorted(expected - set(observed))
+    unexpected = sorted(set(observed) - expected)
+
+    problems: list[str] = []
+    if len(summaries) != len(expected):
+        problems.append(f"expected 32 files, found {len(summaries)}")
+    if duplicates:
+        problems.append(f"duplicate course ids: {duplicates}")
+    if missing:
+        problems.append(f"missing course ids: {missing}")
+    if unexpected:
+        problems.append(f"unexpected course ids: {unexpected}")
+
+    inconsistent = sorted(
+        summary.course_id
+        for summary in summaries
+        if len({summary.face.frames, summary.direction.frames, summary.trick.frames}) != 1
+    )
+    if inconsistent:
+        problems.append(f"mismatched input-stream frame counts: {inconsistent}")
+
+    empty = sorted(
+        summary.course_id
+        for summary in summaries
+        if summary.race_time_ms <= 0 or summary.inputs_size <= 0
+    )
+    if empty:
+        problems.append(f"empty time or input payload: {empty}")
+
+    if problems:
+        raise RkgError("invalid retail course matrix: " + "; ".join(problems))
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("source", type=Path, nargs="?", help="RKG file or directory")
     parser.add_argument("--json", action="store_true", help="emit JSON")
+    parser.add_argument(
+        "--require-course-matrix",
+        action="store_true",
+        help="require exactly one consistent RKG for each retail course id 0..31",
+    )
     parser.add_argument("--self-test", action="store_true", help="run data-free parser tests")
     args = parser.parse_args()
 
@@ -229,6 +306,8 @@ def main() -> int:
         summaries = [inspect_rkg(path) for path in _paths(args.source)]
         if not summaries:
             raise RkgError("no RKG files found")
+        if args.require_course_matrix:
+            require_course_matrix(summaries)
 
         if args.json:
             print(json.dumps([asdict(summary) for summary in summaries], indent=2))
@@ -243,6 +322,8 @@ def main() -> int:
                     f"frames={summary.face.frames}/"
                     f"{summary.direction.frames}/{summary.trick.frames}"
                 )
+            if args.require_course_matrix:
+                print("Retail course matrix passed: 32/32 unique course ids.")
         return 0
     except (OSError, RkgError, AssertionError) as error:
         print(f"ERROR: {error}", file=sys.stderr)

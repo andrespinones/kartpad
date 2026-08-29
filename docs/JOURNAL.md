@@ -478,3 +478,12 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - Added `scripts/summarize-audio-queue.py`, a strict content-free telemetry parser with JSON output, monotonic/range checks, `--require-clean`, and a synthetic self-test. It accepts the clean uncontended log and correctly rejects both load-contended runs once their cumulative drop count becomes nonzero.
 - Classification: **In progress for PRD row 33.** Bounded telemetry and uncontended queue continuity are healthy; gameplay/pause, device-change, and long-session evidence remain open. Evidence: `docs/artifacts/2026-08-29/g10-audio-queue-telemetry.md`.
 - Next step: combine the telemetry with the three-player race and audio-transition playtest after host contention clears.
+
+## 2026-08-29 — G10 retail-course oracle preflight
+
+- Parked the live three-player cadence run when eight unrelated `dolrecomp` workers saturated the host; observed 13–18 FPS and audio drops are explicitly rejected as product-performance evidence. The sole KartPad process was returned to Main Menu and closed cleanly. No Simulator was booted.
+- Extended the content-free RKG inspector with `--require-course-matrix`. It now rejects missing or duplicate course IDs, unexpected IDs, mismatched face/direction/trick frame counts, empty times, and empty input payloads.
+- The data-free self-test covers a valid 32-course matrix and three invalid variants. A one-file negative test exits 1, and the repository safety audit passes.
+- Both private disc-derived staff sets pass the strict matrix: 32 files and exactly one input for every retail course ID `0..31`. No RKG payload or other private game content enters the publishable tree.
+- Classification: **Preparation pass, not PRD row 22 acceptance.** The complete native per-track execution matrix remains open. Evidence: `docs/artifacts/2026-08-29/g10-retail-course-oracle.md`.
+- Next step: use the validated oracle inventory to drive bounded native course-completion checks while returning to the three-/four-player row after unrelated host contention clears.
