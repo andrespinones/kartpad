@@ -36,7 +36,7 @@ real finish transition; boot screenshots do not qualify.
 | Leaf | GBA Bowser Castle 3 | 30 | Open | — |
 | Leaf | N64 DK's Jungle Parkway | 29 | Open | — |
 | Leaf | GCN Mario Circuit | 17 | Open | — |
-| Lightning | SNES Mario Circuit 3 | 24 | Open | — |
+| Lightning | SNES Mario Circuit 3 | 24 | Pass | Native regular-staff replay exactly matches 6,167 input frames: stage 2 `240..6166`, 5,927 samples, then stage 4 |
 | Lightning | DS Peach Gardens | 22 | Open | — |
 | Lightning | GCN DK Mountain | 19 | Open | — |
 | Lightning | N64 Bowser's Castle | 28 | Open | — |
@@ -195,4 +195,15 @@ completion are independent of that wall-clock contention.
 - Ice, snow, water reflections, penguins, and transparent ghost rendering remained intact. GUI sampling observed temporary readings around 45–54 FPS under host load; this is retained as a performance observation.
 - Private log SHA-256 `e08a09425dcf787670131e761000c25b23c3bb1afa90f5a2e74ef1fd9812d0af` recorded 14 audio-queue drops, so this run is rejected from audio-row acceptance.
 
-Current row 22 status: **16/32 Pass; 16 Open.** Mushroom, Flower, Shell, and Banana Cups each have complete four-track evidence.
+## SNES Mario Circuit 3 exact run
+
+- Product: sole native arm64 KartPad process launched with the process-local trace helper; no Dolphin and no Simulator.
+- Test precondition: the user's own private all-cups fixture documented in `docs/artifacts/2026-08-29/g10-all-cups-fixture.md`. This enables track access only and is not progression evidence.
+- Executable SHA-256: `fa86a907ca2bebbc72eec1baf02cd83f3ceb816e584e33ed3dd23926ab945545`.
+- Retail UI path: Time Trials → Lightning Cup → SNES Mario Circuit 3 → regular Nintendo staff data `Nin★iwaco 01:38.880` → Watch Replay.
+- Private trace SHA-256: `1cdad62c99dd8e1bcede3c14f9ceb3033a9a319902e175eda3c7c2740195fa17`.
+- Strict assertion: `scripts/summarize-mkw-state-trace.py --require-complete --expected-input-frames 6167`.
+- Result: the accepted segment begins at race time 240, ends at 6166, contains 5,927 consecutive stage-2 samples, and is followed by stage 4. A separate 74-frame unfinished segment is ignored; the later incomplete segment is the retail automatic replay loop.
+- Focused observations displayed 60 FPS through flat-color geometry, barriers, transparency, and boost effects. Private log SHA-256 `bcbc782c220fad8fb0850d9540d37f2eaf7f46ffcf0ff045ef069c958f55aec7` recorded 17 audio-queue drops, rejected from audio-row acceptance.
+
+Current row 22 status: **17/32 Pass; 15 Open.** Mushroom, Flower, Shell, and Banana Cups each have complete four-track evidence; Lightning Cup is 1/4.

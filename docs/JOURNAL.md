@@ -626,3 +626,19 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - The private trace SHA-256 is `877c38399ac6eaacecb0242a6183a2f6c267d711bc54f584e1ce7770d375ddf4`; the exact executable SHA-256 is `fa86a907ca2bebbc72eec1baf02cd83f3ceb816e584e33ed3dd23926ab945545`.
 - Ice, snow, reflections, penguins, and ghost transparency remained intact. GUI samples temporarily read roughly 45–54 FPS under host load. Private log SHA-256 `e08a09425dcf787670131e761000c25b23c3bb1afa90f5a2e74ef1fd9812d0af` recorded 14 audio drops, rejected from audio-row acceptance.
 - PRD row 22 is now **16/32 Pass, 16 Open**. Mushroom, Flower, Shell, and Banana Cups are each 4/4.
+
+## 2026-08-29 — G10 guarded all-cups test fixture
+
+- The remaining four cups were retail-locked on the existing license. Closed the sole process and moved the rejected menu-only SNES Mario Circuit 3 trace recoverably to Trash; it is not completion evidence.
+- Backed up the user's ignored 2,867,200-byte RKSYS save byte-for-byte at SHA-256 `4c7b8d596bbef8160ddc24255539321d39c07996c1ade0fd2aa6f90c999a6cf6` before mutation.
+- Added `scripts/create-all-cups-test-fixture.py` from the pinned decomp's RKSYS/RKPD layout. It refuses in-place/existing-output writes, validates size/magic/version/stored CRC, changes only the selected GP-completion word plus CRC, and passes positive/corruption/refusal self-tests.
+- The ignored private fixture changes license 0 `0x00000000` → `0xffffc000` and has SHA-256 `f09f809cb13bedb6959cf05aeb550fe7c19db2ea74fcc3cf61665d5b0b7b90ec`. The retail license loaded normally and exposed all eight cups.
+- Classification: **Pass as a private row-22 test precondition only.** Representative Grand Prix and honest unlock progression remain open and cannot be claimed from this fixture. Evidence: `docs/artifacts/2026-08-29/g10-all-cups-fixture.md`.
+
+## 2026-08-29 — G10 SNES Mario Circuit 3 exact native completion
+
+- Used the sole native KartPad process for Time Trials → Lightning Cup → SNES Mario Circuit 3 → `Nin★iwaco 01:38.880` → Watch Replay. No Dolphin or Simulator was present.
+- Course ID 24 has 6,167 regular-staff frames. The strict assertion accepts stage 2 exactly `240..6166` for 5,927 consecutive samples, followed by stage 4. A separate 74-frame unfinished segment is ignored; the later partial segment is the retail automatic replay loop.
+- The private trace SHA-256 is `1cdad62c99dd8e1bcede3c14f9ceb3033a9a319902e175eda3c7c2740195fa17`; exact executable SHA-256 is `fa86a907ca2bebbc72eec1baf02cd83f3ceb816e584e33ed3dd23926ab945545`.
+- Focused observations displayed 60 FPS through flat-color geometry, barriers, transparency, and boost effects. Private log SHA-256 `bcbc782c220fad8fb0850d9540d37f2eaf7f46ffcf0ff045ef069c958f55aec7` recorded 17 audio drops, rejected from audio-row acceptance.
+- PRD row 22 is now **17/32 Pass, 15 Open**. Lightning Cup is 1/4.
