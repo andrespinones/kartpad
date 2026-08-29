@@ -25,7 +25,7 @@ Updated: 2026-08-29
 
 ## Known-good state
 
-- Repository checkpoint: repeated-race camera lifecycle repair `923a846` is on `origin/main`; the accepted two-player completion remains `7ffdd27`.
+- Repository checkpoint: bounded audio telemetry checkpoint `057ae06` is on `origin/main`; the repeated-race camera repair remains `923a846` and the accepted two-player completion remains `7ffdd27`.
 - Simulator state: no Simulator device is booted. KartPad will boot exactly one when a mobile gate requires it.
 - Buildable KartPad targets: host, memory, scheduler, semantic contracts, native subsystem smoke, translated semantic fixture, and provisional translated-frame app.
 - Input profile: WBFS containing clean PAL `RMCP01`, revision 0; original is read-only. GUI keyboard steering uses the measured 0.08 Classic-stick magnitude with a 50 ms synthetic pulse; acceleration/reverse retain their 500 ms gameplay holds. Physical controllers and future touch input are unaffected.
