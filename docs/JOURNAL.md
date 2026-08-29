@@ -353,3 +353,15 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - Instance discipline: exactly one KartPad process throughout, no Dolphin, and no Simulator.
 - Evidence: `docs/artifacts/2026-08-29/g10-balloon-battle/`.
 - Next step: continue the lowest unmet G10 compatibility rows outside Balloon Battle.
+
+## 2026-08-29 — G10 Coin Runners all-arena completion
+
+- Ran the normal signed arm64 product path with no diagnostic environment and selected Single Player → Battle → Coin Runners.
+- Configuration: 6-v-6 teams, Mario, Standard Kart M, Manual drift. Block Plaza ran through two complete three-minute matches with all 12 racers, changing team totals, individual coin totals, coins, items, AI, minimap activity, acceleration, and steering visible.
+- The first match exercised the default next-match path. The second produced a clean full result table: red 40, blue 66, followed by the team outcome and clean return to Main Menu.
+- Booted the other nine retail arenas through the normal UI: Delfino Pier, Funky Stadium, Chain Chomp Roulette, Thwomp Desert, SNES Battle Course 4, GBA Battle Course 3, N64 Skyscraper, GCN Cookie Land, and DS Twilight House.
+- Each boot-only check reached countdown or active match with the Coin Runners HUD, coins, item boxes, player kart, and opponents visible, then exited through Pause → Quit.
+- Classification: **Pass for PRD row 28.** Every arena boots and the representative full match completes.
+- Instance discipline: exactly one KartPad process throughout, no Dolphin, and no booted Simulator.
+- Evidence: `docs/artifacts/2026-08-29/g10-coin-runners/`.
+- Next step: continue the remaining G10 track/cup/mode/local-multiplayer/controller/audio/save rows.
