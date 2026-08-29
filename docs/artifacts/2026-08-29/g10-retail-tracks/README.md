@@ -11,7 +11,7 @@ real finish transition; boot screenshots do not qualify.
 | Mushroom | Luigi Circuit | 8 | Pass | Complete live three-lap race/results in G9 and complete two-player race/results in G10 |
 | Mushroom | Moo Moo Meadows | 1 | Pass | Native regular-staff replay exactly matches 6,106 input frames: stage 2 `240..6105`, 5,866 samples, then stage 4 |
 | Mushroom | Mushroom Gorge | 2 | Pass | Native regular-staff replay exactly matches 8,399 input frames: stage 2 `240..8398`, 8,159 samples, then stage 4 |
-| Mushroom | Toad's Factory | 4 | Open | — |
+| Mushroom | Toad's Factory | 4 | Pass | Native regular-staff replay exactly matches 8,781 input frames: stage 2 `240..8780`, 8,541 samples, then stage 4 |
 | Flower | Mario Circuit | 0 | Open | — |
 | Flower | Coconut Mall | 5 | Open | — |
 | Flower | DK Summit | 6 | Open | — |
@@ -72,4 +72,14 @@ completion are independent of that wall-clock contention.
 - Result: the accepted segment begins at race time 240, ends at 8398, contains 8,159 consecutive stage-2 samples, and is followed by stage 4. The later incomplete segment is the retail automatic replay loop and is not accepted as a second run.
 - The focused UI observations remained at 60.0 FPS, but this trace run is accepted only for guest-stage completion; it is not a G11 frame-pacing sample. The known writable-cache bundle-seal issue recurred after the run and remains separately tracked for G13.
 
-Current row 22 status: **4/32 Pass; 28 Open.**
+## Toad's Factory exact run
+
+- Product: sole native arm64 KartPad process; no Dolphin and no Simulator.
+- Executable SHA-256: `3927307a33dd9cac30237906489b4423fd7a11ba4ccc3d81f54efbd15281b5d6`.
+- Retail UI path: Time Trials → Mushroom Cup → Toad's Factory → regular Nintendo staff data `Nin★Misa 02:22.480` → Watch Replay.
+- Private trace SHA-256: `259abe8ae52bf1a54b069ded79fbd41cf816fd82dde2fea45a546254d6a58495`.
+- Strict assertion: `scripts/summarize-mkw-state-trace.py --require-complete --expected-input-frames 8781`.
+- Result: the accepted segment begins at race time 240, ends at 8780, contains 8,541 consecutive stage-2 samples, and is followed by stage 4. A later incomplete segment is the retail automatic replay loop.
+- Harness note: the persistent GUI launch helper retained the preceding Mushroom Gorge trace path, so this run initially overwrote that ignored filename. The completed contents were validated and moved to `toads-factory-native.csv` after the process closed. Mushroom Gorge acceptance remains supported by its previously recorded exact summary and SHA-256; its convenience copy will be regenerated with a fresh per-process environment.
+
+Current row 22 status: **5/32 Pass; 27 Open.**

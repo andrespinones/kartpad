@@ -523,3 +523,11 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - The focused UI observations held at 60.0 FPS, but only exact guest-stage completion is accepted from this run. The already recorded writable-cache bundle-seal issue recurred after execution and remains a G13 packaging risk.
 - Combined with Luigi Circuit, Moo Moo Meadows, and N64 Mario Raceway, PRD row 22 is now **4/32 Pass, 28 Open**.
 - Next step: continue the exact initially available retail track matrix with Toad's Factory, then progress into available Flower Cup tracks.
+
+## 2026-08-29 — G10 Toad's Factory exact native completion
+
+- Ran the retail Time Trials → Mushroom Cup → Toad's Factory → `Nin★Misa 02:22.480` → Watch Replay path in the sole native arm64 KartPad process. No Dolphin or Simulator was running.
+- The regular staff file reports course ID 4 and exactly 8,781 frames. `scripts/summarize-mkw-state-trace.py --require-complete --expected-input-frames 8781` passes: stage 2 covers `240..8780` for 8,541 consecutive samples, followed by stage 4.
+- The private trace SHA-256 is `259abe8ae52bf1a54b069ded79fbd41cf816fd82dde2fea45a546254d6a58495`; the exact executable SHA-256 is `3927307a33dd9cac30237906489b4423fd7a11ba4ccc3d81f54efbd15281b5d6`.
+- Harness failure signature: the persistent GUI launch helper retained the preceding trace environment and wrote the Toad's Factory run over the ignored Mushroom Gorge filename. The exact contents passed before and after relocating them to `toads-factory-native.csv`. The prior Mushroom Gorge summary/hash remain recorded; future traces will launch with a fresh per-process environment and its convenience copy will be regenerated.
+- PRD row 22 is now **5/32 Pass, 27 Open**. Next step: make trace-path selection process-local, falsify it with a fresh Mushroom Gorge regeneration, then continue Flower Cup.
