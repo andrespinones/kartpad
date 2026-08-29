@@ -330,3 +330,15 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - During Dolphin controller recovery, a stopped Dolphin frontend remained open when a new emulation process started. The PID check caught and closed that frontend before play continued; only one game emulation was active. The isolated `Always Connected` option was restored to off, all Dolphin/KartPad processes were closed, and no Simulator was booted.
 - Evidence: `docs/artifacts/2026-08-28/g10-native-n64-mario/state-trace-comparison.txt`.
 - Next step: resume the independent G10 offline compatibility matrix. Visual elapsed-time inference is no longer an accepted ghost-timing oracle.
+
+## 2026-08-29 — G10 representative Balloon Battle
+
+- Ran the normal signed arm64 product path with no diagnostic environment and selected Single Player → Battle → Balloon Battle → Block Plaza.
+- Configuration: 6-v-6 teams, Mario, Standard Kart M, Manual drift. Block Plaza loaded through its arena intro and the three-minute match ran to completion with all 12 racers.
+- Observed active scoring, minimap state, AI movement, item effects, ink, balloon loss, acceleration, steering, and player position change. Final team score was red 9, blue 13.
+- Result flow passed: the complete result table appeared, followed by `Next Battle / Quit`; Quit returned cleanly to Main Menu.
+- Renderer labels around GUI interaction/capture ranged from 43.2 to 60.0 FPS. This is recorded, not rounded into a cadence claim; G11 requires its dedicated deterministic performance method.
+- Classification: **Partial Pass for PRD row 27.** The required representative full Balloon Battle completes. Block Plaza is one of ten arenas proven to boot; the remaining nine arena boots are still required.
+- Instance discipline: exactly one KartPad game process, no Dolphin, and no Simulator. The app was closed before documenting the row.
+- Evidence: `docs/artifacts/2026-08-29/g10-balloon-battle/`.
+- Next step: boot the remaining nine Balloon Battle arenas without repeating the unchanged full-match run.

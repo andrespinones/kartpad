@@ -4,7 +4,7 @@ Updated: 2026-08-29
 
 ## Current goal
 
-**G10 — macOS offline compatibility complete** is the lowest unmet goal. G0–G9 pass. The official N64 Mario Raceway `Nin★Ichiro 02:14.799` replay is now a strong native pass: KartPad and pinned Dolphin each complete the same 8,080-frame race segment, and 137,360 watched physics/movement words match exactly. The earlier visual overrun classification was disproven as an automatic replay-loop misread. Resume the mandatory offline matrix.
+**G10 — macOS offline compatibility complete** is the lowest unmet goal. G0–G9 pass. Staff-ghost determinism is bit-exact on N64 Mario Raceway. The first representative Balloon Battle now also completes through results and Main Menu on Block Plaza; nine arena-boot checks remain before PRD row 27 passes.
 
 ## Goal ledger
 
@@ -20,12 +20,12 @@ Updated: 2026-08-29
 | G7 Native Metal frame | Pass | Real PAL wrist-strap frame visible at 60 FPS; reproducible Apple runtime patch and capture evidence recorded |
 | G8 macOS boots/input | Pass | Full DOL+StaticR intro/title/menu, audible output, A/directional/1 navigation; evidence under `docs/artifacts/2026-08-28/g8-title-menu/` |
 | G9 first race/save | Pass | 100cc VS standings/result/menu cycle, changed save hash, clean quit/relaunch with `Player` intact, and `Nin★sato 01:29.670` replay; evidence under `docs/artifacts/2026-08-28/g9-race-save/` |
-| G10 macOS offline compatibility | In progress | N64 Mario official staff replay passes with 137,360/137,360 raw state words matching Dolphin. Continue original tracks/cups, Grand Prix/VS/Battle/Time Trial, local multiplayer, controller, audio, and save rows |
+| G10 macOS offline compatibility | In progress | N64 Mario ghost passes 137,360/137,360 state words; Block Plaza Balloon Battle full match passes. Boot the other nine battle arenas, then continue cups/modes/local multiplayer/controller/audio/save rows |
 | G11–G18 | Gated | Await G10 |
 
 ## Known-good state
 
-- Repository checkpoint: initial visual N64 Mario classification checkpoint `a3a0114` is on `origin/main`; the corrective bit-exact trace evidence is the next backup.
+- Repository checkpoint: corrective bit-exact N64 Mario trace checkpoint `4851da7` is on `origin/main`; Block Plaza Balloon Battle evidence is the next backup.
 - Simulator state: no Simulator device is booted. KartPad will boot exactly one when a mobile gate requires it.
 - Buildable KartPad targets: host, memory, scheduler, semantic contracts, native subsystem smoke, translated semantic fixture, and provisional translated-frame app.
 - Input profile: WBFS containing clean PAL `RMCP01`, revision 0; original is read-only.
@@ -49,6 +49,7 @@ Updated: 2026-08-29
 - The exact 2008 Classic ABI is live and the game recognizes it. A/accelerate, analog steering, D-pad, and B/reverse are proven; GUI-driven full-lap precision remains a G10 playtest-quality row.
 - The opt-in RKG player fixture matches native stream expansion and the exact 240-frame countdown cadence but later diverges through the live-player path. It remains a diagnostic harness, not evidence for staff-ghost synchronization or a completed track.
 - The initial visual interpretation of an N64 Mario staff-ghost overrun was false: the observation crossed into an automatic replay loop. A changed frame-end trace proved identical `240..8319` race segments and zero mismatches across 137,360 watched words. Ghost timing must be accepted from guest state, not wall-clock screenshots.
+- Balloon Battle functionality passes a complete 6-v-6 Block Plaza match through results and Main Menu. Nine retail arena boot checks remain. Instantaneous capture-time labels ranged from 43.2–60.0 FPS; deterministic cadence measurement remains a G11 gate and is not inferred from screenshots.
 - G2 audio evidence is limited to emulator execution; subjective audio quality is a future hands-on row and is not claimed.
 - G8 playback is proven by both the runtime's non-silent host-stream telemetry and an independent system-output loopback level capture. Subjective audio quality and latency remain hands-on G10/G11 rows.
 
