@@ -692,3 +692,12 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - Private trace SHA-256 is `477275d7e1cee0f61174421e81a46403f52fde057106e4f0ee97e2b325e42cd4`; exact executable SHA-256 is `80bcfee80ecd9615efef7ad2826407cf0562858c4c8dec5936a40e4e16f2532d`.
 - Bounded presentation checks stayed at the 60 FPS overlay target through exterior sand, falling columns, bats, water, boost panels, interior geometry, and ghost transparency; deterministic cadence remains G11 work. Private log SHA-256 `9e8727372b9da8b2979c4b2242977244bcb910876461d7e135febfa80b9ac8e7` recorded three audio drops and is rejected from audio-row acceptance.
 - PRD row 22 is now **23/32 Pass, 9 Open**. Special Cup is 2/4.
+
+## 2026-08-29 — G10 DS Peach Gardens exact native completion
+
+- Used the sole native KartPad process for Time Trials → Lightning Cup → DS Peach Gardens → `Nin★Ito.y 02:34.894` → Watch Replay. No Dolphin or Simulator was present.
+- Course ID 22 has 9,525 regular-staff frames. The strict assertion accepts stage 2 exactly `240..9524` for 9,285 consecutive samples, followed by stage 4; the later partial segment is the retail automatic replay loop.
+- Private trace SHA-256 is `ce59ada4bc1dfe100e8e02708b34821f5fc053e131503f8e45989f79b4239f3d`; exact executable SHA-256 is `f50f860f3a3546590dc91c2f36eff9db001108c767667188e2721ba24401e26f`.
+- Presentation began at the 60 FPS target and later sampled at 51.7–55 FPS through hedges, Chain Chomps, flowers, statuary, garden/castle geometry, and ghost transparency; retained for G11/G36 work.
+- Private log SHA-256 `3cdc89dbad0860ca86a5bb97303c75ab528c7a43321154ba0f1410ea5096d3f3` ended at 139,264 audio-queue checks with zero drops, zero post-start empty observations, and 53,476,992 submitted bytes. This is a clean telemetry candidate, not subjective audio acceptance.
+- PRD row 22 is now **24/32 Pass, 8 Open**. Lightning Cup is 2/4.

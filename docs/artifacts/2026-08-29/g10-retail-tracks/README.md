@@ -37,7 +37,7 @@ real finish transition; boot screenshots do not qualify.
 | Leaf | N64 DK's Jungle Parkway | 29 | Open | — |
 | Leaf | GCN Mario Circuit | 17 | Pass | Native regular-staff replay exactly matches 7,420 input frames: stage 2 `240..7419`, 7,180 samples, then stage 4 |
 | Lightning | SNES Mario Circuit 3 | 24 | Pass | Native regular-staff replay exactly matches 6,167 input frames: stage 2 `240..6166`, 5,927 samples, then stage 4 |
-| Lightning | DS Peach Gardens | 22 | Open | — |
+| Lightning | DS Peach Gardens | 22 | Pass | Native regular-staff replay exactly matches 9,525 input frames: stage 2 `240..9524`, 9,285 samples, then stage 4 |
 | Lightning | GCN DK Mountain | 19 | Open | — |
 | Lightning | N64 Bowser's Castle | 28 | Open | — |
 
@@ -277,4 +277,16 @@ completion are independent of that wall-clock contention.
 - Bounded presentation checks remained at the overlay's 60 FPS target through sand, falling columns, bats, water, boost panels, interior/exterior geometry, and ghost transparency. Deterministic cadence remains a G11 gate.
 - Private log SHA-256 `9e8727372b9da8b2979c4b2242977244bcb910876461d7e135febfa80b9ac8e7` recorded three audio-queue drops and is rejected from audio-row acceptance.
 
-Current row 22 status: **23/32 Pass; 9 Open.** Mushroom, Flower, Shell, and Banana Cups each have complete four-track evidence; Leaf, Star, and Special Cups are each 2/4, and Lightning Cup is 1/4.
+## DS Peach Gardens exact run
+
+- Product: sole native arm64 KartPad process launched with the process-local trace helper; no Dolphin and no Simulator.
+- Test precondition: the user's own private all-cups fixture documented in `docs/artifacts/2026-08-29/g10-all-cups-fixture.md`; progression acceptance remains separate.
+- Executable SHA-256: `f50f860f3a3546590dc91c2f36eff9db001108c767667188e2721ba24401e26f`.
+- Retail UI path: Time Trials → Lightning Cup → DS Peach Gardens → regular Nintendo staff data `Nin★Ito.y 02:34.894` → Watch Replay.
+- Private trace SHA-256: `ce59ada4bc1dfe100e8e02708b34821f5fc053e131503f8e45989f79b4239f3d`.
+- Strict assertion: `scripts/summarize-mkw-state-trace.py --require-complete --expected-input-frames 9525`.
+- Result: the accepted segment begins at race time 240, ends at 9524, contains 9,285 consecutive stage-2 samples, and is followed by stage 4. The later incomplete segment is the retail automatic replay loop.
+- Bounded presentation checks began at the 60 FPS target and later sampled at 51.7–55 FPS through hedges, Chain Chomps, flowers, statuary, garden/castle geometry, and ghost transparency. This remains G11/G36 performance evidence only.
+- Private log SHA-256 `3cdc89dbad0860ca86a5bb97303c75ab528c7a43321154ba0f1410ea5096d3f3` ended at 139,264 audio-queue checks with zero drops, zero post-start empty observations, and 53,476,992 submitted bytes. It is retained as a clean telemetry candidate, but counters alone do not satisfy the subjective G10 audio row.
+
+Current row 22 status: **24/32 Pass; 8 Open.** Mushroom, Flower, Shell, and Banana Cups each have complete four-track evidence; Leaf, Star, Special, and Lightning Cups are each 2/4.
