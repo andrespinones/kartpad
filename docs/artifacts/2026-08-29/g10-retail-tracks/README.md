@@ -19,7 +19,7 @@ real finish transition; boot screenshots do not qualify.
 | Star | Daisy Circuit | 9 | Pass | Native regular-staff replay exactly matches 7,243 input frames: stage 2 `240..7242`, 7,003 samples, then stage 4 |
 | Star | Koopa Cape | 15 | Open | — |
 | Star | Maple Treeway | 11 | Open | — |
-| Star | Grumble Volcano | 3 | Open | — |
+| Star | Grumble Volcano | 3 | Pass | Native regular-staff replay exactly matches 9,126 input frames: stage 2 `240..9125`, 8,886 samples, then stage 4 |
 | Special | Dry Dry Ruins | 14 | Open | — |
 | Special | Moonview Highway | 10 | Pass | Native regular-staff replay exactly matches 8,440 input frames: stage 2 `240..8439`, 8,200 samples, then stage 4 |
 | Special | Bowser's Castle | 12 | Open | — |
@@ -253,4 +253,16 @@ completion are independent of that wall-clock contention.
 - First use sampled at 1.3 FPS, recovered to roughly 46 FPS within 20 seconds, and later sampled at 46–54 FPS through traffic, city/rural geometry, lighting, boosts, and ghost transparency. This is retained as a G11/G36 performance risk and needs a warm-cache comparison.
 - Private log SHA-256 `f74ae46452cee47ce12eeec215a055282c7a7a88524e82877fa458628fe0f305` recorded 33 audio-queue drops and is rejected from audio-row acceptance.
 
-Current row 22 status: **21/32 Pass; 11 Open.** Mushroom, Flower, Shell, and Banana Cups each have complete four-track evidence; Leaf Cup is 2/4, while Star, Special, and Lightning Cups are each 1/4.
+## Grumble Volcano exact run
+
+- Product: sole native arm64 KartPad process launched with the process-local trace helper; no Dolphin and no Simulator.
+- Test precondition: the user's own private all-cups fixture documented in `docs/artifacts/2026-08-29/g10-all-cups-fixture.md`; progression acceptance remains separate.
+- Executable SHA-256: `de6e157784b6256695c54d41d193da5e90363d480835db3826501fdeecbabe2b`.
+- Retail UI path: Time Trials → Star Cup → Grumble Volcano → regular Nintendo staff data `Nin★Gorin 02:28.237` → Watch Replay.
+- Private trace SHA-256: `308e333e3ea5290a89051039df21b99ede54048c1e3f48517dfd67da3c047180`.
+- Strict assertion: `scripts/summarize-mkw-state-trace.py --require-complete --expected-input-frames 9126`.
+- Result: the accepted segment begins at race time 240, ends at 9125, contains 8,886 consecutive stage-2 samples, and is followed by stage 4. Earlier non-finishing menu/preview segments are ignored; the later incomplete segment is the retail automatic replay loop.
+- Bounded presentation checks during the completed replay ranged from 39.6 to 58 FPS through lava, collapsing terrain, tunnels, particles, and ghost transparency. This remains a G11/G36 performance observation, not deterministic cadence acceptance.
+- Private log SHA-256 `0d936c9e0bdd409db94dfdae7d1892ab521ca1f0e567bdea9f61d55523970c89` recorded 60 audio-queue drops and is rejected from audio-row acceptance.
+
+Current row 22 status: **22/32 Pass; 10 Open.** Mushroom, Flower, Shell, and Banana Cups each have complete four-track evidence; Leaf and Star Cups are 2/4, while Special and Lightning Cups are each 1/4.

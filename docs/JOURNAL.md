@@ -675,3 +675,12 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - Private trace SHA-256 is `264a3fcfec4143cbfc243585f08b0244a3a12002324aabd05dcee2c5b2b796bc`; exact executable SHA-256 is `fa86a907ca2bebbc72eec1baf02cd83f3ceb816e584e33ed3dd23926ab945545`.
 - First use sampled at 1.3 FPS, recovered to ~46 FPS within 20 seconds, and later sampled at 46–54 FPS through traffic, city/rural geometry, lighting, boosts, and ghost transparency. This is retained for G11/G36 warm-cache work. Private log SHA-256 `f74ae46452cee47ce12eeec215a055282c7a7a88524e82877fa458628fe0f305` recorded 33 audio drops and is rejected from audio-row acceptance.
 - PRD row 22 is now **21/32 Pass, 11 Open**. Special Cup is 1/4.
+
+## 2026-08-29 — G10 Grumble Volcano exact native completion
+
+- Used the sole native KartPad process for Time Trials → Star Cup → Grumble Volcano → `Nin★Gorin 02:28.237` → Watch Replay. No Dolphin or Simulator was present.
+- Course ID 3 has 9,126 regular-staff frames. The strict assertion accepts stage 2 exactly `240..9125` for 8,886 consecutive samples, followed by stage 4; the later partial segment is the retail automatic replay loop.
+- Private trace SHA-256 is `308e333e3ea5290a89051039df21b99ede54048c1e3f48517dfd67da3c047180`; exact executable SHA-256 is `de6e157784b6256695c54d41d193da5e90363d480835db3826501fdeecbabe2b`.
+- Bounded presentation checks ranged from 39.6 to 58 FPS through lava, collapsing terrain, tunnels, particles, and ghost transparency; retained for G11/G36 performance work. Private log SHA-256 `0d936c9e0bdd409db94dfdae7d1892ab521ca1f0e567bdea9f61d55523970c89` recorded 60 audio drops and is rejected from audio-row acceptance.
+- Two setup attempts were rejected before acceptance: Challenge Ghost Data never reached finish stage 4, and an over-fast menu sequence entered Nintendo WFC. Both partial traces were moved recoverably to Trash and were not counted.
+- PRD row 22 is now **22/32 Pass, 10 Open**. Star Cup is 2/4.
