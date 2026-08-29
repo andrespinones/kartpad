@@ -342,3 +342,14 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - Instance discipline: exactly one KartPad game process, no Dolphin, and no Simulator. The app was closed before documenting the row.
 - Evidence: `docs/artifacts/2026-08-29/g10-balloon-battle/`.
 - Next step: boot the remaining nine Balloon Battle arenas without repeating the unchanged full-match run.
+
+## 2026-08-29 — G10 Balloon Battle all-arena completion
+
+- Continued the same normal signed arm64 product path with no diagnostic environment and no Simulator.
+- Booted the remaining nine retail Balloon Battle arenas through the normal Single Player UI: Delfino Pier, Funky Stadium, Chain Chomp Roulette, Thwomp Desert, SNES Battle Course 4, GBA Battle Course 3, N64 Skyscraper, GCN Cookie Land, and DS Twilight House.
+- Each arena reached its intro or active-match presentation with environment, HUD, player kart, and opponents visible. Each boot-only check exited through Pause → Quit and returned cleanly to Main Menu before the next selection.
+- Together with the completed Block Plaza match, this covers all ten retail arenas and the representative full-match requirement.
+- Classification: **Pass for PRD row 27.** No second full match is required without a changed variable.
+- Instance discipline: exactly one KartPad process throughout, no Dolphin, and no Simulator.
+- Evidence: `docs/artifacts/2026-08-29/g10-balloon-battle/`.
+- Next step: continue the lowest unmet G10 compatibility rows outside Balloon Battle.
