@@ -4,7 +4,7 @@ Updated: 2026-08-28
 
 ## Current goal
 
-**G9 — First complete macOS race and save** is the lowest unmet goal. G0–G8 pass. The native arm64 runtime loads the full DOL+StaticR graph, renders the intro/title/license menu at 60 FPS, produces audible stereo output, and accepts keyboard-driven Wii controller navigation.
+**G10 — macOS offline compatibility complete** is the lowest unmet goal. G0–G9 pass. The native arm64 runtime now completes a race/results/menu session, persists its isolated license across quit/relaunch, detects an exact Classic Controller report, and runs the original Luigi Circuit staff-ghost fixture.
 
 ## Goal ledger
 
@@ -19,12 +19,13 @@ Updated: 2026-08-28
 | G6 PPC/AArch64 semantics | Pass | 250,227-check arm64/x86 hashes match; Dolphin oracle, sanitizers, translator 579/579, translated scalar/paired state, scheduler/callback persistence, and all 10,836 title units pass |
 | G7 Native Metal frame | Pass | Real PAL wrist-strap frame visible at 60 FPS; reproducible Apple runtime patch and capture evidence recorded |
 | G8 macOS boots/input | Pass | Full DOL+StaticR intro/title/menu, audible output, A/directional/1 navigation; evidence under `docs/artifacts/2026-08-28/g8-title-menu/` |
-| G9 first race/save | In progress | Create an isolated license, complete a race/results/menu cycle, save, quit/relaunch, and run the staff-ghost fixture |
-| G10–G18 | Gated | Await G9 |
+| G9 first race/save | Pass | 100cc VS standings/result/menu cycle, changed save hash, clean quit/relaunch with `Player` intact, and `Nin★sato 01:29.670` replay; evidence under `docs/artifacts/2026-08-28/g9-race-save/` |
+| G10 macOS offline compatibility | In progress | Run the complete mandatory track/cup/mode/Battle/Time Trial/ghost/local-multiplayer/controller/audio/save matrix |
+| G11–G18 | Gated | Await G10 |
 
 ## Known-good state
 
-- Repository checkpoint: pending this G8 title/menu/input/audio commit; G7 checkpoint `b19a968` is on `origin/main`.
+- Repository checkpoint: exact Classic Controller runtime checkpoint `d59218f` is on `origin/main`; G9 evidence is pending its checkpoint.
 - Simulator state: no Simulator device is booted. KartPad will boot exactly one when a mobile gate requires it.
 - Buildable KartPad targets: host, memory, scheduler, semantic contracts, native subsystem smoke, translated semantic fixture, and provisional translated-frame app.
 - Input profile: WBFS containing clean PAL `RMCP01`, revision 0; original is read-only.
@@ -41,11 +42,11 @@ Updated: 2026-08-28
 
 ## Active risks and blockers
 
-- About 14 GiB of host storage remains after private disc extraction and the full translated runtime build. Large generated products remain ignored; capacity must be checked before additional build graphs.
+- About 20 GiB of host storage remains after private disc extraction and the full translated runtime build. Large generated products remain ignored; capacity must be checked before additional build graphs.
 - No human-only prerequisite currently blocks G0 or the independent parts of G1.
 - Physical-device, public-service, account, and hands-on acceptance rows remain future external prerequisites and are not claimed.
 - WiiCompiled's bundled `MAP.txt` may be used as an ignored local reference, but independent provenance for republishing it is not established; do not copy it into public KartPad sources/artifacts.
-- Dolphin pipe input is accepted for deterministic menus. Live race acceleration/brake semantics remain deliberately unclaimed until a narrow controller fixture distinguishes the observed behavior.
+- The exact 2008 Classic ABI is live and the game recognizes it. A/accelerate, analog steering, D-pad, and B/reverse are proven; GUI-driven full-lap precision remains a G10 playtest-quality row.
 - G2 audio evidence is limited to emulator execution; subjective audio quality is a future hands-on row and is not claimed.
 - G8 playback is proven by both the runtime's non-silent host-stream telemetry and an independent system-output loopback level capture. Subjective audio quality and latency remain hands-on G10/G11 rows.
 

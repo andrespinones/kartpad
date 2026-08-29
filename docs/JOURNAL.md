@@ -280,3 +280,16 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - Reproducibility: `scripts/generate-g8-full-title.sh`, the refreshed `patches/wiicompiled-apple-runtime.patch`, and `scripts/prepare-g7-game-runtime.sh` capture translation/runtime preparation without publishing game data.
 - Evidence: `docs/artifacts/2026-08-28/g8-title-menu/`.
 - G8 classification: **Pass**. G9 is the lowest unmet goal: create an isolated license, complete a race/results/menu cycle, save, quit/relaunch, and run the staff-ghost fixture.
+
+## 2026-08-28 — G9 first macOS race, save, and staff ghost
+
+- Created an isolated `Player` license in the portable app NAND and preserved ignored 17-file pre-license and post-license backups.
+- Initial race playtesting proved sustained Wii Remote acceleration but exposed the lack of reliable steering. Controller work was reduced against Mario Kart's byte-matching decomp headers: its historical `KPADStatus` is `0x84`, `KPADUnifiedWpadStatus` is `0x38`, and the Classic format byte is at `0x36`. The newer public SDK layout used during the first experiment was incompatible.
+- Implemented the exact Classic report in both KPAD paths. The live UI changed its back glyph to Classic `B`; Return/A accelerated, A/D changed native left-stick steering, and Q/B reversed. SDL event-held taps are bounded to 500 ms and keyboard stick magnitude is scaled to 0.35 for GUI control.
+- Completed a 100cc Luigi Circuit VS session through standings, the `Next Race / Quit` result menu, and Main Menu. The GUI-driven kart timed out in 12th with 0 points; this is recorded as a playtest-quality limitation, not misrepresented as a winning player run.
+- Save evidence: the 2,867,200-byte `rksys.dat` changed from post-license SHA-256 `5291cecd0ae1749a7996dfd8f3bc53978a9af08fe9aaf639a831214d6bb24f42` to post-race `1e7b6a9482d01436bf5fb650528191f8b725d1a74c178bad30ccae2d10cdc529`.
+- Quit the only running instance, relaunched the signed portable app, and verified `Player` remained available while the save retained the post-race hash.
+- Opened the original Luigi Circuit `Nin★sato` staff ghost (`01:29.670`) and ran its replay at 60 FPS. No Simulator was booted.
+- Reproducibility: refreshed `patches/wiicompiled-apple-runtime.patch` dry-runs cleanly against the pinned runtime. Exact Classic input checkpoint `d59218f` is on GitHub.
+- Evidence: `docs/artifacts/2026-08-28/g9-race-save/`.
+- G9 classification: **Pass**. G10 is the lowest unmet goal: complete the mandatory macOS offline compatibility matrix and close the player-lap precision limitation.
