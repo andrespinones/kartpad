@@ -17,7 +17,7 @@ real finish transition; boot screenshots do not qualify.
 | Flower | DK Summit | 6 | Pass | Native regular-staff replay exactly matches 9,513 input frames: stage 2 `240..9512`, 9,273 samples, then stage 4 |
 | Flower | Wario's Gold Mine | 7 | Pass | Native regular-staff replay exactly matches 8,607 input frames: stage 2 `240..8606`, 8,367 samples, then stage 4 |
 | Star | Daisy Circuit | 9 | Pass | Native regular-staff replay exactly matches 7,243 input frames: stage 2 `240..7242`, 7,003 samples, then stage 4 |
-| Star | Koopa Cape | 15 | Open | — |
+| Star | Koopa Cape | 15 | Pass | Native regular-staff replay exactly matches 11,211 input frames: stage 2 `240..11210`, 10,971 samples, then stage 4 |
 | Star | Maple Treeway | 11 | Pass | Native regular-staff replay exactly matches 10,948 input frames: stage 2 `240..10947`, 10,708 samples, then stage 4 |
 | Star | Grumble Volcano | 3 | Pass | Native regular-staff replay exactly matches 9,126 input frames: stage 2 `240..9125`, 8,886 samples, then stage 4 |
 | Special | Dry Dry Ruins | 14 | Pass | Native regular-staff replay exactly matches 9,288 input frames: stage 2 `240..9287`, 9,048 samples, then stage 4 |
@@ -337,4 +337,16 @@ completion are independent of that wall-clock contention.
 - Focused race presentation checks sampled at 49–51 FPS through the cannon flight, mountain switchbacks, bridge, vegetation, dust, jumps, moving hazards, and ghost transparency. This remains G11/G36 performance evidence only.
 - Private log SHA-256 `1e1ba66b908f6e1830d8ad368c83d0b3ab9e310ad86a47bc3635422c8dbb1e84` recorded 85 audio-queue drops and is rejected from audio-row acceptance.
 
-Current row 22 status: **28/32 Pass; 4 Open.** Mushroom, Flower, Shell, Banana, and Leaf Cups each have complete four-track evidence; Star and Lightning Cups are 3/4, and Special Cup is 2/4.
+## Koopa Cape exact run
+
+- Product: sole native arm64 KartPad process launched with the process-local trace helper; no Dolphin and no Simulator.
+- Test precondition: the user's own private all-cups fixture documented in `docs/artifacts/2026-08-29/g10-all-cups-fixture.md`; progression acceptance remains separate.
+- Executable SHA-256: `94b1da8d3d97cb857f75ef358cdd2817b27ba52eeed28f827d0bd21349fa17aa`.
+- Retail UI path: Time Trials → Star Cup → Koopa Cape → regular Nintendo staff data `Nin★Rose 03:03.022` → Watch Replay.
+- Private trace SHA-256: `9a1d221da310ddc39001c9cf122b9f5d70da1354570f5bcf7a960a62234658f0`.
+- Strict assertion: `scripts/summarize-mkw-state-trace.py --require-complete --expected-input-frames 11211`.
+- Result: the accepted segment begins at race time 240, ends at 11210, contains 10,971 consecutive stage-2 samples, and is followed by stage 4. Earlier non-finishing preview segments are ignored; the later incomplete segment is the automatic replay loop.
+- Bounded race presentation checks remained at the overlay's 60 FPS target through water, waterfalls, ramps, moving shells, rotating electrical hazards, transparent pipe geometry, particles, and ghost transparency. Deterministic cadence remains a G11 gate.
+- Private log SHA-256 `dc32da54eb0e57cc39e257bb407362603bf76cdce8dc1e275f840ff700eab087` recorded 56 audio-queue drops and is rejected from audio-row acceptance.
+
+Current row 22 status: **29/32 Pass; 3 Open.** Mushroom, Flower, Star, Shell, Banana, and Leaf Cups each have complete four-track evidence; Lightning Cup is 3/4 and Special Cup is 2/4.

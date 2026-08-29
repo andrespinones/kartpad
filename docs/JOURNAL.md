@@ -733,3 +733,11 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - Private trace SHA-256 is `6cfad5811fd108b5d24cfad977a58edbdc679107c9d8117a36b4dcf70eb76d88`; exact executable SHA-256 is `6989b5c35f54902641be367f9f426995c12c8c8d1eb1fa4722ef9d5a91f82ace`.
 - Focused presentation checks sampled at 49–51 FPS through the cannon flight, mountain switchbacks, bridge, vegetation, dust, jumps, moving hazards, and ghost transparency; retained for G11/G36. Private log SHA-256 `1e1ba66b908f6e1830d8ad368c83d0b3ab9e310ad86a47bc3635422c8dbb1e84` recorded 85 audio drops and is rejected from audio-row acceptance.
 - PRD row 22 is now **28/32 Pass, 4 Open**. Lightning Cup is 3/4.
+
+## 2026-08-29 — G10 Koopa Cape exact native completion
+
+- Used the sole native KartPad process for Time Trials → Star Cup → Koopa Cape → `Nin★Rose 03:03.022` → Watch Replay. No Dolphin or Simulator was present.
+- Course ID 15 has 11,211 regular-staff frames. The strict assertion accepts stage 2 exactly `240..11210` for 10,971 consecutive samples followed by stage 4. Earlier non-finishing preview segments are ignored; the later partial segment is the automatic replay loop.
+- Private trace SHA-256 is `9a1d221da310ddc39001c9cf122b9f5d70da1354570f5bcf7a960a62234658f0`; exact executable SHA-256 is `94b1da8d3d97cb857f75ef358cdd2817b27ba52eeed28f827d0bd21349fa17aa`.
+- Bounded presentation checks remained at the 60 FPS overlay target through water, waterfalls, ramps, moving shells, rotating electrical hazards, transparent pipe geometry, particles, and ghost transparency; deterministic cadence remains G11 work. Private log SHA-256 `dc32da54eb0e57cc39e257bb407362603bf76cdce8dc1e275f840ff700eab087` recorded 56 audio drops and is rejected from audio-row acceptance.
+- PRD row 22 is now **29/32 Pass, 3 Open**. Star Cup is complete at 4/4.
