@@ -1,0 +1,27 @@
+Goal: G10 native N64 Mario Raceway official staff replay
+Native target: final arm64 KartPad runtime, Metal, no RKG fixture configured or armed
+Oracle target: Dolphin 5.0-17995 JITARM64/Vulkan/HLE, isolated user directory
+Input: same read-only PAL RMCP01 WBFS, Nin★Ichiro 02:14.799
+
+Command:
+./scripts/compare-mkw-state-traces.py private/g10-native-state-trace.csv private/g10-oracle-memorywatch.tsv
+
+Output:
+native_segment=240..8319 frames=8080
+oracle_segment=240..8319 frames=8080
+common_frames=8080 words_per_frame=17 compared_words=137360
+mismatches=0
+
+Raw trace SHA-256 (raw files retained only in ignored private/):
+4dfb25b3f1e02b5bc29a163daf6c5124c65028daaef98f11749d024ea4d3ea47  private/g10-native-state-trace.csv
+cc2ff0ec84419813cc8fd6e5f2652084d00225bba92c3befcb62fd41016ba9bf  private/g10-oracle-memorywatch.tsv
+
+Watched state per produced frame:
+- vehicle position xyz
+- external velocity xyz
+- main rotation quaternion xyzw
+- internal velocity xyz
+- movement internal speed
+- movement direction xyz
+
+Result: Pass. The initial visual failure classification was false. Both runtimes complete the same 8,080-frame race segment and match on all 137,360 watched raw words.

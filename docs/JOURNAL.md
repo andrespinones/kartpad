@@ -319,3 +319,14 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - Instance discipline: exactly one game process ran at a time. KartPad was closed before Dolphin launched; Dolphin emulation was stopped before its app closed. The isolated controller's temporary `Always Connected` option was restored to off. No Simulator was booted.
 - Evidence: `docs/artifacts/2026-08-28/g10-native-n64-mario/`.
 - Next step: capture a deterministic native per-frame kart/physics state trace and locate the earliest divergent state transition against a known-good execution.
+
+### Correction — full-frame comparison disproved the visual failure
+
+- Added a read-only, opt-in native frame-end trace covering position, external/internal velocity, main rotation, internal speed, movement direction, race stage, and race timer. No controller or guest state was modified.
+- The native run completed race stage 2 at timer transition `8319 → 8320`, entered finish stage 4, returned to stage 0, and began another replay. Its longest race segment is `240..8319`, exactly 8,080 frames; the initial wall-clock observation had crossed into the automatic second loop.
+- Captured the same guest addresses using pinned Dolphin's built-in frame-end MemoryWatcher. Dolphin produced the identical `240..8319` segment.
+- `scripts/compare-mkw-state-traces.py` compared 17 raw state words at every common frame: 8,080 frames, 137,360 word comparisons, **zero mismatches**.
+- Corrected classification: **Pass.** The earlier P1 entry above is retained as an audit trail but is superseded. There is no observed native N64 Mario staff-replay divergence and no basis to reopen G6.
+- During Dolphin controller recovery, a stopped Dolphin frontend remained open when a new emulation process started. The PID check caught and closed that frontend before play continued; only one game emulation was active. The isolated `Always Connected` option was restored to off, all Dolphin/KartPad processes were closed, and no Simulator was booted.
+- Evidence: `docs/artifacts/2026-08-28/g10-native-n64-mario/state-trace-comparison.txt`.
+- Next step: resume the independent G10 offline compatibility matrix. Visual elapsed-time inference is no longer an accepted ghost-timing oracle.
