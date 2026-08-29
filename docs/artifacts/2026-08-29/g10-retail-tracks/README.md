@@ -13,7 +13,7 @@ real finish transition; boot screenshots do not qualify.
 | Mushroom | Mushroom Gorge | 2 | Pass | Native regular-staff replay exactly matches 8,399 input frames: stage 2 `240..8398`, 8,159 samples, then stage 4 |
 | Mushroom | Toad's Factory | 4 | Pass | Native regular-staff replay exactly matches 8,781 input frames: stage 2 `240..8780`, 8,541 samples, then stage 4 |
 | Flower | Mario Circuit | 0 | Pass | Native regular-staff replay exactly matches 6,521 input frames: stage 2 `240..6520`, 6,281 samples, then stage 4 |
-| Flower | Coconut Mall | 5 | Open | — |
+| Flower | Coconut Mall | 5 | Pass | Native regular-staff replay exactly matches 9,277 input frames: stage 2 `240..9276`, 9,037 samples, then stage 4 |
 | Flower | DK Summit | 6 | Open | — |
 | Flower | Wario's Gold Mine | 7 | Open | — |
 | Star | Daisy Circuit | 9 | Open | — |
@@ -92,4 +92,14 @@ completion are independent of that wall-clock contention.
 - Result: the accepted segment begins at race time 240, ends at 6520, contains 6,281 consecutive stage-2 samples, and is followed by stage 4. A later incomplete segment is the retail automatic replay loop.
 - Capture-time FPS and audio drops under current host load are rejected; only exact guest-stage completion is accepted.
 
-Current row 22 status: **6/32 Pass; 26 Open.**
+## Coconut Mall exact run
+
+- Product: sole native arm64 KartPad process launched with the process-local trace helper; no Dolphin and no Simulator.
+- Executable SHA-256: `1c2f73f9105d6f41a5ed617f1d22334cd0220bb011ccb010348a8da90635e069`.
+- Retail UI path: Time Trials → Flower Cup → Coconut Mall → regular Nintendo staff data `Nin★♪SiM0 02:30.764` → Watch Replay.
+- Private trace SHA-256: `64de24b8985da1e190aa8835fd47890253a265612c6c0795a880244af2664272`.
+- Strict assertion: `scripts/summarize-mkw-state-trace.py --require-complete --expected-input-frames 9277`.
+- Result: the accepted segment begins at race time 240, ends at 9276, contains 9,037 consecutive stage-2 samples, and is followed by stage 4. A later incomplete segment is the retail automatic replay loop.
+- Focused observations reached 60 FPS across indoor/outdoor transitions, escalators, traffic, shadows, and reflective surfaces, but capture-time variance and audio drops under current host load are rejected from performance/audio acceptance.
+
+Current row 22 status: **7/32 Pass; 25 Open.**

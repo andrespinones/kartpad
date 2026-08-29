@@ -545,3 +545,11 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - The regular staff file reports course ID 0 and 6,521 frames. `scripts/summarize-mkw-state-trace.py --require-complete --expected-input-frames 6521` passes: stage 2 is exactly `240..6520` for 6,281 consecutive samples, followed by stage 4.
 - The private trace SHA-256 is `621ffc9cb573aba276b1c51daa6a2a532970811331f38e999c14fe3f99ec6307`; the exact executable SHA-256 is `bc953f9e6642190a3bfe226558f69f1abfaed4416aeb1c9b7645caccc215ec82`.
 - Capture-time FPS and audio drops under current host load are rejected. PRD row 22 is now **6/32 Pass, 26 Open**; Coconut Mall is the next available Flower Cup trace.
+
+## 2026-08-29 — G10 Coconut Mall exact native completion
+
+- Used the process-local trace launcher for Time Trials → Flower Cup → Coconut Mall → `Nin★♪SiM0 02:30.764` → Watch Replay. Exactly one native KartPad process ran; no Dolphin or Simulator was present.
+- The regular staff file reports course ID 5 and 9,277 frames. The strict assertion passes with stage 2 exactly `240..9276` for 9,037 consecutive samples, followed by stage 4.
+- The private trace SHA-256 is `64de24b8985da1e190aa8835fd47890253a265612c6c0795a880244af2664272`; the exact executable SHA-256 is `1c2f73f9105d6f41a5ed617f1d22334cd0220bb011ccb010348a8da90635e069`.
+- Focused observations reached 60 FPS through indoor/outdoor transitions, escalators, traffic, shadows, and reflections, but capture-time variance and audio drops under current host load are rejected from performance/audio acceptance.
+- PRD row 22 is now **7/32 Pass, 25 Open**. DK Summit is the next available Flower Cup trace.
