@@ -618,3 +618,11 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - The private trace SHA-256 is `9438f871a2f1490c2b989b86f938a9c12aa9cb8f727b5ba7212006f0dde1010f`; the exact executable SHA-256 is `fa86a907ca2bebbc72eec1baf02cd83f3ceb816e584e33ed3dd23926ab945545`.
 - Dense town geometry, shadows, bridges, water, and transparent ghost rendering remained intact. GUI sampling observed temporary 46–53 FPS readings before recovery to 60 FPS. Private log SHA-256 `3633b262262416c59f2f915ecd463d4d6ed78e97e8adfe0d464f8b7170f141fc` recorded 25 audio drops, rejected from audio-row acceptance.
 - PRD row 22 is now **15/32 Pass, 17 Open**. Banana Cup is 3/4.
+
+## 2026-08-29 — G10 N64 Sherbet Land exact native completion
+
+- Used the process-local trace launcher for Time Trials → Banana Cup → N64 Sherbet Land → `Nin★Sakat 02:48.651` → Watch Replay. Exactly one native KartPad process ran; no Dolphin or Simulator was present.
+- Course ID 27 has 10,349 regular-staff frames. The strict assertion passes with stage 2 exactly `240..10348` for 10,109 consecutive samples, followed by stage 4; the later partial segment is the retail automatic replay loop.
+- The private trace SHA-256 is `877c38399ac6eaacecb0242a6183a2f6c267d711bc54f584e1ce7770d375ddf4`; the exact executable SHA-256 is `fa86a907ca2bebbc72eec1baf02cd83f3ceb816e584e33ed3dd23926ab945545`.
+- Ice, snow, reflections, penguins, and ghost transparency remained intact. GUI samples temporarily read roughly 45–54 FPS under host load. Private log SHA-256 `e08a09425dcf787670131e761000c25b23c3bb1afa90f5a2e74ef1fd9812d0af` recorded 14 audio drops, rejected from audio-row acceptance.
+- PRD row 22 is now **16/32 Pass, 16 Open**. Mushroom, Flower, Shell, and Banana Cups are each 4/4.

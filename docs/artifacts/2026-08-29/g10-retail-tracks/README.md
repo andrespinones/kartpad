@@ -28,7 +28,7 @@ real finish transition; boot screenshots do not qualify.
 | Shell | DS Yoshi Falls | 20 | Pass | Native regular-staff replay exactly matches 4,824 input frames: stage 2 `240..4823`, 4,584 samples, then stage 4 |
 | Shell | SNES Ghost Valley 2 | 25 | Pass | Native regular-staff replay exactly matches 4,232 input frames: stage 2 `240..4231`, 3,992 samples, then stage 4 |
 | Shell | N64 Mario Raceway | 26 | Pass | Native regular-staff replay exactly matches 8,320 input frames; 8,080 stage-2 samples and zero state-word mismatches against Dolphin |
-| Banana | N64 Sherbet Land | 27 | Open | — |
+| Banana | N64 Sherbet Land | 27 | Pass | Native regular-staff replay exactly matches 10,349 input frames: stage 2 `240..10348`, 10,109 samples, then stage 4 |
 | Banana | GBA Shy Guy Beach | 31 | Pass | Native regular-staff replay exactly matches 6,568 input frames: stage 2 `240..6567`, 6,328 samples, then stage 4 |
 | Banana | DS Delfino Square | 23 | Pass | Native regular-staff replay exactly matches 9,939 input frames: stage 2 `240..9938`, 9,699 samples, then stage 4 |
 | Banana | GCN Waluigi Stadium | 18 | Pass | Native regular-staff replay exactly matches 9,404 input frames: stage 2 `240..9403`, 9,164 samples, then stage 4 |
@@ -184,4 +184,15 @@ completion are independent of that wall-clock contention.
 - Dense town geometry, shadows, bridges, water, and transparent ghost rendering remained intact. Computer-Use sampling observed temporary mid-run readings around 46–53 FPS before recovery to 60 FPS; this remains a performance observation rather than a determinism failure.
 - Private log SHA-256 `3633b262262416c59f2f915ecd463d4d6ed78e97e8adfe0d464f8b7170f141fc` recorded 25 audio-queue drops, so this run is rejected from audio-row acceptance.
 
-Current row 22 status: **15/32 Pass; 17 Open.** Mushroom, Flower, and Shell Cups have complete four-track evidence; Banana Cup is 3/4.
+## N64 Sherbet Land exact run
+
+- Product: sole native arm64 KartPad process launched with the process-local trace helper; no Dolphin and no Simulator.
+- Executable SHA-256: `fa86a907ca2bebbc72eec1baf02cd83f3ceb816e584e33ed3dd23926ab945545`.
+- Retail UI path: Time Trials → Banana Cup → N64 Sherbet Land → regular Nintendo staff data `Nin★Sakat 02:48.651` → Watch Replay.
+- Private trace SHA-256: `877c38399ac6eaacecb0242a6183a2f6c267d711bc54f584e1ce7770d375ddf4`.
+- Strict assertion: `scripts/summarize-mkw-state-trace.py --require-complete --expected-input-frames 10349`.
+- Result: the accepted segment begins at race time 240, ends at 10348, contains 10,109 consecutive stage-2 samples, and is followed by stage 4. A later incomplete segment is the retail automatic replay loop.
+- Ice, snow, water reflections, penguins, and transparent ghost rendering remained intact. GUI sampling observed temporary readings around 45–54 FPS under host load; this is retained as a performance observation.
+- Private log SHA-256 `e08a09425dcf787670131e761000c25b23c3bb1afa90f5a2e74ef1fd9812d0af` recorded 14 audio-queue drops, so this run is rejected from audio-row acceptance.
+
+Current row 22 status: **16/32 Pass; 16 Open.** Mushroom, Flower, Shell, and Banana Cups each have complete four-track evidence.
