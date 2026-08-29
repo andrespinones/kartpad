@@ -569,3 +569,11 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - The private trace SHA-256 is `25c25abdc17a5bcbcb09d016bb2b3b6e9a6f5df2e482649cba6d0c809a08f8ba`; the exact executable SHA-256 is `86d074650e352e266c50d3fc12489fd35854b3ac35d2968062e6ee316d8ddec6`.
 - Focused observations displayed 60 FPS through ravines, mine interiors, carts, steam, branching rails, and dense wood geometry; audio drops are rejected from performance/audio acceptance.
 - PRD row 22 is now **9/32 Pass, 23 Open**. The full Mushroom and Flower Cup four-track subsets pass native exact completion.
+
+## 2026-08-29 — G10 GCN Peach Beach exact native completion
+
+- Used the process-local trace launcher for Time Trials → Shell Cup → GCN Peach Beach → `Nin★HIRO 01:34.233` → Watch Replay. Exactly one native KartPad process ran; no Dolphin or Simulator was present.
+- Course ID 16 has 5,889 regular-staff frames. The strict assertion passes with stage 2 exactly `240..5888` for 5,649 consecutive samples, followed by stage 4.
+- The private trace SHA-256 is `0cf22954bcaa8b59edea83c181abbff5bea735263759df13fa4f637bb9e60b85`; the exact executable SHA-256 is `334e99a89cb1b061efb7f69bf7ab912e98f5661a361869152e76588912a70403`.
+- Focused observations displayed 60 FPS through beach, surf, forest, obstacles, and translucent effects; four audio drops under host load are rejected from audio acceptance.
+- PRD row 22 is now **10/32 Pass, 22 Open**. Shell Cup is 1/4; DS Yoshi Falls is next.

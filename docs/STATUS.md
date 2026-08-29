@@ -20,7 +20,7 @@ Updated: 2026-08-29
 | G7 Native Metal frame | Pass | Real PAL wrist-strap frame visible at 60 FPS; reproducible Apple runtime patch and capture evidence recorded |
 | G8 macOS boots/input | Pass | Full DOL+StaticR intro/title/menu, audible output, A/directional/1 navigation; evidence under `docs/artifacts/2026-08-28/g8-title-menu/` |
 | G9 first race/save | Pass | 100cc VS standings/result/menu cycle, changed save hash, clean quit/relaunch with `Player` intact, and `Nin★sato 01:29.670` replay; evidence under `docs/artifacts/2026-08-28/g9-race-save/` |
-| G10 macOS offline compatibility | In progress | Row 22 is 9/32 tracks Pass with complete Mushroom/Flower Cup subsets; ghost sync, save safety, vehicles/drift, items/AI/collisions, Battle rows 27–28, two-player row 29, four controller slots, and explicit GameCube-adapter limitation pass. Continue locked cups/tracks, modes, three/four-player races, and audio/save rows |
+| G10 macOS offline compatibility | In progress | Row 22 is 10/32 tracks Pass with complete Mushroom/Flower Cup subsets and Shell Cup 1/4; ghost sync, save safety, vehicles/drift, items/AI/collisions, Battle rows 27–28, two-player row 29, four controller slots, and explicit GameCube-adapter limitation pass. Continue tracks, modes, three/four-player races, and audio/save rows |
 | G11–G18 | Gated | Await G10 |
 
 ## Known-good state
@@ -42,7 +42,7 @@ Updated: 2026-08-29
 
 ## Active risks and blockers
 
-- About 20 GiB of host storage remains after private disc extraction and the full translated runtime build. Large generated products remain ignored; capacity must be checked before additional build graphs.
+- About 14 GiB of host storage remains after private disc extraction, the full translated runtime build, and native trace evidence. Large generated products remain ignored; capacity must be checked before additional build graphs.
 - No human-only prerequisite currently blocks G0 or the independent parts of G1.
 - Physical-device, public-service, account, and hands-on acceptance rows remain future external prerequisites and are not claimed.
 - WiiCompiled's bundled `MAP.txt` may be used as an ignored local reference, but independent provenance for republishing it is not established; do not copy it into public KartPad sources/artifacts.

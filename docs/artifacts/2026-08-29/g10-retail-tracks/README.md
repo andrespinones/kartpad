@@ -24,7 +24,7 @@ real finish transition; boot screenshots do not qualify.
 | Special | Moonview Highway | 10 | Open | — |
 | Special | Bowser's Castle | 12 | Open | — |
 | Special | Rainbow Road | 13 | Open | — |
-| Shell | GCN Peach Beach | 16 | Open | — |
+| Shell | GCN Peach Beach | 16 | Pass | Native regular-staff replay exactly matches 5,889 input frames: stage 2 `240..5888`, 5,649 samples, then stage 4 |
 | Shell | DS Yoshi Falls | 20 | Open | — |
 | Shell | SNES Ghost Valley 2 | 25 | Open | — |
 | Shell | N64 Mario Raceway | 26 | Pass | Native regular-staff replay exactly matches 8,320 input frames; 8,080 stage-2 samples and zero state-word mismatches against Dolphin |
@@ -122,4 +122,14 @@ completion are independent of that wall-clock contention.
 - Result: the accepted segment begins at race time 240, ends at 8606, contains 8,367 consecutive stage-2 samples, and is followed by stage 4. A later incomplete segment is the retail automatic replay loop.
 - Focused observations displayed 60 FPS across ravines, mine interiors, moving carts, steam, branching rails, and dense wood geometry; audio drops keep this out of performance/audio acceptance.
 
-Current row 22 status: **9/32 Pass; 23 Open.** Mushroom and Flower Cups now have complete four-track native completion evidence.
+## GCN Peach Beach exact run
+
+- Product: sole native arm64 KartPad process launched with the process-local trace helper; no Dolphin and no Simulator.
+- Executable SHA-256: `334e99a89cb1b061efb7f69bf7ab912e98f5661a361869152e76588912a70403`.
+- Retail UI path: Time Trials → Shell Cup → GCN Peach Beach → regular Nintendo staff data `Nin★HIRO 01:34.233` → Watch Replay.
+- Private trace SHA-256: `0cf22954bcaa8b59edea83c181abbff5bea735263759df13fa4f637bb9e60b85`.
+- Strict assertion: `scripts/summarize-mkw-state-trace.py --require-complete --expected-input-frames 5889`.
+- Result: the accepted segment begins at race time 240, ends at 5888, contains 5,649 consecutive stage-2 samples, and is followed by stage 4. A later incomplete segment is the retail automatic replay loop.
+- Focused observations displayed 60 FPS across beach, surf, forest, item-obstacle, and translucent effect scenes; four audio drops under host load are rejected from audio acceptance.
+
+Current row 22 status: **10/32 Pass; 22 Open.** Mushroom and Flower Cups have complete four-track evidence; Shell Cup is 1/4.
