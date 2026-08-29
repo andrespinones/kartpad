@@ -20,7 +20,7 @@ Updated: 2026-08-29
 | G7 Native Metal frame | Pass | Real PAL wrist-strap frame visible at 60 FPS; reproducible Apple runtime patch and capture evidence recorded |
 | G8 macOS boots/input | Pass | Full DOL+StaticR intro/title/menu, audible output, A/directional/1 navigation; evidence under `docs/artifacts/2026-08-28/g8-title-menu/` |
 | G9 first race/save | Pass | 100cc VS standings/result/menu cycle, changed save hash, clean quit/relaunch with `Player` intact, and `Nin★sato 01:29.670` replay; evidence under `docs/artifacts/2026-08-28/g9-race-save/` |
-| G10 macOS offline compatibility | In progress | Row 22 is 17/32 tracks Pass with complete Mushroom/Flower/Shell/Banana Cup subsets and Lightning Cup 1/4; ghost sync, save safety, vehicles/drift, items/AI/collisions, Battle rows 27–28, two-player row 29, four controller slots, and explicit GameCube-adapter limitation pass. Continue tracks, modes, honest Grand Prix progression, three/four-player races, and audio/save rows |
+| G10 macOS offline compatibility | In progress | Row 22 is 18/32 tracks Pass with complete Mushroom/Flower/Shell/Banana Cup subsets and Star/Lightning Cups 1/4 each; ghost sync, save safety, vehicles/drift, items/AI/collisions, Battle rows 27–28, two-player row 29, four controller slots, and explicit GameCube-adapter limitation pass. Continue tracks, modes, honest Grand Prix progression, three/four-player races, and audio/save rows |
 | G11–G18 | Gated | Await G10 |
 
 ## Known-good state

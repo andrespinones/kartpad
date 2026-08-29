@@ -16,7 +16,7 @@ real finish transition; boot screenshots do not qualify.
 | Flower | Coconut Mall | 5 | Pass | Native regular-staff replay exactly matches 9,277 input frames: stage 2 `240..9276`, 9,037 samples, then stage 4 |
 | Flower | DK Summit | 6 | Pass | Native regular-staff replay exactly matches 9,513 input frames: stage 2 `240..9512`, 9,273 samples, then stage 4 |
 | Flower | Wario's Gold Mine | 7 | Pass | Native regular-staff replay exactly matches 8,607 input frames: stage 2 `240..8606`, 8,367 samples, then stage 4 |
-| Star | Daisy Circuit | 9 | Open | — |
+| Star | Daisy Circuit | 9 | Pass | Native regular-staff replay exactly matches 7,243 input frames: stage 2 `240..7242`, 7,003 samples, then stage 4 |
 | Star | Koopa Cape | 15 | Open | — |
 | Star | Maple Treeway | 11 | Open | — |
 | Star | Grumble Volcano | 3 | Open | — |
@@ -206,4 +206,15 @@ completion are independent of that wall-clock contention.
 - Result: the accepted segment begins at race time 240, ends at 6166, contains 5,927 consecutive stage-2 samples, and is followed by stage 4. A separate 74-frame unfinished segment is ignored; the later incomplete segment is the retail automatic replay loop.
 - Focused observations displayed 60 FPS through flat-color geometry, barriers, transparency, and boost effects. Private log SHA-256 `bcbc782c220fad8fb0850d9540d37f2eaf7f46ffcf0ff045ef069c958f55aec7` recorded 17 audio-queue drops, rejected from audio-row acceptance.
 
-Current row 22 status: **17/32 Pass; 15 Open.** Mushroom, Flower, Shell, and Banana Cups each have complete four-track evidence; Lightning Cup is 1/4.
+## Daisy Circuit exact run
+
+- Product: sole native arm64 KartPad process launched with the process-local trace helper; no Dolphin and no Simulator.
+- Test precondition: the user's own private all-cups fixture documented in `docs/artifacts/2026-08-29/g10-all-cups-fixture.md`; progression acceptance remains separate.
+- Executable SHA-256: `fa86a907ca2bebbc72eec1baf02cd83f3ceb816e584e33ed3dd23926ab945545`.
+- Retail UI path: Time Trials → Star Cup → Daisy Circuit → regular Nintendo staff data `Nin★Toki 01:56.822` → Watch Replay.
+- Private trace SHA-256: `290104ee301b0f8c45da71960186ffdb052a8b3c25d3ac97e0154f57c1444532`.
+- Strict assertion: `scripts/summarize-mkw-state-trace.py --require-complete --expected-input-frames 7243`.
+- Result: the accepted segment begins at race time 240, ends at 7242, contains 7,003 consecutive stage-2 samples, and is followed by stage 4. An earlier unfinished segment is ignored; the later incomplete segment is the retail automatic replay loop.
+- Harbor, tunnel, lighthouse, animated scenery, sun/glare effects, and transparent ghost rendering remained intact. Focused presentation sampled near 58 FPS. Private log SHA-256 `7e9daa7f5d8e3ee47999d7f5374d2bd45a5d19049123e7fd82f0bcdb8f6f6db3` recorded 147 audio-queue drops and is rejected from audio-row acceptance.
+
+Current row 22 status: **18/32 Pass; 14 Open.** Mushroom, Flower, Shell, and Banana Cups each have complete four-track evidence; Star and Lightning Cups are each 1/4.
