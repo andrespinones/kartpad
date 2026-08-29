@@ -26,7 +26,7 @@ real finish transition; boot screenshots do not qualify.
 | Special | Rainbow Road | 13 | Open | — |
 | Shell | GCN Peach Beach | 16 | Pass | Native regular-staff replay exactly matches 5,889 input frames: stage 2 `240..5888`, 5,649 samples, then stage 4 |
 | Shell | DS Yoshi Falls | 20 | Pass | Native regular-staff replay exactly matches 4,824 input frames: stage 2 `240..4823`, 4,584 samples, then stage 4 |
-| Shell | SNES Ghost Valley 2 | 25 | Open | — |
+| Shell | SNES Ghost Valley 2 | 25 | Pass | Native regular-staff replay exactly matches 4,232 input frames: stage 2 `240..4231`, 3,992 samples, then stage 4 |
 | Shell | N64 Mario Raceway | 26 | Pass | Native regular-staff replay exactly matches 8,320 input frames; 8,080 stage-2 samples and zero state-word mismatches against Dolphin |
 | Banana | N64 Sherbet Land | 27 | Open | — |
 | Banana | GBA Shy Guy Beach | 31 | Open | — |
@@ -142,4 +142,14 @@ completion are independent of that wall-clock contention.
 - Result: the accepted segment begins at race time 240, ends at 4823, contains 4,584 consecutive stage-2 samples, and is followed by stage 4. A later incomplete segment is the retail automatic replay loop.
 - The private console log SHA-256 is `112ed94e5af89eea89f56db6bed7e31d3c951d09f3df0d085f89d146d78ead4c`. Its bounded audio summary is clean through 81,920 checks and 31,456,896 submitted bytes, with zero empty observations or drops and an 8,684-byte maximum below the 15,360-byte limit. This supports gameplay continuity but does not by itself complete row 33's pause/device-change/long-session scope.
 
-Current row 22 status: **11/32 Pass; 21 Open.** Mushroom and Flower Cups have complete four-track evidence; Shell Cup is 2/4.
+## SNES Ghost Valley 2 exact run
+
+- Product: sole native arm64 KartPad process launched with the process-local trace helper; no Dolphin and no Simulator.
+- Executable SHA-256: `d3ec1cfd25df859e19ad3332bfa7a539183c2d8f54371971c8a355a09cc2b046`.
+- Retail UI path: Time Trials → Shell Cup → SNES Ghost Valley 2 → regular Nintendo staff data `Nin★YOKO. 01:06.595` → Watch Replay.
+- Private trace SHA-256: `9b308f3ed729cfb8cc805e04eb2000c1ed593b9e359f5ae2fd3ed223bcf10f68`.
+- Strict assertion: `scripts/summarize-mkw-state-trace.py --require-complete --expected-input-frames 4232`.
+- Result: the accepted segment begins at race time 240, ends at 4231, contains 3,992 consecutive stage-2 samples, and is followed by stage 4. A later incomplete segment is the retail automatic replay loop.
+- Focused observations displayed 60 FPS across dark/fogged geometry, animated ghosts, breakaway edges, transparent driver rendering, and boost effects. Seven audio drops under host load are rejected from audio acceptance.
+
+Current row 22 status: **12/32 Pass; 20 Open.** Mushroom and Flower Cups have complete four-track evidence; Shell Cup is 3/4.
