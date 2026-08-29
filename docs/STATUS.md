@@ -20,7 +20,7 @@ Updated: 2026-08-29
 | G7 Native Metal frame | Pass | Real PAL wrist-strap frame visible at 60 FPS; reproducible Apple runtime patch and capture evidence recorded |
 | G8 macOS boots/input | Pass | Full DOL+StaticR intro/title/menu, audible output, A/directional/1 navigation; evidence under `docs/artifacts/2026-08-28/g8-title-menu/` |
 | G9 first race/save | Pass | 100cc VS standings/result/menu cycle, changed save hash, clean quit/relaunch with `Player` intact, and `Nin★sato 01:29.670` replay; evidence under `docs/artifacts/2026-08-28/g9-race-save/` |
-| G10 macOS offline compatibility | In progress | Row 22 is 20/32 tracks Pass with complete Mushroom/Flower/Shell/Banana Cup subsets, Leaf Cup 2/4, and Star/Lightning Cups 1/4 each; ghost sync, save safety, vehicles/drift, items/AI/collisions, Battle rows 27–28, two-player row 29, four controller slots, and explicit GameCube-adapter limitation pass. Continue tracks, modes, honest Grand Prix progression, three/four-player races, and audio/save rows |
+| G10 macOS offline compatibility | In progress | Row 22 is 21/32 tracks Pass with complete Mushroom/Flower/Shell/Banana Cup subsets, Leaf Cup 2/4, and Star/Special/Lightning Cups 1/4 each; ghost sync, save safety, vehicles/drift, items/AI/collisions, Battle rows 27–28, two-player row 29, four controller slots, and explicit GameCube-adapter limitation pass. Continue tracks, modes, honest Grand Prix progression, three/four-player races, and audio/save rows |
 | G11–G18 | Gated | Await G10 |
 
 ## Known-good state
@@ -64,6 +64,7 @@ Updated: 2026-08-29
 - G8 playback is proven by both the runtime's non-silent host-stream telemetry and an independent system-output loopback level capture. Subjective audio quality and latency remain hands-on G10/G11 rows.
 - Audio continuity instrumentation is bounded and cumulative. Its first uncontended diagnostic sample recorded 104,960 queue checks and 40,304,256 submitted bytes with zero post-start empty observations or drops; a second signed-app smoke run verified reports at the final 8,192-check interval. Gameplay/pause, default-device migration, and long-session rows remain open.
 - The development app currently stores writable `UserData` caches/logs inside its signed bundle. A playtest mutated Dawn's cache and invalidated the bundle resource seal until it was re-signed; G13 packaging must relocate writable runtime state outside the app before distribution acceptance.
+- Moonview Highway first use sampled at 1.3 FPS and recovered to roughly 46 FPS within 20 seconds, then remained around 46–54 FPS during focused checks. Exact guest completion passed, but G11/G36 must compare a controlled warm-cache rerun and resolve sustained frame pacing before performance acceptance.
 
 ## UI reference commitment
 

@@ -21,7 +21,7 @@ real finish transition; boot screenshots do not qualify.
 | Star | Maple Treeway | 11 | Open | — |
 | Star | Grumble Volcano | 3 | Open | — |
 | Special | Dry Dry Ruins | 14 | Open | — |
-| Special | Moonview Highway | 10 | Open | — |
+| Special | Moonview Highway | 10 | Pass | Native regular-staff replay exactly matches 8,440 input frames: stage 2 `240..8439`, 8,200 samples, then stage 4 |
 | Special | Bowser's Castle | 12 | Open | — |
 | Special | Rainbow Road | 13 | Open | — |
 | Shell | GCN Peach Beach | 16 | Pass | Native regular-staff replay exactly matches 5,889 input frames: stage 2 `240..5888`, 5,649 samples, then stage 4 |
@@ -241,4 +241,16 @@ completion are independent of that wall-clock contention.
 - An initial presentation sample read 19.9 FPS, then recovered to 60 FPS through animated trees, chain chomp, trackside geometry, boost effects, and ghost transparency. This remains a G11/G36 performance observation.
 - Private log SHA-256 `dc90b846ac856a1f31ce5830e60501e03023c3a5a84308e03652e29ca6f6881d` recorded four audio-queue drops and is rejected from audio-row acceptance.
 
-Current row 22 status: **20/32 Pass; 12 Open.** Mushroom, Flower, Shell, and Banana Cups each have complete four-track evidence; Leaf Cup is 2/4, while Star and Lightning Cups are each 1/4.
+## Moonview Highway exact run
+
+- Product: sole native arm64 KartPad process launched with the process-local trace helper; no Dolphin and no Simulator.
+- Test precondition: the user's own private all-cups fixture documented in `docs/artifacts/2026-08-29/g10-all-cups-fixture.md`; progression acceptance remains separate.
+- Executable SHA-256: `fa86a907ca2bebbc72eec1baf02cd83f3ceb816e584e33ed3dd23926ab945545`.
+- Retail UI path: Time Trials → Special Cup → Moonview Highway → regular Nintendo staff data `Nin★KOZ★ 02:16.802` → Watch Replay.
+- Private trace SHA-256: `264a3fcfec4143cbfc243585f08b0244a3a12002324aabd05dcee2c5b2b796bc`.
+- Strict assertion: `scripts/summarize-mkw-state-trace.py --require-complete --expected-input-frames 8440`.
+- Result: the accepted segment begins at race time 240, ends at 8439, contains 8,200 consecutive stage-2 samples, and is followed by stage 4. An earlier unfinished segment is ignored; the later incomplete segment is the retail automatic replay loop.
+- First use sampled at 1.3 FPS, recovered to roughly 46 FPS within 20 seconds, and later sampled at 46–54 FPS through traffic, city/rural geometry, lighting, boosts, and ghost transparency. This is retained as a G11/G36 performance risk and needs a warm-cache comparison.
+- Private log SHA-256 `f74ae46452cee47ce12eeec215a055282c7a7a88524e82877fa458628fe0f305` recorded 33 audio-queue drops and is rejected from audio-row acceptance.
+
+Current row 22 status: **21/32 Pass; 11 Open.** Mushroom, Flower, Shell, and Banana Cups each have complete four-track evidence; Leaf Cup is 2/4, while Star, Special, and Lightning Cups are each 1/4.

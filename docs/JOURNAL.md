@@ -667,3 +667,11 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - Private trace SHA-256 is `14a6c68d222b2a59e9714cb762cee36a6aa1eae206df4b6c18ad30bcfe67cca3`; exact executable SHA-256 is `fa86a907ca2bebbc72eec1baf02cd83f3ceb816e584e33ed3dd23926ab945545`.
 - An initial 19.9 FPS presentation sample recovered to 60 FPS through animated trees, chain chomp, trackside geometry, boosts, and ghost transparency; retained for performance work. Private log SHA-256 `dc90b846ac856a1f31ce5830e60501e03023c3a5a84308e03652e29ca6f6881d` recorded four audio drops and is rejected from audio-row acceptance.
 - PRD row 22 is now **20/32 Pass, 12 Open**. Leaf Cup is 2/4.
+
+## 2026-08-29 — G10 Moonview Highway exact native completion
+
+- Used the sole native KartPad process for Time Trials → Special Cup → Moonview Highway → `Nin★KOZ★ 02:16.802` → Watch Replay. No Dolphin or Simulator was present.
+- Course ID 10 has 8,440 regular-staff frames. The strict assertion accepts stage 2 exactly `240..8439` for 8,200 consecutive samples, followed by stage 4; the later partial segment is the retail automatic replay loop.
+- Private trace SHA-256 is `264a3fcfec4143cbfc243585f08b0244a3a12002324aabd05dcee2c5b2b796bc`; exact executable SHA-256 is `fa86a907ca2bebbc72eec1baf02cd83f3ceb816e584e33ed3dd23926ab945545`.
+- First use sampled at 1.3 FPS, recovered to ~46 FPS within 20 seconds, and later sampled at 46–54 FPS through traffic, city/rural geometry, lighting, boosts, and ghost transparency. This is retained for G11/G36 warm-cache work. Private log SHA-256 `f74ae46452cee47ce12eeec215a055282c7a7a88524e82877fa458628fe0f305` recorded 33 audio drops and is rejected from audio-row acceptance.
+- PRD row 22 is now **21/32 Pass, 11 Open**. Special Cup is 1/4.
