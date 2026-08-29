@@ -29,8 +29,8 @@ The initial instrumentation candidate built and ran in the signed native arm64 a
 
 This changed-variable sample ran after the earlier competing translation workload had ended. It proves the queue can remain continuously fed without a drop in an uncontended native session. It also explains why older one-line overflow reports cannot be accepted as sustained-loss evidence: those historical runs include heavily contended diagnostic sessions and do not contain counters.
 
-The first candidate logged every 512 checks so its behavior could be observed quickly. The checked-in candidate uses the bounded 8,192-check interval; it must receive a fresh runtime sample before this instrumentation checkpoint is accepted.
+The first candidate logged every 512 checks so its behavior could be observed quickly. The checked-in candidate uses the bounded 8,192-check interval. A fresh signed-app smoke run produced reports at exactly 8,192 and 16,384 checks; at the latter it had submitted 6,291,072 bytes with zero post-start empty observations and zero dropped blocks/bytes. This verifies the final reporting cadence. Because unrelated compilation was active, this second run is instrumentation evidence only, not a performance sample.
 
 ## Classification
 
-**In progress for PRD row 33.** The first queue sample is healthy. A fresh bounded-interval sample, gameplay/pause transitions, output-device migration, and a longer session remain open.
+**In progress for PRD row 33.** The bounded telemetry and first uncontended queue sample are healthy. Gameplay/pause transitions, output-device migration, and a longer session remain open.
