@@ -602,3 +602,11 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - The accepted private trace SHA-256 is `eecd70c0084708ffe4c06766c147a55a4f448721557d246e378d32f3b5770889`; executable SHA-256 is `8dc81191800692bf03a5eb6d3d0e04348e3a73e9f7d8efeb333e06cf144eb71c`.
 - Private log SHA-256 `596da9664cf1288d30f3d4b950b05066d22ae6167c0ab4d64c02556a15b17e89` is audio-clean through 106,496 checks and 40,894,080 submitted bytes with zero empty observations/drops; broader row 33 scope remains open.
 - PRD row 22 is now **13/32 Pass, 19 Open**. Banana Cup is 1/4.
+
+## 2026-08-29 — G10 GCN Waluigi Stadium exact native completion
+
+- Used the process-local trace launcher for Time Trials → Banana Cup → GCN Waluigi Stadium → `Nin★NARI★ 02:32.882` → Watch Replay. Exactly one native KartPad process ran; no Dolphin or Simulator was present.
+- Course ID 18 has 9,404 regular-staff frames. The strict assertion passes with stage 2 exactly `240..9403` for 9,164 consecutive samples, followed by stage 4; later movement was the retail automatic replay loop.
+- The private trace SHA-256 is `6b2a4644bbff65de2d12ea9a3cc18b7b6845ec3bca7b8546e026cfdbb6d9caeb`; the exact executable SHA-256 is `fa86a907ca2bebbc72eec1baf02cd83f3ceb816e584e33ed3dd23926ab945545`.
+- Focused observations displayed 60 FPS through the crowd, dirt, ramp, lighting, boost, and water sections. Private log SHA-256 `0b4c18b56b690eda9a5d07e9a8d9ba5e65169290171468aad45429fe539dae8d` recorded nine audio-queue drops under host load, so this run is rejected for audio-row acceptance.
+- PRD row 22 is now **14/32 Pass, 18 Open**. Banana Cup is 2/4.

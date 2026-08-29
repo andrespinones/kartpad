@@ -31,7 +31,7 @@ real finish transition; boot screenshots do not qualify.
 | Banana | N64 Sherbet Land | 27 | Open | — |
 | Banana | GBA Shy Guy Beach | 31 | Pass | Native regular-staff replay exactly matches 6,568 input frames: stage 2 `240..6567`, 6,328 samples, then stage 4 |
 | Banana | DS Delfino Square | 23 | Open | — |
-| Banana | GCN Waluigi Stadium | 18 | Open | — |
+| Banana | GCN Waluigi Stadium | 18 | Pass | Native regular-staff replay exactly matches 9,404 input frames: stage 2 `240..9403`, 9,164 samples, then stage 4 |
 | Leaf | DS Desert Hills | 21 | Open | — |
 | Leaf | GBA Bowser Castle 3 | 30 | Open | — |
 | Leaf | N64 DK's Jungle Parkway | 29 | Open | — |
@@ -163,4 +163,14 @@ completion are independent of that wall-clock contention.
 - A rejected partial launch accidentally entered the first local Nintendo WFC privacy-notice screen. No agreement or network action occurred; the process was closed and its partial trace moved recoverably to Trash before this fresh offline run.
 - The private accepted log SHA-256 is `596da9664cf1288d30f3d4b950b05066d22ae6167c0ab4d64c02556a15b17e89`. Bounded audio telemetry is clean through 106,496 checks and 40,894,080 submitted bytes, with zero empty observations/drops and a 14,296-byte maximum below the 15,360-byte limit. Broader row 33 scope remains open.
 
-Current row 22 status: **13/32 Pass; 19 Open.** Mushroom, Flower, and Shell Cups have complete four-track evidence; Banana Cup is 1/4.
+## GCN Waluigi Stadium exact run
+
+- Product: sole native arm64 KartPad process launched with the process-local trace helper; no Dolphin and no Simulator.
+- Executable SHA-256: `fa86a907ca2bebbc72eec1baf02cd83f3ceb816e584e33ed3dd23926ab945545`.
+- Retail UI path: Time Trials → Banana Cup → GCN Waluigi Stadium → regular Nintendo staff data `Nin★NARI★ 02:32.882` → Watch Replay.
+- Private trace SHA-256: `6b2a4644bbff65de2d12ea9a3cc18b7b6845ec3bca7b8546e026cfdbb6d9caeb`.
+- Strict assertion: `scripts/summarize-mkw-state-trace.py --require-complete --expected-input-frames 9404`.
+- Result: the accepted segment begins at race time 240, ends at 9403, contains 9,164 consecutive stage-2 samples, and is followed by stage 4. A later incomplete segment is the retail automatic replay loop.
+- Focused observations displayed 60 FPS across the stadium crowd, dirt, ramp, lighting, boost, and water sections. The private log SHA-256 is `0b4c18b56b690eda9a5d07e9a8d9ba5e65169290171468aad45429fe539dae8d`; nine audio-queue drops are rejected from audio-row acceptance.
+
+Current row 22 status: **14/32 Pass; 18 Open.** Mushroom, Flower, and Shell Cups have complete four-track evidence; Banana Cup is 2/4.
