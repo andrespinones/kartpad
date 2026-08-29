@@ -16,6 +16,8 @@ shards="${output}/build_shards"
 "${dotnet_bin}" "${translator_dll}" translate-recursive 0x800060A4 \
   --project "${manifest}" --threads 8 --prune-stale \
   --output-metadata "${metadata}"
+"${repo_root}/scripts/inject-g10-rkg-fixture-hook.py" \
+  "${functions}/func_8051FC84.cpp"
 "${dotnet_bin}" "${translator_dll}" generate-data-init --project "${manifest}"
 "${dotnet_bin}" "${translator_dll}" emit-build-shards \
   --project "${manifest}" \

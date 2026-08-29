@@ -117,9 +117,9 @@ def _summarize_stream(records: bytes, trick: bool = False) -> StreamSummary:
     frames = 0
     for offset in range(0, len(records), 2):
         if trick:
-            frames += (_u16be(records, offset) & 0x0FFF) + 1
+            frames += max(1, _u16be(records, offset) & 0x0FFF)
         else:
-            frames += records[offset + 1] + 1
+            frames += max(1, records[offset + 1])
     return StreamSummary(sequences=len(records) // 2, frames=frames)
 
 
@@ -197,8 +197,9 @@ def _self_test() -> None:
     copied = b"Yaz1" + struct.pack(">I", 8) + bytes(8) + b"\xe0ABC\x30\x02"
     assert decode_yaz(copied) == b"ABCABCAB"
 
-    assert _summarize_stream(b"\x01\x00\x01\xff").frames == 257
-    assert _summarize_stream(b"\x2f\xff", trick=True).frames == 4096
+    assert _summarize_stream(b"\x01\x00\x01\xff").frames == 256
+    assert _summarize_stream(b"\x20\x00", trick=True).frames == 1
+    assert _summarize_stream(b"\x2f\xff", trick=True).frames == 4095
 
 
 def _paths(source: Path) -> list[Path]:
