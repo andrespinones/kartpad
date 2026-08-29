@@ -1,10 +1,10 @@
 # KartPad status
 
-Updated: 2026-08-28
+Updated: 2026-08-29
 
 ## Current goal
 
-**G10 — macOS offline compatibility complete** is the lowest unmet goal. G0–G9 pass. The native arm64 runtime completes a race/results/menu session, persists its isolated license across quit/relaunch, detects an exact Classic Controller report, and runs the original Luigi Circuit staff-ghost replay. RKG structural parsing and native countdown cadence are proven; the opt-in player-injection fixture remains diagnostic and is not a G10 acceptance path.
+**G10 — macOS offline compatibility complete** is the lowest unmet goal. G0–G9 pass. A genuine G10 blocker is now reproduced: the native arm64 product path diverges while replaying the official N64 Mario Raceway `Nin★Ichiro 02:14.799` ghost and remains in progress beyond its reference duration, while pinned Dolphin completes and loops the same ghost from the same WBFS. The next gate is the earliest attributable native physics/state divergence, not a wider matrix run.
 
 ## Goal ledger
 
@@ -20,12 +20,12 @@ Updated: 2026-08-28
 | G7 Native Metal frame | Pass | Real PAL wrist-strap frame visible at 60 FPS; reproducible Apple runtime patch and capture evidence recorded |
 | G8 macOS boots/input | Pass | Full DOL+StaticR intro/title/menu, audible output, A/directional/1 navigation; evidence under `docs/artifacts/2026-08-28/g8-title-menu/` |
 | G9 first race/save | Pass | 100cc VS standings/result/menu cycle, changed save hash, clean quit/relaunch with `Player` intact, and `Nin★sato 01:29.670` replay; evidence under `docs/artifacts/2026-08-28/g9-race-save/` |
-| G10 macOS offline compatibility | In progress | Native staff replay passes; RKG parser validates all 64 staff files; diagnostic player injection diverges later and is not accepted. Run the complete mandatory track/cup/mode/Battle/Time Trial/ghost/local-multiplayer/controller/audio/save matrix |
+| G10 macOS offline compatibility | In progress — P1 blocker | Native N64 Mario Raceway official staff replay diverges and overruns; pinned Dolphin passes the identical replay. Narrow the first divergent guest physics state before resuming the mandatory matrix |
 | G11–G18 | Gated | Await G10 |
 
 ## Known-good state
 
-- Repository checkpoint: RKG parser and reproducible fixture-hook generator checkpoint `316e5e0` is on `origin/main`; refreshed runtime/evidence checkpoint is pending.
+- Repository checkpoint: bounded RKG cadence evidence checkpoint `3ebe6a6` is on `origin/main`; native N64 Mario failure/oracle evidence is the next backup.
 - Simulator state: no Simulator device is booted. KartPad will boot exactly one when a mobile gate requires it.
 - Buildable KartPad targets: host, memory, scheduler, semantic contracts, native subsystem smoke, translated semantic fixture, and provisional translated-frame app.
 - Input profile: WBFS containing clean PAL `RMCP01`, revision 0; original is read-only.
@@ -48,6 +48,7 @@ Updated: 2026-08-28
 - WiiCompiled's bundled `MAP.txt` may be used as an ignored local reference, but independent provenance for republishing it is not established; do not copy it into public KartPad sources/artifacts.
 - The exact 2008 Classic ABI is live and the game recognizes it. A/accelerate, analog steering, D-pad, and B/reverse are proven; GUI-driven full-lap precision remains a G10 playtest-quality row.
 - The opt-in RKG player fixture matches native stream expansion and the exact 240-frame countdown cadence but later diverges through the live-player path. It remains a diagnostic harness, not evidence for staff-ghost synchronization or a completed track.
+- P1: the unmodified native product path also diverges on the official N64 Mario Raceway `Nin★Ichiro 02:14.799` replay. The pinned Dolphin 5.0-17995 oracle completes and loops the same ghost from the same WBFS. Evidence is in `docs/artifacts/2026-08-28/g10-native-n64-mario/`; the first divergent physics/state transition is not yet attributed.
 - G2 audio evidence is limited to emulator execution; subjective audio quality is a future hands-on row and is not claimed.
 - G8 playback is proven by both the runtime's non-silent host-stream telemetry and an independent system-output loopback level capture. Subjective audio quality and latency remain hands-on G10/G11 rows.
 

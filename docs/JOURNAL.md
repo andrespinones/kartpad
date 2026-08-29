@@ -308,3 +308,14 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - Reproducibility: refreshed `patches/wiicompiled-apple-runtime.patch` dry-runs against the pinned runtime; `scripts/inspect-mkw-rkg.py --self-test` and the repository safety audit pass.
 - Evidence: `docs/artifacts/2026-08-28/g10-offline/`.
 - Next step: run independent native G10 rows—original tracks/cups, Grand Prix/VS/Battle/Time Trial, local multiplayer, controller slots, audio, and save behavior—while retaining the fixture only as a diagnostic tool.
+
+## 2026-08-29 — G10 native N64 Mario Raceway ghost divergence
+
+- Ran the final signed native arm64 product path with no configured RKG fixture and no player injection. Through the original Time Trials UI, selected Shell Cup → N64 Mario Raceway → regular staff ghost `Nin★Ichiro 02:14.799` → Watch Replay.
+- Native result: **Fail.** The replay began on the expected line at 59.7–59.9 FPS, later moved off course, and was still running well beyond the recorded `02:14.799` duration. This is the game's own `KPadGhostController` path, so it falsifies the earlier working assumption that divergence was confined to the diagnostic live-player injector.
+- Oracle comparison: launched the exact pinned Dolphin 5.0-17995 with an isolated user directory and the same read-only WBFS. The identical ghost held 60 FPS/VPS at 100%, stayed on the racing line at the recorded checkpoints, completed, and automatically restarted its replay loop.
+- Classification: genuine P1 G10 native translated-runtime determinism defect. The comparison isolates the execution runtime from the WBFS, staff file, and expected finish behavior, but does not yet attribute the cause to PPC semantics, scheduler timing, HLE state, or physics integration. G6 is not reopened without that attribution.
+- Reproduction count: native failure 1/1; pinned-Dolphin pass 1/1. The next run must add bounded state tracing rather than repeat the unchanged visual test.
+- Instance discipline: exactly one game process ran at a time. KartPad was closed before Dolphin launched; Dolphin emulation was stopped before its app closed. The isolated controller's temporary `Always Connected` option was restored to off. No Simulator was booted.
+- Evidence: `docs/artifacts/2026-08-28/g10-native-n64-mario/`.
+- Next step: capture a deterministic native per-frame kart/physics state trace and locate the earliest divergent state transition against a known-good execution.
