@@ -717,3 +717,11 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - Private trace SHA-256 is `e4b51fb794ae3cfddf4dae4161ddfa26fb630d7c084c0906f076c4334d430e8c`; exact executable SHA-256 is `7f4d9d9a138f4b780d8fc092ac25517615bbf3df687a3eaf8183910ca319bdfb`.
 - Bounded presentation checks remained at the 60 FPS overlay target through lava, moving platforms, Thwomps, ramps, particles, storm effects, and ghost transparency; deterministic cadence remains G11 work. Private log SHA-256 `12f996acb5c88a1c9cbe195e1c3c5c047c8a8fbdae2aa08bb100ffe4877c4bf4` recorded 11 audio drops and is rejected from audio-row acceptance.
 - PRD row 22 is now **26/32 Pass, 6 Open**. Leaf Cup is complete at 4/4.
+
+## 2026-08-29 — G10 Maple Treeway exact native completion
+
+- Used the sole native KartPad process for Time Trials → Star Cup → Maple Treeway → `Nin★pico 02:58.633` → Watch Replay. No Dolphin or Simulator was present.
+- Course ID 11 has 10,948 regular-staff frames. The strict assertion accepts stage 2 exactly `240..10947` for 10,708 consecutive samples, followed by stage 4; the later partial segment is the automatic replay loop.
+- Private trace SHA-256 is `b36a526eef9571fa16473b9f50c5f719e0ac1b91e40e248620658d76fbdca3b4`; exact executable SHA-256 is `cdfd788a365edadecac4c2134ecd600606bbab4e55a85217e63a12df11366296`.
+- Bounded presentation checks remained at the 60 FPS overlay target through foliage, leaf particles, tree interiors, branches, the net bridge, Wigglers, moving hazards, and ghost transparency; deterministic cadence remains G11 work. Private log SHA-256 `f946d86b72862b051495a17ef5ac08c6288fb1bd474e0384261e99b8d6408801` recorded eight audio drops and is rejected from audio-row acceptance.
+- PRD row 22 is now **27/32 Pass, 5 Open**. Star Cup is 3/4.

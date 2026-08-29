@@ -18,7 +18,7 @@ real finish transition; boot screenshots do not qualify.
 | Flower | Wario's Gold Mine | 7 | Pass | Native regular-staff replay exactly matches 8,607 input frames: stage 2 `240..8606`, 8,367 samples, then stage 4 |
 | Star | Daisy Circuit | 9 | Pass | Native regular-staff replay exactly matches 7,243 input frames: stage 2 `240..7242`, 7,003 samples, then stage 4 |
 | Star | Koopa Cape | 15 | Open | — |
-| Star | Maple Treeway | 11 | Open | — |
+| Star | Maple Treeway | 11 | Pass | Native regular-staff replay exactly matches 10,948 input frames: stage 2 `240..10947`, 10,708 samples, then stage 4 |
 | Star | Grumble Volcano | 3 | Pass | Native regular-staff replay exactly matches 9,126 input frames: stage 2 `240..9125`, 8,886 samples, then stage 4 |
 | Special | Dry Dry Ruins | 14 | Pass | Native regular-staff replay exactly matches 9,288 input frames: stage 2 `240..9287`, 9,048 samples, then stage 4 |
 | Special | Moonview Highway | 10 | Pass | Native regular-staff replay exactly matches 8,440 input frames: stage 2 `240..8439`, 8,200 samples, then stage 4 |
@@ -313,4 +313,16 @@ completion are independent of that wall-clock contention.
 - Bounded presentation checks remained at the overlay's 60 FPS target through lava, moving platforms, Thwomps, ramps, particles, storm effects, and ghost transparency. Deterministic cadence remains a G11 gate.
 - Private log SHA-256 `12f996acb5c88a1c9cbe195e1c3c5c047c8a8fbdae2aa08bb100ffe4877c4bf4` recorded 11 audio-queue drops and is rejected from audio-row acceptance.
 
-Current row 22 status: **26/32 Pass; 6 Open.** Mushroom, Flower, Shell, Banana, and Leaf Cups each have complete four-track evidence; Star, Special, and Lightning Cups are each 2/4.
+## Maple Treeway exact run
+
+- Product: sole native arm64 KartPad process launched with the process-local trace helper; no Dolphin and no Simulator.
+- Test precondition: the user's own private all-cups fixture documented in `docs/artifacts/2026-08-29/g10-all-cups-fixture.md`; progression acceptance remains separate.
+- Executable SHA-256: `cdfd788a365edadecac4c2134ecd600606bbab4e55a85217e63a12df11366296`.
+- Retail UI path: Time Trials → Star Cup → Maple Treeway → regular Nintendo staff data `Nin★pico 02:58.633` → Watch Replay.
+- Private trace SHA-256: `b36a526eef9571fa16473b9f50c5f719e0ac1b91e40e248620658d76fbdca3b4`.
+- Strict assertion: `scripts/summarize-mkw-state-trace.py --require-complete --expected-input-frames 10948`.
+- Result: the accepted segment begins at race time 240, ends at 10947, contains 10,708 consecutive stage-2 samples, and is followed by stage 4. The later incomplete segment is the retail automatic replay loop.
+- Bounded presentation checks remained at the overlay's 60 FPS target through foliage, leaf particles, tree interiors, branches, net bridge, Wigglers, moving hazards, and ghost transparency. Deterministic cadence remains a G11 gate.
+- Private log SHA-256 `f946d86b72862b051495a17ef5ac08c6288fb1bd474e0384261e99b8d6408801` recorded eight audio-queue drops and is rejected from audio-row acceptance.
+
+Current row 22 status: **27/32 Pass; 5 Open.** Mushroom, Flower, Shell, Banana, and Leaf Cups each have complete four-track evidence; Star Cup is 3/4, and Special and Lightning Cups are each 2/4.
