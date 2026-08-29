@@ -493,3 +493,13 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - Added `scripts/summarize-mkw-state-trace.py` so row 22 runs can be accepted from guest state rather than screenshots or elapsed wall time. It validates the complete CSV schema, monotonic sample/retrace values, consecutive race-stage timing, a later finish-stage transition, and an optional exact RKG input-frame count.
 - The data-free self-test rejects an unfinished race and two incorrect frame counts. The retained private N64 Mario Raceway native trace passes at the exact 8,320-frame staff input: race stage 2 covers `240..8319` for 8,080 samples and is followed by finish stage 4. The same trace correctly fails when asked for 8,319 input frames.
 - Classification remains **preparation pass, not row 22 acceptance**. This creates the strict native assertion that each remaining track run must satisfy.
+
+## 2026-08-29 — G10 Moo Moo Meadows exact native completion
+
+- Started the retail Time Trials → Mushroom Cup → Moo Moo Meadows → `Nin★YuNya 01:37.856` → Watch Replay path in the sole native arm64 KartPad process. No Dolphin or Simulator was running.
+- First attempt failure signature: the replay visibly reached its finish animation, but startup had logged `[state-trace] unable to open .../private/g10-track-matrix/moo-moo-native.csv` because the absolute parent directory did not exist. No trace was captured, so the visual run is rejected rather than rounded up to Pass.
+- Created the exact ignored output directory and reran through the same retail path. The private trace SHA-256 is `b61dc910a085a09c0e62c252a9cd516223cde46d6fb175ce201b8154f719b572`.
+- `scripts/summarize-mkw-state-trace.py --require-complete --expected-input-frames 6106` passes: race stage 2 covers exactly `240..6105` for 5,866 samples, followed by finish stage 4. A later partial segment is the retail automatic replay loop and is not mistaken for the accepted run.
+- Eight unrelated `dolrecomp` workers remained active. Overlay and audio data from this run are rejected as performance/audio evidence; only exact guest-stage completion is accepted.
+- Combined with the accepted Luigi Circuit live races and exact N64 Mario Raceway staff trace, PRD row 22 is now **3/32 Pass, 29 Open**. Evidence: `docs/artifacts/2026-08-29/g10-retail-tracks/README.md`.
+- Next step: continue native exact completion on the remaining initially available cups, then obtain honest progression coverage for the locked cups without treating an unlock bypass as progression evidence.
