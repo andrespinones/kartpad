@@ -60,6 +60,7 @@ Updated: 2026-08-29
 - Four controller slots PRD row 31 passes: P1–P4 independently register as Classic controllers, channel-specific disconnect raises the correct interruption state, reconnect restores assignment, and pending/previous held input is cleared.
 - G2 audio evidence is limited to emulator execution; subjective audio quality is a future hands-on row and is not claimed.
 - G8 playback is proven by both the runtime's non-silent host-stream telemetry and an independent system-output loopback level capture. Subjective audio quality and latency remain hands-on G10/G11 rows.
+- Audio continuity instrumentation is now bounded and cumulative. Its first uncontended diagnostic sample recorded 104,960 queue checks and 40,304,256 submitted bytes with zero post-start empty observations or drops; the final 8,192-check reporting cadence, gameplay/pause, default-device migration, and long-session rows remain open.
 
 ## UI reference commitment
 

@@ -467,3 +467,13 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - A simultaneous unrelated eight-worker LLVM translation invalidated the later overlay as cadence evidence and was left untouched. A clean-load 29.5–30.1 FPS observation already establishes the retail three-player mode; uncontended resampling and complete three-/four-player standings cycles remain open.
 - Classification: **Pass for the repeated-race camera lifecycle defect; PRD row 30 remains in progress.** Evidence: `docs/artifacts/2026-08-29/g10-three-player-camera-lifecycle.md`.
 - Next step: checkpoint the reproducible repair, re-sample after host contention clears, and complete the normal three- and four-player race rows.
+
+## 2026-08-29 — G10 audio continuity telemetry
+
+- Audited 83 native logs containing successful non-silent host playback. Fifty-eight older diagnostic runs contained the deliberately one-shot `output queue full` message, which could not distinguish one startup/load burst from sustained loss.
+- Confirmed from the SDL 3 default-device contract that a stream opened on `SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK` may migrate automatically when the system default changes; the migration still requires a hands-on KartPad test.
+- Added content-free cumulative queue telemetry to the reproducible Apple runtime patch: checks, post-start empty observations, dropped blocks/bytes, submitted bytes, depth range/current depth, and queue limit. Queuing and timing behavior are unchanged.
+- The first signed arm64 sample ran for approximately six minutes with 104,960 checks, 40,304,256 submitted bytes, zero post-start empty observations, zero dropped blocks, and a 0–14,796-byte observed range below the 15,360-byte limit.
+- Reduced reporting from the fast diagnostic cadence to one report per 8,192 checks (about 30 seconds at the observed rate) plus orderly shutdown, keeping diagnostics bounded. This final cadence still needs its own runtime sample.
+- Classification: **In progress for PRD row 33.** Uncontended queue continuity is healthy; final-cadence, gameplay/pause, device-change, and long-session evidence remain open. Evidence: `docs/artifacts/2026-08-29/g10-audio-queue-telemetry.md`.
+- Next step: rebuild the bounded candidate, collect a fresh sample when host contention clears, then combine it with the three-player race and audio-transition playtest.

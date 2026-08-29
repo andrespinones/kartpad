@@ -156,12 +156,26 @@ diff -ruN --exclude=.git --exclude=third_party --exclude=build a/cmake/PublicPro
  endforeach()
 diff -ruN --exclude=.git --exclude=third_party --exclude=build a/include/audio_backend.h b/include/audio_backend.h
 --- a/include/audio_backend.h	2026-08-28 14:10:57
-+++ b/include/audio_backend.h	2026-08-28 19:54:23
-@@ -44,5 +44,6 @@
++++ b/include/audio_backend.h	2026-08-29 08:41:47
+@@ -32,5 +32,6 @@
+     bool EnsureInitializedLocked(uint32_t sampleRate, uint32_t channels);
+     bool QueueHasCapacityLocked(int incomingBytes);
++    void LogQueueTelemetryLocked(int queued, bool final = false);
+     uint32_t QueueLimitBytesLocked() const;
+     float EffectiveGainLocked() const;
+     void ApplyGainLocked();
+@@ -44,5 +45,13 @@
      float m_masterVolume = 1.0f;
      bool m_muted = false;
      bool m_reportedDroppedBlock = false;
 +    bool m_reportedAudibleBlock = false;
++    uint64_t m_queueChecks = 0;
++    uint64_t m_emptyQueueChecks = 0;
++    uint64_t m_droppedBlocks = 0;
++    uint64_t m_droppedBytes = 0;
++    uint64_t m_submittedBytes = 0;
++    int m_minQueuedBytes = -1;
++    int m_maxQueuedBytes = 0;
      std::vector<int16_t> m_convertBuffer;
  };
 diff -ruN --exclude=.git --exclude=third_party --exclude=build a/include/hle/controller_status_contract.h b/include/hle/controller_status_contract.h
@@ -602,7 +616,7 @@ diff -ruN --exclude=.git --exclude=third_party --exclude=build a/src/apple/wup02
 +}  // namespace Wup028Adapter
 diff -ruN --exclude=.git --exclude=third_party --exclude=build a/src/audio_backend.cpp b/src/audio_backend.cpp
 --- a/src/audio_backend.cpp	2026-08-28 14:10:57
-+++ b/src/audio_backend.cpp	2026-08-28 19:54:23
++++ b/src/audio_backend.cpp	2026-08-29 08:41:47
 @@ -79,6 +79,9 @@
      m_sampleRate = sampleRate;
      m_channels = channels;
@@ -613,18 +627,83 @@ diff -ruN --exclude=.git --exclude=third_party --exclude=build a/src/audio_backe
      return true;
  }
 
-@@ -100,6 +103,7 @@
+@@ -89,6 +92,10 @@
+
+ void AudioBackend::Shutdown() {
+     std::lock_guard<std::mutex> lock(m_mutex);
++    if (m_queueChecks != 0) {
++        const int queued = m_stream ? SDL_GetAudioStreamQueued(m_stream) : -1;
++        LogQueueTelemetryLocked(queued, true);
++    }
+     if (m_stream) {
+         SDL_DestroyAudioStream(m_stream);
+         m_stream = nullptr;
+@@ -100,6 +107,14 @@
      m_sampleRate = 0;
      m_channels = 0;
      m_reportedDroppedBlock = false;
 +    m_reportedAudibleBlock = false;
++    m_queueChecks = 0;
++    m_emptyQueueChecks = 0;
++    m_droppedBlocks = 0;
++    m_droppedBytes = 0;
++    m_submittedBytes = 0;
++    m_minQueuedBytes = -1;
++    m_maxQueuedBytes = 0;
      m_convertBuffer.clear();
  }
 
-@@ -176,6 +180,18 @@
+@@ -120,6 +135,12 @@
+     if (queued < 0) {
+         return true;
+     }
++    ++m_queueChecks;
++    if (m_queueChecks > 1 && queued == 0) {
++        ++m_emptyQueueChecks;
++    }
++    m_minQueuedBytes = m_minQueuedBytes < 0 ? queued : std::min(m_minQueuedBytes, queued);
++    m_maxQueuedBytes = std::max(m_maxQueuedBytes, queued);
+     const uint32_t maxQueued = QueueLimitBytesLocked();
+     if (static_cast<uint64_t>(queued) + static_cast<uint64_t>(std::max(incomingBytes, 0)) > maxQueued) {
+         // Match Dolphin's FIFO overflow behavior: preserve the continuous audio
+@@ -132,11 +153,32 @@
+             RT_LOG(RT_TAG_AUDIO) << "output queue full (" << queued << "/" << maxQueued
+                       << " bytes); dropping blocks to preserve continuity" << std::endl;
+         }
++        ++m_droppedBlocks;
++        m_droppedBytes += static_cast<uint64_t>(std::max(incomingBytes, 0));
++        LogQueueTelemetryLocked(queued);
+         return false;
+     }
++    LogQueueTelemetryLocked(queued);
+     return true;
+ }
+
++void AudioBackend::LogQueueTelemetryLocked(int queued, bool final) {
++    constexpr uint64_t reportEveryChecks = 8192;
++    if (!final && (m_queueChecks == 0 || (m_queueChecks % reportEveryChecks) != 0)) {
++        return;
++    }
++    RT_LOG(RT_TAG_AUDIO) << (final ? "final " : "")
++                         << "queue telemetry: checks=" << m_queueChecks
++                         << ", empty-before-push=" << m_emptyQueueChecks
++                         << ", dropped-blocks=" << m_droppedBlocks
++                         << ", dropped-bytes=" << m_droppedBytes
++                         << ", submitted-bytes=" << m_submittedBytes
++                         << ", queued=" << queued
++                         << ", observed-range=[" << m_minQueuedBytes << ","
++                         << m_maxQueuedBytes << "] bytes, limit="
++                         << QueueLimitBytesLocked() << " bytes" << std::endl;
++}
++
+ bool AudioBackend::PushWiiAiSamplesBE16(const uint8_t* data, size_t bytes) {
+     if (!data || bytes == 0) {
+         return false;
+@@ -176,6 +218,19 @@
          RT_LOG(RT_TAG_AUDIO) << "SDL_PutAudioStreamData failed: " << SDL_GetError() << std::endl;
          return false;
      }
++    m_submittedBytes += static_cast<uint64_t>(lenBytes);
 +    if (!m_reportedAudibleBlock) {
 +        const auto peak = std::max_element(
 +            m_convertBuffer.begin(), m_convertBuffer.begin() + sampleCount,
@@ -640,11 +719,11 @@ diff -ruN --exclude=.git --exclude=third_party --exclude=build a/src/audio_backe
 
      return true;
  }
-@@ -197,6 +213,19 @@
-     if (!SDL_PutAudioStreamData(m_stream, samples, lenBytes)) {
+@@ -198,6 +253,20 @@
          RT_LOG(RT_TAG_AUDIO) << "SDL_PutAudioStreamData failed: " << SDL_GetError() << std::endl;
          return false;
-+    }
+     }
++    m_submittedBytes += static_cast<uint64_t>(lenBytes);
 +    if (!m_reportedAudibleBlock) {
 +        int peak = 0;
 +        for (size_t i = 0; i < sampleCount; ++i) {
@@ -657,9 +736,10 @@ diff -ruN --exclude=.git --exclude=third_party --exclude=build a/src/audio_backe
 +                                 << SDL_GetAudioStreamQueued(m_stream) << " bytes"
 +                                 << std::endl;
 +        }
-     }
++    }
 
      return true;
+ }
 diff -ruN --exclude=.git --exclude=third_party --exclude=build a/src/fiber_manager.cpp b/src/fiber_manager.cpp
 --- a/src/fiber_manager.cpp	2026-08-28 14:10:57
 +++ b/src/fiber_manager.cpp	2026-08-28 19:11:47
