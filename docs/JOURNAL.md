@@ -257,3 +257,12 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - The native bridge validates the command and issues real Dolphin GX projection, matrix, vertex-format, TEV, and triangle commands. Aurora decodes the FIFO, builds the GX pipeline, Dawn submits it to Metal, and Aurora captures the presentation texture.
 - The logical 640x480 GX viewport maps to the 1164x960 Retina EFB. The captured corners are exact clear BGRA `30 20 10 ff`, while the center is exact triangle BGRA `00 00 00 ff`; BMP SHA-256 is `799af319cb7bdbbc3ce6371b00d3dad1a5c47a8a14c6108f2271b0210777477e`.
 - Translated-GX portion: **Pass**. The first Mario Kart Wii frame is the remaining G7 condition.
+
+### G7 real Mario Kart Wii frame and gate pass
+
+- Extracted the user-owned PAL WBFS into ignored private data with `nodtool 2.0.0-alpha.9`. Hash validation rejected the container at H0 block 0, so the extraction was repeated without validation; the resulting `main.dol` SHA-256 still exactly matches the independently verified input DOL.
+- Ported WiiCompiled's flat 4 GiB guest mapping and cooperative `OSThread` fibers to Apple arm64. The scheduler now uses `ucontext` host fibers and preserves the existing per-thread `CpuContext`, FPSCR/NI, wait, wake, resume, termination, and deferred-delete semantics.
+- Linked all 10,264 shared translated functions, initialized Revolution OS, published 2,068 FST entries from 2,037 disc files, initialized GX/VI, and entered the real game frame loop. A live sample captured `EGG::AsyncDisplay::endRender → GXCopyDisp` on the main stack and VI-retrace sleep/resume on a guest fiber.
+- Packaged the ignored spike as a signed portable macOS app for GUI playtesting. Computer Use captured the Nintendo wrist-strap safety screen at 60 FPS through Aurora, pinned Dawn, and Metal. Capture SHA-256 is `3228b6044cfc746e4bf86971f1445f412e5e8a6ff3029fa8b3b620d20be087b8`.
+- Added a reproducible Apple runtime patch and preparation script. Private disc, NAND, translation, caches, and application products remain ignored.
+- G7 classification: **Pass**. G8 is the lowest unmet goal: advance through intro/title/menu, verify audible audio, and prove keyboard/controller navigation.

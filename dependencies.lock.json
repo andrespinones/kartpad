@@ -98,6 +98,21 @@
       "role": "Pinned WebGPU implementation used by vendored Aurora; Darwin arm64 artifact is hash-verified at configure time"
     },
     {
+      "name": "sse2neon",
+      "repository": "https://github.com/DLTcollab/sse2neon.git",
+      "commit": "13a42df35dc7fcc94f987568e7274a998bb6cc86",
+      "file": "sse2neon.h",
+      "sha256": "44b9fa3dec3a52ea473246e04b9f692a4e5b0ed654299eef7fe7ec3049e223e0",
+      "role": "Pinned x86 SIMD compatibility layer used by the arm64 WiiCompiled runtime port"
+    },
+    {
+      "name": "nodtool",
+      "repository": "https://github.com/encounter/nod.git",
+      "version": "2.0.0-alpha.9",
+      "distribution": "crates.io",
+      "role": "Read-only extraction of the supplied WBFS into ignored private workspace data"
+    },
+    {
       "name": "Mario Kart Wii function map",
       "path": "ref/upstream/Wiicompiled/projects/mkwii/MAP.txt",
       "vendoredInCommit": "1912292c804ff9b1b79938de89369ec4496f9fff",

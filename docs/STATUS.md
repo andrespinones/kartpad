@@ -4,7 +4,7 @@ Updated: 2026-08-28
 
 ## Current goal
 
-**G7 — Native Metal frame** is the lowest unmet goal. G0–G6 pass. The pinned Aurora/Dawn graph now GPU-captures both the exact host clear and translated PPC-authored GX geometry through Metal. The first game frame remains.
+**G8 — macOS boots and accepts input** is the lowest unmet goal. G0–G7 pass. The native arm64 runtime renders Mario Kart Wii's real wrist-strap frame at 60 FPS through Aurora, pinned Dawn, and Metal; menu input and audible audio remain to be proven.
 
 ## Goal ledger
 
@@ -17,12 +17,13 @@ Updated: 2026-08-28
 | G4 Guest memory | Pass | Checked Darwin path passes conformance, lifecycle, randomized stress, microprogram, ASan/UBSan; safe Mach VM feasibility probe passes |
 | G5 Guest scheduler | Pass | Explicit state machine passes lifecycle/priority/VI/register tests and two deterministic million-operation runs under Release and ASan/UBSan |
 | G6 PPC/AArch64 semantics | Pass | 250,227-check arm64/x86 hashes match; Dolphin oracle, sanitizers, translator 579/579, translated scalar/paired state, scheduler/callback persistence, and all 10,836 title units pass |
-| G7 Native Metal frame | In progress | Aurora/Dawn Metal host clear and translated GX geometry Pass; first game frame remains |
-| G8–G18 | Gated | Await G7 |
+| G7 Native Metal frame | Pass | Real PAL wrist-strap frame visible at 60 FPS; reproducible Apple runtime patch and capture evidence recorded |
+| G8 macOS boots/input | In progress | Advance through intro/title/menu; verify audible audio and keyboard/controller navigation |
+| G9–G18 | Gated | Await G8 |
 
 ## Known-good state
 
-- Repository checkpoint: `f633874` (`origin/main`), complete translated scalar/paired semantic baseline.
+- Repository checkpoint: pending this G7 game-frame commit; prior checkpoint `ce2fbb5` is on `origin/main`.
 - Simulator state: no Simulator device is booted. KartPad will boot exactly one when a mobile gate requires it.
 - Buildable KartPad targets: host, memory, scheduler, semantic contracts, native subsystem smoke, translated semantic fixture, and provisional translated-frame app.
 - Input profile: WBFS containing clean PAL `RMCP01`, revision 0; original is read-only.
@@ -39,13 +40,13 @@ Updated: 2026-08-28
 
 ## Active risks and blockers
 
-- About 31 GiB of host storage remains. Large generated translation/build products stay ignored and capacity must be checked before Dawn/Aurora builds.
+- About 14 GiB of host storage remains after private disc extraction and the full translated runtime build. Large generated products remain ignored; capacity must be checked before additional build graphs.
 - No human-only prerequisite currently blocks G0 or the independent parts of G1.
 - Physical-device, public-service, account, and hands-on acceptance rows remain future external prerequisites and are not claimed.
 - WiiCompiled's bundled `MAP.txt` may be used as an ignored local reference, but independent provenance for republishing it is not established; do not copy it into public KartPad sources/artifacts.
 - Dolphin pipe input is accepted for deterministic menus. Live race acceleration/brake semantics remain deliberately unclaimed until a narrow controller fixture distinguishes the observed behavior.
 - G2 audio evidence is limited to emulator execution; subjective audio quality is a future hands-on row and is not claimed.
-- The current G7 frame is a deterministic translated command consumed by direct Metal. It is evidence for the translated-to-native boundary only, not Dawn/Aurora, GX correctness, or a Mario Kart Wii frame.
+- The complete PAL game translation now reaches a real Mario Kart Wii frame through GX/Aurora/Dawn/Metal. G8 still requires advancing through the intro/title/menu with working input and audible audio.
 
 ## UI reference commitment
 

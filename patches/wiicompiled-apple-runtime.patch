@@ -1,0 +1,791 @@
+diff -ruN --exclude=third_party --exclude=build a/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt	2026-08-28 14:10:57
++++ b/CMakeLists.txt	2026-08-28 19:25:25
+@@ -1,10 +1,9 @@
+ ﻿cmake_minimum_required(VERSION 3.16)
+-project(mkw_recompiled)
++project(mkw_recompiled LANGUAGES C CXX)
+ 
+-if(NOT WIN32 OR NOT MINGW OR NOT CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR
+-   NOT CMAKE_SIZEOF_VOID_P EQUAL 8 OR
+-   NOT CMAKE_SYSTEM_PROCESSOR MATCHES "^(AMD64|amd64|x86_64|X86_64)$")
+-    message(FATAL_ERROR "WiiCompiled requires 64-bit LLVM-MinGW Clang on Windows")
++if(NOT APPLE OR NOT CMAKE_SIZEOF_VOID_P EQUAL 8 OR
++   NOT CMAKE_SYSTEM_PROCESSOR MATCHES "^(arm64|aarch64|ARM64)$")
++    message(FATAL_ERROR "KartPad G7 runtime spike requires 64-bit Apple arm64")
+ endif()
+ if(NOT CMAKE_BUILD_TYPE STREQUAL "Release")
+     message(FATAL_ERROR "WiiCompiled only supports Release builds")
+@@ -18,7 +17,7 @@
+ # aurora-main and its third-party tree stay unaffected.
+ set(MKW_PROJECT_COMPILE_DEFINITIONS NOMINMAX)
+ 
+-set(CMAKE_CXX_STANDARD 17)
++set(CMAKE_CXX_STANDARD 20)
+ 
+ # Declared before the vendored libraries so the third-party block below can
+ # branch on it and so cmake/NativePrebuilt.cmake is included after the names it
+@@ -91,7 +90,8 @@
+ # not compiled at all; imported targets with the same names are wired up from
+ # the package instead, so this project's own code compiles and links exactly
+ # as before.
+-set(MKW_AURORA_DIR "${CMAKE_CURRENT_LIST_DIR}/../aurora-main")
++set(MKW_AURORA_DIR "${CMAKE_CURRENT_LIST_DIR}/../aurora-main"
++    CACHE PATH "Pinned Aurora source")
+ 
+ # The translator's explicit float casts are PPC single-precision rounding points.
+ # Fast-math may erase them and change guest-visible integer conversions.
+@@ -109,13 +109,16 @@
+     if(NOT EXISTS ${MKW_AURORA_DIR}/CMakeLists.txt)
+         message(FATAL_ERROR "Requested aurora-main but ${MKW_AURORA_DIR} is missing")
+     endif()
+-    set(DAWN_ENABLE_D3D11 OFF CACHE BOOL "" FORCE)
+-    set(DAWN_ENABLE_D3D12 ON CACHE BOOL "" FORCE)
+-    set(DAWN_ENABLE_VULKAN ON CACHE BOOL "" FORCE)
+-    set(TINT_BUILD_HLSL_WRITER ON CACHE BOOL "" FORCE)
+-    set(DAWN_BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
+-    set(DAWN_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+-    set(DAWN_USE_WINDOWS_UI OFF CACHE BOOL "" FORCE)
++    set(AURORA_DAWN_PROVIDER package CACHE STRING "" FORCE)
++    set(AURORA_DAWN_VERSION v20260603.191052 CACHE STRING "" FORCE)
++    set(AURORA_DAWN_PACKAGE_URL "" CACHE STRING
++        "file:// URL for the pinned Dawn Darwin arm64 archive")
++    set(AURORA_DAWN_PACKAGE_URL_HASH
++        "SHA256=084ffd2ef500d614e443e3d494738272134628867bad3270d67ee8b0fb5f0838"
++        CACHE STRING "" FORCE)
++    set(AURORA_SDL3_PROVIDER system CACHE STRING "" FORCE)
++    set(AURORA_ENABLE_GX ON CACHE BOOL "" FORCE)
++    set(AURORA_ENABLE_DVD OFF CACHE BOOL "" FORCE)
+ 
+     # Provide a tiny stub for DXProgrammableCapture when the SDK/PIX headers are
+     # missing (common on MinGW). Dawn only includes the header; no symbols are
+@@ -206,6 +209,12 @@
+ set(MKW_CPU_BASELINE_SOURCE "${CMAKE_CURRENT_LIST_DIR}/src/host_cpu_baseline.cpp")
+ list(REMOVE_ITEM SOURCES ${MKW_BASE_PRODUCT_SOURCE} ${MKW_RETRO_REWIND_PRODUCT_SOURCE}
+      ${MKW_CPU_BASELINE_SOURCE})
++list(REMOVE_ITEM SOURCES
++    "${CMAKE_CURRENT_LIST_DIR}/src/guest_flat_memory.cpp"
++    "${CMAKE_CURRENT_LIST_DIR}/src/wup028_adapter.cpp")
++list(APPEND SOURCES
++    "${CMAKE_CURRENT_LIST_DIR}/src/apple/guest_flat_memory_apple.cpp"
++    "${CMAKE_CURRENT_LIST_DIR}/src/apple/wup028_adapter_stub.cpp")
+ 
+ # The translator emits the complete, content-addressed source graph. Consuming
+ # this one manifest keeps configure independent of the 28k generated function
+diff -ruN --exclude=third_party --exclude=build a/cmake/PublicProducts.cmake b/cmake/PublicProducts.cmake
+--- a/cmake/PublicProducts.cmake	2026-08-28 14:10:57
++++ b/cmake/PublicProducts.cmake	2026-08-28 19:12:10
+@@ -73,11 +73,12 @@
+ target_compile_features(mkw_runtime_common PRIVATE cxx_std_20)
+ target_compile_definitions(mkw_runtime_common PRIVATE
+     SDL_MAIN_HANDLED
+-    _DISABLE_STRING_ANNOTATION _DISABLE_VECTOR_ANNOTATION)
++    _DISABLE_STRING_ANNOTATION _DISABLE_VECTOR_ANNOTATION
++    $<$<PLATFORM_ID:Darwin>:_XOPEN_SOURCE>)
+ target_link_libraries(mkw_runtime_common PRIVATE
+     aurora::gx aurora::pad aurora::si aurora::vi aurora::mtx)
+ target_link_libraries(mkw_runtime_common PRIVATE mkw::pugixml mkw::toml11 mkw::cryptopp)
+-target_link_libraries(mkw_runtime_common PRIVATE shell32 windowsapp)
++target_link_libraries(mkw_runtime_common PRIVATE "-framework Foundation")
+ if(MKW_CPPWINRT_INCLUDE_DIR)
+     if(NOT EXISTS "${MKW_CPPWINRT_INCLUDE_DIR}/winrt/base.h")
+         message(FATAL_ERROR
+@@ -127,7 +128,7 @@
+ # check from a C initializer so an unsupported machine gets a readable error
+ # instead of an illegal-instruction crash. Excluded from the unity build and the
+ # precompiled header because both are produced with the owning target's flags.
+-add_library(mkw_cpu_baseline OBJECT "${MKW_CPU_BASELINE_SOURCE}")
++add_library(mkw_cpu_baseline OBJECT "${MKW_RUNTIME_SOURCE_DIR}/src/apple/host_cpu_baseline_stub.cpp")
+ target_compile_features(mkw_cpu_baseline PRIVATE cxx_std_17)
+ set_target_properties(mkw_cpu_baseline PROPERTIES UNITY_BUILD OFF)
+ target_compile_options(mkw_cpu_baseline PRIVATE -w)
+@@ -205,10 +206,11 @@
+     endif()
+ 
+     target_link_libraries(${target} PRIVATE
+-        dbghelp user32 winmm ws2_32 iphlpapi secur32 crypt32 windowsapp setupapi winusb)
++        "-framework Foundation" "-framework CoreAudio" "-framework AudioToolbox")
+ 
+-    set_target_properties(${target} PROPERTIES WIN32_EXECUTABLE TRUE)
+-    foreach(runtime_dll libc++.dll libunwind.dll)
++    if(WIN32)
++      set_target_properties(${target} PROPERTIES WIN32_EXECUTABLE TRUE)
++      foreach(runtime_dll libc++.dll libunwind.dll)
+         execute_process(
+             COMMAND "${CMAKE_CXX_COMPILER}" "--print-file-name=${runtime_dll}"
+             OUTPUT_VARIABLE runtime_dll_path
+@@ -223,7 +225,8 @@
+         add_custom_command(TARGET ${target} POST_BUILD
+             COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                 "${runtime_dll_path}" $<TARGET_FILE_DIR:${target}>)
+-    endforeach()
++      endforeach()
++    endif()
+ 
+     set(MKW_WII_BOOTSTRAP_SOURCE_DIR "${MKW_RUNTIME_SOURCE_DIR}/assets/wii")
+     if(NOT EXISTS "${MKW_WII_BOOTSTRAP_SOURCE_DIR}/shared2/wc24")
+@@ -287,6 +290,6 @@
+     mkw_retro_rewind_functions WiiCompiled RetroRewind)
+ foreach(target IN LISTS MKW_ALL_BUILD_TARGETS)
+     if(TARGET ${target})
+-        target_compile_options(${target} PRIVATE -march=x86-64-v3)
++        target_compile_options(${target} PRIVATE -mcpu=apple-m2)
+     endif()
+ endforeach()
+diff -ruN --exclude=third_party --exclude=build a/include/isa/ppc_isa_config.h b/include/isa/ppc_isa_config.h
+--- a/include/isa/ppc_isa_config.h	2026-08-28 14:10:57
++++ b/include/isa/ppc_isa_config.h	2026-08-28 18:25:14
+@@ -4,18 +4,41 @@
+ #include <cstdint>
+ 
+ #define MKW_RESTRICT __restrict
++#if defined(__aarch64__)
++#include "../../third_party/sse2neon/sse2neon.h"
++
++// SSE2NEON deliberately stops at SSE4.2. The translated PPC helpers use the
++// two FMA3 operations below to retain a single rounding step for paired-single
++// arithmetic; Apple Silicon exposes the same operation directly through NEON.
++inline __m128 _mm_fmadd_ps(__m128 a, __m128 b, __m128 c)
++{
++    return vfmaq_f32(c, a, b);
++}
++
++inline __m128 _mm_fmsub_ps(__m128 a, __m128 b, __m128 c)
++{
++    return vfmaq_f32(vnegq_f32(c), a, b);
++}
++#else
+ #include <immintrin.h>
++#endif
+ 
+ inline constexpr bool MkwStateFreeAbiEnabled(uint32_t) noexcept
+ {
+     return true;
+ }
+ 
++#if defined(_MSC_VER)
+ #define MKW_PPC_FORCE_INLINE __forceinline
+ #define MKW_PPC_NO_INLINE __declspec(noinline)
++#define MKW_PPC_INTERNAL_CALL __regcall
++#else
++#define MKW_PPC_FORCE_INLINE inline __attribute__((always_inline))
++#define MKW_PPC_NO_INLINE __attribute__((noinline))
++#define MKW_PPC_INTERNAL_CALL
++#endif
+ #define MKW_PPC_ALWAYS_INLINE_BODY __attribute__((always_inline))
+ #define MKW_PPC_COLD __attribute__((cold))
+-#define MKW_PPC_INTERNAL_CALL __regcall
+ 
+ 
+ using MkwStateFreeResult2 = uint64_t __attribute__((ext_vector_type(2)));
+diff -ruN --exclude=third_party --exclude=build a/include/memory_access.h b/include/memory_access.h
+--- a/include/memory_access.h	2026-08-28 14:10:57
++++ b/include/memory_access.h	2026-08-28 18:25:14
+@@ -18,8 +18,13 @@
+ }
+ 
+ namespace MemoryInline {
++#if defined(_MSC_VER)
+ #define MKW_MEMORY_FORCE_INLINE __forceinline
+ #define MKW_MEMORY_NO_INLINE __declspec(noinline)
++#else
++#define MKW_MEMORY_FORCE_INLINE inline __attribute__((always_inline))
++#define MKW_MEMORY_NO_INLINE __attribute__((noinline))
++#endif
+ #define MKW_MEMORY_COLD __attribute__((cold))
+ inline constexpr uint32_t kPageShift = 20;
+ inline constexpr uint32_t kPageSize = 1u << kPageShift;
+diff -ruN --exclude=third_party --exclude=build a/include/runtime_config.h b/include/runtime_config.h
+--- a/include/runtime_config.h	2026-08-28 14:10:57
++++ b/include/runtime_config.h	2026-08-28 18:31:35
+@@ -17,6 +17,9 @@
+ #include <utility>
+ #include <vector>
+ #include <toml.hpp>
++#ifdef __APPLE__
++#include <mach-o/dyld.h>
++#endif
+ #ifdef _WIN32
+ #ifndef WIN32_LEAN_AND_MEAN
+ #define WIN32_LEAN_AND_MEAN
+@@ -155,6 +158,15 @@
+         }
+         buffer.resize(buffer.size() * 2);
+     }
++#elif defined(__APPLE__)
++    uint32_t size = 0;
++    _NSGetExecutablePath(nullptr, &size);
++    std::vector<char> buffer(size + 1, '\0');
++    if (_NSGetExecutablePath(buffer.data(), &size) != 0)
++        return std::nullopt;
++    std::error_code ec;
++    const auto canonical = std::filesystem::weakly_canonical(buffer.data(), ec);
++    return (ec ? std::filesystem::path(buffer.data()) : canonical).parent_path();
+ #else
+     return std::nullopt;
+ #endif
+diff -ruN --exclude=third_party --exclude=build a/src/apple/guest_flat_memory_apple.cpp b/src/apple/guest_flat_memory_apple.cpp
+--- a/src/apple/guest_flat_memory_apple.cpp	1969-12-31 18:00:00
++++ b/src/apple/guest_flat_memory_apple.cpp	2026-08-28 18:30:22
+@@ -0,0 +1,229 @@
++#include "guest_flat_memory.h"
++
++#include <algorithm>
++#include <atomic>
++#include <cerrno>
++#include <cstring>
++#include <fcntl.h>
++#include <iostream>
++#include <mutex>
++#include <sstream>
++#include <stdexcept>
++#include <string>
++#include <sys/mman.h>
++#include <unistd.h>
++#include <vector>
++
++namespace GuestFlat {
++namespace {
++
++struct Section {
++    Backing backing = Backing::Owned;
++    uint32_t ownedBase = 0;
++    uint64_t size = 0;
++    int fd = -1;
++    uint8_t* host = nullptr;
++};
++
++struct Mapping {
++    uint32_t base = 0;
++    uint64_t size = 0;
++    uint64_t offset = 0;
++    Section* section = nullptr;
++};
++
++uint8_t* g_base = nullptr;
++bool g_initialized = false;
++std::vector<RegionRequest> g_layout;
++std::vector<Section> g_sections;
++std::vector<Mapping> g_mappings;
++std::mutex g_mutex;
++std::atomic<uint32_t> g_mmio{0};
++std::atomic<uint32_t> g_efb{0};
++std::atomic<uint32_t> g_xguard{0};
++std::atomic<uint32_t> g_unmapped{0};
++std::atomic<uint32_t> g_unmappedRegions{0};
++
++uint64_t RoundUp(uint64_t value, uint64_t alignment)
++{
++    return (value + alignment - 1) & ~(alignment - 1);
++}
++
++uint64_t OffsetFor(const RegionRequest& region)
++{
++    if (region.backing == Backing::Mem1)
++        return region.base & 0x01ffffffu;
++    if (region.backing == Backing::Mem2)
++        return region.base & 0x0fffffffu;
++    return 0;
++}
++
++bool SameKey(const Section& section, const RegionRequest& region)
++{
++    return section.backing == region.backing &&
++           (region.backing != Backing::Owned || section.ownedBase == region.base);
++}
++
++bool SameLayout(const std::vector<RegionRequest>& lhs,
++                const std::vector<RegionRequest>& rhs)
++{
++    if (lhs.size() != rhs.size())
++        return false;
++    for (size_t i = 0; i < lhs.size(); ++i) {
++        if (lhs[i].base != rhs[i].base || lhs[i].size != rhs[i].size ||
++            lhs[i].backing != rhs[i].backing)
++            return false;
++    }
++    return true;
++}
++
++[[noreturn]] void ThrowErrno(const char* operation)
++{
++    std::ostringstream message;
++    message << operation << " failed: " << std::strerror(errno);
++    throw std::runtime_error(message.str());
++}
++
++int CreateSharedSection(uint64_t size, unsigned ordinal)
++{
++    const std::string name = "/kartpad-g7-" + std::to_string(getpid()) + "-" +
++                             std::to_string(ordinal);
++    const int fd = shm_open(name.c_str(), O_RDWR | O_CREAT | O_EXCL, 0600);
++    if (fd < 0)
++        ThrowErrno("shm_open");
++    shm_unlink(name.c_str());
++    if (ftruncate(fd, static_cast<off_t>(size)) != 0) {
++        const int saved = errno;
++        close(fd);
++        errno = saved;
++        ThrowErrno("ftruncate");
++    }
++    return fd;
++}
++
++void SetProtection(uint32_t address, size_t length, int protection)
++{
++    if (!g_base || length == 0)
++        return;
++    const uint64_t pageSize = static_cast<uint64_t>(getpagesize());
++    const uint64_t first = static_cast<uint64_t>(address) & ~(pageSize - 1);
++    const uint64_t last = RoundUp(static_cast<uint64_t>(address) + length, pageSize);
++    mprotect(g_base + first, static_cast<size_t>(last - first), protection);
++}
++
++} // namespace
++
++bool IsActive() { return g_initialized; }
++
++void Initialize(const std::vector<RegionRequest>& regions)
++{
++    std::lock_guard lock(g_mutex);
++    if (g_initialized) {
++        if (!SameLayout(g_layout, regions))
++            throw std::runtime_error("Flat guest memory was reinitialized with a different layout");
++        for (auto& section : g_sections)
++            std::memset(section.host, 0, static_cast<size_t>(section.size));
++        return;
++    }
++
++    const uint64_t pageSize = static_cast<uint64_t>(getpagesize());
++    const uint64_t reservationSize = kGuestSpaceSize + pageSize;
++    void* requested = reinterpret_cast<void*>(kFixedFlatGuestBase);
++    void* reserved = mmap(requested, static_cast<size_t>(reservationSize), PROT_NONE,
++                          MAP_PRIVATE | MAP_ANON, -1, 0);
++    if (reserved == MAP_FAILED)
++        ThrowErrno("mmap flat guest reservation");
++    if (reserved != requested) {
++        munmap(reserved, static_cast<size_t>(reservationSize));
++        throw std::runtime_error("macOS did not honor the fixed flat guest address hint");
++    }
++    g_base = static_cast<uint8_t*>(reserved);
++
++    g_sections.reserve(regions.size());
++    for (const auto& region : regions) {
++        auto it = std::find_if(g_sections.begin(), g_sections.end(),
++                               [&](const Section& value) { return SameKey(value, region); });
++        if (it == g_sections.end()) {
++            g_sections.push_back(Section{region.backing,
++                                         region.backing == Backing::Owned ? region.base : 0});
++            it = std::prev(g_sections.end());
++        }
++        it->size = std::max(it->size, RoundUp(OffsetFor(region) + region.size, pageSize));
++    }
++
++    for (size_t i = 0; i < g_sections.size(); ++i) {
++        auto& section = g_sections[i];
++        section.fd = CreateSharedSection(section.size, static_cast<unsigned>(i));
++        void* host = mmap(nullptr, static_cast<size_t>(section.size), PROT_READ | PROT_WRITE,
++                          MAP_SHARED, section.fd, 0);
++        if (host == MAP_FAILED)
++            ThrowErrno("mmap host guest-memory alias");
++        section.host = static_cast<uint8_t*>(host);
++    }
++
++    g_mappings.reserve(regions.size());
++    for (const auto& region : regions) {
++        auto section = std::find_if(g_sections.begin(), g_sections.end(),
++                                    [&](const Section& value) { return SameKey(value, region); });
++        const uint64_t offset = OffsetFor(region);
++        const uint64_t mappedSize = RoundUp(region.size, pageSize);
++        void* view = mmap(g_base + region.base, static_cast<size_t>(mappedSize),
++                          PROT_READ | PROT_WRITE, MAP_SHARED | MAP_FIXED,
++                          section->fd, static_cast<off_t>(offset));
++        if (view == MAP_FAILED || view != g_base + region.base)
++            ThrowErrno("mmap fixed guest-memory alias");
++        g_mappings.push_back(Mapping{region.base, region.size, offset, &*section});
++    }
++
++    for (auto& section : g_sections) {
++        close(section.fd);
++        section.fd = -1;
++    }
++    g_layout = regions;
++    g_initialized = true;
++}
++
++uint8_t* HostPointer(uint32_t guestAddress)
++{
++    for (const auto& mapping : g_mappings) {
++        if (guestAddress >= mapping.base &&
++            static_cast<uint64_t>(guestAddress - mapping.base) < mapping.size)
++            return mapping.section->host + mapping.offset + (guestAddress - mapping.base);
++    }
++    return nullptr;
++}
++
++void ProtectDeferredRange(uint32_t address, size_t length)
++{
++    SetProtection(address, length, PROT_NONE);
++}
++
++void UnprotectDeferredRange(uint32_t address, size_t length)
++{
++    SetProtection(address, length, PROT_READ | PROT_WRITE);
++}
++
++void RegisterExecutableRange(uint32_t, uint32_t)
++{
++    // Initial Apple bring-up keeps executable guest pages writable. Mod-code
++    // invalidation still takes the checked page-table path.
++}
++
++FaultCounters Counters()
++{
++    return {g_mmio.load(), g_efb.load(), g_xguard.load(), g_unmapped.load(),
++            g_unmappedRegions.load()};
++}
++
++void LogFaultSummary() noexcept
++{
++    const auto counters = Counters();
++    if (counters.mmio || counters.efb || counters.xguard || counters.unmapped)
++        std::cerr << "[runtime] flat guest fault summary: mmio=" << counters.mmio
++                  << " efb=" << counters.efb << " xguard=" << counters.xguard
++                  << " unmapped=" << counters.unmapped << std::endl;
++}
++
++bool HandleAccessViolation(void*) noexcept { return false; }
++
++} // namespace GuestFlat
+diff -ruN --exclude=third_party --exclude=build a/src/apple/host_cpu_baseline_stub.cpp b/src/apple/host_cpu_baseline_stub.cpp
+--- a/src/apple/host_cpu_baseline_stub.cpp	1969-12-31 18:00:00
++++ b/src/apple/host_cpu_baseline_stub.cpp	2026-08-28 18:22:10
+@@ -0,0 +1,3 @@
++namespace {
++[[maybe_unused]] const int kKartPadAppleArm64Baseline = 1;
++}
+diff -ruN --exclude=third_party --exclude=build a/src/apple/wup028_adapter_stub.cpp b/src/apple/wup028_adapter_stub.cpp
+--- a/src/apple/wup028_adapter_stub.cpp	1969-12-31 18:00:00
++++ b/src/apple/wup028_adapter_stub.cpp	2026-08-28 18:22:24
+@@ -0,0 +1,17 @@
++#include "wup028_adapter.h"
++#include <dolphin/pad.h>
++
++namespace Wup028Adapter {
++
++void Initialize() {}
++void Shutdown() {}
++AdapterInfo GetInfo() { return {}; }
++bool Read(std::array<PADStatus, 4>& statuses) {
++  for (PADStatus& status : statuses) status = {};
++  return false;
++}
++void SetPortAssignment(std::uint32_t, int) {}
++int GetPortAssignment(std::uint32_t) { return -1; }
++bool SetRumble(std::uint32_t, bool) { return false; }
++
++}  // namespace Wup028Adapter
+diff -ruN --exclude=third_party --exclude=build a/src/fiber_manager.cpp b/src/fiber_manager.cpp
+--- a/src/fiber_manager.cpp	2026-08-28 14:10:57
++++ b/src/fiber_manager.cpp	2026-08-28 19:11:47
+@@ -11,8 +11,68 @@
+ #include <cstdlib>
+ #include <iostream>
+ #include <iomanip>
++#include <memory>
+ #include <sstream>
+ 
++#if defined(__APPLE__)
++#include <cerrno>
++#include <cstring>
++#include <ucontext.h>
++#endif
++
++namespace {
++#if defined(__APPLE__)
++struct AppleFiber {
++    ucontext_t context{};
++    std::unique_ptr<std::byte[]> stack;
++};
++
++thread_local AppleFiber* g_currentAppleFiber = nullptr;
++
++void* CreateAppleSchedulerFiber()
++{
++    auto fiber = std::make_unique<AppleFiber>();
++    if (getcontext(&fiber->context) != 0) {
++        return nullptr;
++    }
++    g_currentAppleFiber = fiber.get();
++    return fiber.release();
++}
++
++void SwitchHostFiber(void* handle)
++{
++    auto* target = static_cast<AppleFiber*>(handle);
++    AppleFiber* source = g_currentAppleFiber;
++    if (!source || !target || source == target) {
++        return;
++    }
++
++    g_currentAppleFiber = target;
++    if (swapcontext(&source->context, &target->context) != 0) {
++        const int error = errno;
++        g_currentAppleFiber = source;
++        RT_LOG(RT_TAG_OS) << "FATAL: swapcontext failed: " << std::strerror(error) << std::endl;
++        std::abort();
++    }
++    g_currentAppleFiber = source;
++}
++
++void* CurrentHostFiber()
++{
++    return g_currentAppleFiber;
++}
++
++void DeleteHostFiber(void* handle)
++{
++    delete static_cast<AppleFiber*>(handle);
++}
++#elif defined(_WIN32)
++void SwitchHostFiber(void* handle) { SwitchToFiber(handle); }
++void* CurrentHostFiber() { return GetCurrentFiber(); }
++void DeleteHostFiber(void* handle) { DeleteFiber(handle); }
++#endif
++} // namespace
++
+ namespace Fiber {
+ 
+ std::mutex GuestFiberManager::s_mutex;
+@@ -24,16 +84,16 @@
+ thread_local CpuContext* GuestFiberManager::s_cpuContext = nullptr;
+ 
+ void GuestFiberManager::PurgePendingFibers() {
+-#if defined(_WIN32)
++#if defined(_WIN32) || defined(__APPLE__)
+     std::vector<void*> toDelete;
+     {
+         std::lock_guard<std::mutex> lock(s_mutex);
+         toDelete.swap(s_fibersPendingDelete);
+     }
+-    const void* current = GetCurrentFiber();
++    const void* current = CurrentHostFiber();
+     for (void* f : toDelete) {
+         if (f && f != current) {
+-            DeleteFiber(f);
++            DeleteHostFiber(f);
+         }
+     }
+ #endif
+@@ -203,6 +263,13 @@
+         }
+     }
+     
++#elif defined(__APPLE__)
++    s_schedulerFiber = CreateAppleSchedulerFiber();
++    if (!s_schedulerFiber) {
++        RT_LOG(RT_TAG_OS) << "FATAL: Failed to initialize macOS scheduler fiber: "
++                          << std::strerror(errno) << std::endl;
++        std::abort();
++    }
+ #else
+     RT_LOG(RT_TAG_OS) << "WARNING: Fiber support not available on this platform!" << std::endl;
+     s_schedulerFiber = nullptr;
+@@ -215,21 +282,29 @@
+ void GuestFiberManager::Shutdown() {
+     std::lock_guard<std::mutex> lock(s_mutex);
+ 
+-#if defined(_WIN32)
++#if defined(_WIN32) || defined(__APPLE__)
+     for (auto& [addr, fiber] : s_fibers) {
+         if (fiber.fiber && !fiber.isSchedulerFiber) {
+-            DeleteFiber(fiber.fiber);
++            DeleteHostFiber(fiber.fiber);
+             fiber.fiber = nullptr;
+         }
+     }
+     s_fibers.clear();
+     
++#if defined(_WIN32)
+     // Convert scheduler fiber back to thread
+     if (s_schedulerFiber) {
+         ConvertFiberToThread();
+         s_schedulerFiber = nullptr;
+     }
++#else
++    if (s_schedulerFiber) {
++        DeleteHostFiber(s_schedulerFiber);
++        s_schedulerFiber = nullptr;
++        g_currentAppleFiber = nullptr;
++    }
+ #endif
++#endif
+     
+     s_initialized = false;
+ }
+@@ -250,10 +325,10 @@
+     // Check if fiber already exists for this thread - if so, reset it
+     auto existingIt = s_fibers.find(guestThreadAddr);
+     if (existingIt != s_fibers.end()) {
+-#if defined(_WIN32)
++#if defined(_WIN32) || defined(__APPLE__)
+         // Delete the old fiber if it exists and is not the scheduler fiber
+         if (existingIt->second.fiber && !existingIt->second.isSchedulerFiber) {
+-            DeleteFiber(existingIt->second.fiber);
++            DeleteHostFiber(existingIt->second.fiber);
+         }
+ #endif
+         s_fibers.erase(existingIt);
+@@ -287,6 +362,26 @@
+                   << " error=" << std::dec << err << std::endl;
+         return false;
+     }
++#elif defined(__APPLE__)
++    constexpr size_t kHostStackSize = 256 * 1024;
++    auto appleFiber = std::make_unique<AppleFiber>();
++    appleFiber->stack = std::make_unique<std::byte[]>(kHostStackSize);
++    if (getcontext(&appleFiber->context) != 0) {
++        RT_LOG(RT_TAG_OS) << "getcontext failed for thread 0x" << std::hex << guestThreadAddr
++                          << ": " << std::strerror(errno) << std::dec << std::endl;
++        return false;
++    }
++    appleFiber->context.uc_stack.ss_sp = appleFiber->stack.get();
++    appleFiber->context.uc_stack.ss_size = kHostStackSize;
++    appleFiber->context.uc_stack.ss_flags = 0;
++    appleFiber->context.uc_link = &static_cast<AppleFiber*>(s_schedulerFiber)->context;
++    auto trampoline = +[](uint32_t threadAddr) {
++        GuestFiberManager::FiberProc(
++            reinterpret_cast<void*>(static_cast<uintptr_t>(threadAddr)));
++    };
++    makecontext(&appleFiber->context,
++                reinterpret_cast<void (*)()>(trampoline), 1, guestThreadAddr);
++    gf.fiber = appleFiber.release();
+ #else
+     gf.fiber = nullptr;
+ #endif
+@@ -342,13 +437,13 @@
+         s_currentGuestThread = 0;
+     }
+     
+-#if defined(_WIN32)
++#if defined(_WIN32) || defined(__APPLE__)
+     if (it->second.fiber && !it->second.isSchedulerFiber) {
+-        const void* current = GetCurrentFiber();
++        const void* current = CurrentHostFiber();
+         if (it->second.fiber == current) {
+             s_fibersPendingDelete.push_back(it->second.fiber);
+         } else {
+-            DeleteFiber(it->second.fiber);
++            DeleteHostFiber(it->second.fiber);
+         }
+         it->second.fiber = nullptr;
+     }
+@@ -415,10 +510,10 @@
+     // Store CPU context pointer for the target fiber to use
+     s_cpuContext = cpu;
+     
+-#if defined(_WIN32)
++#if defined(_WIN32) || defined(__APPLE__)
+     // Check if we're already on the target fiber (e.g., switching to main thread
+     // when we're already on the scheduler fiber)
+-    void* currentFiber = GetCurrentFiber();
++    void* currentFiber = CurrentHostFiber();
+     if (currentFiber == fiberHandle) {
+         // Already executing on the target host fiber. This is common for the
+         // default guest thread, which also owns the scheduler fiber. Keep the
+@@ -436,7 +531,7 @@
+     }
+ 
+     // Switch to the target fiber (the target fiber will load its own context)
+-    SwitchToFiber(fiberHandle);
++    SwitchHostFiber(fiberHandle);
+     
+     // When we return here, the fiber that issued SwitchToThread has resumed.
+     // That does not automatically mean the previous guest thread became runnable
+@@ -560,7 +655,7 @@
+     uint32_t guestThreadAddr = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(param));
+     
+     
+-#if defined(_WIN32)
++#if defined(_WIN32) || defined(__APPLE__)
+     // Get our fiber info
+     GuestFiber* fiber = nullptr;
+     uint32_t entryPoint = 0;
+@@ -571,7 +666,7 @@
+         auto it = s_fibers.find(guestThreadAddr);
+         if (it == s_fibers.end()) {
+             RT_LOG(RT_TAG_OS) << "FiberProc: fiber not found!" << std::endl;
+-            SwitchToFiber(s_schedulerFiber);
++            SwitchHostFiber(s_schedulerFiber);
+             return;
+         }
+         fiber = &it->second;
+@@ -634,7 +729,7 @@
+                       << ", fn=0x" << startFn << ") after retries; continuing anyway." << std::dec << std::endl;
+             break;
+         }
+-        SwitchToFiber(s_schedulerFiber);
++        SwitchHostFiber(s_schedulerFiber);
+     }
+ 
+     // The deferral loop above yields to the scheduler and therefore can resume
+@@ -691,7 +786,7 @@
+     }
+     
+     // Return to scheduler
+-    SwitchToFiber(s_schedulerFiber);
++    SwitchHostFiber(s_schedulerFiber);
+ #else
+     (void)guestThreadAddr;
+     RT_LOG(RT_TAG_OS) << "Fibers not supported on this platform!" << std::endl;
+diff -ruN --exclude=third_party --exclude=build a/src/hle/os/os_init.cpp b/src/hle/os/os_init.cpp
+--- a/src/hle/os/os_init.cpp	2026-08-28 14:10:57
++++ b/src/hle/os/os_init.cpp	2026-08-28 18:30:27
+@@ -19,7 +19,6 @@
+ #include "system_bridge.h"
+ 
+ extern "C" void func_801A961C(CpuContext* ctx);
+-extern "C" void func_8055531C(CpuContext* ctx);
+ 
+ extern "C" void OSInitAlarm_RecompModLateInit_801a961c(CpuContext* ctx) {
+     func_801A961C(ctx);
+@@ -29,7 +28,10 @@
+ 
+ extern "C" void StaticRProlog_RecompModInit_8055531c(CpuContext* ctx) {
+     RecompMod::RunMemoryInitializers();
+-    func_8055531C(ctx);
++    // The supplied base disc has no StaticR.rel payload to translate.
++    // Keep the native registration as the mod-initializer rendezvous without
++    // manufacturing an unresolved guest function at link time.
++    (void)ctx;
+     RecompMod::RunPostRelInitializers();
+ }
+ 
+diff -ruN --exclude=third_party --exclude=build a/src/memory.cpp b/src/memory.cpp
+--- a/src/memory.cpp	2026-08-28 14:10:57
++++ b/src/memory.cpp	2026-08-28 18:26:53
+@@ -23,8 +23,10 @@
+ #ifndef NOMINMAX
+ #define NOMINMAX
+ #endif
++#if defined(_WIN32)
+ #include <windows.h>
+ #include <dbghelp.h>
++#endif
+ 
+ MemoryInline::PageEntry MemoryInline::g_pageTable[MemoryInline::kPageCount]{};
+ uintptr_t MemoryInline::g_fullPageBias[MemoryInline::kPageCount]{};
+diff -ruN --exclude=third_party --exclude=build a/src/system_bridge.cpp b/src/system_bridge.cpp
+--- a/src/system_bridge.cpp	2026-08-28 14:10:57
++++ b/src/system_bridge.cpp	2026-08-28 18:26:53
+@@ -12,7 +12,9 @@
+ #ifndef NOMINMAX
+ #define NOMINMAX
+ #endif
++#if defined(_WIN32)
+ #include <windows.h>
++#endif
+ 
+ 
+ #include "abi_bridge.h"
+
