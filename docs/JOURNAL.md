@@ -749,3 +749,11 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - Private trace SHA-256 is `1113377b06e3dcd119ae1bb3129aeb220168f6e9a408d28976603b12a4bff817`; exact executable SHA-256 is `c7e28cfa27f69d0efd9d243c0ab2fd04187971cc8856a87f30a2c4b3234a9cbc`.
 - Bounded presentation checks sampled from 51 to 60 FPS through lava, Thwomps, moving geometry, half-pipes, fire effects, interior/exterior geometry, and ghost transparency. Private log SHA-256 `66247e3e9637b5da5de85b9ef1858d9044cf965c0bc2b20a650c120bf6794eed` recorded three audio drops and is rejected from audio-row acceptance.
 - PRD row 22 is now **30/32 Pass, 2 Open**. Special Cup is 3/4.
+
+## 2026-08-29 — G10 Rainbow Road exact native completion
+
+- Used the sole native KartPad process for Time Trials → Special Cup → Rainbow Road → `Nin★Konno 03:05.895` → Watch Replay. No Dolphin or Simulator was present.
+- Course ID 13 has 11,383 regular-staff frames. The strict assertion accepts stage 2 exactly `240..11382` for 11,143 consecutive samples followed by stage 4; the later partial segment is the automatic replay loop.
+- Private trace SHA-256 is `a1fd02aaf2950c22424570509719b5a7f54cc4de9cfa88cf52fb37e628f25a22`; exact executable SHA-256 is `8fc836be5c0c620625070d4c0a0fef37502fa7550c156c34640cfd3defbc4ce8`.
+- Bounded presentation checks sampled from 49 to 56 FPS through the star field, transparent road, animated rails, half-pipes, boost ramps, banked turns, camera transitions, and ghost transparency. Private log SHA-256 `4c404aa3820e8a19f6361e38b256ccf79e964cbc8de29e5f48d76c0c12c2e591` recorded 30 audio drops and is rejected from audio-row acceptance.
+- PRD row 22 is now **31/32 Pass, 1 Open**. Special Cup is complete at 4/4.

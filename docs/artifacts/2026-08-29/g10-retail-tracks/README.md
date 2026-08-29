@@ -361,4 +361,16 @@ completion are independent of that wall-clock contention.
 - Bounded race presentation checks sampled from 51 to 60 FPS through lava, Thwomps, moving geometry, half-pipes, fire effects, interior/exterior geometry, and ghost transparency. This remains G11/G36 performance evidence only.
 - Private log SHA-256 `66247e3e9637b5da5de85b9ef1858d9044cf965c0bc2b20a650c120bf6794eed` recorded three audio-queue drops and is rejected from audio-row acceptance.
 
-Current row 22 status: **30/32 Pass; 2 Open.** Mushroom, Flower, Star, Shell, Banana, and Leaf Cups each have complete four-track evidence; Lightning Cup is 3/4 and Special Cup is 3/4.
+## Rainbow Road exact run
+
+- Product: sole native arm64 KartPad process launched with the process-local trace helper; no Dolphin and no Simulator.
+- Test precondition: the user's own private all-cups fixture documented in `docs/artifacts/2026-08-29/g10-all-cups-fixture.md`; progression acceptance remains separate.
+- Executable SHA-256: `8fc836be5c0c620625070d4c0a0fef37502fa7550c156c34640cfd3defbc4ce8`.
+- Retail UI path: Time Trials → Special Cup → Rainbow Road → regular Nintendo staff data `Nin★Konno 03:05.895` → Watch Replay.
+- Private trace SHA-256: `a1fd02aaf2950c22424570509719b5a7f54cc4de9cfa88cf52fb37e628f25a22`.
+- Strict assertion: `scripts/summarize-mkw-state-trace.py --require-complete --expected-input-frames 11383`.
+- Result: the accepted segment begins at race time 240, ends at 11382, contains 11,143 consecutive stage-2 samples, and is followed by stage 4. The later incomplete segment is the retail automatic replay loop.
+- Bounded race presentation checks sampled from 49 to 56 FPS through the star field, transparent road, animated rails, half-pipes, boost ramps, banked turns, camera transitions, and ghost transparency. This remains G11/G36 performance evidence only.
+- Private log SHA-256 `4c404aa3820e8a19f6361e38b256ccf79e964cbc8de29e5f48d76c0c12c2e591` recorded 30 audio-queue drops and is rejected from audio-row acceptance.
+
+Current row 22 status: **31/32 Pass; 1 Open.** Mushroom, Flower, Star, Shell, Banana, Leaf, and Special Cups each have complete four-track evidence; Lightning Cup is 3/4.
