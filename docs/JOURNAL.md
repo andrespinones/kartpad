@@ -366,6 +366,16 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - Evidence: `docs/artifacts/2026-08-29/g10-coin-runners/`.
 - Next step: continue the remaining G10 track/cup/mode/local-multiplayer/controller/audio/save rows.
 
+## 2026-08-29 — G10 items, AI, and collisions cross-evidence
+
+- Audited the accepted native full-session evidence instead of repeating an unchanged fixture.
+- Balloon Battle completed multiple 12-racer matches with active AI, item boxes/effects, Blooper ink, balloon loss, collisions, scoring, minimap activity, results, and clean exits.
+- Coin Runners completed two 12-racer matches with coins, items, AI, collisions, changing team/individual totals, results, and clean exit. The Bowser/Automatic changed-variable match added another complete item/collision session.
+- The earlier 100cc Luigi Circuit VS run independently completed a 12-racer item/AI race through standings and menu transition.
+- Classification: **Pass for PRD row 25.** Heavy 12-racer item fixtures complete correctly without an observed P0/P1 defect.
+- Evidence index: `docs/artifacts/2026-08-29/g10-items-ai-collisions.md`.
+- Next step: continue the remaining G10 track/cup/mode/local-multiplayer/controller/audio/save rows.
+
 ## 2026-08-29 — G10 representative vehicles, weights, and drift modes
 
 - Completed a three-minute native Balloon Battle as Bowser on Standard Bike L with Automatic drift. The kart accelerated and steered, changed position, collided, received ink/item effects, participated in live scoring with 12 racers, reached the full result table, and returned cleanly to Main Menu.
