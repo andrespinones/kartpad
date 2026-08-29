@@ -25,7 +25,7 @@ Updated: 2026-08-29
 
 ## Known-good state
 
-- Repository checkpoint: Moo Moo Meadows exact native completion `1cb0194` is on `origin/main`; corrected repeated-race camera lifecycle candidate SHA-256 is `3d15b8dade09679c0cdc78dd6a40304f28d3888e0fb2471da365e32bc9b6d16f` pending its source/evidence checkpoint.
+- Repository checkpoint: corrected repeated-race camera lifecycle repair `3c1d22f` is on `origin/main`; the exact playtested executable SHA-256 is `3d15b8dade09679c0cdc78dd6a40304f28d3888e0fb2471da365e32bc9b6d16f`.
 - Simulator state: no Simulator device is booted. KartPad will boot exactly one when a mobile gate requires it.
 - Buildable KartPad targets: host, memory, scheduler, semantic contracts, native subsystem smoke, translated semantic fixture, and provisional translated-frame app.
 - Input profile: WBFS containing clean PAL `RMCP01`, revision 0; original is read-only. GUI keyboard steering uses the measured 0.08 Classic-stick magnitude with a 50 ms synthetic pulse; acceleration/reverse retain their 500 ms gameplay holds. Physical controllers and future touch input are unaffected.
