@@ -514,3 +514,12 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - The private 267-line PID 48089 log contains two retail `Scene Restart` records and no temporary `scnmgr-lifecycle` trace; its SHA-256 is `9085cef84e023f061e3d1e9ce325ddb8db2bd3a2a1a1a2724efdf4d2ac31ac47`. The public runtime patch dry-runs against the pinned WiiCompiled runtime; the repository safety audit, Python compile check, injector idempotence check, and `git diff --check` pass. Capture-time 14.8–19.8 FPS overlays and 18 audio drops are rejected as cadence/audio evidence.
 - Post-run strict signature verification correctly failed because Dawn mutated `UserData/Cache/dawn_cache.db-shm` inside the sealed bundle. The playtested executable itself retained SHA-256 `3d15b8...`; re-sealing restored strict verification and produced signature-different executable SHA-256 `f6b40a...`. Writable runtime state inside the signed bundle is now an explicit G13 packaging risk.
 - Classification: **Pass for the corrected repeated-race lifecycle defect; PRD row 30 remains in progress.** Complete three- and four-player standings cycles remain open.
+
+## 2026-08-29 — G10 Mushroom Gorge exact native completion
+
+- Started the retail Time Trials → Mushroom Cup → Mushroom Gorge → `Nin★Murak 02:16.110` → Watch Replay path in the sole native arm64 KartPad process. No Dolphin or Simulator was running.
+- The official regular staff file reports course ID 2 and exactly 8,399 face/direction/trick frames. The ignored native trace SHA-256 is `e20883a2ca6cdfda1bb1f3da75535b852006a44ac87b833c46787ceea88277e4`; the playtested executable SHA-256 is `f6b40a3902ac5ba559d359c5b1cb5488176ebf14bc8eab3da1371c1fd146f9fc`.
+- `scripts/summarize-mkw-state-trace.py --require-complete --expected-input-frames 8399` passes: race stage 2 covers exactly `240..8398` for 8,159 samples, followed by finish stage 4. A later partial segment is the retail automatic replay loop and is not mistaken for the accepted run.
+- The focused UI observations held at 60.0 FPS, but only exact guest-stage completion is accepted from this run. The already recorded writable-cache bundle-seal issue recurred after execution and remains a G13 packaging risk.
+- Combined with Luigi Circuit, Moo Moo Meadows, and N64 Mario Raceway, PRD row 22 is now **4/32 Pass, 28 Open**.
+- Next step: continue the exact initially available retail track matrix with Toad's Factory, then progress into available Flower Cup tracks.

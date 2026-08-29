@@ -10,7 +10,7 @@ real finish transition; boot screenshots do not qualify.
 |---|---|---:|---|---|
 | Mushroom | Luigi Circuit | 8 | Pass | Complete live three-lap race/results in G9 and complete two-player race/results in G10 |
 | Mushroom | Moo Moo Meadows | 1 | Pass | Native regular-staff replay exactly matches 6,106 input frames: stage 2 `240..6105`, 5,866 samples, then stage 4 |
-| Mushroom | Mushroom Gorge | 2 | Open | — |
+| Mushroom | Mushroom Gorge | 2 | Pass | Native regular-staff replay exactly matches 8,399 input frames: stage 2 `240..8398`, 8,159 samples, then stage 4 |
 | Mushroom | Toad's Factory | 4 | Open | — |
 | Flower | Mario Circuit | 0 | Open | — |
 | Flower | Coconut Mall | 5 | Open | — |
@@ -62,4 +62,14 @@ affected the FPS overlay and audio queue, so neither performance nor audio is
 accepted from this evidence. Guest stage progression and exact input-frame
 completion are independent of that wall-clock contention.
 
-Current row 22 status: **3/32 Pass; 29 Open.**
+## Mushroom Gorge exact run
+
+- Product: sole native arm64 KartPad process; no Dolphin and no Simulator.
+- Executable SHA-256: `f6b40a3902ac5ba559d359c5b1cb5488176ebf14bc8eab3da1371c1fd146f9fc`.
+- Retail UI path: Time Trials → Mushroom Cup → Mushroom Gorge → regular Nintendo staff data `Nin★Murak 02:16.110` → Watch Replay.
+- Private trace SHA-256: `e20883a2ca6cdfda1bb1f3da75535b852006a44ac87b833c46787ceea88277e4`.
+- Strict assertion: `scripts/summarize-mkw-state-trace.py --require-complete --expected-input-frames 8399`.
+- Result: the accepted segment begins at race time 240, ends at 8398, contains 8,159 consecutive stage-2 samples, and is followed by stage 4. The later incomplete segment is the retail automatic replay loop and is not accepted as a second run.
+- The focused UI observations remained at 60.0 FPS, but this trace run is accepted only for guest-stage completion; it is not a G11 frame-pacing sample. The known writable-cache bundle-seal issue recurred after the run and remains separately tracked for G13.
+
+Current row 22 status: **4/32 Pass; 28 Open.**
