@@ -366,6 +366,14 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - Evidence: `docs/artifacts/2026-08-29/g10-coin-runners/`.
 - Next step: continue the remaining G10 track/cup/mode/local-multiplayer/controller/audio/save rows.
 
+## 2026-08-29 — G10 explicit GameCube adapter limitation
+
+- Audited the public Darwin product graph and adapter contract. macOS deliberately selects `src/apple/wup028_adapter_stub.cpp`; discovery/read/rumble report no active adapter and game-port assignments remain unclaimed.
+- The product therefore does not advertise or silently attempt WUP-028 raw USB support. `docs/PORTABILITY.md` already identifies a separate macOS backend or explicit limitation as the portability requirement.
+- Classification: **Pass for PRD row 32 by explicit limitation.** A physical adapter pass is not claimed. Ordinary SDL/GameController assignment and reconnect remain separate mandatory rows.
+- Evidence: `docs/artifacts/2026-08-29/g10-gamecube-adapter.md`.
+- Next step: continue the remaining G10 track/cup/mode/local-multiplayer/ordinary-controller/audio/save rows.
+
 ## 2026-08-29 — G10 items, AI, and collisions cross-evidence
 
 - Audited the accepted native full-session evidence instead of repeating an unchanged fixture.
