@@ -424,3 +424,15 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - No Dolphin and no booted Simulator were present. The ignored recovery copy remains under `private/g10-forced-exit/`.
 - Evidence: `docs/artifacts/2026-08-29/g10-forced-exit-save/`.
 - Next step: continue the remaining G10 track/cup/mode/local-multiplayer/controller/audio/save rows.
+
+## 2026-08-29 — G10 two-player completion diagnostics
+
+- Ran repeated native two-player Luigi Circuit fixtures with one KartPad process, no Dolphin, and no booted Simulator. P1 and P2 independently accelerated and steered; stable split-screen rendering, AI traffic, item activity, and 60 FPS presentation remained visible.
+- A long parked-player run did not reach results even after the AI field circulated for more than ten minutes. Advancing P1 partway through the opening section did not satisfy the timeout condition, so no completion claim is made.
+- Built Wiimm's ISO Tool locally as an ignored x86_64/Rosetta utility and enumerated the read-only WBFS. The disc contains both complete Nintendo staff-ghost sets. Disc-derived RKG files remain private and ignored.
+- Tightened the opt-in RKG diagnostic with `KARTPAD_RKG_AUTOSTART=1`: it now arms only when `RaceManager` enters the countdown and leaves menu/intro controller handling untouched. The signed product reached the two-player countdown without the earlier interruption.
+- The regular N64 Mario Raceway staff input was matched to Baby Mario, Nanobike, and Manual drift. Its Time Trial line still diverged immediately from the rear/outside VS starting slot, proving the different grid origin is material.
+- Investigated the game's retail CPU controller path. Reclassifying local player 0 as CPU before and after the menu-to-race scenario copy each produced a reproducible scene-transition `EXC_BAD_ACCESS`; the entire CPU-player experiment was removed, the environment was cleared, and the stable full-title product was rebuilt and strictly code-sign verified.
+- Classification: **Diagnostic only.** PRD row 29 remains open because no two-player standings/result cycle has completed.
+- Evidence: `docs/artifacts/2026-08-29/g10-two-player-race/`.
+- Next step: pursue a normal retail completion path that preserves local-player ownership, then repeat the three/four-player full-race row.

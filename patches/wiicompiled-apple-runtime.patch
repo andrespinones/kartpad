@@ -915,8 +915,8 @@ diff -ruN --exclude=.git --exclude=third_party --exclude=build a/src/fiber_manag
      RT_LOG(RT_TAG_OS) << "Fibers not supported on this platform!" << std::endl;
 diff -ruN --exclude=.git --exclude=third_party --exclude=build a/src/hle/input/kpad.cpp b/src/hle/input/kpad.cpp
 --- a/src/hle/input/kpad.cpp	2026-08-28 14:10:57
-+++ b/src/hle/input/kpad.cpp	2026-08-29 03:51:09
-@@ -1,23 +1,745 @@
++++ b/src/hle/input/kpad.cpp	2026-08-29 04:48:55
+@@ -1,23 +1,756 @@
  #include "hle_stubs.h"
 +#include "memory.h"
 
@@ -1025,6 +1025,14 @@ diff -ruN --exclude=.git --exclude=third_party --exclude=build a/src/hle/input/k
 +
 +    const GhostSample& Current() const { return m_current; }
 +    bool Active() const { return m_active; }
++    bool AutoArmAtCountdown(uint32_t stage)
++    {
++        const char* autoStart = std::getenv("KARTPAD_RKG_AUTOSTART");
++        if (stage != 1 || autoStart == nullptr || std::strcmp(autoStart, "1") != 0) {
++            return false;
++        }
++        return Arm();
++    }
 +    bool BeginIfCountdown(uint32_t stage)
 +    {
 +        if (!m_started && stage == 1) {
@@ -1599,9 +1607,15 @@ diff -ruN --exclude=.git --exclude=third_party --exclude=build a/src/hle/input/k
 +// tick instead of per host KPAD/presentation sample.
 +extern "C" bool KPad_RkgFixture_CalcInner(CpuContext* ctx)
 +{
-+    if (!Fixture().Active()) {
++    uint32_t stage = 0xffffffffu;
++    try {
++        const uint32_t raceManager = Memory::Read32(0x809bd730);
++        stage = raceManager == 0 ? 0xffffffffu :
++                                   Memory::Read8(raceManager + 0x2b);
++    } catch (const Memory::AccessViolation&) {
 +        return false;
 +    }
++    if (!Fixture().Active() && !Fixture().AutoArmAtCountdown(stage)) return false;
 +
 +    const uint32_t controller = ctx->gpr[3];
 +    try {
@@ -1616,14 +1630,11 @@ diff -ruN --exclude=.git --exclude=third_party --exclude=build a/src/hle/input/k
 +    const uint32_t raceState = ctx->gpr[4];
 +    const uint32_t uiState = ctx->gpr[5];
 +    if (raceState == 0 || uiState == 0) {
-+        return true;
++        return false;
 +    }
 +
 +    GhostSample sample;
 +    try {
-+        const uint32_t raceManager = Memory::Read32(0x809bd730);
-+        const uint32_t stage = raceManager == 0 ? 0xffffffffu :
-+                                                  Memory::Read8(raceManager + 0x2b);
 +        sample = Fixture().BeginIfCountdown(stage) ? Fixture().Next() :
 +                                                    Fixture().Current();
 +    } catch (const Memory::AccessViolation&) {
