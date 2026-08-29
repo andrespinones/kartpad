@@ -659,3 +659,11 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - Private trace SHA-256 is `bd9a6068adbc64633df6df1f2aac92bee2cf48b5f279918bdb1e71e3e14f436e`; exact executable SHA-256 is `fa86a907ca2bebbc72eec1baf02cd83f3ceb816e584e33ed3dd23926ab945545`.
 - A bounded first-use shader compile sampled at 23 FPS, then presentation recovered to 60 FPS through sand, ruins, lighting, obstacles, and ghost transparency; retained for later performance work. Private log SHA-256 `4ba00de7368798886bf0eafdd2ab99afe844871822c9ed2632b6392653e16e88` recorded 39 audio drops and is rejected from audio-row acceptance.
 - PRD row 22 is now **19/32 Pass, 13 Open**. Leaf Cup is 1/4.
+
+## 2026-08-29 — G10 GCN Mario Circuit exact native completion
+
+- Used the sole native KartPad process for Time Trials → Leaf Cup → GCN Mario Circuit → `Nin★♪Miz 01:59.771` → Watch Replay. No Dolphin or Simulator was present.
+- Course ID 17 has 7,420 regular-staff frames. The strict assertion accepts stage 2 exactly `240..7419` for 7,180 consecutive samples, followed by stage 4.
+- Private trace SHA-256 is `14a6c68d222b2a59e9714cb762cee36a6aa1eae206df4b6c18ad30bcfe67cca3`; exact executable SHA-256 is `fa86a907ca2bebbc72eec1baf02cd83f3ceb816e584e33ed3dd23926ab945545`.
+- An initial 19.9 FPS presentation sample recovered to 60 FPS through animated trees, chain chomp, trackside geometry, boosts, and ghost transparency; retained for performance work. Private log SHA-256 `dc90b846ac856a1f31ce5830e60501e03023c3a5a84308e03652e29ca6f6881d` recorded four audio drops and is rejected from audio-row acceptance.
+- PRD row 22 is now **20/32 Pass, 12 Open**. Leaf Cup is 2/4.
