@@ -21,6 +21,13 @@ shards="${output}/build_shards"
 "${repo_root}/scripts/inject-g10-camera-lifecycle-guard.py" \
   "${functions}/func_805A1A8C.cpp"
 "${dotnet_bin}" "${translator_dll}" generate-data-init --project "${manifest}"
+# generate-data-init rewrites the assembly payload table in ELF/COFF spelling.
+# Preserve the Mach-O aliases applied by prepare-g7-game-runtime.sh on every
+# regeneration so a clean incremental Apple link still exports the C symbols.
+blob_asm="${output}/data_sections_init_blobs.S"
+if ! rg -q '^\.globl _kData_' "${blob_asm}"; then
+  perl -0pi -e 's/^\.globl (kData_[^\n]+)\n\1:/\.globl $1\n.globl _$1\n$1:\n_$1:/mg' "${blob_asm}"
+fi
 "${dotnet_bin}" "${translator_dll}" emit-build-shards \
   --project "${manifest}" \
   --base-metadata "${metadata}" \

@@ -9,17 +9,17 @@ from pathlib import Path
 
 SIGNATURE = 'extern "C" void func_805A1A8C(CpuContext* MKW_RESTRICT ctx)\n{'
 ENTRY = "[[maybe_unused]] loc_805A1AAC:\n{\n    r12 = MemoryInline::FlatRead32(r30);"
-MARKER = "// A race restart can leave a camera node linked after its scene-heap object"
+MARKER = "// A race restart can leave a reclaimed camera node linked after scene teardown"
 GUARD = """[[maybe_unused]] loc_805A1AAC:
 {
-    // A race restart can leave a camera node linked after its scene-heap object
-    // has been reclaimed. The reclaimed object carries player slot 0xff; the
-    // retail update would sign-extend it and index KartObjectManager[-1].
-    // Unlink that stale node at the translated thunk boundary, then resume from
-    // the current list head in the same pass.
+    // A race restart can leave a reclaimed camera node linked after scene teardown.
+    // Three-player retail races also contain legitimate non-player cameras with
+    // player slot 0xff, so the slot alone is not a reclamation signal. Require
+    // the scene-heap poison in the camera object before unlinking the stale node.
     const uint32_t camera_node = r30;
     const uint32_t camera = camera_node - 136u;
-    if (MemoryInline::FlatRead8(camera + 156u) == 0xFFu) {
+    if (MemoryInline::FlatRead8(camera + 156u) == 0xFFu &&
+        MemoryInline::FlatRead32(camera) == 0x55440003u) {
         constexpr uint32_t list = 0x809C19A8u;
         const uint32_t offset = MemoryInline::FlatRead16(list + 10u);
         const uint32_t links = camera_node + offset;

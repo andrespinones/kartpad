@@ -25,7 +25,7 @@ Updated: 2026-08-29
 
 ## Known-good state
 
-- Repository checkpoint: complete retail ghost-matrix preflight `fd265d2` is on `origin/main`; bounded audio telemetry remains `057ae06`, the repeated-race camera repair remains `923a846`, and the accepted two-player completion remains `7ffdd27`.
+- Repository checkpoint: Moo Moo Meadows exact native completion `1cb0194` is on `origin/main`; corrected repeated-race camera lifecycle candidate SHA-256 is `3d15b8dade09679c0cdc78dd6a40304f28d3888e0fb2471da365e32bc9b6d16f` pending its source/evidence checkpoint.
 - Simulator state: no Simulator device is booted. KartPad will boot exactly one when a mobile gate requires it.
 - Buildable KartPad targets: host, memory, scheduler, semantic contracts, native subsystem smoke, translated semantic fixture, and provisional translated-frame app.
 - Input profile: WBFS containing clean PAL `RMCP01`, revision 0; original is read-only. GUI keyboard steering uses the measured 0.08 Classic-stick magnitude with a 50 ms synthetic pulse; acceleration/reverse retain their 500 ms gameplay holds. Physical controllers and future touch input are unaffected.
@@ -47,7 +47,7 @@ Updated: 2026-08-29
 - Physical-device, public-service, account, and hands-on acceptance rows remain future external prerequisites and are not claimed.
 - WiiCompiled's bundled `MAP.txt` may be used as an ignored local reference, but independent provenance for republishing it is not established; do not copy it into public KartPad sources/artifacts.
 - The exact 2008 Classic ABI is live and the game recognizes it. A/accelerate, analog steering, D-pad, and B/reverse are proven. Three-player gameplay switches to the retail 30 FPS cadence documented by the Dolphin oracle; a complete live-input three-player race remains open.
-- A deterministic second-race crash after returning from a three-player race was traced to a reclaimed camera node retained by the global race-camera list. The reproducible generated-source guard removes the stale node with retail intrusive-list semantics; the exact formerly failing sequence now reaches live second-race gameplay without a process relaunch. An uncontended cadence resample and full three-/four-player standings cycles remain open.
+- A deterministic second-race crash after returning from a three-player race was traced to a reclaimed camera node retained by the global race-camera list. A broad slot-`0xff` guard was itself regressive because three-player retail mode uses a legitimate slot-`0xff` overview camera. The corrected generated-source guard additionally requires the observed `0x55440003` scene-heap poison; the exact formerly failing sequence now preserves all four panes and reaches live second-race gameplay in the same process. Full three-/four-player standings cycles remain open.
 - The opt-in RKG player fixture matches native stream expansion and the exact 240-frame countdown cadence but later diverges through the live-player path. It remains a diagnostic harness, not evidence for staff-ghost synchronization or a completed track.
 - Both private disc-derived staff sets pass a strict content-free preflight: 32 files, exactly one structurally consistent input for every retail course ID `0..31`, and matched per-stream frame counts. This establishes a complete oracle inventory only; native row 22 execution remains open.
 - Two-player split-screen PRD row 29 passes: P1 completed three live-keyboard laps, both panes reached the retail finish transition, and the full standings table retained distinct Mario/P1 and Luigi/P2 rows. The successful log contains zero fixture entries; evidence is under `docs/artifacts/2026-08-29/g10-two-player-race/`. Three/four-player full races remain open.
@@ -62,6 +62,7 @@ Updated: 2026-08-29
 - G2 audio evidence is limited to emulator execution; subjective audio quality is a future hands-on row and is not claimed.
 - G8 playback is proven by both the runtime's non-silent host-stream telemetry and an independent system-output loopback level capture. Subjective audio quality and latency remain hands-on G10/G11 rows.
 - Audio continuity instrumentation is bounded and cumulative. Its first uncontended diagnostic sample recorded 104,960 queue checks and 40,304,256 submitted bytes with zero post-start empty observations or drops; a second signed-app smoke run verified reports at the final 8,192-check interval. Gameplay/pause, default-device migration, and long-session rows remain open.
+- The development app currently stores writable `UserData` caches/logs inside its signed bundle. A playtest mutated Dawn's cache and invalidated the bundle resource seal until it was re-signed; G13 packaging must relocate writable runtime state outside the app before distribution acceptance.
 
 ## UI reference commitment
 
