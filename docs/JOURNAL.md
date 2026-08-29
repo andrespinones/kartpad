@@ -266,3 +266,17 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - Packaged the ignored spike as a signed portable macOS app for GUI playtesting. Computer Use captured the Nintendo wrist-strap safety screen at 60 FPS through Aurora, pinned Dawn, and Metal. Capture SHA-256 is `3228b6044cfc746e4bf86971f1445f412e5e8a6ff3029fa8b3b620d20be087b8`.
 - Added a reproducible Apple runtime patch and preparation script. Private disc, NAND, translation, caches, and application products remain ignored.
 - G7 classification: **Pass**. G8 is the lowest unmet goal: advance through intro/title/menu, verify audible audio, and prove keyboard/controller navigation.
+
+## 2026-08-28 — G8 full title graph, audio, and controller navigation
+
+- Goal: boot the native macOS build through intro/title/menu with audible audio and working navigation.
+- Translation: generated the complete PAL DOL+`StaticR.rel` graph from the user-owned disc extraction. The graph contains 29,637 translated functions; 29,065 are shared base functions and the StaticR prolog `0x8055531C` is present.
+- Build failure signature: the first full shard failed on undeclared `Ppc*StateInline` helpers. Cause: KartPad's FPSCR-aware translator patch emitted the exact stateful ABI proven at G6, while the production shell still exposed older value-only helpers. The production header now adapts generated calls to KartPad's tested header-only semantic model under C++20. The changed 72-shard build linked successfully.
+- Runtime result: Pass. The app loaded 4,934,832 bytes of StaticR at `0x805102E0`, ran 43 DOL and 192 REL constructors, rendered the Wii/Mario Kart intros and title, and reached Select License at 60 FPS through Metal.
+- Input failure 1: title ignored the existing GameCube keyboard mapping. Trace showed the Wii KPAD HLE returned no data and WPAD declared channel 0 disconnected. Implemented a big-endian core KPAD report and connected channel-0 WPAD contract.
+- Input failure 2: short Computer Use key taps were occasionally invisible to `SDL_GetKeyboardState` between guest polls. An SDL event watch now latches key-down edges until the next KPAD sample. Changed run passed: Return advanced title, Right selected Options, Left+Return opened New License, and Q/Wii Remote 1 returned.
+- Audio result: Pass for G8 audibility. SDL opened 32 kHz stereo at gain 1 and received non-silent PCM (peak 3988, queue 6,372 bytes). Independent AVFoundation capture of the active system-output device measured 427,776 samples over 4.46 seconds, mean `-36.2 dB`, peak `-17.6 dB`. The temporary WAV is not retained.
+- Instance discipline: no Simulator and exactly one game instance. Every rebuild followed a Computer Use close and PID check before replacement/relaunch.
+- Reproducibility: `scripts/generate-g8-full-title.sh`, the refreshed `patches/wiicompiled-apple-runtime.patch`, and `scripts/prepare-g7-game-runtime.sh` capture translation/runtime preparation without publishing game data.
+- Evidence: `docs/artifacts/2026-08-28/g8-title-menu/`.
+- G8 classification: **Pass**. G9 is the lowest unmet goal: create an isolated license, complete a race/results/menu cycle, save, quit/relaunch, and run the staff-ghost fixture.

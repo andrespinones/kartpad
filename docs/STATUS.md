@@ -4,7 +4,7 @@ Updated: 2026-08-28
 
 ## Current goal
 
-**G8 — macOS boots and accepts input** is the lowest unmet goal. G0–G7 pass. The native arm64 runtime renders Mario Kart Wii's real wrist-strap frame at 60 FPS through Aurora, pinned Dawn, and Metal; menu input and audible audio remain to be proven.
+**G9 — First complete macOS race and save** is the lowest unmet goal. G0–G8 pass. The native arm64 runtime loads the full DOL+StaticR graph, renders the intro/title/license menu at 60 FPS, produces audible stereo output, and accepts keyboard-driven Wii controller navigation.
 
 ## Goal ledger
 
@@ -18,12 +18,13 @@ Updated: 2026-08-28
 | G5 Guest scheduler | Pass | Explicit state machine passes lifecycle/priority/VI/register tests and two deterministic million-operation runs under Release and ASan/UBSan |
 | G6 PPC/AArch64 semantics | Pass | 250,227-check arm64/x86 hashes match; Dolphin oracle, sanitizers, translator 579/579, translated scalar/paired state, scheduler/callback persistence, and all 10,836 title units pass |
 | G7 Native Metal frame | Pass | Real PAL wrist-strap frame visible at 60 FPS; reproducible Apple runtime patch and capture evidence recorded |
-| G8 macOS boots/input | In progress | Advance through intro/title/menu; verify audible audio and keyboard/controller navigation |
-| G9–G18 | Gated | Await G8 |
+| G8 macOS boots/input | Pass | Full DOL+StaticR intro/title/menu, audible output, A/directional/1 navigation; evidence under `docs/artifacts/2026-08-28/g8-title-menu/` |
+| G9 first race/save | In progress | Create an isolated license, complete a race/results/menu cycle, save, quit/relaunch, and run the staff-ghost fixture |
+| G10–G18 | Gated | Await G9 |
 
 ## Known-good state
 
-- Repository checkpoint: pending this G7 game-frame commit; prior checkpoint `ce2fbb5` is on `origin/main`.
+- Repository checkpoint: pending this G8 title/menu/input/audio commit; G7 checkpoint `b19a968` is on `origin/main`.
 - Simulator state: no Simulator device is booted. KartPad will boot exactly one when a mobile gate requires it.
 - Buildable KartPad targets: host, memory, scheduler, semantic contracts, native subsystem smoke, translated semantic fixture, and provisional translated-frame app.
 - Input profile: WBFS containing clean PAL `RMCP01`, revision 0; original is read-only.
@@ -35,7 +36,7 @@ Updated: 2026-08-28
 - Scheduler baseline: explicit cooperative state machine, deterministic hash `0x7287563387fb1677`, plus translated CPU-context/NI/FPSCR persistence across yields and host callbacks; evidence is `docs/artifacts/2026-08-28/g5-guest-scheduler.md`.
 - Native subsystem preparation: validated Metal/CoreAudio/GameController/storage/network smoke; useful for G7 and later gates.
 - Semantic subset: arm64/x86_64 complete 250,227 checks with state hash `0xccd5757c4c0643d4`; the translated fixture additionally proves VE-enabled paired invalid arithmetic still writes both lanes while aggregating causes. Evidence is `docs/artifacts/2026-08-28/g6-ppc-semantics.md` and `docs/SEMANTICS.md`.
-- Real DOL surface: user-owned `main.dol` matches the pinned PAL hash, translates into 10,836 functions with unsupported instructions disabled, and every emitted unit compiles against the portable shim.
+- Full title surface: user-owned PAL DOL and StaticR translate into 29,637 functions; the native runtime executes both constructor graphs through the title and license menu.
 - Original icon: editable default/dark/tinted SVG masters and opaque exports exist; 1024 px and 16 px visual QA passed. Asset-catalog validation awaits application targets.
 
 ## Active risks and blockers
@@ -46,7 +47,7 @@ Updated: 2026-08-28
 - WiiCompiled's bundled `MAP.txt` may be used as an ignored local reference, but independent provenance for republishing it is not established; do not copy it into public KartPad sources/artifacts.
 - Dolphin pipe input is accepted for deterministic menus. Live race acceleration/brake semantics remain deliberately unclaimed until a narrow controller fixture distinguishes the observed behavior.
 - G2 audio evidence is limited to emulator execution; subjective audio quality is a future hands-on row and is not claimed.
-- The complete PAL game translation now reaches a real Mario Kart Wii frame through GX/Aurora/Dawn/Metal. G8 still requires advancing through the intro/title/menu with working input and audible audio.
+- G8 playback is proven by both the runtime's non-silent host-stream telemetry and an independent system-output loopback level capture. Subjective audio quality and latency remain hands-on G10/G11 rows.
 
 ## UI reference commitment
 

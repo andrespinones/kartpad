@@ -1,0 +1,13 @@
+KartPad G8 system-output loopback analysis
+Date: 2026-08-28
+Source: AVFoundation audio device 4, Jump Desktop Audio (active default output)
+Capture duration: 4.46 seconds
+Format analyzed: 48,000 Hz, stereo PCM
+Samples analyzed: 427,776
+Mean volume: -36.2 dB
+Maximum volume: -17.6 dB
+
+The temporary WAV was used only for numeric validation and is not retained in
+the repository. The runtime-console.log independently records that the same
+KartPad process opened 32 kHz stereo playback at gain 1 and queued a non-silent
+PCM block.

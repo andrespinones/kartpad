@@ -1,11 +1,11 @@
 diff -ruN --exclude=third_party --exclude=build a/CMakeLists.txt b/CMakeLists.txt
---- a/CMakeLists.txt	2026-08-28 14:10:57
-+++ b/CMakeLists.txt	2026-08-28 19:25:25
+--- a/CMakeLists.txt	2026-08-28 19:57:18
++++ b/CMakeLists.txt	2026-08-28 19:57:18
 @@ -1,10 +1,9 @@
  ﻿cmake_minimum_required(VERSION 3.16)
 -project(mkw_recompiled)
 +project(mkw_recompiled LANGUAGES C CXX)
- 
+
 -if(NOT WIN32 OR NOT MINGW OR NOT CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR
 -   NOT CMAKE_SIZEOF_VOID_P EQUAL 8 OR
 -   NOT CMAKE_SYSTEM_PROCESSOR MATCHES "^(AMD64|amd64|x86_64|X86_64)$")
@@ -19,10 +19,10 @@ diff -ruN --exclude=third_party --exclude=build a/CMakeLists.txt b/CMakeLists.tx
 @@ -18,7 +17,7 @@
  # aurora-main and its third-party tree stay unaffected.
  set(MKW_PROJECT_COMPILE_DEFINITIONS NOMINMAX)
- 
+
 -set(CMAKE_CXX_STANDARD 17)
 +set(CMAKE_CXX_STANDARD 20)
- 
+
  # Declared before the vendored libraries so the third-party block below can
  # branch on it and so cmake/NativePrebuilt.cmake is included after the names it
 @@ -91,7 +90,8 @@
@@ -32,7 +32,7 @@ diff -ruN --exclude=third_party --exclude=build a/CMakeLists.txt b/CMakeLists.tx
 -set(MKW_AURORA_DIR "${CMAKE_CURRENT_LIST_DIR}/../aurora-main")
 +set(MKW_AURORA_DIR "${CMAKE_CURRENT_LIST_DIR}/../aurora-main"
 +    CACHE PATH "Pinned Aurora source")
- 
+
  # The translator's explicit float casts are PPC single-precision rounding points.
  # Fast-math may erase them and change guest-visible integer conversions.
 @@ -109,13 +109,16 @@
@@ -56,7 +56,7 @@ diff -ruN --exclude=third_party --exclude=build a/CMakeLists.txt b/CMakeLists.tx
 +    set(AURORA_SDL3_PROVIDER system CACHE STRING "" FORCE)
 +    set(AURORA_ENABLE_GX ON CACHE BOOL "" FORCE)
 +    set(AURORA_ENABLE_DVD OFF CACHE BOOL "" FORCE)
- 
+
      # Provide a tiny stub for DXProgrammableCapture when the SDK/PIX headers are
      # missing (common on MinGW). Dawn only includes the header; no symbols are
 @@ -206,6 +209,12 @@
@@ -69,12 +69,34 @@ diff -ruN --exclude=third_party --exclude=build a/CMakeLists.txt b/CMakeLists.tx
 +list(APPEND SOURCES
 +    "${CMAKE_CURRENT_LIST_DIR}/src/apple/guest_flat_memory_apple.cpp"
 +    "${CMAKE_CURRENT_LIST_DIR}/src/apple/wup028_adapter_stub.cpp")
- 
+
  # The translator emits the complete, content-addressed source graph. Consuming
  # this one manifest keeps configure independent of the 28k generated function
+@@ -226,4 +235,12 @@
+     "${MKW_RETRO_REWIND_FUNCTION_COUNT} Retro Rewind functions")
+
+ set(MKW_RUNTIME_SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}")
++set(MKW_KARTPAD_RUNTIME_INCLUDE "" CACHE PATH
++    "Path to KartPad's header-only PowerPC architectural semantics")
++if(NOT MKW_KARTPAD_RUNTIME_INCLUDE OR
++   NOT EXISTS "${MKW_KARTPAD_RUNTIME_INCLUDE}/kartpad/semantics/ppc_semantics.h")
++    message(FATAL_ERROR
++        "MKW_KARTPAD_RUNTIME_INCLUDE must contain kartpad/semantics/ppc_semantics.h")
++endif()
++include_directories(SYSTEM "${MKW_KARTPAD_RUNTIME_INCLUDE}")
+ include("${CMAKE_CURRENT_LIST_DIR}/cmake/PublicProducts.cmake")
 diff -ruN --exclude=third_party --exclude=build a/cmake/PublicProducts.cmake b/cmake/PublicProducts.cmake
---- a/cmake/PublicProducts.cmake	2026-08-28 14:10:57
-+++ b/cmake/PublicProducts.cmake	2026-08-28 19:12:10
+--- a/cmake/PublicProducts.cmake	2026-08-28 19:57:18
++++ b/cmake/PublicProducts.cmake	2026-08-28 19:57:18
+@@ -44,7 +44,7 @@
+         "${MKW_RUNTIME_SOURCE_DIR}/../aurora-main/include")
+     target_compile_definitions(${target} PRIVATE
+         TARGET_PC)
+-    set_target_properties(${target} PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
++    set_target_properties(${target} PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED ON)
+ endfunction()
+
+ # Translated shard TUs are the memory-hungry compiles; everything else in the build is
 @@ -73,11 +73,12 @@
  target_compile_features(mkw_runtime_common PRIVATE cxx_std_20)
  target_compile_definitions(mkw_runtime_common PRIVATE
@@ -101,11 +123,11 @@ diff -ruN --exclude=third_party --exclude=build a/cmake/PublicProducts.cmake b/c
  target_compile_options(mkw_cpu_baseline PRIVATE -w)
 @@ -205,10 +206,11 @@
      endif()
- 
+
      target_link_libraries(${target} PRIVATE
 -        dbghelp user32 winmm ws2_32 iphlpapi secur32 crypt32 windowsapp setupapi winusb)
 +        "-framework Foundation" "-framework CoreAudio" "-framework AudioToolbox")
- 
+
 -    set_target_properties(${target} PROPERTIES WIN32_EXECUTABLE TRUE)
 -    foreach(runtime_dll libc++.dll libunwind.dll)
 +    if(WIN32)
@@ -121,7 +143,7 @@ diff -ruN --exclude=third_party --exclude=build a/cmake/PublicProducts.cmake b/c
 -    endforeach()
 +      endforeach()
 +    endif()
- 
+
      set(MKW_WII_BOOTSTRAP_SOURCE_DIR "${MKW_RUNTIME_SOURCE_DIR}/assets/wii")
      if(NOT EXISTS "${MKW_WII_BOOTSTRAP_SOURCE_DIR}/shared2/wc24")
 @@ -287,6 +290,6 @@
@@ -132,12 +154,35 @@ diff -ruN --exclude=third_party --exclude=build a/cmake/PublicProducts.cmake b/c
 +        target_compile_options(${target} PRIVATE -mcpu=apple-m2)
      endif()
  endforeach()
+diff -ruN --exclude=third_party --exclude=build a/include/audio_backend.h b/include/audio_backend.h
+--- a/include/audio_backend.h	2026-08-28 19:57:18
++++ b/include/audio_backend.h	2026-08-28 19:57:18
+@@ -44,5 +44,6 @@
+     float m_masterVolume = 1.0f;
+     bool m_muted = false;
+     bool m_reportedDroppedBlock = false;
++    bool m_reportedAudibleBlock = false;
+     std::vector<int16_t> m_convertBuffer;
+ };
+diff -ruN --exclude=third_party --exclude=build a/include/hle/controller_status_contract.h b/include/hle/controller_status_contract.h
+--- a/include/hle/controller_status_contract.h	2026-08-28 19:57:18
++++ b/include/hle/controller_status_contract.h	2026-08-28 19:57:18
+@@ -72,7 +72,8 @@
+         if (chan >= kChannelCount) {
+             return kErrorBadChannel;
+         }
+-        return m_initialized ? kErrorNoController : kErrorNotReady;
++        return m_initialized && chan == 0 ? 0 :
++               (m_initialized ? kErrorNoController : kErrorNotReady);
+     }
+
+ private:
 diff -ruN --exclude=third_party --exclude=build a/include/isa/ppc_isa_config.h b/include/isa/ppc_isa_config.h
---- a/include/isa/ppc_isa_config.h	2026-08-28 14:10:57
-+++ b/include/isa/ppc_isa_config.h	2026-08-28 18:25:14
+--- a/include/isa/ppc_isa_config.h	2026-08-28 19:57:18
++++ b/include/isa/ppc_isa_config.h	2026-08-28 19:57:18
 @@ -4,18 +4,41 @@
  #include <cstdint>
- 
+
  #define MKW_RESTRICT __restrict
 +#if defined(__aarch64__)
 +#include "../../third_party/sse2neon/sse2neon.h"
@@ -157,12 +202,12 @@ diff -ruN --exclude=third_party --exclude=build a/include/isa/ppc_isa_config.h b
 +#else
  #include <immintrin.h>
 +#endif
- 
+
  inline constexpr bool MkwStateFreeAbiEnabled(uint32_t) noexcept
  {
      return true;
  }
- 
+
 +#if defined(_MSC_VER)
  #define MKW_PPC_FORCE_INLINE __forceinline
  #define MKW_PPC_NO_INLINE __declspec(noinline)
@@ -175,15 +220,15 @@ diff -ruN --exclude=third_party --exclude=build a/include/isa/ppc_isa_config.h b
  #define MKW_PPC_ALWAYS_INLINE_BODY __attribute__((always_inline))
  #define MKW_PPC_COLD __attribute__((cold))
 -#define MKW_PPC_INTERNAL_CALL __regcall
- 
- 
+
+
  using MkwStateFreeResult2 = uint64_t __attribute__((ext_vector_type(2)));
 diff -ruN --exclude=third_party --exclude=build a/include/memory_access.h b/include/memory_access.h
---- a/include/memory_access.h	2026-08-28 14:10:57
-+++ b/include/memory_access.h	2026-08-28 18:25:14
+--- a/include/memory_access.h	2026-08-28 19:57:18
++++ b/include/memory_access.h	2026-08-28 19:57:18
 @@ -18,8 +18,13 @@
  }
- 
+
  namespace MemoryInline {
 +#if defined(_MSC_VER)
  #define MKW_MEMORY_FORCE_INLINE __forceinline
@@ -195,9 +240,71 @@ diff -ruN --exclude=third_party --exclude=build a/include/memory_access.h b/incl
  #define MKW_MEMORY_COLD __attribute__((cold))
  inline constexpr uint32_t kPageShift = 20;
  inline constexpr uint32_t kPageSize = 1u << kPageShift;
+diff -ruN --exclude=third_party --exclude=build a/include/ppc_runtime.h b/include/ppc_runtime.h
+--- a/include/ppc_runtime.h	2026-08-28 19:57:18
++++ b/include/ppc_runtime.h	2026-08-28 19:57:18
+@@ -12,3 +12,58 @@
+ #include "isa/ppc_isa_int.h"
+ #include "isa/ppc_isa_float.h"
+ #include "isa/ppc_isa_quantized.h"
++#include <kartpad/semantics/ppc_semantics.h>
++
++// The translator emits state-aware scalar helpers so FPSCR sticky bits,
++// exception enables, FPRF, and suppressed destination writes remain visible
++// to the guest.  Keep these tiny adapters beside the generated-code umbrella
++// header; the exact architectural rules live in KartPad's tested semantics
++// library and are shared with the translation conformance fixtures.
++inline bool PpcCommitScalarFpInline(
++    double& destination, kartpad::semantics::ScalarFpResult result)
++{
++    CpuContext* cpu = CurrentCpuContext();
++    cpu->fpscr = result.fpscr;
++    MkwApplyHostNiMode(cpu->fpscr);
++    if (result.write_destination)
++        destination = result.value;
++    return result.write_destination;
++}
++
++inline uint32_t PpcCompareStateInline(bool ordered, double a, double b)
++{
++    CpuContext* cpu = CurrentCpuContext();
++    const auto result = kartpad::semantics::EvaluatePpcFloatCompare(
++        cpu->fpscr, a, b, ordered);
++    cpu->fpscr = result.fpscr;
++    MkwApplyHostNiMode(cpu->fpscr);
++    return result.condition;
++}
++
++inline bool PpcFaddsStateInline(double& d, double a, double b) { return PpcCommitScalarFpInline(d, kartpad::semantics::EvaluatePpcScalarBinary(CurrentCpuContext()->fpscr, kartpad::semantics::ScalarFpBinaryOperation::Add, a, b, true)); }
++inline bool PpcFsubsStateInline(double& d, double a, double b) { return PpcCommitScalarFpInline(d, kartpad::semantics::EvaluatePpcScalarBinary(CurrentCpuContext()->fpscr, kartpad::semantics::ScalarFpBinaryOperation::Subtract, a, b, true)); }
++inline bool PpcFmulsStateInline(double& d, double a, double b) { return PpcCommitScalarFpInline(d, kartpad::semantics::EvaluatePpcScalarBinary(CurrentCpuContext()->fpscr, kartpad::semantics::ScalarFpBinaryOperation::Multiply, a, kartpad::semantics::Force25Bit(b), true)); }
++inline bool PpcFdivsStateInline(double& d, double a, double b) { return PpcCommitScalarFpInline(d, kartpad::semantics::EvaluatePpcScalarBinary(CurrentCpuContext()->fpscr, kartpad::semantics::ScalarFpBinaryOperation::Divide, a, b, true)); }
++inline bool PpcFaddStateInline(double& d, double a, double b) { return PpcCommitScalarFpInline(d, kartpad::semantics::EvaluatePpcScalarBinary(CurrentCpuContext()->fpscr, kartpad::semantics::ScalarFpBinaryOperation::Add, a, b, false)); }
++inline bool PpcFsubStateInline(double& d, double a, double b) { return PpcCommitScalarFpInline(d, kartpad::semantics::EvaluatePpcScalarBinary(CurrentCpuContext()->fpscr, kartpad::semantics::ScalarFpBinaryOperation::Subtract, a, b, false)); }
++inline bool PpcFmulStateInline(double& d, double a, double b) { return PpcCommitScalarFpInline(d, kartpad::semantics::EvaluatePpcScalarBinary(CurrentCpuContext()->fpscr, kartpad::semantics::ScalarFpBinaryOperation::Multiply, a, b, false)); }
++inline bool PpcFdivStateInline(double& d, double a, double b) { return PpcCommitScalarFpInline(d, kartpad::semantics::EvaluatePpcScalarBinary(CurrentCpuContext()->fpscr, kartpad::semantics::ScalarFpBinaryOperation::Divide, a, b, false)); }
++inline bool PpcFctiwzStateInline(double& d, double value) { return PpcCommitScalarFpInline(d, kartpad::semantics::EvaluatePpcConvertToInteger(CurrentCpuContext()->fpscr, value, FE_TOWARDZERO)); }
++inline bool PpcFmaddsStateInline(double& d, double a, double c, double b) { return PpcCommitScalarFpInline(d, kartpad::semantics::EvaluatePpcFused(CurrentCpuContext()->fpscr, a, c, b, false, true, false)); }
++inline bool PpcFmsubsStateInline(double& d, double a, double c, double b) { return PpcCommitScalarFpInline(d, kartpad::semantics::EvaluatePpcFused(CurrentCpuContext()->fpscr, a, c, b, true, true, false)); }
++inline bool PpcFnmsubStateInline(double& d, double a, double c, double b) { return PpcCommitScalarFpInline(d, kartpad::semantics::EvaluatePpcFused(CurrentCpuContext()->fpscr, a, c, b, true, false, true)); }
++inline bool PpcFnmsubsStateInline(double& d, double a, double c, double b) { return PpcCommitScalarFpInline(d, kartpad::semantics::EvaluatePpcFused(CurrentCpuContext()->fpscr, a, c, b, true, true, true)); }
++inline bool PpcFrsqrteStateInline(double& d, double value) { return PpcCommitScalarFpInline(d, kartpad::semantics::EvaluatePpcEstimate(CurrentCpuContext()->fpscr, value, true)); }
++
++inline double PpcFresValueStateInline(double current, double value)
++{
++    CpuContext* cpu = CurrentCpuContext();
++    const auto result = kartpad::semantics::EvaluatePpcEstimate(
++        cpu->fpscr, value, false);
++    cpu->fpscr = result.fpscr;
++    MkwApplyHostNiMode(cpu->fpscr);
++    if (!result.write_destination)
++        return current;
++    const float lane = static_cast<float>(result.value);
++    return PpcPackPairedInline(lane, lane);
++}
 diff -ruN --exclude=third_party --exclude=build a/include/runtime_config.h b/include/runtime_config.h
---- a/include/runtime_config.h	2026-08-28 14:10:57
-+++ b/include/runtime_config.h	2026-08-28 18:31:35
+--- a/include/runtime_config.h	2026-08-28 19:57:18
++++ b/include/runtime_config.h	2026-08-28 19:57:18
 @@ -17,6 +17,9 @@
  #include <utility>
  #include <vector>
@@ -226,7 +333,7 @@ diff -ruN --exclude=third_party --exclude=build a/include/runtime_config.h b/inc
  #endif
 diff -ruN --exclude=third_party --exclude=build a/src/apple/guest_flat_memory_apple.cpp b/src/apple/guest_flat_memory_apple.cpp
 --- a/src/apple/guest_flat_memory_apple.cpp	1969-12-31 18:00:00
-+++ b/src/apple/guest_flat_memory_apple.cpp	2026-08-28 18:30:22
++++ b/src/apple/guest_flat_memory_apple.cpp	2026-08-28 19:57:18
 @@ -0,0 +1,229 @@
 +#include "guest_flat_memory.h"
 +
@@ -459,14 +566,14 @@ diff -ruN --exclude=third_party --exclude=build a/src/apple/guest_flat_memory_ap
 +} // namespace GuestFlat
 diff -ruN --exclude=third_party --exclude=build a/src/apple/host_cpu_baseline_stub.cpp b/src/apple/host_cpu_baseline_stub.cpp
 --- a/src/apple/host_cpu_baseline_stub.cpp	1969-12-31 18:00:00
-+++ b/src/apple/host_cpu_baseline_stub.cpp	2026-08-28 18:22:10
++++ b/src/apple/host_cpu_baseline_stub.cpp	2026-08-28 19:57:18
 @@ -0,0 +1,3 @@
 +namespace {
 +[[maybe_unused]] const int kKartPadAppleArm64Baseline = 1;
 +}
 diff -ruN --exclude=third_party --exclude=build a/src/apple/wup028_adapter_stub.cpp b/src/apple/wup028_adapter_stub.cpp
 --- a/src/apple/wup028_adapter_stub.cpp	1969-12-31 18:00:00
-+++ b/src/apple/wup028_adapter_stub.cpp	2026-08-28 18:22:24
++++ b/src/apple/wup028_adapter_stub.cpp	2026-08-28 19:57:18
 @@ -0,0 +1,17 @@
 +#include "wup028_adapter.h"
 +#include <dolphin/pad.h>
@@ -485,16 +592,76 @@ diff -ruN --exclude=third_party --exclude=build a/src/apple/wup028_adapter_stub.
 +bool SetRumble(std::uint32_t, bool) { return false; }
 +
 +}  // namespace Wup028Adapter
+diff -ruN --exclude=third_party --exclude=build a/src/audio_backend.cpp b/src/audio_backend.cpp
+--- a/src/audio_backend.cpp	2026-08-28 19:57:18
++++ b/src/audio_backend.cpp	2026-08-28 19:57:18
+@@ -79,6 +79,9 @@
+     m_sampleRate = sampleRate;
+     m_channels = channels;
+     m_initialized = true;
++    RT_LOG(RT_TAG_AUDIO) << "host playback active: " << sampleRate << " Hz, "
++                         << channels << " channels, gain=" << EffectiveGainLocked()
++                         << std::endl;
+     return true;
+ }
+
+@@ -100,6 +103,7 @@
+     m_sampleRate = 0;
+     m_channels = 0;
+     m_reportedDroppedBlock = false;
++    m_reportedAudibleBlock = false;
+     m_convertBuffer.clear();
+ }
+
+@@ -176,6 +180,18 @@
+         RT_LOG(RT_TAG_AUDIO) << "SDL_PutAudioStreamData failed: " << SDL_GetError() << std::endl;
+         return false;
+     }
++    if (!m_reportedAudibleBlock) {
++        const auto peak = std::max_element(
++            m_convertBuffer.begin(), m_convertBuffer.begin() + sampleCount,
++            [](int16_t a, int16_t b) { return std::abs(static_cast<int>(a)) < std::abs(static_cast<int>(b)); });
++        if (peak != m_convertBuffer.begin() + sampleCount && *peak != 0) {
++            m_reportedAudibleBlock = true;
++            RT_LOG(RT_TAG_AUDIO) << "non-silent PCM reached host playback: peak="
++                                 << std::abs(static_cast<int>(*peak))
++                                 << ", queued=" << SDL_GetAudioStreamQueued(m_stream)
++                                 << " bytes" << std::endl;
++        }
++    }
+
+     return true;
+ }
+@@ -197,6 +213,19 @@
+     if (!SDL_PutAudioStreamData(m_stream, samples, lenBytes)) {
+         RT_LOG(RT_TAG_AUDIO) << "SDL_PutAudioStreamData failed: " << SDL_GetError() << std::endl;
+         return false;
++    }
++    if (!m_reportedAudibleBlock) {
++        int peak = 0;
++        for (size_t i = 0; i < sampleCount; ++i) {
++            peak = std::max(peak, std::abs(static_cast<int>(samples[i])));
++        }
++        if (peak != 0) {
++            m_reportedAudibleBlock = true;
++            RT_LOG(RT_TAG_AUDIO) << "non-silent PCM reached host playback: peak="
++                                 << peak << ", queued="
++                                 << SDL_GetAudioStreamQueued(m_stream) << " bytes"
++                                 << std::endl;
++        }
+     }
+
+     return true;
 diff -ruN --exclude=third_party --exclude=build a/src/fiber_manager.cpp b/src/fiber_manager.cpp
---- a/src/fiber_manager.cpp	2026-08-28 14:10:57
-+++ b/src/fiber_manager.cpp	2026-08-28 19:11:47
+--- a/src/fiber_manager.cpp	2026-08-28 19:57:18
++++ b/src/fiber_manager.cpp	2026-08-28 19:57:18
 @@ -11,8 +11,68 @@
  #include <cstdlib>
  #include <iostream>
  #include <iomanip>
 +#include <memory>
  #include <sstream>
- 
+
 +#if defined(__APPLE__)
 +#include <cerrno>
 +#include <cstring>
@@ -555,11 +722,11 @@ diff -ruN --exclude=third_party --exclude=build a/src/fiber_manager.cpp b/src/fi
 +} // namespace
 +
  namespace Fiber {
- 
+
  std::mutex GuestFiberManager::s_mutex;
 @@ -24,16 +84,16 @@
  thread_local CpuContext* GuestFiberManager::s_cpuContext = nullptr;
- 
+
  void GuestFiberManager::PurgePendingFibers() {
 -#if defined(_WIN32)
 +#if defined(_WIN32) || defined(__APPLE__)
@@ -594,7 +761,7 @@ diff -ruN --exclude=third_party --exclude=build a/src/fiber_manager.cpp b/src/fi
 @@ -215,21 +282,29 @@
  void GuestFiberManager::Shutdown() {
      std::lock_guard<std::mutex> lock(s_mutex);
- 
+
 -#if defined(_WIN32)
 +#if defined(_WIN32) || defined(__APPLE__)
      for (auto& [addr, fiber] : s_fibers) {
@@ -695,7 +862,7 @@ diff -ruN --exclude=third_party --exclude=build a/src/fiber_manager.cpp b/src/fi
          // default guest thread, which also owns the scheduler fiber. Keep the
 @@ -436,7 +531,7 @@
      }
- 
+
      // Switch to the target fiber (the target fiber will load its own context)
 -    SwitchToFiber(fiberHandle);
 +    SwitchHostFiber(fiberHandle);
@@ -727,7 +894,7 @@ diff -ruN --exclude=third_party --exclude=build a/src/fiber_manager.cpp b/src/fi
 -        SwitchToFiber(s_schedulerFiber);
 +        SwitchHostFiber(s_schedulerFiber);
      }
- 
+
      // The deferral loop above yields to the scheduler and therefore can resume
 @@ -691,7 +786,7 @@
      }
@@ -738,32 +905,273 @@ diff -ruN --exclude=third_party --exclude=build a/src/fiber_manager.cpp b/src/fi
  #else
      (void)guestThreadAddr;
      RT_LOG(RT_TAG_OS) << "Fibers not supported on this platform!" << std::endl;
-diff -ruN --exclude=third_party --exclude=build a/src/hle/os/os_init.cpp b/src/hle/os/os_init.cpp
---- a/src/hle/os/os_init.cpp	2026-08-28 14:10:57
-+++ b/src/hle/os/os_init.cpp	2026-08-28 18:30:27
-@@ -19,7 +19,6 @@
- #include "system_bridge.h"
- 
- extern "C" void func_801A961C(CpuContext* ctx);
--extern "C" void func_8055531C(CpuContext* ctx);
- 
- extern "C" void OSInitAlarm_RecompModLateInit_801a961c(CpuContext* ctx) {
-     func_801A961C(ctx);
-@@ -29,7 +28,10 @@
- 
- extern "C" void StaticRProlog_RecompModInit_8055531c(CpuContext* ctx) {
-     RecompMod::RunMemoryInitializers();
--    func_8055531C(ctx);
-+    // The supplied base disc has no StaticR.rel payload to translate.
-+    // Keep the native registration as the mod-initializer rendezvous without
-+    // manufacturing an unresolved guest function at link time.
-+    (void)ctx;
-     RecompMod::RunPostRelInitializers();
+diff -ruN --exclude=third_party --exclude=build a/src/hle/input/kpad.cpp b/src/hle/input/kpad.cpp
+--- a/src/hle/input/kpad.cpp	2026-08-28 19:57:18
++++ b/src/hle/input/kpad.cpp	2026-08-28 19:57:18
+@@ -1,19 +1,141 @@
+ #include "hle_stubs.h"
++#include "memory.h"
+
++#include <SDL3/SDL_keyboard.h>
++#include <SDL3/SDL_events.h>
++#include <SDL3/SDL_scancode.h>
++
++#include <array>
++#include <atomic>
++#include <cstdio>
+ #include <cstdint>
++#include <cstring>
+
++namespace {
++
++// Revolution SDK KPADStatus begins with three big-endian button masks.  The
++// remaining core-remote fields occupy 0x60 bytes before extension data; Mario
++// Kart's menu path only consumes these masks and the zero-valued status bytes.
++constexpr uint32_t kKpadCoreStatusSize = 0x60;
++constexpr uint32_t kWpadButtonLeft = 0x0001;
++constexpr uint32_t kWpadButtonRight = 0x0002;
++constexpr uint32_t kWpadButtonDown = 0x0004;
++constexpr uint32_t kWpadButtonUp = 0x0008;
++constexpr uint32_t kWpadButtonPlus = 0x0010;
++constexpr uint32_t kWpadButtonTwo = 0x0100;
++constexpr uint32_t kWpadButtonOne = 0x0200;
++constexpr uint32_t kWpadButtonB = 0x0400;
++constexpr uint32_t kWpadButtonA = 0x0800;
++constexpr uint32_t kWpadButtonMinus = 0x1000;
++
++std::array<uint32_t, 4> g_previousButtons{};
++std::atomic<uint32_t> g_pendingPresses{0};
++
++uint32_t ButtonForScancode(SDL_Scancode code)
++{
++    switch (code) {
++    case SDL_SCANCODE_RETURN: return kWpadButtonA;
++    case SDL_SCANCODE_BACKSPACE: return kWpadButtonB;
++    case SDL_SCANCODE_SPACE: return kWpadButtonPlus;
++    case SDL_SCANCODE_Q: return kWpadButtonOne;
++    case SDL_SCANCODE_E: return kWpadButtonTwo;
++    case SDL_SCANCODE_ESCAPE: return kWpadButtonMinus;
++    case SDL_SCANCODE_LEFT: return kWpadButtonLeft;
++    case SDL_SCANCODE_RIGHT: return kWpadButtonRight;
++    case SDL_SCANCODE_DOWN: return kWpadButtonDown;
++    case SDL_SCANCODE_UP: return kWpadButtonUp;
++    default: return 0;
++    }
++}
++
++bool SDLCALL WatchKeyboardEvent(void*, SDL_Event* event)
++{
++    if (event->type == SDL_EVENT_KEY_DOWN && !event->key.repeat) {
++        g_pendingPresses.fetch_or(ButtonForScancode(event->key.scancode),
++                                  std::memory_order_release);
++    }
++    return true;
++}
++
++void EnsureKeyboardWatch()
++{
++    static const bool installed = SDL_AddEventWatch(WatchKeyboardEvent, nullptr);
++    (void)installed;
++}
++
++uint32_t ReadKeyboardButtons()
++{
++    int keyCount = 0;
++    const bool* keys = SDL_GetKeyboardState(&keyCount);
++    const auto down = [&](SDL_Scancode code) {
++        return static_cast<int>(code) < keyCount && keys[code];
++    };
++
++    uint32_t buttons = 0;
++    if (down(SDL_SCANCODE_RETURN)) buttons |= kWpadButtonA;
++    if (down(SDL_SCANCODE_BACKSPACE)) buttons |= kWpadButtonB;
++    if (down(SDL_SCANCODE_SPACE)) buttons |= kWpadButtonPlus;
++    if (down(SDL_SCANCODE_Q)) buttons |= kWpadButtonOne;
++    if (down(SDL_SCANCODE_E)) buttons |= kWpadButtonTwo;
++    if (down(SDL_SCANCODE_ESCAPE)) buttons |= kWpadButtonMinus;
++    if (down(SDL_SCANCODE_LEFT)) buttons |= kWpadButtonLeft;
++    if (down(SDL_SCANCODE_RIGHT)) buttons |= kWpadButtonRight;
++    if (down(SDL_SCANCODE_DOWN)) buttons |= kWpadButtonDown;
++    if (down(SDL_SCANCODE_UP)) buttons |= kWpadButtonUp;
++    return buttons;
++}
++
++void WriteCoreStatus(uint32_t address, uint32_t hold, uint32_t trigger,
++                     uint32_t release)
++{
++    auto* status = Memory::GetPointer(address, kKpadCoreStatusSize);
++    std::memset(status, 0, kKpadCoreStatusSize);
++    Memory::Write32(address + 0x00, hold);
++    Memory::Write32(address + 0x04, trigger);
++    Memory::Write32(address + 0x08, release);
++    // 0x5c extension type = core, 0x5d error = success,
++    // 0x5e DPD invalid, 0x5f core data format; memset supplied all four.
++}
++
++} // namespace
++
+ extern "C" int32_t KPAD__Read_HLE(uint32_t chan, uint32_t statusPtr, uint32_t count)
+ {
+-    (void)chan;
+-    (void)statusPtr;
+-    (void)count;
+-    return 0;
++    static bool logged = false;
++    if (!logged) {
++        std::fprintf(stderr, "[input] KPADRead active: chan=%u count=%u\n", chan, count);
++        logged = true;
++    }
++    if (chan >= g_previousButtons.size() || statusPtr == 0 || count == 0) {
++        return 0;
++    }
++    EnsureKeyboardWatch();
++
++    const uint32_t pending = chan == 0 ?
++        g_pendingPresses.exchange(0, std::memory_order_acq_rel) : 0;
++    const uint32_t hold = chan == 0 ? (ReadKeyboardButtons() | pending) : 0;
++    const uint32_t previous = g_previousButtons[chan];
++    const uint32_t trigger = pending | (hold & ~previous);
++    const uint32_t release = previous & ~hold;
++    g_previousButtons[chan] = hold;
++
++    try {
++        WriteCoreStatus(statusPtr, hold, trigger, release);
++    } catch (const Memory::AccessViolation&) {
++        return 0;
++    }
++    return 1;
  }
- 
+ PPC_NATIVE_OVERRIDE(80197380, KPAD__Read_HLE, int32_t, (uint32_t chan, uint32_t statusPtr, uint32_t count),
+          (chan, statusPtr, count));
+
+ extern "C" int32_t KPAD__GetUnifiedWpadStatus_HLE(uint32_t chan, uint32_t statusPtr, uint32_t count)
+ {
++    static bool logged = false;
++    if (!logged) {
++        std::fprintf(stderr, "[input] KPADGetUnifiedWpadStatus active: chan=%u count=%u\n", chan, count);
++        logged = true;
++    }
+     (void)chan;
+     (void)statusPtr;
+     (void)count;
+diff -ruN --exclude=third_party --exclude=build a/src/hle/input/pad.cpp b/src/hle/input/pad.cpp
+--- a/src/hle/input/pad.cpp	2026-08-28 19:57:18
++++ b/src/hle/input/pad.cpp	2026-08-28 19:57:18
+@@ -9,6 +9,7 @@
+ #include <cstdlib>
+ #include <cstring>
+
++#include <SDL3/SDL_scancode.h>
+ #include <dolphin/pad.h>
+
+ namespace {
+@@ -30,12 +31,53 @@
+     std::memcpy(dst, guestStatus.data(), guestStatus.size());
+ }
+
++void ConfigureDefaultKeyboardPort() {
++    constexpr std::array buttonBindings{
++        PADKeyButtonBinding{SDL_SCANCODE_RETURN, PAD_BUTTON_A},
++        PADKeyButtonBinding{SDL_SCANCODE_BACKSPACE, PAD_BUTTON_B},
++        PADKeyButtonBinding{SDL_SCANCODE_Q, PAD_BUTTON_X},
++        PADKeyButtonBinding{SDL_SCANCODE_E, PAD_BUTTON_Y},
++        PADKeyButtonBinding{SDL_SCANCODE_SPACE, PAD_BUTTON_START},
++        PADKeyButtonBinding{SDL_SCANCODE_LSHIFT, PAD_TRIGGER_Z},
++        PADKeyButtonBinding{SDL_SCANCODE_LCTRL, PAD_TRIGGER_L},
++        PADKeyButtonBinding{SDL_SCANCODE_LALT, PAD_TRIGGER_R},
++        PADKeyButtonBinding{SDL_SCANCODE_UP, PAD_BUTTON_UP},
++        PADKeyButtonBinding{SDL_SCANCODE_DOWN, PAD_BUTTON_DOWN},
++        PADKeyButtonBinding{SDL_SCANCODE_LEFT, PAD_BUTTON_LEFT},
++        PADKeyButtonBinding{SDL_SCANCODE_RIGHT, PAD_BUTTON_RIGHT},
++    };
++    constexpr std::array axisBindings{
++        PADKeyAxisBinding{SDL_SCANCODE_D, PAD_AXIS_LEFT_X_POS, 0},
++        PADKeyAxisBinding{SDL_SCANCODE_A, PAD_AXIS_LEFT_X_NEG, 0},
++        PADKeyAxisBinding{SDL_SCANCODE_W, PAD_AXIS_LEFT_Y_POS, 0},
++        PADKeyAxisBinding{SDL_SCANCODE_S, PAD_AXIS_LEFT_Y_NEG, 0},
++        PADKeyAxisBinding{SDL_SCANCODE_L, PAD_AXIS_RIGHT_X_POS, 0},
++        PADKeyAxisBinding{SDL_SCANCODE_J, PAD_AXIS_RIGHT_X_NEG, 0},
++        PADKeyAxisBinding{SDL_SCANCODE_I, PAD_AXIS_RIGHT_Y_POS, 0},
++        PADKeyAxisBinding{SDL_SCANCODE_K, PAD_AXIS_RIGHT_Y_NEG, 0},
++        PADKeyAxisBinding{SDL_SCANCODE_LCTRL, PAD_AXIS_TRIGGER_L, 0},
++        PADKeyAxisBinding{SDL_SCANCODE_LALT, PAD_AXIS_TRIGGER_R, 0},
++    };
++
++    for (const auto& binding : buttonBindings) {
++        PADSetKeyButtonBinding(0, binding);
++    }
++    for (const auto& binding : axisBindings) {
++        PADSetKeyAxisBinding(0, binding);
++    }
++    PADSetKeyboardActive(0, TRUE);
++}
++
+ } // namespace
+
+ extern "C" uint32_t PAD__Init_HLE()
+ {
+     Wup028Adapter::Initialize();
+-    return PADInit() ? 1u : 0u;
++    if (!PADInit()) {
++        return 0;
++    }
++    ConfigureDefaultKeyboardPort();
++    return 1;
+ }
+ PPC_NATIVE_OVERRIDE(801AF2F0, PAD__Init_HLE, uint32_t, (), ());
+
+diff -ruN --exclude=third_party --exclude=build a/src/hle/input/wpad.cpp b/src/hle/input/wpad.cpp
+--- a/src/hle/input/wpad.cpp	2026-08-28 19:57:18
++++ b/src/hle/input/wpad.cpp	2026-08-28 19:57:18
+@@ -3,6 +3,7 @@
+ #include "hle/controller_status_contract.h"
+
+ #include <cstdint>
++#include <cstring>
+
+ void NandQueueIosCallback(uint32_t callbackPtr, int32_t result, uint32_t callbackArg);
+
+@@ -113,7 +114,7 @@
+     if (typePtr != 0) {
+         Memory::Write32(typePtr, WpadContract::kExtensionCore);
+     }
+-    return WpadContract::kErrorNoController;
++    return chan == 0 ? kStatusOk : WpadContract::kErrorNoController;
+ }
+ PPC_NATIVE_OVERRIDE(801C0990, WPADProbe_HLE, int32_t, (uint32_t chan, uint32_t typePtr), (chan, typePtr));
+
+@@ -130,8 +131,16 @@
+         return CompleteWpadRequest(chan, callback, WpadContract::kErrorBadChannel);
+     }
+
+-    (void)infoPtr;
+-    return CompleteWpadRequest(chan, callback, WpadContract::kErrorNoController);
++    if (chan != 0) {
++        return CompleteWpadRequest(chan, callback, WpadContract::kErrorNoController);
++    }
++    if (infoPtr != 0) {
++        // WPADInfo is 24 bytes in the Revolution SDK. A zeroed core-remote
++        // report with a full battery is sufficient for the menu connection path.
++        std::memset(Memory::GetPointer(infoPtr, 24), 0, 24);
++        Memory::Write32(infoPtr, 4);
++    }
++    return CompleteWpadRequest(chan, callback, kStatusOk);
+ }
+ PPC_NATIVE_OVERRIDE(801C0CA4, WPADGetInfoAsync_HLE, int32_t,
+          (uint32_t chan, uint32_t infoPtr, uint32_t callback), (chan, infoPtr, callback));
+@@ -142,7 +151,8 @@
+         return CompleteWpadRequest(chan, callback, WpadContract::kErrorBadChannel);
+     }
+     (void)ledMask;
+-    return CompleteWpadRequest(chan, callback, WpadContract::kErrorNoController);
++    return CompleteWpadRequest(chan, callback,
++                               chan == 0 ? kStatusOk : WpadContract::kErrorNoController);
+ }
+ PPC_NATIVE_OVERRIDE(801C0FF8, WPADControlLed_HLE, int32_t,
+          (uint32_t chan, uint32_t ledMask, uint32_t callback), (chan, ledMask, callback));
 diff -ruN --exclude=third_party --exclude=build a/src/memory.cpp b/src/memory.cpp
---- a/src/memory.cpp	2026-08-28 14:10:57
-+++ b/src/memory.cpp	2026-08-28 18:26:53
+--- a/src/memory.cpp	2026-08-28 19:57:18
++++ b/src/memory.cpp	2026-08-28 19:57:18
 @@ -23,8 +23,10 @@
  #ifndef NOMINMAX
  #define NOMINMAX
@@ -772,12 +1180,12 @@ diff -ruN --exclude=third_party --exclude=build a/src/memory.cpp b/src/memory.cp
  #include <windows.h>
  #include <dbghelp.h>
 +#endif
- 
+
  MemoryInline::PageEntry MemoryInline::g_pageTable[MemoryInline::kPageCount]{};
  uintptr_t MemoryInline::g_fullPageBias[MemoryInline::kPageCount]{};
 diff -ruN --exclude=third_party --exclude=build a/src/system_bridge.cpp b/src/system_bridge.cpp
---- a/src/system_bridge.cpp	2026-08-28 14:10:57
-+++ b/src/system_bridge.cpp	2026-08-28 18:26:53
+--- a/src/system_bridge.cpp	2026-08-28 19:57:18
++++ b/src/system_bridge.cpp	2026-08-28 19:57:18
 @@ -12,7 +12,9 @@
  #ifndef NOMINMAX
  #define NOMINMAX
@@ -785,6 +1193,6 @@ diff -ruN --exclude=third_party --exclude=build a/src/system_bridge.cpp b/src/sy
 +#if defined(_WIN32)
  #include <windows.h>
 +#endif
- 
- 
+
+
  #include "abi_bridge.h"

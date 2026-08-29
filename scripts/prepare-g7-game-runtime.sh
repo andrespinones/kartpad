@@ -62,6 +62,7 @@ cmake -S "${runtime_source}" -B "${runtime_build}" -G Ninja \
   -DMKW_AURORA_DIR="${repo_root}/ref/upstream/Wiicompiled/aurora-main" \
   -DAURORA_DAWN_PACKAGE_URL="file://${dawn_archive}" \
   -DMKW_TRANSLATED_SHARD_MANIFEST="${translation_root}/build_shards/shards.cmake" \
+  -DMKW_KARTPAD_RUNTIME_INCLUDE="${repo_root}/runtime/include" \
   -DMKW_TRANSLATED_COMPILE_JOBS=2
 cmake --build "${runtime_build}" --target WiiCompiled --parallel 4
 
