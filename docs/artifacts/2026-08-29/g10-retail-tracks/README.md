@@ -349,4 +349,16 @@ completion are independent of that wall-clock contention.
 - Bounded race presentation checks remained at the overlay's 60 FPS target through water, waterfalls, ramps, moving shells, rotating electrical hazards, transparent pipe geometry, particles, and ghost transparency. Deterministic cadence remains a G11 gate.
 - Private log SHA-256 `dc32da54eb0e57cc39e257bb407362603bf76cdce8dc1e275f840ff700eab087` recorded 56 audio-queue drops and is rejected from audio-row acceptance.
 
-Current row 22 status: **29/32 Pass; 3 Open.** Mushroom, Flower, Star, Shell, Banana, and Leaf Cups each have complete four-track evidence; Lightning Cup is 3/4 and Special Cup is 2/4.
+## Bowser's Castle exact run
+
+- Product: sole native arm64 KartPad process launched with the process-local trace helper; no Dolphin and no Simulator.
+- Test precondition: the user's own private all-cups fixture documented in `docs/artifacts/2026-08-29/g10-all-cups-fixture.md`; progression acceptance remains separate.
+- Executable SHA-256: `c7e28cfa27f69d0efd9d243c0ab2fd04187971cc8856a87f30a2c4b3234a9cbc`.
+- Retail UI path: Time Trials → Special Cup → Bowser's Castle → regular Nintendo staff data `Nin★YABUKI 03:04.836` → Watch Replay.
+- Private trace SHA-256: `1113377b06e3dcd119ae1bb3129aeb220168f6e9a408d28976603b12a4bff817`.
+- Strict assertion: `scripts/summarize-mkw-state-trace.py --require-complete --expected-input-frames 11320`.
+- Result: the accepted segment begins at race time 240, ends at 11319, contains 11,080 consecutive stage-2 samples, and is followed by stage 4. The later incomplete segment is the retail automatic replay loop.
+- Bounded race presentation checks sampled from 51 to 60 FPS through lava, Thwomps, moving geometry, half-pipes, fire effects, interior/exterior geometry, and ghost transparency. This remains G11/G36 performance evidence only.
+- Private log SHA-256 `66247e3e9637b5da5de85b9ef1858d9044cf965c0bc2b20a650c120bf6794eed` recorded three audio-queue drops and is rejected from audio-row acceptance.
+
+Current row 22 status: **30/32 Pass; 2 Open.** Mushroom, Flower, Star, Shell, Banana, and Leaf Cups each have complete four-track evidence; Lightning Cup is 3/4 and Special Cup is 3/4.
