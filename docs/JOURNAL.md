@@ -765,3 +765,10 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - Private trace SHA-256 is `a79ca17ab964bbc029139b2b155d6997019dbd7550ed041117a9eb38ead5df21`; exact executable SHA-256 is `421fad338fca6d4e197bc533cc5a73a36461c36b70436e99b0e7b54d6a889404`.
 - Bounded presentation checks sampled from 52 to 58 FPS through lava, stone corridors, moving platforms, fire hazards, exterior towers, bridges, jumps, camera transitions, and ghost transparency. Private log SHA-256 `da41f9a68c71bad36cef491e39c466db5df7a86771f6e2b8e2c7b7e54dad734c` recorded 41 audio drops and is rejected from audio-row acceptance.
 - PRD row 22 is now **32/32 Pass, 0 Open**. Lightning Cup and the exact native retail-track matrix are complete.
+
+## 2026-08-29 — G10 full-range keyboard steering correction
+
+- A fresh three-player Luigi Circuit completion attempt exposed that the keyboard Classic-stick bridge used `0.08f` despite its full-normalized-range contract. P1 could accelerate but could not reliably recover from barriers.
+- Changed the reproducible Apple-runtime patch and the immediate private generated source to `1.0f`; the arm64 target rebuilt, the patch dry-ran against the pin, the app passed strict signature verification, and live three-player driving showed decisive turn and reverse-turn response.
+- Public patch SHA-256 is `9cda1217ab0f9d16549e19f288bd8c61d9ee38f6729eeb43f0a48700198b8fe5`; closed re-sealed executable SHA-256 is `dee991ea9596cf24b05c3329215722a52238d7c3faf5d4e236fcd157f07eee0f`. Evidence: `docs/artifacts/2026-08-29/g10-keyboard-steering-range.md`.
+- Three private traces remain rejected: the old 8%-range attempt, an over-steered retry with the obsolete cadence, and a calibrated GUI-tap attempt that entered runoff and struck scenery. None reached standings, so row 30 remains open without inflation.

@@ -1507,7 +1507,7 @@ diff -ruN --exclude=.git --exclude=third_party --exclude=build a/src/hle/input/k
 +{
 +    int keyCount = 0;
 +    const bool* keys = SDL_GetKeyboardState(&keyCount);
-+    constexpr float kKeyboardStickScale = 0.08f;
++    constexpr float kKeyboardStickScale = 1.0f;
 +    const std::array<SDL_Scancode, 4> profile = chan == 0 ?
 +        std::array<SDL_Scancode, 4>{SDL_SCANCODE_A, SDL_SCANCODE_D, SDL_SCANCODE_S, SDL_SCANCODE_W} :
 +        chan == 1 ? std::array<SDL_Scancode, 4>{SDL_SCANCODE_T, SDL_SCANCODE_Y, SDL_SCANCODE_H, SDL_SCANCODE_G} :
