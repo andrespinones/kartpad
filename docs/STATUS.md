@@ -25,7 +25,7 @@ Updated: 2026-08-29
 
 ## Known-good state
 
-- Repository checkpoint: calibrated four-channel keyboard controller checkpoint `8c82865` is on `origin/main`; the countdown-only fixture diagnostic follows in the next backup.
+- Repository checkpoint: normal two-player split-screen completion checkpoint `7ffdd27` is on `origin/main` with finish/standings evidence and the calibrated keyboard candidate.
 - Simulator state: no Simulator device is booted. KartPad will boot exactly one when a mobile gate requires it.
 - Buildable KartPad targets: host, memory, scheduler, semantic contracts, native subsystem smoke, translated semantic fixture, and provisional translated-frame app.
 - Input profile: WBFS containing clean PAL `RMCP01`, revision 0; original is read-only. GUI keyboard steering uses a 0.22 Classic-stick magnitude with a 120 ms synthetic pulse; acceleration/reverse retain their 500 ms gameplay holds.
