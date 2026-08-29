@@ -725,3 +725,11 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - Private trace SHA-256 is `b36a526eef9571fa16473b9f50c5f719e0ac1b91e40e248620658d76fbdca3b4`; exact executable SHA-256 is `cdfd788a365edadecac4c2134ecd600606bbab4e55a85217e63a12df11366296`.
 - Bounded presentation checks remained at the 60 FPS overlay target through foliage, leaf particles, tree interiors, branches, the net bridge, Wigglers, moving hazards, and ghost transparency; deterministic cadence remains G11 work. Private log SHA-256 `f946d86b72862b051495a17ef5ac08c6288fb1bd474e0384261e99b8d6408801` recorded eight audio drops and is rejected from audio-row acceptance.
 - PRD row 22 is now **27/32 Pass, 5 Open**. Star Cup is 3/4.
+
+## 2026-08-29 — G10 GCN DK Mountain exact native completion
+
+- Used the sole native KartPad process for Time Trials → Lightning Cup → GCN DK Mountain → `Nin★♫msk 02:57.744` → Watch Replay. No Dolphin or Simulator was present.
+- Course ID 19 has 10,894 regular-staff frames. The strict assertion accepts stage 2 exactly `240..10893` for 10,654 consecutive samples followed by stage 4. Earlier non-finishing segments include a rejected menu-only Grand Prix prelude; the later partial segment is the automatic replay loop.
+- Private trace SHA-256 is `6cfad5811fd108b5d24cfad977a58edbdc679107c9d8117a36b4dcf70eb76d88`; exact executable SHA-256 is `6989b5c35f54902641be367f9f426995c12c8c8d1eb1fa4722ef9d5a91f82ace`.
+- Focused presentation checks sampled at 49–51 FPS through the cannon flight, mountain switchbacks, bridge, vegetation, dust, jumps, moving hazards, and ghost transparency; retained for G11/G36. Private log SHA-256 `1e1ba66b908f6e1830d8ad368c83d0b3ab9e310ad86a47bc3635422c8dbb1e84` recorded 85 audio drops and is rejected from audio-row acceptance.
+- PRD row 22 is now **28/32 Pass, 4 Open**. Lightning Cup is 3/4.
