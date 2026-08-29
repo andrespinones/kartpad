@@ -593,3 +593,12 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - The private trace SHA-256 is `9b308f3ed729cfb8cc805e04eb2000c1ed593b9e359f5ae2fd3ed223bcf10f68`; the exact executable SHA-256 is `d3ec1cfd25df859e19ad3332bfa7a539183c2d8f54371971c8a355a09cc2b046`.
 - Focused observations displayed 60 FPS through dark/fogged geometry, animated ghosts, breakaway edges, transparent driver rendering, and boosts; seven audio drops under host load are rejected.
 - PRD row 22 is now **12/32 Pass, 20 Open**. Shell Cup is 3/4; the already accepted N64 Mario Raceway completes the cup matrix.
+
+## 2026-08-29 — G10 GBA Shy Guy Beach exact native completion
+
+- The first launch accidentally selected the local Nintendo WFC privacy-notice flow. No agreement or network action occurred; Back was ineffective, so the sole process was closed and its partial trace was moved recoverably to Trash before a fresh offline run.
+- Used the process-local trace launcher for Time Trials → Banana Cup → GBA Shy Guy Beach → `Nin★Kato 01:45.568` → Watch Replay. Exactly one native KartPad process ran; no Dolphin or Simulator was present.
+- Course ID 31 has 6,568 regular-staff frames. The strict assertion passes with stage 2 exactly `240..6567` for 6,328 consecutive samples, followed by stage 4.
+- The accepted private trace SHA-256 is `eecd70c0084708ffe4c06766c147a55a4f448721557d246e378d32f3b5770889`; executable SHA-256 is `8dc81191800692bf03a5eb6d3d0e04348e3a73e9f7d8efeb333e06cf144eb71c`.
+- Private log SHA-256 `596da9664cf1288d30f3d4b950b05066d22ae6167c0ab4d64c02556a15b17e89` is audio-clean through 106,496 checks and 40,894,080 submitted bytes with zero empty observations/drops; broader row 33 scope remains open.
+- PRD row 22 is now **13/32 Pass, 19 Open**. Banana Cup is 1/4.

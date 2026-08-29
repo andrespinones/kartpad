@@ -29,7 +29,7 @@ real finish transition; boot screenshots do not qualify.
 | Shell | SNES Ghost Valley 2 | 25 | Pass | Native regular-staff replay exactly matches 4,232 input frames: stage 2 `240..4231`, 3,992 samples, then stage 4 |
 | Shell | N64 Mario Raceway | 26 | Pass | Native regular-staff replay exactly matches 8,320 input frames; 8,080 stage-2 samples and zero state-word mismatches against Dolphin |
 | Banana | N64 Sherbet Land | 27 | Open | — |
-| Banana | GBA Shy Guy Beach | 31 | Open | — |
+| Banana | GBA Shy Guy Beach | 31 | Pass | Native regular-staff replay exactly matches 6,568 input frames: stage 2 `240..6567`, 6,328 samples, then stage 4 |
 | Banana | DS Delfino Square | 23 | Open | — |
 | Banana | GCN Waluigi Stadium | 18 | Open | — |
 | Leaf | DS Desert Hills | 21 | Open | — |
@@ -152,4 +152,15 @@ completion are independent of that wall-clock contention.
 - Result: the accepted segment begins at race time 240, ends at 4231, contains 3,992 consecutive stage-2 samples, and is followed by stage 4. A later incomplete segment is the retail automatic replay loop.
 - Focused observations displayed 60 FPS across dark/fogged geometry, animated ghosts, breakaway edges, transparent driver rendering, and boost effects. Seven audio drops under host load are rejected from audio acceptance.
 
-Current row 22 status: **12/32 Pass; 20 Open.** Mushroom and Flower Cups have complete four-track evidence; Shell Cup is 3/4.
+## GBA Shy Guy Beach exact run
+
+- Product: sole native arm64 KartPad process launched with the process-local trace helper; no Dolphin and no Simulator.
+- Executable SHA-256: `8dc81191800692bf03a5eb6d3d0e04348e3a73e9f7d8efeb333e06cf144eb71c`.
+- Retail UI path: Time Trials → Banana Cup → GBA Shy Guy Beach → regular Nintendo staff data `Nin★Kato 01:45.568` → Watch Replay.
+- Private trace SHA-256: `eecd70c0084708ffe4c06766c147a55a4f448721557d246e378d32f3b5770889`.
+- Strict assertion: `scripts/summarize-mkw-state-trace.py --require-complete --expected-input-frames 6568`.
+- Result: the accepted segment begins at race time 240, ends at 6567, contains 6,328 consecutive stage-2 samples, and is followed by stage 4. A later incomplete segment is the retail automatic replay loop.
+- A rejected partial launch accidentally entered the first local Nintendo WFC privacy-notice screen. No agreement or network action occurred; the process was closed and its partial trace moved recoverably to Trash before this fresh offline run.
+- The private accepted log SHA-256 is `596da9664cf1288d30f3d4b950b05066d22ae6167c0ab4d64c02556a15b17e89`. Bounded audio telemetry is clean through 106,496 checks and 40,894,080 submitted bytes, with zero empty observations/drops and a 14,296-byte maximum below the 15,360-byte limit. Broader row 33 scope remains open.
+
+Current row 22 status: **13/32 Pass; 19 Open.** Mushroom, Flower, and Shell Cups have complete four-track evidence; Banana Cup is 1/4.
