@@ -365,3 +365,15 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - Instance discipline: exactly one KartPad process throughout, no Dolphin, and no booted Simulator.
 - Evidence: `docs/artifacts/2026-08-29/g10-coin-runners/`.
 - Next step: continue the remaining G10 track/cup/mode/local-multiplayer/controller/audio/save rows.
+
+## 2026-08-29 — G10 forced-exit save safety
+
+- Began from the stable Main Menu after the completed Battle matrix and made an ignored local recovery copy of the live 2,867,200-byte `rksys.dat`.
+- The live save and recovery copy both hashed to `c5a5108cd3184d4b6e8ca55c4fdd768afd08638c99fcb98695757a5f3a58d1d6`.
+- Resolved exactly one KartPad PID (23422), terminated that exact process with `SIGKILL`, and confirmed the live save was still byte-identical immediately afterward.
+- Relaunched the signed product normally as exactly one new process (PID 26767). Select License displayed the existing `Player` license and progress grid without a damaged slot or recovery warning.
+- The post-relaunch save remained byte-identical to the recovery copy with the same SHA-256.
+- Classification: **Pass for PRD row 20 at a stable Main Menu boundary.** No unrelated save corruption was observed and the application recovered normally.
+- No Dolphin and no booted Simulator were present. The ignored recovery copy remains under `private/g10-forced-exit/`.
+- Evidence: `docs/artifacts/2026-08-29/g10-forced-exit-save/`.
+- Next step: continue the remaining G10 track/cup/mode/local-multiplayer/controller/audio/save rows.
