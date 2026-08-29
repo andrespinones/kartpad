@@ -15,7 +15,7 @@ real finish transition; boot screenshots do not qualify.
 | Flower | Mario Circuit | 0 | Pass | Native regular-staff replay exactly matches 6,521 input frames: stage 2 `240..6520`, 6,281 samples, then stage 4 |
 | Flower | Coconut Mall | 5 | Pass | Native regular-staff replay exactly matches 9,277 input frames: stage 2 `240..9276`, 9,037 samples, then stage 4 |
 | Flower | DK Summit | 6 | Pass | Native regular-staff replay exactly matches 9,513 input frames: stage 2 `240..9512`, 9,273 samples, then stage 4 |
-| Flower | Wario's Gold Mine | 7 | Open | — |
+| Flower | Wario's Gold Mine | 7 | Pass | Native regular-staff replay exactly matches 8,607 input frames: stage 2 `240..8606`, 8,367 samples, then stage 4 |
 | Star | Daisy Circuit | 9 | Open | — |
 | Star | Koopa Cape | 15 | Open | — |
 | Star | Maple Treeway | 11 | Open | — |
@@ -112,4 +112,14 @@ completion are independent of that wall-clock contention.
 - Result: the accepted segment begins at race time 240, ends at 9512, contains 9,273 consecutive stage-2 samples, and is followed by stage 4. A later incomplete segment is the retail automatic replay loop.
 - Focused observations displayed 60 FPS across half-pipe, snow, ski-lift, jump, and trick sections; audio drops under host load keep this run out of performance/audio acceptance.
 
-Current row 22 status: **8/32 Pass; 24 Open.**
+## Wario's Gold Mine exact run
+
+- Product: sole native arm64 KartPad process launched with the process-local trace helper; no Dolphin and no Simulator.
+- Executable SHA-256: `86d074650e352e266c50d3fc12489fd35854b3ac35d2968062e6ee316d8ddec6`.
+- Retail UI path: Time Trials → Flower Cup → Wario's Gold Mine → regular Nintendo staff data `Nin★morimo 02:19.585` → Watch Replay.
+- Private trace SHA-256: `25c25abdc17a5bcbcb09d016bb2b3b6e9a6f5df2e482649cba6d0c809a08f8ba`.
+- Strict assertion: `scripts/summarize-mkw-state-trace.py --require-complete --expected-input-frames 8607`.
+- Result: the accepted segment begins at race time 240, ends at 8606, contains 8,367 consecutive stage-2 samples, and is followed by stage 4. A later incomplete segment is the retail automatic replay loop.
+- Focused observations displayed 60 FPS across ravines, mine interiors, moving carts, steam, branching rails, and dense wood geometry; audio drops keep this out of performance/audio acceptance.
+
+Current row 22 status: **9/32 Pass; 23 Open.** Mushroom and Flower Cups now have complete four-track native completion evidence.

@@ -561,3 +561,11 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - The private trace SHA-256 is `7da9713d157958270635a4e27dd8e34eabe9b6095cdc0df46df018ce9f8dafee`; the exact executable SHA-256 is `bfa5378f45b3a4eba30804d37cdcfb957f065ab34948d2ada17929d1d25e9e28`.
 - Focused observations displayed 60 FPS through half-pipe, snow, ski-lift, jump, and trick sections; audio drops under host load are rejected from performance/audio acceptance.
 - PRD row 22 is now **8/32 Pass, 24 Open**. Wario's Gold Mine is the last open Flower Cup track.
+
+## 2026-08-29 — G10 Wario's Gold Mine exact native completion
+
+- Used the process-local trace launcher for Time Trials → Flower Cup → Wario's Gold Mine → `Nin★morimo 02:19.585` → Watch Replay. Exactly one native KartPad process ran; no Dolphin or Simulator was present.
+- Course ID 7 has 8,607 regular-staff frames. The strict assertion passes with stage 2 exactly `240..8606` for 8,367 consecutive samples, followed by stage 4.
+- The private trace SHA-256 is `25c25abdc17a5bcbcb09d016bb2b3b6e9a6f5df2e482649cba6d0c809a08f8ba`; the exact executable SHA-256 is `86d074650e352e266c50d3fc12489fd35854b3ac35d2968062e6ee316d8ddec6`.
+- Focused observations displayed 60 FPS through ravines, mine interiors, carts, steam, branching rails, and dense wood geometry; audio drops are rejected from performance/audio acceptance.
+- PRD row 22 is now **9/32 Pass, 23 Open**. The full Mushroom and Flower Cup four-track subsets pass native exact completion.
