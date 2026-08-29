@@ -374,6 +374,18 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - Evidence: `docs/artifacts/2026-08-29/g10-gamecube-adapter.md`.
 - Next step: continue the remaining G10 track/cup/mode/local-multiplayer/ordinary-controller/audio/save rows.
 
+## 2026-08-29 — G10 four keyboard-backed controller slots
+
+- Root cause: WPAD/KPAD hard-coded channel 0 as the only connected device; channels 1–3 always returned no controller or no samples, blocking local multiplayer.
+- Implemented independent keyboard-backed Classic reports for all four channels, per-channel pending/previous state, connection-aware WPAD probe/info/LED/data-format behavior, and explicit P2–P4 connect/disconnect bindings.
+- The retail four-player registration UI assigned yellow/P1, blue/P2, red/P3, and green/P4 controllers. P2 independently selected Luigi/Standard Kart M and accelerated/steered in live two-player Luigi Circuit.
+- Sent a P3 A edge immediately before disconnect. The game raised the correct red/P3 interruption dialog. Reconnect restored four assignments and remained stable beyond the synthetic hold interval, proving stale held state was cleared.
+- Increased keyboard stick magnitude from 0.35 to the full normalized range after the first split-screen driving pass showed insufficient recovery authority off road.
+- The signed arm64 product rebuilds and launches; the refreshed public runtime patch dry-runs against the pinned source.
+- Classification: **Pass for PRD row 31.** Full two-player and three/four-player race completion remain rows 29–30 and are not claimed here.
+- Evidence: `docs/artifacts/2026-08-29/g10-controller-slots/`.
+- Next step: complete the two-player and three/four-player split-screen race rows with the new channel implementation.
+
 ## 2026-08-29 — G10 items, AI, and collisions cross-evidence
 
 - Audited the accepted native full-session evidence instead of repeating an unchanged fixture.
