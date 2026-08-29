@@ -23,6 +23,6 @@ The diagnostic fixture can follow the expected racing line for substantial inter
 - `kartpad-g10-stage2b-10s.jpeg` — zero-phase run following the expected early racing line.
 - `kartpad-g10-stage2b-22s.jpeg` — later divergence from that diagnostic run.
 - `kartpad-g10-phase5-18s.jpeg` — rejected five-frame phase experiment.
-- `kartpad-rkg-fixture-sync.log` — bounded stage/frame counter (`stage 1: frame 0`, `stage 2: frame 240`).
+- `kartpad-rkg-fixture-sync.txt` — bounded stage/frame counter (`stage 1: frame 0`, `stage 2: frame 240`).
 
 The next accepted G10 evidence must come from native mode/track/controller/save execution, including the game's own ghost-controller path, not from this incomplete player-injection harness.
