@@ -757,3 +757,11 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - Private trace SHA-256 is `a1fd02aaf2950c22424570509719b5a7f54cc4de9cfa88cf52fb37e628f25a22`; exact executable SHA-256 is `8fc836be5c0c620625070d4c0a0fef37502fa7550c156c34640cfd3defbc4ce8`.
 - Bounded presentation checks sampled from 49 to 56 FPS through the star field, transparent road, animated rails, half-pipes, boost ramps, banked turns, camera transitions, and ghost transparency. Private log SHA-256 `4c404aa3820e8a19f6361e38b256ccf79e964cbc8de29e5f48d76c0c12c2e591` recorded 30 audio drops and is rejected from audio-row acceptance.
 - PRD row 22 is now **31/32 Pass, 1 Open**. Special Cup is complete at 4/4.
+
+## 2026-08-29 — G10 N64 Bowser's Castle and retail-track matrix completion
+
+- Used the sole native KartPad process for Time Trials → Lightning Cup → N64 Bowser's Castle → `Nin★GASK2 03:19.323` → Watch Replay. No Dolphin or Simulator was present.
+- Course ID 28 has 12,188 regular-staff frames. The strict assertion accepts stage 2 exactly `240..12187` for 11,948 consecutive samples followed by stage 4; the later partial segment is the automatic replay loop.
+- Private trace SHA-256 is `a79ca17ab964bbc029139b2b155d6997019dbd7550ed041117a9eb38ead5df21`; exact executable SHA-256 is `421fad338fca6d4e197bc533cc5a73a36461c36b70436e99b0e7b54d6a889404`.
+- Bounded presentation checks sampled from 52 to 58 FPS through lava, stone corridors, moving platforms, fire hazards, exterior towers, bridges, jumps, camera transitions, and ghost transparency. Private log SHA-256 `da41f9a68c71bad36cef491e39c466db5df7a86771f6e2b8e2c7b7e54dad734c` recorded 41 audio drops and is rejected from audio-row acceptance.
+- PRD row 22 is now **32/32 Pass, 0 Open**. Lightning Cup and the exact native retail-track matrix are complete.

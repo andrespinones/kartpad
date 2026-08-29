@@ -373,4 +373,16 @@ completion are independent of that wall-clock contention.
 - Bounded race presentation checks sampled from 49 to 56 FPS through the star field, transparent road, animated rails, half-pipes, boost ramps, banked turns, camera transitions, and ghost transparency. This remains G11/G36 performance evidence only.
 - Private log SHA-256 `4c404aa3820e8a19f6361e38b256ccf79e964cbc8de29e5f48d76c0c12c2e591` recorded 30 audio-queue drops and is rejected from audio-row acceptance.
 
-Current row 22 status: **31/32 Pass; 1 Open.** Mushroom, Flower, Star, Shell, Banana, Leaf, and Special Cups each have complete four-track evidence; Lightning Cup is 3/4.
+## N64 Bowser's Castle exact run
+
+- Product: sole native arm64 KartPad process launched with the process-local trace helper; no Dolphin and no Simulator.
+- Test precondition: the user's own private all-cups fixture documented in `docs/artifacts/2026-08-29/g10-all-cups-fixture.md`; progression acceptance remains separate.
+- Executable SHA-256: `421fad338fca6d4e197bc533cc5a73a36461c36b70436e99b0e7b54d6a889404`.
+- Retail UI path: Time Trials → Lightning Cup → N64 Bowser's Castle → regular Nintendo staff data `Nin★GASK2 03:19.323` → Watch Replay.
+- Private trace SHA-256: `a79ca17ab964bbc029139b2b155d6997019dbd7550ed041117a9eb38ead5df21`.
+- Strict assertion: `scripts/summarize-mkw-state-trace.py --require-complete --expected-input-frames 12188`.
+- Result: the accepted segment begins at race time 240, ends at 12187, contains 11,948 consecutive stage-2 samples, and is followed by stage 4. The later incomplete segment is the retail automatic replay loop.
+- Bounded race presentation checks sampled from 52 to 58 FPS through lava, stone corridors, moving platforms, fire hazards, exterior towers, bridges, jumps, camera transitions, and ghost transparency. This remains G11/G36 performance evidence only.
+- Private log SHA-256 `da41f9a68c71bad36cef491e39c466db5df7a86771f6e2b8e2c7b7e54dad734c` recorded 41 audio-queue drops and is rejected from audio-row acceptance.
+
+Current row 22 status: **32/32 Pass; 0 Open.** All eight retail cup subsets have complete four-track evidence.
