@@ -531,3 +531,10 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - The private trace SHA-256 is `259abe8ae52bf1a54b069ded79fbd41cf816fd82dde2fea45a546254d6a58495`; the exact executable SHA-256 is `3927307a33dd9cac30237906489b4423fd7a11ba4ccc3d81f54efbd15281b5d6`.
 - Harness failure signature: the persistent GUI launch helper retained the preceding trace environment and wrote the Toad's Factory run over the ignored Mushroom Gorge filename. The exact contents passed before and after relocating them to `toads-factory-native.csv`. The prior Mushroom Gorge summary/hash remain recorded; future traces will launch with a fresh per-process environment and its convenience copy will be regenerated.
 - PRD row 22 is now **5/32 Pass, 27 Open**. Next step: make trace-path selection process-local, falsify it with a fresh Mushroom Gorge regeneration, then continue Flower Cup.
+
+### Process-local trace launcher regression
+
+- Added `scripts/launch-g10-traced-runtime.sh` so each trace path is exported only in the runtime process that consumes it. It refuses a relative path, an existing output, a missing parent/runtime, and a second active KartPad process.
+- Static syntax, usage, relative-path, existing-output, repository-safety, and diff checks pass. A real direct launch immediately created only the requested `mushroom-gorge-native.csv` and remained the sole game process.
+- Repeated the official Mushroom Gorge Watch Replay path. The new private trace SHA-256 is `5aa1026555f10dc683c68fb80476ad077a641e4ab30669f50bebdbb43d3419b5`; the strict 8,399-frame assertion again passes with stage 2 exactly `240..8398` followed by stage 4.
+- Classification: **Pass for process-local trace routing and restored Mushroom Gorge convenience evidence.** Capture-time FPS/audio were variable under host load and remain rejected from this harness regression.

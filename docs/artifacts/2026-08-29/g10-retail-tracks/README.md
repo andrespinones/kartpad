@@ -67,7 +67,7 @@ completion are independent of that wall-clock contention.
 - Product: sole native arm64 KartPad process; no Dolphin and no Simulator.
 - Executable SHA-256: `f6b40a3902ac5ba559d359c5b1cb5488176ebf14bc8eab3da1371c1fd146f9fc`.
 - Retail UI path: Time Trials → Mushroom Cup → Mushroom Gorge → regular Nintendo staff data `Nin★Murak 02:16.110` → Watch Replay.
-- Private trace SHA-256: `e20883a2ca6cdfda1bb1f3da75535b852006a44ac87b833c46787ceea88277e4`.
+- Original accepted private trace SHA-256: `e20883a2ca6cdfda1bb1f3da75535b852006a44ac87b833c46787ceea88277e4`. After the GUI-helper filename incident described below, a process-local rerun restored the convenience trace with SHA-256 `5aa1026555f10dc683c68fb80476ad077a641e4ab30669f50bebdbb43d3419b5` and the same exact accepted stage/frame boundary.
 - Strict assertion: `scripts/summarize-mkw-state-trace.py --require-complete --expected-input-frames 8399`.
 - Result: the accepted segment begins at race time 240, ends at 8398, contains 8,159 consecutive stage-2 samples, and is followed by stage 4. The later incomplete segment is the retail automatic replay loop and is not accepted as a second run.
 - The focused UI observations remained at 60.0 FPS, but this trace run is accepted only for guest-stage completion; it is not a G11 frame-pacing sample. The known writable-cache bundle-seal issue recurred after the run and remains separately tracked for G13.
@@ -80,6 +80,6 @@ completion are independent of that wall-clock contention.
 - Private trace SHA-256: `259abe8ae52bf1a54b069ded79fbd41cf816fd82dde2fea45a546254d6a58495`.
 - Strict assertion: `scripts/summarize-mkw-state-trace.py --require-complete --expected-input-frames 8781`.
 - Result: the accepted segment begins at race time 240, ends at 8780, contains 8,541 consecutive stage-2 samples, and is followed by stage 4. A later incomplete segment is the retail automatic replay loop.
-- Harness note: the persistent GUI launch helper retained the preceding Mushroom Gorge trace path, so this run initially overwrote that ignored filename. The completed contents were validated and moved to `toads-factory-native.csv` after the process closed. Mushroom Gorge acceptance remains supported by its previously recorded exact summary and SHA-256; its convenience copy will be regenerated with a fresh per-process environment.
+- Harness note: the persistent GUI launch helper retained the preceding Mushroom Gorge trace path, so this run initially overwrote that ignored filename. The completed contents were validated and moved to `toads-factory-native.csv` after the process closed. `scripts/launch-g10-traced-runtime.sh` now binds the path in the runtime's own process, refuses relative/existing outputs and a second KartPad process, and restored the Mushroom Gorge convenience trace in an exact rerun.
 
 Current row 22 status: **5/32 Pass; 27 Open.**
