@@ -39,3 +39,22 @@ game code is copied into this repository or evidence file.
 content-free preflight proving that both candidate oracle sets cover all 32
 retail course IDs. Native per-track execution and completion evidence remains
 required.
+
+## Native completion gate
+
+`scripts/summarize-mkw-state-trace.py` provides the matching execution-side
+gate. It strictly parses the bounded native CSV, separates consecutive race-stage
+segments, requires a later finish-stage transition, and can require an exact RKG
+input-frame count. The frame relationship is explicit: the first 240 input
+frames are countdown stage 1, so a file containing `N` input frames must produce
+the completed race-stage range `240..N-1` with `N-240` samples.
+
+The data-free self-test rejects both an unfinished segment and incorrect expected
+frame counts. The previously accepted N64 Mario Raceway trace independently
+passes the new gate with input count 8,320, race-stage range `240..8319`, 8,080
+samples, and a following finish-stage transition. Supplying 8,319 as the expected
+input count exits with status 1.
+
+This turns future per-track evidence into an exact content-free assertion rather
+than a screenshot or wall-clock inference. The remaining task is to execute that
+gate for the other retail courses.

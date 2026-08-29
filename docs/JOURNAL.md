@@ -487,3 +487,9 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - Both private disc-derived staff sets pass the strict matrix: 32 files and exactly one input for every retail course ID `0..31`. No RKG payload or other private game content enters the publishable tree.
 - Classification: **Preparation pass, not PRD row 22 acceptance.** The complete native per-track execution matrix remains open. Evidence: `docs/artifacts/2026-08-29/g10-retail-course-oracle.md`.
 - Next step: use the validated oracle inventory to drive bounded native course-completion checks while returning to the three-/four-player row after unrelated host contention clears.
+
+### Native completion assertion
+
+- Added `scripts/summarize-mkw-state-trace.py` so row 22 runs can be accepted from guest state rather than screenshots or elapsed wall time. It validates the complete CSV schema, monotonic sample/retrace values, consecutive race-stage timing, a later finish-stage transition, and an optional exact RKG input-frame count.
+- The data-free self-test rejects an unfinished race and two incorrect frame counts. The retained private N64 Mario Raceway native trace passes at the exact 8,320-frame staff input: race stage 2 covers `240..8319` for 8,080 samples and is followed by finish stage 4. The same trace correctly fails when asked for 8,319 input frames.
+- Classification remains **preparation pass, not row 22 acceptance**. This creates the strict native assertion that each remaining track run must satisfy.
