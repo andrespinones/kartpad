@@ -30,7 +30,7 @@ real finish transition; boot screenshots do not qualify.
 | Shell | N64 Mario Raceway | 26 | Pass | Native regular-staff replay exactly matches 8,320 input frames; 8,080 stage-2 samples and zero state-word mismatches against Dolphin |
 | Banana | N64 Sherbet Land | 27 | Open | — |
 | Banana | GBA Shy Guy Beach | 31 | Pass | Native regular-staff replay exactly matches 6,568 input frames: stage 2 `240..6567`, 6,328 samples, then stage 4 |
-| Banana | DS Delfino Square | 23 | Open | — |
+| Banana | DS Delfino Square | 23 | Pass | Native regular-staff replay exactly matches 9,939 input frames: stage 2 `240..9938`, 9,699 samples, then stage 4 |
 | Banana | GCN Waluigi Stadium | 18 | Pass | Native regular-staff replay exactly matches 9,404 input frames: stage 2 `240..9403`, 9,164 samples, then stage 4 |
 | Leaf | DS Desert Hills | 21 | Open | — |
 | Leaf | GBA Bowser Castle 3 | 30 | Open | — |
@@ -173,4 +173,15 @@ completion are independent of that wall-clock contention.
 - Result: the accepted segment begins at race time 240, ends at 9403, contains 9,164 consecutive stage-2 samples, and is followed by stage 4. A later incomplete segment is the retail automatic replay loop.
 - Focused observations displayed 60 FPS across the stadium crowd, dirt, ramp, lighting, boost, and water sections. The private log SHA-256 is `0b4c18b56b690eda9a5d07e9a8d9ba5e65169290171468aad45429fe539dae8d`; nine audio-queue drops are rejected from audio-row acceptance.
 
-Current row 22 status: **14/32 Pass; 18 Open.** Mushroom, Flower, and Shell Cups have complete four-track evidence; Banana Cup is 2/4.
+## DS Delfino Square exact run
+
+- Product: sole native arm64 KartPad process launched with the process-local trace helper; no Dolphin and no Simulator.
+- Executable SHA-256: `fa86a907ca2bebbc72eec1baf02cd83f3ceb816e584e33ed3dd23926ab945545`.
+- Retail UI path: Time Trials → Banana Cup → DS Delfino Square → regular Nintendo staff data `Nin★iwaco 02:41.807` → Watch Replay.
+- Private trace SHA-256: `9438f871a2f1490c2b989b86f938a9c12aa9cb8f727b5ba7212006f0dde1010f`.
+- Strict assertion: `scripts/summarize-mkw-state-trace.py --require-complete --expected-input-frames 9939`.
+- Result: the accepted segment begins at race time 240, ends at 9938, contains 9,699 consecutive stage-2 samples, and is followed by stage 4. A later incomplete segment is the retail automatic replay loop.
+- Dense town geometry, shadows, bridges, water, and transparent ghost rendering remained intact. Computer-Use sampling observed temporary mid-run readings around 46–53 FPS before recovery to 60 FPS; this remains a performance observation rather than a determinism failure.
+- Private log SHA-256 `3633b262262416c59f2f915ecd463d4d6ed78e97e8adfe0d464f8b7170f141fc` recorded 25 audio-queue drops, so this run is rejected from audio-row acceptance.
+
+Current row 22 status: **15/32 Pass; 17 Open.** Mushroom, Flower, and Shell Cups have complete four-track evidence; Banana Cup is 3/4.

@@ -610,3 +610,11 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - The private trace SHA-256 is `6b2a4644bbff65de2d12ea9a3cc18b7b6845ec3bca7b8546e026cfdbb6d9caeb`; the exact executable SHA-256 is `fa86a907ca2bebbc72eec1baf02cd83f3ceb816e584e33ed3dd23926ab945545`.
 - Focused observations displayed 60 FPS through the crowd, dirt, ramp, lighting, boost, and water sections. Private log SHA-256 `0b4c18b56b690eda9a5d07e9a8d9ba5e65169290171468aad45429fe539dae8d` recorded nine audio-queue drops under host load, so this run is rejected for audio-row acceptance.
 - PRD row 22 is now **14/32 Pass, 18 Open**. Banana Cup is 2/4.
+
+## 2026-08-29 — G10 DS Delfino Square exact native completion
+
+- Used the process-local trace launcher for Time Trials → Banana Cup → DS Delfino Square → `Nin★iwaco 02:41.807` → Watch Replay. Exactly one native KartPad process ran; no Dolphin or Simulator was present.
+- Course ID 23 has 9,939 regular-staff frames. The strict assertion passes with stage 2 exactly `240..9938` for 9,699 consecutive samples, followed by stage 4; the later partial segment is the retail automatic replay loop.
+- The private trace SHA-256 is `9438f871a2f1490c2b989b86f938a9c12aa9cb8f727b5ba7212006f0dde1010f`; the exact executable SHA-256 is `fa86a907ca2bebbc72eec1baf02cd83f3ceb816e584e33ed3dd23926ab945545`.
+- Dense town geometry, shadows, bridges, water, and transparent ghost rendering remained intact. GUI sampling observed temporary 46–53 FPS readings before recovery to 60 FPS. Private log SHA-256 `3633b262262416c59f2f915ecd463d4d6ed78e97e8adfe0d464f8b7170f141fc` recorded 25 audio drops, rejected from audio-row acceptance.
+- PRD row 22 is now **15/32 Pass, 17 Open**. Banana Cup is 3/4.
