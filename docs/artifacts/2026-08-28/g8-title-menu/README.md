@@ -34,7 +34,7 @@ Evidence:
 - `final-build-select-license.jpeg` — final audio-instrumented build after A.
 - `keyboard-navigation-confirm.jpeg` — second A opens New License confirmation.
 - `keyboard-back-navigation.jpeg` — Wii Remote 1 returns to Select License.
-- `runtime-console.log` — DOL/REL initialization, Metal, input polling, and
+- `runtime-console.txt` — DOL/REL initialization, Metal, input polling, and
   non-silent host playback evidence.
 - `audio-loopback-analysis.txt` — system-output capture metadata and volume
   analysis.
