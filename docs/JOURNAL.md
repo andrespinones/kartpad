@@ -701,3 +701,11 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - Presentation began at the 60 FPS target and later sampled at 51.7–55 FPS through hedges, Chain Chomps, flowers, statuary, garden/castle geometry, and ghost transparency; retained for G11/G36 work.
 - Private log SHA-256 `3cdc89dbad0860ca86a5bb97303c75ab528c7a43321154ba0f1410ea5096d3f3` ended at 139,264 audio-queue checks with zero drops, zero post-start empty observations, and 53,476,992 submitted bytes. This is a clean telemetry candidate, not subjective audio acceptance.
 - PRD row 22 is now **24/32 Pass, 8 Open**. Lightning Cup is 2/4.
+
+## 2026-08-29 — G10 N64 DK's Jungle Parkway exact native completion
+
+- Used the sole native KartPad process for Time Trials → Leaf Cup → N64 DK's Jungle Parkway → `Nin★Matt 02:58.264` → Watch Replay. No Dolphin or Simulator was present.
+- Course ID 29 has 10,926 regular-staff frames. The strict assertion found two exact complete loops, each accepting stage 2 `240..10925` for 10,686 consecutive samples followed by stage 4; the final partial segment is the third automatic replay loop.
+- Private trace SHA-256 is `b2cc03b7651ba45a090a03f838c299c15faaa5193ddbfea3ca037affe54a2ac5`; exact executable SHA-256 is `bb5e63cd56751f8a9e5daea4e8bdecce92275278a0e7ac10b5a52507cf03c79c`.
+- Bounded presentation checks ranged from 38 to 58.5 FPS through the jungle, riverboat, bridge, water, vegetation, mud, particles, and ghost transparency; retained for G11/G36. Private log SHA-256 `5e08e0d93913085faf2782b654c98853ce06897aa6288cfbe694a8692e5fb95a` recorded 30 audio drops and is rejected from audio-row acceptance.
+- PRD row 22 is now **25/32 Pass, 7 Open**. Leaf Cup is 3/4.
