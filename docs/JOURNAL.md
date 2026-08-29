@@ -553,3 +553,11 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - The private trace SHA-256 is `64de24b8985da1e190aa8835fd47890253a265612c6c0795a880244af2664272`; the exact executable SHA-256 is `1c2f73f9105d6f41a5ed617f1d22334cd0220bb011ccb010348a8da90635e069`.
 - Focused observations reached 60 FPS through indoor/outdoor transitions, escalators, traffic, shadows, and reflections, but capture-time variance and audio drops under current host load are rejected from performance/audio acceptance.
 - PRD row 22 is now **7/32 Pass, 25 Open**. DK Summit is the next available Flower Cup trace.
+
+## 2026-08-29 — G10 DK Summit exact native completion
+
+- Used the process-local trace launcher for Time Trials → Flower Cup → PAL `DK's Snowboard Cross` → `Nin★mokke 02:34.693` → Watch Replay. Exactly one native KartPad process ran; no Dolphin or Simulator was present.
+- The course ID 6 regular staff replay has 9,513 frames. The strict assertion passes with stage 2 exactly `240..9512` for 9,273 samples, followed by stage 4.
+- The private trace SHA-256 is `7da9713d157958270635a4e27dd8e34eabe9b6095cdc0df46df018ce9f8dafee`; the exact executable SHA-256 is `bfa5378f45b3a4eba30804d37cdcfb957f065ab34948d2ada17929d1d25e9e28`.
+- Focused observations displayed 60 FPS through half-pipe, snow, ski-lift, jump, and trick sections; audio drops under host load are rejected from performance/audio acceptance.
+- PRD row 22 is now **8/32 Pass, 24 Open**. Wario's Gold Mine is the last open Flower Cup track.

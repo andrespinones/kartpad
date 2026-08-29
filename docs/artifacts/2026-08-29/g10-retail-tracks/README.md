@@ -14,7 +14,7 @@ real finish transition; boot screenshots do not qualify.
 | Mushroom | Toad's Factory | 4 | Pass | Native regular-staff replay exactly matches 8,781 input frames: stage 2 `240..8780`, 8,541 samples, then stage 4 |
 | Flower | Mario Circuit | 0 | Pass | Native regular-staff replay exactly matches 6,521 input frames: stage 2 `240..6520`, 6,281 samples, then stage 4 |
 | Flower | Coconut Mall | 5 | Pass | Native regular-staff replay exactly matches 9,277 input frames: stage 2 `240..9276`, 9,037 samples, then stage 4 |
-| Flower | DK Summit | 6 | Open | — |
+| Flower | DK Summit | 6 | Pass | Native regular-staff replay exactly matches 9,513 input frames: stage 2 `240..9512`, 9,273 samples, then stage 4 |
 | Flower | Wario's Gold Mine | 7 | Open | — |
 | Star | Daisy Circuit | 9 | Open | — |
 | Star | Koopa Cape | 15 | Open | — |
@@ -102,4 +102,14 @@ completion are independent of that wall-clock contention.
 - Result: the accepted segment begins at race time 240, ends at 9276, contains 9,037 consecutive stage-2 samples, and is followed by stage 4. A later incomplete segment is the retail automatic replay loop.
 - Focused observations reached 60 FPS across indoor/outdoor transitions, escalators, traffic, shadows, and reflective surfaces, but capture-time variance and audio drops under current host load are rejected from performance/audio acceptance.
 
-Current row 22 status: **7/32 Pass; 25 Open.**
+## DK Summit exact run
+
+- Product: sole native arm64 KartPad process launched with the process-local trace helper; no Dolphin and no Simulator.
+- Executable SHA-256: `bfa5378f45b3a4eba30804d37cdcfb957f065ab34948d2ada17929d1d25e9e28`.
+- Retail UI path: Time Trials → Flower Cup → DK's Snowboard Cross (PAL DK Summit) → regular Nintendo staff data `Nin★mokke 02:34.693` → Watch Replay.
+- Private trace SHA-256: `7da9713d157958270635a4e27dd8e34eabe9b6095cdc0df46df018ce9f8dafee`.
+- Strict assertion: `scripts/summarize-mkw-state-trace.py --require-complete --expected-input-frames 9513`.
+- Result: the accepted segment begins at race time 240, ends at 9512, contains 9,273 consecutive stage-2 samples, and is followed by stage 4. A later incomplete segment is the retail automatic replay loop.
+- Focused observations displayed 60 FPS across half-pipe, snow, ski-lift, jump, and trick sections; audio drops under host load keep this run out of performance/audio acceptance.
+
+Current row 22 status: **8/32 Pass; 24 Open.**
