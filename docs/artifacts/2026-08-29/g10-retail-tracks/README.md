@@ -12,7 +12,7 @@ real finish transition; boot screenshots do not qualify.
 | Mushroom | Moo Moo Meadows | 1 | Pass | Native regular-staff replay exactly matches 6,106 input frames: stage 2 `240..6105`, 5,866 samples, then stage 4 |
 | Mushroom | Mushroom Gorge | 2 | Pass | Native regular-staff replay exactly matches 8,399 input frames: stage 2 `240..8398`, 8,159 samples, then stage 4 |
 | Mushroom | Toad's Factory | 4 | Pass | Native regular-staff replay exactly matches 8,781 input frames: stage 2 `240..8780`, 8,541 samples, then stage 4 |
-| Flower | Mario Circuit | 0 | Open | — |
+| Flower | Mario Circuit | 0 | Pass | Native regular-staff replay exactly matches 6,521 input frames: stage 2 `240..6520`, 6,281 samples, then stage 4 |
 | Flower | Coconut Mall | 5 | Open | — |
 | Flower | DK Summit | 6 | Open | — |
 | Flower | Wario's Gold Mine | 7 | Open | — |
@@ -82,4 +82,14 @@ completion are independent of that wall-clock contention.
 - Result: the accepted segment begins at race time 240, ends at 8780, contains 8,541 consecutive stage-2 samples, and is followed by stage 4. A later incomplete segment is the retail automatic replay loop.
 - Harness note: the persistent GUI launch helper retained the preceding Mushroom Gorge trace path, so this run initially overwrote that ignored filename. The completed contents were validated and moved to `toads-factory-native.csv` after the process closed. `scripts/launch-g10-traced-runtime.sh` now binds the path in the runtime's own process, refuses relative/existing outputs and a second KartPad process, and restored the Mushroom Gorge convenience trace in an exact rerun.
 
-Current row 22 status: **5/32 Pass; 27 Open.**
+## Mario Circuit exact run
+
+- Product: sole native arm64 KartPad process launched with the process-local trace helper; no Dolphin and no Simulator.
+- Executable SHA-256: `bc953f9e6642190a3bfe226558f69f1abfaed4416aeb1c9b7645caccc215ec82`.
+- Retail UI path: Time Trials → Flower Cup → Mario Circuit → regular Nintendo staff data `Nin★==Kony 01:44.777` → Watch Replay.
+- Private trace SHA-256: `621ffc9cb573aba276b1c51daa6a2a532970811331f38e999c14fe3f99ec6307`.
+- Strict assertion: `scripts/summarize-mkw-state-trace.py --require-complete --expected-input-frames 6521`.
+- Result: the accepted segment begins at race time 240, ends at 6520, contains 6,281 consecutive stage-2 samples, and is followed by stage 4. A later incomplete segment is the retail automatic replay loop.
+- Capture-time FPS and audio drops under current host load are rejected; only exact guest-stage completion is accepted.
+
+Current row 22 status: **6/32 Pass; 26 Open.**

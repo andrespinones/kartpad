@@ -538,3 +538,10 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - Static syntax, usage, relative-path, existing-output, repository-safety, and diff checks pass. A real direct launch immediately created only the requested `mushroom-gorge-native.csv` and remained the sole game process.
 - Repeated the official Mushroom Gorge Watch Replay path. The new private trace SHA-256 is `5aa1026555f10dc683c68fb80476ad077a641e4ab30669f50bebdbb43d3419b5`; the strict 8,399-frame assertion again passes with stage 2 exactly `240..8398` followed by stage 4.
 - Classification: **Pass for process-local trace routing and restored Mushroom Gorge convenience evidence.** Capture-time FPS/audio were variable under host load and remain rejected from this harness regression.
+
+## 2026-08-29 — G10 Mario Circuit exact native completion
+
+- Used the process-local trace launcher for the retail Time Trials → Flower Cup → Mario Circuit → `Nin★==Kony 01:44.777` → Watch Replay path. Exactly one native KartPad process ran; no Dolphin or Simulator was present.
+- The regular staff file reports course ID 0 and 6,521 frames. `scripts/summarize-mkw-state-trace.py --require-complete --expected-input-frames 6521` passes: stage 2 is exactly `240..6520` for 6,281 consecutive samples, followed by stage 4.
+- The private trace SHA-256 is `621ffc9cb573aba276b1c51daa6a2a532970811331f38e999c14fe3f99ec6307`; the exact executable SHA-256 is `bc953f9e6642190a3bfe226558f69f1abfaed4416aeb1c9b7645caccc215ec82`.
+- Capture-time FPS and audio drops under current host load are rejected. PRD row 22 is now **6/32 Pass, 26 Open**; Coconut Mall is the next available Flower Cup trace.
