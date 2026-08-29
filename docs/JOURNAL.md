@@ -577,3 +577,11 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - The private trace SHA-256 is `0cf22954bcaa8b59edea83c181abbff5bea735263759df13fa4f637bb9e60b85`; the exact executable SHA-256 is `334e99a89cb1b061efb7f69bf7ab912e98f5661a361869152e76588912a70403`.
 - Focused observations displayed 60 FPS through beach, surf, forest, obstacles, and translucent effects; four audio drops under host load are rejected from audio acceptance.
 - PRD row 22 is now **10/32 Pass, 22 Open**. Shell Cup is 1/4; DS Yoshi Falls is next.
+
+## 2026-08-29 — G10 DS Yoshi Falls exact native completion
+
+- Used the process-local trace launcher for Time Trials → Shell Cup → DS Yoshi Falls → `Nin★DoTak 01:16.461` → Watch Replay. Exactly one native KartPad process ran; no Dolphin or Simulator was present.
+- Course ID 20 has 4,824 regular-staff frames. The strict assertion passes with stage 2 exactly `240..4823` for 4,584 consecutive samples, followed by stage 4.
+- The private trace SHA-256 is `9d52cf29f84851e183c9f4e4afe72531c8229f63ee0eb3431747ba0fea2fbe71`; the exact executable SHA-256 is `ee4260df39e341dd1baecf8d74115e8f28ca770152d980a6aa635c74e59731b5`.
+- The private console log SHA-256 is `112ed94e5af89eea89f56db6bed7e31d3c951d09f3df0d085f89d146d78ead4c`. Bounded audio telemetry remains clean through 81,920 checks and 31,456,896 submitted bytes with zero empty observations/drops; this supports gameplay continuity but does not complete row 33's broader scope.
+- PRD row 22 is now **11/32 Pass, 21 Open**. Shell Cup is 2/4; SNES Ghost Valley 2 is next.

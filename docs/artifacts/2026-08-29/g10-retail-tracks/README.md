@@ -25,7 +25,7 @@ real finish transition; boot screenshots do not qualify.
 | Special | Bowser's Castle | 12 | Open | — |
 | Special | Rainbow Road | 13 | Open | — |
 | Shell | GCN Peach Beach | 16 | Pass | Native regular-staff replay exactly matches 5,889 input frames: stage 2 `240..5888`, 5,649 samples, then stage 4 |
-| Shell | DS Yoshi Falls | 20 | Open | — |
+| Shell | DS Yoshi Falls | 20 | Pass | Native regular-staff replay exactly matches 4,824 input frames: stage 2 `240..4823`, 4,584 samples, then stage 4 |
 | Shell | SNES Ghost Valley 2 | 25 | Open | — |
 | Shell | N64 Mario Raceway | 26 | Pass | Native regular-staff replay exactly matches 8,320 input frames; 8,080 stage-2 samples and zero state-word mismatches against Dolphin |
 | Banana | N64 Sherbet Land | 27 | Open | — |
@@ -132,4 +132,14 @@ completion are independent of that wall-clock contention.
 - Result: the accepted segment begins at race time 240, ends at 5888, contains 5,649 consecutive stage-2 samples, and is followed by stage 4. A later incomplete segment is the retail automatic replay loop.
 - Focused observations displayed 60 FPS across beach, surf, forest, item-obstacle, and translucent effect scenes; four audio drops under host load are rejected from audio acceptance.
 
-Current row 22 status: **10/32 Pass; 22 Open.** Mushroom and Flower Cups have complete four-track evidence; Shell Cup is 1/4.
+## DS Yoshi Falls exact run
+
+- Product: sole native arm64 KartPad process launched with the process-local trace helper; no Dolphin and no Simulator.
+- Executable SHA-256: `ee4260df39e341dd1baecf8d74115e8f28ca770152d980a6aa635c74e59731b5`.
+- Retail UI path: Time Trials → Shell Cup → DS Yoshi Falls → regular Nintendo staff data `Nin★DoTak 01:16.461` → Watch Replay.
+- Private trace SHA-256: `9d52cf29f84851e183c9f4e4afe72531c8229f63ee0eb3431747ba0fea2fbe71`.
+- Strict assertion: `scripts/summarize-mkw-state-trace.py --require-complete --expected-input-frames 4824`.
+- Result: the accepted segment begins at race time 240, ends at 4823, contains 4,584 consecutive stage-2 samples, and is followed by stage 4. A later incomplete segment is the retail automatic replay loop.
+- The private console log SHA-256 is `112ed94e5af89eea89f56db6bed7e31d3c951d09f3df0d085f89d146d78ead4c`. Its bounded audio summary is clean through 81,920 checks and 31,456,896 submitted bytes, with zero empty observations or drops and an 8,684-byte maximum below the 15,360-byte limit. This supports gameplay continuity but does not by itself complete row 33's pause/device-change/long-session scope.
+
+Current row 22 status: **11/32 Pass; 21 Open.** Mushroom and Flower Cups have complete four-track evidence; Shell Cup is 2/4.
