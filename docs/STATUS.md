@@ -25,7 +25,7 @@ Updated: 2026-08-29
 
 ## Known-good state
 
-- Repository checkpoint: three-player keyboard-precision calibration checkpoint `ef01110` is on `origin/main`; the accepted two-player completion remains `7ffdd27`.
+- Repository checkpoint: measured three-player keyboard-precision checkpoint `1e770e6` is on `origin/main`; the accepted two-player completion remains `7ffdd27`. A reproducible repeated-race camera lifecycle repair is the current local candidate.
 - Simulator state: no Simulator device is booted. KartPad will boot exactly one when a mobile gate requires it.
 - Buildable KartPad targets: host, memory, scheduler, semantic contracts, native subsystem smoke, translated semantic fixture, and provisional translated-frame app.
 - Input profile: WBFS containing clean PAL `RMCP01`, revision 0; original is read-only. GUI keyboard steering uses the measured 0.08 Classic-stick magnitude with a 50 ms synthetic pulse; acceleration/reverse retain their 500 ms gameplay holds. Physical controllers and future touch input are unaffected.
@@ -47,6 +47,7 @@ Updated: 2026-08-29
 - Physical-device, public-service, account, and hands-on acceptance rows remain future external prerequisites and are not claimed.
 - WiiCompiled's bundled `MAP.txt` may be used as an ignored local reference, but independent provenance for republishing it is not established; do not copy it into public KartPad sources/artifacts.
 - The exact 2008 Classic ABI is live and the game recognizes it. A/accelerate, analog steering, D-pad, and B/reverse are proven. Three-player gameplay switches to the retail 30 FPS cadence documented by the Dolphin oracle; a complete live-input three-player race remains open.
+- A deterministic second-race crash after returning from a three-player race was traced to a reclaimed camera node retained by the global race-camera list. The reproducible generated-source guard removes the stale node with retail intrusive-list semantics; the exact formerly failing sequence now reaches live second-race gameplay without a process relaunch. An uncontended cadence resample and full three-/four-player standings cycles remain open.
 - The opt-in RKG player fixture matches native stream expansion and the exact 240-frame countdown cadence but later diverges through the live-player path. It remains a diagnostic harness, not evidence for staff-ghost synchronization or a completed track.
 - Two-player split-screen PRD row 29 passes: P1 completed three live-keyboard laps, both panes reached the retail finish transition, and the full standings table retained distinct Mario/P1 and Luigi/P2 rows. The successful log contains zero fixture entries; evidence is under `docs/artifacts/2026-08-29/g10-two-player-race/`. Three/four-player full races remain open.
 - The initial visual interpretation of an N64 Mario staff-ghost overrun was false: the observation crossed into an automatic replay loop. A changed frame-end trace proved identical `240..8319` race segments and zero mismatches across 137,360 watched words. Ghost timing must be accepted from guest state, not wall-clock screenshots.

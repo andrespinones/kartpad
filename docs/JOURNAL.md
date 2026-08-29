@@ -457,3 +457,13 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - Every candidate rebuilt, copied into the app, ad-hoc signed, passed strict signature verification, passed the repository safety audit, and retained a public patch that dry-runs against the pinned WiiCompiled source. Checkpoints `332a6d8`, `3fecc82`, and `ef01110` are on `origin/main`.
 - Classification: **In progress for PRD row 30.** Three-player registration, independent panes, and verified original cadence pass, but no complete three-player standings cycle has been accepted yet; four-player full-race evidence is also still open.
 - Next step: complete a normal three-player race with the precision candidate, repeat four-player at the same verified 30 FPS cadence, then archive finish/standings/log evidence.
+
+## 2026-08-29 — G10 repeated-race camera lifecycle repair
+
+- Reproduced a deterministic three-player lifecycle crash three times with the normal race → Pause/Quit → Main Menu → second race sequence. Every macOS report was `EXC_BAD_ACCESS` in translated guest function `func_805A2034`.
+- Focused guest-state instrumentation found a reclaimed race-camera node still linked after scene teardown. Its player slot was `0xff`; the retail update treated that as `-1` and selected the reclaimed-memory sentinel immediately before the kart-object array.
+- Added a strict, idempotent generation-time injector for the shared camera-list walker. It removes reclaimed camera nodes with the retail intrusive-list layout, maintains head/tail/count, clears the node links, and resumes the current traversal. Temporary diagnostic traces and the superseded narrow guard are absent from the candidate.
+- Regenerated all 72 stable shards, rebuilt, signed, and strictly verified the arm64 app. A fresh single-process run completed the exact failing sequence and reached live three-pane gameplay in the second race without a crash or process relaunch.
+- A simultaneous unrelated eight-worker LLVM translation invalidated the later overlay as cadence evidence and was left untouched. A clean-load 29.5–30.1 FPS observation already establishes the retail three-player mode; uncontended resampling and complete three-/four-player standings cycles remain open.
+- Classification: **Pass for the repeated-race camera lifecycle defect; PRD row 30 remains in progress.** Evidence: `docs/artifacts/2026-08-29/g10-three-player-camera-lifecycle.md`.
+- Next step: checkpoint the reproducible repair, re-sample after host contention clears, and complete the normal three- and four-player race rows.
