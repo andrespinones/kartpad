@@ -5,7 +5,7 @@ Status: **Pass for PRD row 31.** P1–P4 assignment, reconnect, and held-state c
 ## Implementation
 
 - Extended the existing Classic-controller keyboard bridge from channel 0 to four independent WPAD/KPAD channels.
-- P1 remains always connected with the established Return/Backspace/arrows/WASD mapping.
+- P1 remains always connected with the established Return/Backspace/arrows/WASD mapping. `U` and `M` provide held gameplay A/accelerate and B/reverse aliases without changing the short menu-safe Return/Backspace pulses.
 - Pressing `2`, `3`, or `4` connects P2, P3, or P4 and supplies that channel's Plus edge; each channel then has independent A/B/directional/stick bindings.
 - Pressing `7`, `8`, or `9` disconnects P2, P3, or P4. Disconnect clears pending, previous-core, and previous-Classic button state before WPAD reports no controller.
 - WPAD probe, data-format, info, and LED paths now reflect per-channel connection state. KPAD regular and unified reports read the matching channel instead of rejecting channels 1–3.

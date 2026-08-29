@@ -25,7 +25,7 @@ Updated: 2026-08-29
 
 ## Known-good state
 
-- Repository checkpoint: explicit GameCube-adapter limitation checkpoint `c3e8dba` is on `origin/main`; four-channel keyboard controller implementation/evidence is the next backup.
+- Repository checkpoint: four-channel keyboard controller implementation/evidence checkpoint `0aa0fbe` is on `origin/main`; the calibrated held gameplay aliases and keyboard steering follow in the next backup.
 - Simulator state: no Simulator device is booted. KartPad will boot exactly one when a mobile gate requires it.
 - Buildable KartPad targets: host, memory, scheduler, semantic contracts, native subsystem smoke, translated semantic fixture, and provisional translated-frame app.
 - Input profile: WBFS containing clean PAL `RMCP01`, revision 0; original is read-only.

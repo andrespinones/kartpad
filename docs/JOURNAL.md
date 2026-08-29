@@ -396,6 +396,13 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - Evidence index: `docs/artifacts/2026-08-29/g10-items-ai-collisions.md`.
 - Next step: continue the remaining G10 track/cup/mode/local-multiplayer/controller/audio/save rows.
 
+## 2026-08-29 — G10 keyboard fallback race calibration
+
+- A native two-player Luigi Circuit playtest exposed that `Return` must remain a short synthetic pulse for menu safety, which also made it a poor held accelerator during a race. Added `U` as a gameplay A/accelerator alias with the existing 500 ms synthetic hold and `M` as the matching gameplay B/reverse alias; `Return`/`Backspace` retain their short menu behavior.
+- Repeated changed runs proved sustained forward acceleration, sustained reverse recovery, independent P2 input, item acquisition, AI traffic, stable 60 FPS presentation, and clean split-screen rendering. The first high-speed runs also showed that full-scale keyboard steering crossed a lane in only a few GUI-generated samples, so the fallback stick magnitude returned to the previously validated `0.35` calibration. Physical/touch analog sources are not changed by this keyboard-only scale.
+- The affected runtime target rebuilt and the signed app passed strict code-sign verification after each calibration. These runs are diagnostic input evidence only: no complete two-player results screen was reached, so PRD row 29 remains open.
+- Next step: complete the two-player results cycle with the calibrated fallback, then repeat the three/four-player full-race rows before advancing G10.
+
 ## 2026-08-29 — G10 representative vehicles, weights, and drift modes
 
 - Completed a three-minute native Balloon Battle as Bowser on Standard Bike L with Automatic drift. The kart accelerated and steered, changed position, collided, received ink/item effects, participated in live scoring with 12 racers, reached the full result table, and returned cleanly to Main Menu.
