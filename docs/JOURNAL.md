@@ -366,6 +366,16 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - Evidence: `docs/artifacts/2026-08-29/g10-coin-runners/`.
 - Next step: continue the remaining G10 track/cup/mode/local-multiplayer/controller/audio/save rows.
 
+## 2026-08-29 — G10 representative vehicles, weights, and drift modes
+
+- Completed a three-minute native Balloon Battle as Bowser on Standard Bike L with Automatic drift. The kart accelerated and steered, changed position, collided, received ink/item effects, participated in live scoring with 12 racers, reached the full result table, and returned cleanly to Main Menu.
+- Combined that changed-variable run with existing accepted native evidence: Mario on Standard Kart M with Manual drift completed both Battle modes, and the Baby Mario Bit Bike/Nanobike Manual official staff replay completed bit-exactly against Dolphin on N64 Mario Raceway.
+- The three configurations cover light/medium/heavy characters, kart and bike vehicle families, and Manual/Automatic drift through completed native sessions.
+- Classification: **Pass for PRD row 24.** This is representative coverage; it does not claim every individual unlock as separately completed.
+- Instance discipline: exactly one KartPad process, no Dolphin, and no booted Simulator.
+- Evidence: `docs/artifacts/2026-08-29/g10-vehicle-character-drift/` plus the linked accepted G10 evidence directories.
+- Next step: continue the remaining G10 track/cup/mode/local-multiplayer/controller/audio/save rows.
+
 ## 2026-08-29 — G10 forced-exit save safety
 
 - Began from the stable Main Menu after the completed Battle matrix and made an ignored local recovery copy of the live 2,867,200-byte `rksys.dat`.

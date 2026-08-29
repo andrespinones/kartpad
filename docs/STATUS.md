@@ -20,12 +20,12 @@ Updated: 2026-08-29
 | G7 Native Metal frame | Pass | Real PAL wrist-strap frame visible at 60 FPS; reproducible Apple runtime patch and capture evidence recorded |
 | G8 macOS boots/input | Pass | Full DOL+StaticR intro/title/menu, audible output, A/directional/1 navigation; evidence under `docs/artifacts/2026-08-28/g8-title-menu/` |
 | G9 first race/save | Pass | 100cc VS standings/result/menu cycle, changed save hash, clean quit/relaunch with `Player` intact, and `Nin★sato 01:29.670` replay; evidence under `docs/artifacts/2026-08-28/g9-race-save/` |
-| G10 macOS offline compatibility | In progress | N64 Mario ghost passes 137,360/137,360 state words; Battle rows 27–28 pass; forced-exit save safety passes at Main Menu. Continue tracks/cups/modes/local multiplayer/controller/audio/save rows |
+| G10 macOS offline compatibility | In progress | N64 Mario ghost passes bit-exactly; Battle rows 27–28, forced-exit save safety, and representative vehicle/character/drift row 24 pass. Continue tracks/cups/modes/local multiplayer/controller/audio/save rows |
 | G11–G18 | Gated | Await G10 |
 
 ## Known-good state
 
-- Repository checkpoint: all-arena Coin Runners checkpoint `1379a9f` is on `origin/main`; forced-exit save-safety evidence is the next backup.
+- Repository checkpoint: forced-exit save-safety checkpoint `f5edef1` is on `origin/main`; representative vehicle/character/drift evidence is the next backup.
 - Simulator state: no Simulator device is booted. KartPad will boot exactly one when a mobile gate requires it.
 - Buildable KartPad targets: host, memory, scheduler, semantic contracts, native subsystem smoke, translated semantic fixture, and provisional translated-frame app.
 - Input profile: WBFS containing clean PAL `RMCP01`, revision 0; original is read-only.
@@ -52,6 +52,7 @@ Updated: 2026-08-29
 - Balloon Battle PRD row 27 passes: all ten retail arenas boot, and a complete 6-v-6 Block Plaza match reaches results and Main Menu. Instantaneous capture-time labels ranged from 43.2–60.0 FPS; deterministic cadence measurement remains a G11 gate and is not inferred from screenshots.
 - Coin Runners PRD row 28 passes: all ten retail arenas boot, and complete 6-v-6 Block Plaza matches reach per-player results, team outcome, and Main Menu.
 - Forced-exit save safety PRD row 20 passes at the stable Main Menu boundary: pre-exit, post-`SIGKILL`, and post-relaunch saves are byte-identical, and the existing `Player` license remains selectable.
+- Vehicles/characters/drift PRD row 24 passes representative native coverage: Baby Mario light bike Manual completes via the bit-exact staff replay, Mario medium kart Manual completes both Battle modes, and Bowser heavy bike Automatic completes a full Balloon Battle.
 - G2 audio evidence is limited to emulator execution; subjective audio quality is a future hands-on row and is not claimed.
 - G8 playback is proven by both the runtime's non-silent host-stream telemetry and an independent system-output loopback level capture. Subjective audio quality and latency remain hands-on G10/G11 rows.
 
