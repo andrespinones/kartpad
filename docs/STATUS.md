@@ -28,7 +28,7 @@ Updated: 2026-08-29
 - Repository checkpoint: three-player keyboard-precision calibration checkpoint `ef01110` is on `origin/main`; the accepted two-player completion remains `7ffdd27`.
 - Simulator state: no Simulator device is booted. KartPad will boot exactly one when a mobile gate requires it.
 - Buildable KartPad targets: host, memory, scheduler, semantic contracts, native subsystem smoke, translated semantic fixture, and provisional translated-frame app.
-- Input profile: WBFS containing clean PAL `RMCP01`, revision 0; original is read-only. GUI keyboard steering now uses a fine 0.02 Classic-stick magnitude with a 50 ms synthetic pulse; acceleration/reverse retain their 500 ms gameplay holds. Physical controllers and future touch input are unaffected.
+- Input profile: WBFS containing clean PAL `RMCP01`, revision 0; original is read-only. GUI keyboard steering uses the measured 0.08 Classic-stick magnitude with a 50 ms synthetic pulse; acceleration/reverse retain their 500 ms gameplay holds. Physical controllers and future touch input are unaffected.
 - WiiCompiled baseline: required commit/tree verified in a detached, push-disabled partial clone.
 - Translator baseline: immutable upstream remains 570/570; KartPad's reproducible FPSCR lowering patch passes 579/579 on native arm64 with .NET SDK 8.0.130.
 - Gameplay baseline: hashed Dolphin 5.0-17995 arm64/Vulkan/HLE binary boots `RMCP01`, creates an isolated license/save, reaches Luigi Circuit and its official staff ghost, and recovers to 60 FPS/VPS after shader warmup.
