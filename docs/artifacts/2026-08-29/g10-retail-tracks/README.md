@@ -33,7 +33,7 @@ real finish transition; boot screenshots do not qualify.
 | Banana | DS Delfino Square | 23 | Pass | Native regular-staff replay exactly matches 9,939 input frames: stage 2 `240..9938`, 9,699 samples, then stage 4 |
 | Banana | GCN Waluigi Stadium | 18 | Pass | Native regular-staff replay exactly matches 9,404 input frames: stage 2 `240..9403`, 9,164 samples, then stage 4 |
 | Leaf | DS Desert Hills | 21 | Pass | Native regular-staff replay exactly matches 8,047 input frames: stage 2 `240..8046`, 7,807 samples, then stage 4 |
-| Leaf | GBA Bowser Castle 3 | 30 | Open | — |
+| Leaf | GBA Bowser Castle 3 | 30 | Pass | Native regular-staff replay exactly matches 10,928 input frames: stage 2 `240..10927`, 10,688 samples, then stage 4 |
 | Leaf | N64 DK's Jungle Parkway | 29 | Pass | Native regular-staff replay exactly matches 10,926 input frames twice: stage 2 `240..10925`, 10,686 samples, then stage 4 |
 | Leaf | GCN Mario Circuit | 17 | Pass | Native regular-staff replay exactly matches 7,420 input frames: stage 2 `240..7419`, 7,180 samples, then stage 4 |
 | Lightning | SNES Mario Circuit 3 | 24 | Pass | Native regular-staff replay exactly matches 6,167 input frames: stage 2 `240..6166`, 5,927 samples, then stage 4 |
@@ -301,4 +301,16 @@ completion are independent of that wall-clock contention.
 - Bounded presentation checks ranged from 38 to 58.5 FPS through the jungle, riverboat, bridge, water, vegetation, mud, particles, and ghost transparency. This remains G11/G36 performance evidence only; guest-state completion was exact in both complete loops.
 - Private log SHA-256 `5e08e0d93913085faf2782b654c98853ce06897aa6288cfbe694a8692e5fb95a` recorded 30 audio-queue drops and is rejected from audio-row acceptance.
 
-Current row 22 status: **25/32 Pass; 7 Open.** Mushroom, Flower, Shell, and Banana Cups each have complete four-track evidence; Leaf Cup is 3/4, and Star, Special, and Lightning Cups are each 2/4.
+## GBA Bowser Castle 3 exact run
+
+- Product: sole native arm64 KartPad process launched with the process-local trace helper; no Dolphin and no Simulator.
+- Test precondition: the user's own private all-cups fixture documented in `docs/artifacts/2026-08-29/g10-all-cups-fixture.md`; progression acceptance remains separate.
+- Executable SHA-256: `7f4d9d9a138f4b780d8fc092ac25517615bbf3df687a3eaf8183910ca319bdfb`.
+- Retail UI path: Time Trials → Leaf Cup → GBA Bowser Castle 3 → regular Nintendo staff data `Nin★Fukuda 02:58.304` → Watch Replay.
+- Private trace SHA-256: `e4b51fb794ae3cfddf4dae4161ddfa26fb630d7c084c0906f076c4334d430e8c`.
+- Strict assertion: `scripts/summarize-mkw-state-trace.py --require-complete --expected-input-frames 10928`.
+- Result: the accepted segment begins at race time 240, ends at 10927, contains 10,688 consecutive stage-2 samples, and is followed by stage 4. The later incomplete segment is the retail automatic replay loop.
+- Bounded presentation checks remained at the overlay's 60 FPS target through lava, moving platforms, Thwomps, ramps, particles, storm effects, and ghost transparency. Deterministic cadence remains a G11 gate.
+- Private log SHA-256 `12f996acb5c88a1c9cbe195e1c3c5c047c8a8fbdae2aa08bb100ffe4877c4bf4` recorded 11 audio-queue drops and is rejected from audio-row acceptance.
+
+Current row 22 status: **26/32 Pass; 6 Open.** Mushroom, Flower, Shell, Banana, and Leaf Cups each have complete four-track evidence; Star, Special, and Lightning Cups are each 2/4.

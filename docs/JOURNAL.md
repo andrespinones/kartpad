@@ -709,3 +709,11 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - Private trace SHA-256 is `b2cc03b7651ba45a090a03f838c299c15faaa5193ddbfea3ca037affe54a2ac5`; exact executable SHA-256 is `bb5e63cd56751f8a9e5daea4e8bdecce92275278a0e7ac10b5a52507cf03c79c`.
 - Bounded presentation checks ranged from 38 to 58.5 FPS through the jungle, riverboat, bridge, water, vegetation, mud, particles, and ghost transparency; retained for G11/G36. Private log SHA-256 `5e08e0d93913085faf2782b654c98853ce06897aa6288cfbe694a8692e5fb95a` recorded 30 audio drops and is rejected from audio-row acceptance.
 - PRD row 22 is now **25/32 Pass, 7 Open**. Leaf Cup is 3/4.
+
+## 2026-08-29 — G10 GBA Bowser Castle 3 exact native completion
+
+- Used the sole native KartPad process for Time Trials → Leaf Cup → GBA Bowser Castle 3 → `Nin★Fukuda 02:58.304` → Watch Replay. No Dolphin or Simulator was present.
+- Course ID 30 has 10,928 regular-staff frames. The strict assertion accepts stage 2 exactly `240..10927` for 10,688 consecutive samples, followed by stage 4; the later partial segment is the automatic replay loop.
+- Private trace SHA-256 is `e4b51fb794ae3cfddf4dae4161ddfa26fb630d7c084c0906f076c4334d430e8c`; exact executable SHA-256 is `7f4d9d9a138f4b780d8fc092ac25517615bbf3df687a3eaf8183910ca319bdfb`.
+- Bounded presentation checks remained at the 60 FPS overlay target through lava, moving platforms, Thwomps, ramps, particles, storm effects, and ghost transparency; deterministic cadence remains G11 work. Private log SHA-256 `12f996acb5c88a1c9cbe195e1c3c5c047c8a8fbdae2aa08bb100ffe4877c4bf4` recorded 11 audio drops and is rejected from audio-row acceptance.
+- PRD row 22 is now **26/32 Pass, 6 Open**. Leaf Cup is complete at 4/4.
