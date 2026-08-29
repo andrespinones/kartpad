@@ -293,3 +293,18 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - Reproducibility: refreshed `patches/wiicompiled-apple-runtime.patch` dry-runs cleanly against the pinned runtime. Exact Classic input checkpoint `d59218f` is on GitHub.
 - Evidence: `docs/artifacts/2026-08-28/g9-race-save/`.
 - G9 classification: **Pass**. G10 is the lowest unmet goal: complete the mandatory macOS offline compatibility matrix and close the player-lap precision limitation.
+
+## 2026-08-28 — G10 RKG structural oracle and player-fixture investigation
+
+- Goal: establish a deterministic, locally inspectable staff-ghost input oracle before expanding the offline matrix.
+- Corrected the RKG sequence-duration rule against the game's translated `KPad*ButtonsStream::readFrame`: a stored duration is `max(1, value)`, not `value + 1`. All 64 on-disc staff files now parse with equal face/direction/trick totals; the parser emits structural metadata only.
+- Added a reproducible, opt-in guard to the translated PAL `KPadWiiController::calcInner` at `0x8051FC84`. With no configured/armed fixture it returns to the complete original function.
+- Two identical startup crashes from an earlier duplicate native override were classified and removed. The guarded translated function then booted normally.
+- A bounded probe of the game's own `KPadGhostController` proved that input begins on race stage 1 and stage 1 contains exactly 240 calls. The player fixture independently reported `stage=1 frame=0` and `stage=2 frame=240`.
+- Native output verified the first direction expansion directly: `0x8e` for four calls before the next sequence. The corrected decoder matches it.
+- Configuration errors were separately falsified: Luigi Circuit regular staff vehicle ID `0x10` is Sprinter, not Standard Kart M, and is locked on the fresh license. Later tests used selectable Shell Cup staff configurations and verified each character/vehicle label in the live UI.
+- The regular N64 Mario Raceway file (`Baby Mario`, PAL `Nanobike`/Bit Bike, Manual) followed the racing line through a complete first lap and entered lap 2, then diverged later. The countdown cadence remained exact. Forcing the Wii slot's control-source field to `GHOST` raised the expected controller-interrupted dialog and was reverted.
+- Classification: **Inconclusive diagnostic, not Pass.** The player-injection harness is not the native ghost product path and does not satisfy a G10 row. The native Luigi Circuit staff replay established in G9 remains healthy.
+- Reproducibility: refreshed `patches/wiicompiled-apple-runtime.patch` dry-runs against the pinned runtime; `scripts/inspect-mkw-rkg.py --self-test` and the repository safety audit pass.
+- Evidence: `docs/artifacts/2026-08-28/g10-offline/`.
+- Next step: run independent native G10 rows—original tracks/cups, Grand Prix/VS/Battle/Time Trial, local multiplayer, controller slots, audio, and save behavior—while retaining the fixture only as a diagnostic tool.
