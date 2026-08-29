@@ -448,3 +448,12 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - Focused interaction/captures repeatedly displayed 59.5–60.1 FPS, including 60.0 at finish and standings. This passes the functional two-player cadence observation; G11 retains the separate p99/worst-case qualification.
 - Classification: **Pass for PRD row 29.** Evidence and hashes are under `docs/artifacts/2026-08-29/g10-two-player-race/`.
 - Next step: complete PRD row 30 with normal three-player and four-player split-screen races, then continue the remaining G10 matrix.
+
+## 2026-08-29 — G10 three-player cadence and keyboard precision calibration
+
+- Confirmed the original retail cadence from the Dolphin Mario Kart Wii oracle: three- and four-player split-screen are intentionally locked to 30 FPS. The native three-player Luigi Circuit gameplay overlay repeatedly reported 29.5–30.1 FPS while menus remained 59.8–60.1 FPS, preserving the mode transition instead of forcing a universal 60 FPS rate.
+- Registered three independent Classic channels and repeatedly entered a normal 100cc VS Solo Race with Mario, Luigi, and Yoshi. All three panes rendered independently with AI, items, minimap state, and per-player HUDs active. No Simulator or Dolphin process was running.
+- Hands-on steering exposed a GUI-keyboard-specific problem: the previous 0.22 stick magnitude and 120 ms synthetic hold crossed the narrow three-player pane's racing line in only a few generated samples. Reduced the synthetic stick hold to 50 ms and narrowed keyboard-only magnitude through measured 0.12 and 0.08 candidates to a 0.02 precision candidate. Physical controller input, game physics, and future touch analog input are unchanged.
+- Every candidate rebuilt, copied into the app, ad-hoc signed, passed strict signature verification, passed the repository safety audit, and retained a public patch that dry-runs against the pinned WiiCompiled source. Checkpoints `332a6d8`, `3fecc82`, and `ef01110` are on `origin/main`.
+- Classification: **In progress for PRD row 30.** Three-player registration, independent panes, and verified original cadence pass, but no complete three-player standings cycle has been accepted yet; four-player full-race evidence is also still open.
+- Next step: complete a normal three-player race with the precision candidate, repeat four-player at the same verified 30 FPS cadence, then archive finish/standings/log evidence.
