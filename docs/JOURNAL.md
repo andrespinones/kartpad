@@ -684,3 +684,11 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - Bounded presentation checks ranged from 39.6 to 58 FPS through lava, collapsing terrain, tunnels, particles, and ghost transparency; retained for G11/G36 performance work. Private log SHA-256 `0d936c9e0bdd409db94dfdae7d1892ab521ca1f0e567bdea9f61d55523970c89` recorded 60 audio drops and is rejected from audio-row acceptance.
 - Two setup attempts were rejected before acceptance: Challenge Ghost Data never reached finish stage 4, and an over-fast menu sequence entered Nintendo WFC. Both partial traces were moved recoverably to Trash and were not counted.
 - PRD row 22 is now **22/32 Pass, 10 Open**. Star Cup is 2/4.
+
+## 2026-08-29 — G10 Dry Dry Ruins exact native completion
+
+- Used the sole native KartPad process for Time Trials → Special Cup → Dry Dry Ruins → `Nin★Kei 02:30.949` → Watch Replay. No Dolphin or Simulator was present.
+- Course ID 14 has 9,288 regular-staff frames. The strict assertion accepts stage 2 exactly `240..9287` for 9,048 consecutive samples, followed by stage 4; the later partial segment is the retail automatic replay loop.
+- Private trace SHA-256 is `477275d7e1cee0f61174421e81a46403f52fde057106e4f0ee97e2b325e42cd4`; exact executable SHA-256 is `80bcfee80ecd9615efef7ad2826407cf0562858c4c8dec5936a40e4e16f2532d`.
+- Bounded presentation checks stayed at the 60 FPS overlay target through exterior sand, falling columns, bats, water, boost panels, interior geometry, and ghost transparency; deterministic cadence remains G11 work. Private log SHA-256 `9e8727372b9da8b2979c4b2242977244bcb910876461d7e135febfa80b9ac8e7` recorded three audio drops and is rejected from audio-row acceptance.
+- PRD row 22 is now **23/32 Pass, 9 Open**. Special Cup is 2/4.
