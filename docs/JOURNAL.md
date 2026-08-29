@@ -651,3 +651,11 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - Private trace SHA-256 is `290104ee301b0f8c45da71960186ffdb052a8b3c25d3ac97e0154f57c1444532`; exact executable SHA-256 is `fa86a907ca2bebbc72eec1baf02cd83f3ceb816e584e33ed3dd23926ab945545`.
 - Harbor, tunnel, lighthouse, animated scenery, glare, and ghost transparency remained intact. Private log SHA-256 `7e9daa7f5d8e3ee47999d7f5374d2bd45a5d19049123e7fd82f0bcdb8f6f6db3` recorded 147 audio drops and is rejected from audio-row acceptance.
 - PRD row 22 is now **18/32 Pass, 14 Open**. Star Cup is 1/4.
+
+## 2026-08-29 — G10 DS Desert Hills exact native completion
+
+- Used the sole native KartPad process for Time Trials → Leaf Cup → DS Desert Hills → `Nin★CHIA 02:10.233` → Watch Replay. No Dolphin or Simulator was present.
+- Course ID 21 has 8,047 regular-staff frames. The strict assertion accepts stage 2 exactly `240..8046` for 7,807 consecutive samples, followed by stage 4; the later partial segment is the retail automatic replay loop.
+- Private trace SHA-256 is `bd9a6068adbc64633df6df1f2aac92bee2cf48b5f279918bdb1e71e3e14f436e`; exact executable SHA-256 is `fa86a907ca2bebbc72eec1baf02cd83f3ceb816e584e33ed3dd23926ab945545`.
+- A bounded first-use shader compile sampled at 23 FPS, then presentation recovered to 60 FPS through sand, ruins, lighting, obstacles, and ghost transparency; retained for later performance work. Private log SHA-256 `4ba00de7368798886bf0eafdd2ab99afe844871822c9ed2632b6392653e16e88` recorded 39 audio drops and is rejected from audio-row acceptance.
+- PRD row 22 is now **19/32 Pass, 13 Open**. Leaf Cup is 1/4.

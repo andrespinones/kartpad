@@ -32,7 +32,7 @@ real finish transition; boot screenshots do not qualify.
 | Banana | GBA Shy Guy Beach | 31 | Pass | Native regular-staff replay exactly matches 6,568 input frames: stage 2 `240..6567`, 6,328 samples, then stage 4 |
 | Banana | DS Delfino Square | 23 | Pass | Native regular-staff replay exactly matches 9,939 input frames: stage 2 `240..9938`, 9,699 samples, then stage 4 |
 | Banana | GCN Waluigi Stadium | 18 | Pass | Native regular-staff replay exactly matches 9,404 input frames: stage 2 `240..9403`, 9,164 samples, then stage 4 |
-| Leaf | DS Desert Hills | 21 | Open | — |
+| Leaf | DS Desert Hills | 21 | Pass | Native regular-staff replay exactly matches 8,047 input frames: stage 2 `240..8046`, 7,807 samples, then stage 4 |
 | Leaf | GBA Bowser Castle 3 | 30 | Open | — |
 | Leaf | N64 DK's Jungle Parkway | 29 | Open | — |
 | Leaf | GCN Mario Circuit | 17 | Open | — |
@@ -217,4 +217,16 @@ completion are independent of that wall-clock contention.
 - Result: the accepted segment begins at race time 240, ends at 7242, contains 7,003 consecutive stage-2 samples, and is followed by stage 4. An earlier unfinished segment is ignored; the later incomplete segment is the retail automatic replay loop.
 - Harbor, tunnel, lighthouse, animated scenery, sun/glare effects, and transparent ghost rendering remained intact. Focused presentation sampled near 58 FPS. Private log SHA-256 `7e9daa7f5d8e3ee47999d7f5374d2bd45a5d19049123e7fd82f0bcdb8f6f6db3` recorded 147 audio-queue drops and is rejected from audio-row acceptance.
 
-Current row 22 status: **18/32 Pass; 14 Open.** Mushroom, Flower, Shell, and Banana Cups each have complete four-track evidence; Star and Lightning Cups are each 1/4.
+## DS Desert Hills exact run
+
+- Product: sole native arm64 KartPad process launched with the process-local trace helper; no Dolphin and no Simulator.
+- Test precondition: the user's own private all-cups fixture documented in `docs/artifacts/2026-08-29/g10-all-cups-fixture.md`; progression acceptance remains separate.
+- Executable SHA-256: `fa86a907ca2bebbc72eec1baf02cd83f3ceb816e584e33ed3dd23926ab945545`.
+- Retail UI path: Time Trials → Leaf Cup → DS Desert Hills → regular Nintendo staff data `Nin★CHIA 02:10.233` → Watch Replay.
+- Private trace SHA-256: `bd9a6068adbc64633df6df1f2aac92bee2cf48b5f279918bdb1e71e3e14f436e`.
+- Strict assertion: `scripts/summarize-mkw-state-trace.py --require-complete --expected-input-frames 8047`.
+- Result: the accepted segment begins at race time 240, ends at 8046, contains 7,807 consecutive stage-2 samples, and is followed by stage 4. An earlier unfinished segment is ignored; the later incomplete segment is the retail automatic replay loop.
+- A bounded first-use shader compile sampled at 23 FPS, then presentation recovered to 60 FPS through sand, ruins, lighting, obstacles, and ghost transparency. This remains a G11/G36 performance observation.
+- Private log SHA-256 `4ba00de7368798886bf0eafdd2ab99afe844871822c9ed2632b6392653e16e88` recorded 39 audio-queue drops and is rejected from audio-row acceptance.
+
+Current row 22 status: **19/32 Pass; 13 Open.** Mushroom, Flower, Shell, and Banana Cups each have complete four-track evidence; Star, Leaf, and Lightning Cups are each 1/4.
