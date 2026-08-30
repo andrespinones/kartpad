@@ -98,6 +98,26 @@ def summarize(directory: Path) -> dict[str, object]:
     threads = [float(row["threads"]) for row in rows]
     gaps = [right - left for left, right in zip(elapsed, elapsed[1:])]
     requested = int(metadata.get("duration_seconds", "0"))
+    warmup_cutoff = elapsed[0] + 900.0
+    post_warmup = [
+        (x_value, y_value)
+        for x_value, y_value in zip(elapsed, rss)
+        if x_value >= warmup_cutoff
+    ]
+    post_warmup_summary = None
+    if len(post_warmup) >= 2:
+        post_elapsed = [item[0] for item in post_warmup]
+        post_rss = [item[1] for item in post_warmup]
+        post_warmup_summary = {
+            "sample_count": len(post_warmup),
+            "covered_duration_seconds": post_elapsed[-1] - post_elapsed[0],
+            "first": post_rss[0],
+            "last": post_rss[-1],
+            "minimum": min(post_rss),
+            "maximum": max(post_rss),
+            "delta": post_rss[-1] - post_rss[0],
+            "least_squares_slope_per_hour": slope_per_hour(post_elapsed, post_rss),
+        }
     return {
         "directory": str(directory),
         "sample_count": len(rows),
@@ -115,6 +135,7 @@ def summarize(directory: Path) -> dict[str, object]:
             "maximum": max(rss),
             "delta": rss[-1] - rss[0],
             "least_squares_slope_per_hour": slope_per_hour(elapsed, rss),
+            "after_15_minute_warmup": post_warmup_summary,
         },
         "cpu_percent": {
             "median": statistics.median(cpu),
@@ -169,6 +190,7 @@ def self_test() -> None:
         assert result["covered_duration_seconds"] == 120
         assert result["rss_kib"]["delta"] == 200
         assert round(result["rss_kib"]["least_squares_slope_per_hour"]) == 6000
+        assert result["rss_kib"]["after_15_minute_warmup"] is None
         assert result["thread_count"]["maximum"] == 11
     print("macOS soak summary self-test passed")
 
