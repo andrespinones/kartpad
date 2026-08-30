@@ -2,13 +2,6 @@
 
 This file is append-only. Evidence paths refer to sanitized, publishable artifacts unless explicitly marked private and ignored.
 
-## 2026-08-29 — G15 exact SunPad overlay baseline and Classic input adapter
-
-- Imported the exact SunPad touch overlay, settings, input state, and mixer from pinned commit `e43f0ea6b797e5110787171957c9dc3c6213269c`, together with the complete GPLv3 text and explicit upstream provenance. A repository verifier proves the seven source files and license remain byte-identical to the local pinned reference.
-- Used Nintendo's *Mario Kart Wii Instruction Booklet* Classic Controller diagram rather than inferred mappings. Added a separate adapter from SunPad's normalized GameCube-shaped input to KartPad's existing Classic ABI: A accelerate, B/R drift-brake, L item, X/ZR rear view, Plus pause, and D-pad trick/wheelie.
-- Added an arm64 Objective-C++ contract test covering every button independently, their simultaneous union, both sticks, and connection state. The focused build/test, exact-snapshot verifier, repository safety audit, and `git diff --check` pass.
-- Classification: **mobile source integration in progress**. Direct-copy and input-boundary evidence pass; no Simulator gameplay, visual comparison, or touch-feel acceptance is claimed yet. Evidence: `docs/artifacts/2026-08-29/g15-sunpad-overlay.md`.
-
 ## 2026-08-28 — G0 workspace initialization
 
 - Goal: establish the workspace and evidence system before modifying or translating private game data.
@@ -832,3 +825,12 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - Audited every FetchContent input used by the new static macOS graph. Aurora already enforced hashes for Dawn, libpng, FreeType, xxHash, fmt, ImGui, SQLite, zstd, and Tracy; only Abseil 20240722.0 and SDL 3.4.4 lacked archive digests.
 - Declared those two inputs before Aurora so CMake's first-declaration rule enforces exact SHA-256 values. Generated URL metadata now contains the expected hashes, both downloaded archives match, patch dry-run passes, and reconfiguration succeeds.
 - Ninja reported no work and the runtime remained byte-identical at SHA-256 `4c12eadfd5edf0dd106b76692bef82d8162026684969c7b498a0d3a830f4a0a5`, confirming a reproducibility-only change.
+
+## 2026-08-29 — G15 exact SunPad overlay baseline, Classic adapter, and native shell
+
+- Imported the exact SunPad touch overlay, settings, diagnostics, input state, and mixer from pinned commit `e43f0ea6b797e5110787171957c9dc3c6213269c`, together with the complete GPLv3 text and explicit upstream provenance. A repository verifier proves the nine source files and license remain byte-identical to the local pinned reference.
+- Used Nintendo's *Mario Kart Wii Instruction Booklet* Classic Controller diagram rather than inferred mappings. Added a separate adapter from SunPad's normalized GameCube-shaped input to KartPad's existing Classic ABI: A accelerate, B/R drift-brake, L item, X/ZR rear view, Plus pause, and D-pad trick/wheelie.
+- Added an arm64 Objective-C++ contract test covering every button independently, their simultaneous union, both sticks, and connection state. The focused build/test and exact-snapshot verifier pass.
+- Added a real UIKit lifecycle and `CAMetalLayer` iOS target that compiles the byte-identical overlay directly, packages the original light/dark/tinted icon assets and privacy manifest, and builds as a system-library-only arm64 iOS Simulator app with a 16.0 minimum. The fail-closed shell auditor passes.
+- The launch runner audits before install, refuses a second booted Simulator, and refuses to overlap the live macOS game. Its concurrent-game guard exited 75 as designed; no Simulator was booted during the protected macOS soak.
+- Classification: **mobile shell/source integration in progress**. Direct-copy, input-boundary, native build, package, and concurrency-guard evidence pass; the game core is not linked and no Simulator gameplay, visual comparison, or touch-feel acceptance is claimed. Evidence: `docs/artifacts/2026-08-29/g15-sunpad-overlay.md`.

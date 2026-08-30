@@ -70,4 +70,4 @@ Updated: 2026-08-29
 
 ## UI reference commitment
 
-The local `ref/sunpad` checkout is the direct implementation reference for the future mobile touch interface and persistent three-dot menu. KartPad will copy those components exactly at G15, adapting only the game-specific input mapping required by Mario Kart Wii. Mobile implementation cannot be accepted before the PRD's macOS correctness prerequisites pass.
+The local `ref/sunpad` checkout is the direct implementation reference for the mobile touch interface and persistent three-dot menu. A byte-identical, pinned nine-file snapshot now compiles directly in a native arm64 iOS Simulator shell; its exact-snapshot verifier, Mario Kart Classic-input adapter contract, original icon catalog, privacy manifest, and package audit pass. The translated game core, KartPad-specific menu services, Simulator visual comparison, complete races, and touch-feel acceptance remain open. Mobile completion cannot be claimed before those tests and the PRD's macOS correctness prerequisites pass.

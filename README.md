@@ -40,7 +40,7 @@ signing material.
 | Input | Keyboard plus four independent Classic-controller slots; two-player full-race evidence passes |
 | Audio | Non-silent host playback, pause/resume, and live output-device migration pass instrumented continuity checks; subjective and long-session acceptance remain open |
 | Packaging | Original icon masters and macOS ICNS exist; installed-data relocation and a self-contained signed package are under final validation |
-| iPhone/iPad | Planned after the macOS compatibility gate; no mobile-complete claim or downloadable IPA yet |
+| iPhone/iPad | Native arm64 Simulator shell builds with the exact pinned SunPad overlay and original icons; core gameplay and mobile acceptance remain open |
 | Distribution | Development source only; no game data and no release candidate |
 
 The evidence ledger, exact open rows, and known risks live in
@@ -104,13 +104,15 @@ The development macOS keyboard bridge maps directional keys to menu movement,
 Classic Controller stick. Native controller discovery and four stable local
 slots are implemented separately from the keyboard fallback.
 
-The iPhone/iPad shell will use the local SunPad project as its direct GPLv3 UI
-reference. KartPad will preserve SunPad's touch-control component and persistent
-**•••** menu structure, layout editing, controller handoff, accessibility
-behavior, and safe-area treatment, changing only the game-specific Wii input
-mapping and KartPad settings/actions. That mobile surface is not considered
-implemented until both iPhone and iPad Simulator races pass with one Simulator
-booted at a time.
+The iPhone/iPad shell compiles a byte-identical pinned snapshot of SunPad's
+GPLv3 touch-control component and persistent **•••** menu directly. It preserves
+the component's layout editing, controller handoff, accessibility behavior, and
+safe-area treatment; a separate tested adapter supplies Mario Kart Wii's Classic
+Controller mapping without changing the copied baseline. The native arm64
+Simulator shell, original icon catalog, privacy manifest, and package audit pass.
+The game core and KartPad-specific menu services remain under integration, and
+the mobile surface is not accepted until complete iPhone and iPad Simulator
+races pass with one Simulator booted at a time.
 
 ## Evidence-first development
 
@@ -136,7 +138,7 @@ runtime behavior. KartPad is not affiliated with or endorsed by Nintendo.
 
 WiiCompiled is GPLv3 at the pinned revision. Aurora, Dawn, SDL, Dolphin-derived
 code, Crypto++, Abseil, FreeType, libpng, and other dependencies retain their
-own licenses and notice obligations. SunPad-derived mobile UI source must retain
-its GPLv3 notice and clear modification attribution when it is imported.
+own licenses and notice obligations. The imported SunPad mobile UI snapshot
+retains its GPLv3 license, exact upstream revision, hashes, and attribution.
 KartPad's original icon provenance is recorded in
 [`branding/PROVENANCE.md`](branding/PROVENANCE.md).

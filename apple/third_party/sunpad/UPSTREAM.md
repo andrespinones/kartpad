@@ -13,6 +13,8 @@ Upstream paths:
 - `apple/shared/SunPadInputMixer.mm`
 - `apple/shared/SunPadSettings.h`
 - `apple/shared/SunPadSettings.mm`
+- `apple/shared/SunPadDiagnostics.h`
+- `apple/shared/SunPadDiagnostics.mm`
 
 The snapshot retains SunPad's names and behavior deliberately. KartPad-specific
 adaptation belongs outside this directory so the direct-copy baseline remains
@@ -30,4 +32,6 @@ Snapshot SHA-256 values:
 67ecd1014f32e4e81573baeb5819b438eb5ebaf4fd1dc3d79169da9a6f71e4d9  SunPadInputState.h
 6ee9d671db17961676f71d0da3a80c4b9ea2d9de2aecf11c2041bc593faaa33b  SunPadInputMixer.mm
 d2cbfc15605ccf9b44303a02cef0f36a877deedd2ddba8bad84a03a4625f9c40  SunPadSettings.mm
+d7b899d43cafd5ee4a77b3c113339676bacdd3e712719575f802459e285800b1  SunPadDiagnostics.h
+89560621c658387de44711c2d69eb89aca3eceeb8fec94ff8e26ea7424cb6be3  SunPadDiagnostics.mm
 ```

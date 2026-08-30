@@ -13,6 +13,8 @@ files=(
   "apple/shared/SunPadInputMixer.mm"
   "apple/shared/SunPadSettings.h"
   "apple/shared/SunPadSettings.mm"
+  "apple/shared/SunPadDiagnostics.h"
+  "apple/shared/SunPadDiagnostics.mm"
 )
 
 for upstream in "${files[@]}"; do

@@ -8,8 +8,9 @@ source. KartPad now retains a byte-identical snapshot of:
 
 - `SunPadGameOverlay.h/.mm`;
 - `SunPadInputState.h`;
-- `SunPadInputMixer.h/.mm`; and
-- `SunPadSettings.h/.mm`.
+- `SunPadInputMixer.h/.mm`;
+- `SunPadSettings.h/.mm`; and
+- `SunPadDiagnostics.h/.mm`.
 
 `scripts/verify-sunpad-overlay-snapshot.sh` compares every file byte-for-byte
 against the pinned local reference, verifies the reference commit, and compares
@@ -50,3 +51,23 @@ The host Objective-C++ contract test proves every individual mapping, the full
 simultaneous mask, both analog sticks, and connection state. It passes under the
 arm64 macOS toolchain. This is source-level boundary evidence only; it does not
 claim Simulator gameplay or touch ergonomics acceptance.
+
+## Native Simulator shell checkpoint
+
+`apple/ios` is a real UIKit application target with a landscape lifecycle,
+`CAMetalLayer`, and the byte-identical SunPad component compiled directly above
+the render surface. It contains KartPad's original light, dark, and tinted icon
+assets plus the privacy manifest. The reproducible shell build produced an
+arm64 `IOSSIMULATOR` Mach-O with a 16.0 minimum and only Apple system dynamic
+dependencies; `scripts/audit-ios-shell.sh` passed the exact bundle.
+
+`scripts/run-ios-shell-simulator.sh` audits before installation, refuses to run
+while a macOS KartPad game instance is active, refuses more than one booted
+Simulator, and refuses to replace a different already-booted device. The live
+macOS soak exercised the first guard successfully with exit 75, so no Simulator
+was booted for this checkpoint.
+
+The surface currently makes its integration state explicit: the translated
+game core is not linked and copied SunPad menu actions have not yet been adapted
+to KartPad services. Build and package success therefore do not establish a
+complete race, visual fidelity, menu acceptance, or touch feel.
