@@ -1,12 +1,12 @@
-# G14 full retail iPhone Simulator checkpoint
+# G14 full retail iPhone and iPad Simulator checkpoint
 
 Date: 2026-08-30
 
 ## Scope and result
 
-The exact 29,065-function retail UIKit app now launches on the sole booted iPhone 17 Pro / iOS 26.5 Simulator, loads the staged extracted Mario Kart Wii data, renders through Metal, reaches the title and retail menus, accepts touch input, enters the retail two-player controller-registration flow, and reaches a live 50cc Luigi Circuit race.
+The exact 29,065-function retail UIKit app now launches sequentially on iPhone 17 Pro and iPad Pro 13-inch (M5) / iOS 26.5 Simulators, loads the staged extracted Mario Kart Wii data, renders through Metal, reaches the title and retail menus, accepts touch input, and reaches live 50cc Luigi Circuit on both device classes. The iPhone also enters the retail two-player controller-registration flow.
 
-This checkpoint does not claim a completed mobile race, sustained touch acceleration/steering feel, save acceptance, iPad retail execution, physical-device behavior, or subjective audio quality. Those gates remain open.
+This checkpoint does not claim a completed mobile race, sustained touch acceleration/steering feel, physical-device behavior, or subjective audio quality. Those gates remain open.
 
 ## Exact candidate
 
@@ -15,7 +15,8 @@ This checkpoint does not claim a completed mobile race, sustained touch accelera
 - `Assets.car` SHA-256: `18de0779809a419002a50074b1d9e45e83aa89dfaa4e4355e8ed26c45c7fb346`
 - Privacy manifest SHA-256: `343dbc92a22d95a896d5bb894f439d655ac8e15d0fcc7fe72500bd5fcaba1740`
 - Simulator: iPhone 17 Pro, iOS 26.5, UDID `7E8E357A-30DD-4EB3-B8C7-83BB555E67B7`
-- One-Simulator invariant: pass; every other Simulator remained shut down.
+- Simulator: iPad Pro 13-inch (M5), iOS 26.5, UDID `D80E9862-C29A-4D69-B8E5-D81D396C17D5`
+- One-Simulator invariant: pass; the iPhone was terminated and shut down before booting the iPad, and the iPad was shut down after its pass.
 - Full-game bundle audit: pass before install.
 - Exact pinned nine-file SunPad snapshot verifier: pass.
 
@@ -53,6 +54,16 @@ Observed end-to-end behavior on this candidate:
 
 The pinned SunPad files remain byte-identical. A KartPad-owned subclass adds a top-level `Multiplayer…` action around the unchanged source menu. The action opens a native setup sheet explaining Player 1 touch and routes to the existing controller-mapping UI. The native entry and the retail two-player controller-registration screen were both exercised.
 
+## iPad results
+
+- The guarded runner booted the iPad only after the iPhone was shut down.
+- Landscape rotation fills the iPad display cleanly in the native 4:3 mode; the portrait-hardware state correctly presents the landscape scene letterboxed until rotation.
+- The exact touch overlay scales cleanly and the complete SunPad menu is visible without compact-menu scrolling.
+- The KartPad-owned `Multiplayer…` entry appears above the unchanged SunPad menu children.
+- Touch created a new local `Player` license, reached Main Menu, selected the default 50cc Grand Prix flow, and reached live Luigi Circuit.
+- The new `rksys.dat` had SHA-256 `5291cecd0ae1749a7996dfd8f3bc53978a9af08fe9aaf639a831214d6bb24f42` before and after terminate/relaunch, and the `Player` license remained selectable.
+- Home/background and foreground resume returned to the active game/menu state.
+
 ## Evidence files
 
 - `iphone-stable-original-4x3.jpeg`
@@ -63,7 +74,11 @@ The pinned SunPad files remain byte-identical. A KartPad-owned subclass adds a t
 - `iphone-live-race-touch.jpeg`
 - `title-mac-vs-iphone-16x9.png`
 - `title-oracle-vs-iphone-4x3.png`
+- `ipad-stable-original-4x3.jpeg`
+- `ipad-main-menu-touch.jpeg`
+- `ipad-kartpad-menu.jpeg`
+- `ipad-live-race-touch.jpeg`
 
 ## Classification
 
-Pass for iPhone retail boot, Metal presentation, container migration, stable aspect default, bounded 16:9 option, title/menu touch navigation, Multiplayer access, controller-registration entry, live-race entry, and background/foreground recovery. G14/G15 remain open pending a complete touch-driven iPhone race/save/relaunch, sequential iPad retail pass after shutting down iPhone, controller handoff, and hands-on touch/audio acceptance.
+Pass for sequential iPhone/iPad retail boot, Metal presentation, container migration, stable aspect default, bounded iPhone 16:9 option, title/menu touch navigation, Multiplayer access, controller-registration entry, live-race entry on both device classes, iPad license save/relaunch, and background/foreground recovery. G14/G15 remain open pending complete touch-driven races, iPhone save/relaunch acceptance, controller handoff, and hands-on touch/audio acceptance.
