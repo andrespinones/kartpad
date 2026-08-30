@@ -41,6 +41,8 @@ cp -R "${repo_root}/ref/upstream/Wiicompiled/aurora-main" \
   "${runtime_source}/aurora-main"
 patch --batch -p1 -d "${runtime_source}/aurora-main" < \
   "${repo_root}/patches/aurora-present-telemetry.patch"
+patch --batch -p1 -d "${runtime_source}/aurora-main" < \
+  "${repo_root}/patches/aurora-macos-single-pipeline-worker.patch"
 patch -p1 -d "${runtime_source}" < "${repo_root}/patches/wiicompiled-apple-runtime.patch"
 patch -p1 -d "${runtime_source}" < "${repo_root}/patches/wiicompiled-macos-shell.patch"
 patch --batch -p1 -d "${runtime_source}" < \

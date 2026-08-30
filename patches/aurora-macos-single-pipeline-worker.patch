@@ -1,0 +1,27 @@
+--- a/lib/gfx/pipeline_cache.cpp
++++ b/lib/gfx/pipeline_cache.cpp
+@@ -16,6 +16,10 @@
+ #include <thread>
+ #include <vector>
+ 
++#if defined(__APPLE__)
++#include <TargetConditionals.h>
++#endif
++
+ #include <SDL3/SDL_iostream.h>
+ #include <absl/container/flat_hash_map.h>
+ 
+@@ -1044,7 +1048,13 @@ static size_t pipeline_worker_count() {
+   if (logicalProcessors == 0) {
+     return 1;
+   }
+   const size_t availableWorkers =
+       logicalProcessors > ReservedLogicalProcessors ? logicalProcessors - ReservedLogicalProcessors : 1;
++#if defined(__APPLE__) && TARGET_OS_OSX
++  // Parallel Metal pipeline creation is slower and disrupts presentation/audio
++  // on the accepted Apple Silicon cold-cache fixture. A single worker produced
++  // better p99/worst timing and zero audio drops while completing the same seed.
++  return 1;
++#endif
+   return std::clamp(availableWorkers, size_t{1}, MaxPipelineWorkers);
+ }
