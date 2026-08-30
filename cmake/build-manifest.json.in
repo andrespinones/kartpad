@@ -6,7 +6,7 @@
   "compilerVersion": "@CMAKE_CXX_COMPILER_VERSION@",
   "compilerPath": "@CMAKE_CXX_COMPILER@",
   "systemName": "@CMAKE_SYSTEM_NAME@",
-  "systemProcessor": "@CMAKE_SYSTEM_PROCESSOR@",
+  "systemProcessor": "@MKW_HOST_PROCESSOR@",
   "deploymentTarget": "@CMAKE_OSX_DEPLOYMENT_TARGET@",
   "architectures": "@CMAKE_OSX_ARCHITECTURES@",
   "buildType": "@CMAKE_BUILD_TYPE@",

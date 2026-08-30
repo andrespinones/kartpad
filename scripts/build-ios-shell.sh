@@ -9,11 +9,14 @@ if [[ "${build_dir}" != /* ]]; then
   exit 64
 fi
 
-cmake -S "${repo_root}/apple/ios" -B "${build_dir}" -G Xcode \
+cmake -S "${repo_root}" -B "${build_dir}" -G Xcode \
   -DCMAKE_SYSTEM_NAME=iOS \
   -DCMAKE_OSX_SYSROOT=iphonesimulator \
   -DCMAKE_OSX_ARCHITECTURES=arm64 \
-  -DCMAKE_OSX_DEPLOYMENT_TARGET=16.0
+  -DCMAKE_OSX_DEPLOYMENT_TARGET=16.0 \
+  -DMKW_BUILD_IOS_SIMULATOR=ON \
+  -DMKW_BUILD_IOS_DEVICE=OFF \
+  -DBUILD_TESTING=OFF
 cmake --build "${build_dir}" --config Debug --target KartPad -- \
   -sdk iphonesimulator CODE_SIGNING_ALLOWED=NO
 

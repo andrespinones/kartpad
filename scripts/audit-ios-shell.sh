@@ -52,4 +52,11 @@ if strings "${binary}" | rg -F -q '/Users/'; then
   exit 70
 fi
 
+if ! nm -gj "${binary}" | rg -q 'KartPadCoreIntegrationSummary' ||
+   ! strings "${binary}" | rg -F -q 'KartPad mobile core checks passed' ||
+   ! strings "${binary}" | rg -F -q 'translated fixture output mismatch'; then
+  echo "Simulator shell does not contain the linked mobile core self-check" >&2
+  exit 69
+fi
+
 echo "iOS Simulator shell audit passed: ${app}"

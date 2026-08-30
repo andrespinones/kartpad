@@ -21,11 +21,23 @@ option(MKW_BUILD_AURORA_G7_FIXTURES "Build the pinned Aurora/Dawn G7 validation 
 option(MKW_GUEST_MEMORY_FLAT "Select the flat guest-memory backend" OFF)
 option(MKW_GUEST_MEMORY_CHECKED "Select the checked guest-memory backend" ON)
 
-if(APPLE AND CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+if(APPLE AND CMAKE_SYSTEM_NAME MATCHES "^(Darwin|iOS)$")
   set(MKW_HOST_DARWIN ON)
   set(MKW_HOST_WINDOWS OFF)
-  if(NOT MKW_BUILD_IOS_SIMULATOR AND NOT MKW_BUILD_IOS_DEVICE)
+  if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    if(MKW_BUILD_IOS_SIMULATOR OR MKW_BUILD_IOS_DEVICE)
+      message(FATAL_ERROR "iOS host options require an iOS toolchain/sysroot")
+    endif()
     set(MKW_BUILD_MACOS ON)
+  else()
+    set(MKW_BUILD_MACOS OFF)
+    if(MKW_BUILD_IOS_SIMULATOR AND MKW_BUILD_IOS_DEVICE)
+      message(FATAL_ERROR "Select exactly one iOS host kind")
+    endif()
+    if(NOT MKW_BUILD_IOS_SIMULATOR AND NOT MKW_BUILD_IOS_DEVICE)
+      message(FATAL_ERROR
+        "Select MKW_BUILD_IOS_SIMULATOR or MKW_BUILD_IOS_DEVICE for iOS")
+    endif()
   endif()
 elseif(WIN32)
   set(MKW_HOST_DARWIN OFF)
@@ -34,14 +46,23 @@ else()
   message(FATAL_ERROR "KartPad currently supports Darwin and Windows host graphs only")
 endif()
 
-if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(arm64|aarch64|ARM64)$")
+set(MKW_HOST_PROCESSOR "${CMAKE_SYSTEM_PROCESSOR}")
+if(NOT MKW_HOST_PROCESSOR AND CMAKE_OSX_ARCHITECTURES)
+  list(LENGTH CMAKE_OSX_ARCHITECTURES MKW_OSX_ARCHITECTURE_COUNT)
+  if(NOT MKW_OSX_ARCHITECTURE_COUNT EQUAL 1)
+    message(FATAL_ERROR "KartPad requires one explicit Apple architecture")
+  endif()
+  set(MKW_HOST_PROCESSOR "${CMAKE_OSX_ARCHITECTURES}")
+endif()
+
+if(MKW_HOST_PROCESSOR MATCHES "^(arm64|aarch64|ARM64)$")
   set(MKW_HOST_ARM64 ON)
   set(MKW_HOST_X86_64 OFF)
-elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64|amd64)$")
+elseif(MKW_HOST_PROCESSOR MATCHES "^(x86_64|AMD64|amd64)$")
   set(MKW_HOST_ARM64 OFF)
   set(MKW_HOST_X86_64 ON)
 else()
-  message(FATAL_ERROR "Unsupported host architecture: ${CMAKE_SYSTEM_PROCESSOR}")
+  message(FATAL_ERROR "Unsupported host architecture: ${MKW_HOST_PROCESSOR}")
 endif()
 
 if(MKW_HOST_DARWIN)
@@ -132,23 +153,25 @@ if(MKW_HOST_DARWIN)
   target_compile_options(kartpad_g7_translated PRIVATE
     -Wall -Wextra -Wpedantic -Werror -fno-fast-math -ffp-contract=off)
 
-  add_executable(KartPadG7Frame MACOSX_BUNDLE runtime/apps/KartPadG7Frame.mm)
-  target_include_directories(KartPadG7Frame PRIVATE runtime/translation_shim)
-  target_link_libraries(KartPadG7Frame PRIVATE kartpad_g7_translated)
-  target_compile_features(KartPadG7Frame PRIVATE cxx_std_20)
-  target_compile_options(KartPadG7Frame PRIVATE -fobjc-arc -Wall -Wextra -Wpedantic -Werror)
-  foreach(framework IN ITEMS AppKit Foundation Metal QuartzCore ImageIO UniformTypeIdentifiers)
-    find_library(G7_${framework}_FRAMEWORK ${framework} REQUIRED)
-    target_link_libraries(KartPadG7Frame PRIVATE "${G7_${framework}_FRAMEWORK}")
-  endforeach()
-  set_target_properties(KartPadG7Frame PROPERTIES
-    MACOSX_BUNDLE_BUNDLE_NAME "KartPad G7 Frame"
-    MACOSX_BUNDLE_GUI_IDENTIFIER "com.kartpad.g7-frame"
-    MACOSX_BUNDLE_SHORT_VERSION_STRING "0.1"
-    MACOSX_BUNDLE_BUNDLE_VERSION "1"
-  )
+  if(MKW_BUILD_MACOS)
+    add_executable(KartPadG7Frame MACOSX_BUNDLE runtime/apps/KartPadG7Frame.mm)
+    target_include_directories(KartPadG7Frame PRIVATE runtime/translation_shim)
+    target_link_libraries(KartPadG7Frame PRIVATE kartpad_g7_translated)
+    target_compile_features(KartPadG7Frame PRIVATE cxx_std_20)
+    target_compile_options(KartPadG7Frame PRIVATE -fobjc-arc -Wall -Wextra -Wpedantic -Werror)
+    foreach(framework IN ITEMS AppKit Foundation Metal QuartzCore ImageIO UniformTypeIdentifiers)
+      find_library(G7_${framework}_FRAMEWORK ${framework} REQUIRED)
+      target_link_libraries(KartPadG7Frame PRIVATE "${G7_${framework}_FRAMEWORK}")
+    endforeach()
+    set_target_properties(KartPadG7Frame PROPERTIES
+      MACOSX_BUNDLE_BUNDLE_NAME "KartPad G7 Frame"
+      MACOSX_BUNDLE_GUI_IDENTIFIER "com.kartpad.g7-frame"
+      MACOSX_BUNDLE_SHORT_VERSION_STRING "0.1"
+      MACOSX_BUNDLE_BUNDLE_VERSION "1"
+    )
+  endif()
 
-  if(MKW_BUILD_AURORA_G7_FIXTURES)
+  if(MKW_BUILD_MACOS AND MKW_BUILD_AURORA_G7_FIXTURES)
     set(AURORA_ENABLE_GX ON CACHE BOOL "Enable Aurora GX" FORCE)
     set(AURORA_ENABLE_CARD OFF CACHE BOOL "Disable CARD for the G7 graphics fixture" FORCE)
     set(AURORA_ENABLE_DVD OFF CACHE BOOL "Disable DVD for the G7 graphics fixture" FORCE)
@@ -205,6 +228,57 @@ if(MKW_HOST_WINDOWS)
   target_link_libraries(kartpad_host PRIVATE shell32)
 endif()
 
+if(MKW_BUILD_IOS_SIMULATOR OR MKW_BUILD_IOS_DEVICE)
+  set(KARTPAD_IOS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/apple/ios")
+  set(KARTPAD_SUNPAD_DIR "${CMAKE_CURRENT_SOURCE_DIR}/apple/third_party/sunpad")
+  set(KARTPAD_APP_ICON_CATALOG "${KARTPAD_IOS_DIR}/Assets.xcassets")
+  set(KARTPAD_PRIVACY_MANIFEST "${KARTPAD_IOS_DIR}/PrivacyInfo.xcprivacy")
+
+  add_executable(KartPad MACOSX_BUNDLE
+    "${KARTPAD_IOS_DIR}/KartPadAppDelegate.mm"
+    "${KARTPAD_IOS_DIR}/KartPadShellViewController.mm"
+    "${CMAKE_CURRENT_SOURCE_DIR}/apple/mobile/KartPadCoreBridge.mm"
+    "${CMAKE_CURRENT_SOURCE_DIR}/apple/mobile/KartPadClassicInput.mm"
+    "${KARTPAD_SUNPAD_DIR}/SunPadGameOverlay.mm"
+    "${KARTPAD_SUNPAD_DIR}/SunPadInputMixer.mm"
+    "${KARTPAD_SUNPAD_DIR}/SunPadSettings.mm"
+    "${KARTPAD_SUNPAD_DIR}/SunPadDiagnostics.mm"
+    "${KARTPAD_APP_ICON_CATALOG}"
+    "${KARTPAD_PRIVACY_MANIFEST}")
+  target_include_directories(KartPad PRIVATE
+    "${KARTPAD_IOS_DIR}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/apple/mobile"
+    "${KARTPAD_SUNPAD_DIR}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/runtime/translation_shim")
+  target_link_libraries(KartPad PRIVATE
+    kartpad_host kartpad_scheduler kartpad_g7_translated)
+  target_compile_features(KartPad PRIVATE cxx_std_20)
+  target_compile_options(KartPad PRIVATE
+    -fobjc-arc -Wall -Wextra
+    "-ffile-prefix-map=${CMAKE_CURRENT_SOURCE_DIR}=.")
+  foreach(framework IN ITEMS
+      Foundation UIKit CoreGraphics QuartzCore Metal GameController UniformTypeIdentifiers)
+    find_library(KARTPAD_IOS_${framework}_FRAMEWORK ${framework} REQUIRED)
+    target_link_libraries(KartPad PRIVATE "${KARTPAD_IOS_${framework}_FRAMEWORK}")
+  endforeach()
+  set_source_files_properties(
+    "${KARTPAD_APP_ICON_CATALOG}" "${KARTPAD_PRIVACY_MANIFEST}"
+    PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+  set_target_properties(KartPad PROPERTIES
+    MACOSX_BUNDLE_INFO_PLIST "${KARTPAD_IOS_DIR}/Info.plist"
+    XCODE_ATTRIBUTE_ARCHS arm64
+    XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME AppIcon
+    XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++20"
+    XCODE_ATTRIBUTE_CURRENT_PROJECT_VERSION 1
+    XCODE_ATTRIBUTE_GENERATE_INFOPLIST_FILE NO
+    XCODE_ATTRIBUTE_IPHONEOS_DEPLOYMENT_TARGET 16.0
+    XCODE_ATTRIBUTE_MARKETING_VERSION 0.1.0
+    XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER dev.kartpad.app
+    XCODE_ATTRIBUTE_SUPPORTED_PLATFORMS "iphonesimulator iphoneos"
+    XCODE_ATTRIBUTE_SUPPORTS_MACCATALYST NO
+    XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1,2")
+endif()
+
 if(BUILD_TESTING)
   add_executable(kartpad_host_contract_tests runtime/tests/host_contract_tests.cpp)
   target_link_libraries(kartpad_host_contract_tests PRIVATE kartpad_host)
@@ -225,7 +299,7 @@ if(BUILD_TESTING)
   target_compile_options(kartpad_scheduler_tests PRIVATE -Wall -Wextra -Wpedantic -Werror)
   add_test(NAME kartpad.scheduler.portable COMMAND kartpad_scheduler_tests)
 
-  if(MKW_HOST_DARWIN)
+  if(MKW_BUILD_MACOS)
     add_executable(kartpad_darwin_vm_probe runtime/tests/darwin_vm_probe.cpp)
     target_compile_features(kartpad_darwin_vm_probe PRIVATE cxx_std_20)
     target_compile_options(kartpad_darwin_vm_probe PRIVATE -Wall -Wextra -Wpedantic -Werror)

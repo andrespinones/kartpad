@@ -54,7 +54,7 @@ claim Simulator gameplay or touch ergonomics acceptance.
 
 ## Native Simulator shell checkpoint
 
-`apple/ios` is a real UIKit application target with a landscape lifecycle,
+The root `KartPad` target uses the UIKit sources under `apple/ios`, with a landscape lifecycle,
 `CAMetalLayer`, and the byte-identical SunPad component compiled directly above
 the render surface. It contains KartPad's original light, dark, and tinted icon
 assets plus the privacy manifest. The reproducible shell build produced an
@@ -68,6 +68,25 @@ macOS soak exercised the first guard successfully with exit 75, so no Simulator
 was booted for this checkpoint.
 
 The surface currently makes its integration state explicit: the translated
-game core is not linked and copied SunPad menu actions have not yet been adapted
-to KartPad services. Build and package success therefore do not establish a
-complete race, visual fidelity, menu acceptance, or touch feel.
+retail game graph is not linked and copied SunPad menu actions have not yet been
+adapted to KartPad services. Build and package success therefore do not establish
+a complete race, visual fidelity, menu acceptance, or touch feel.
+
+## Shared-core promotion checkpoint
+
+The repository's previously dormant iOS host options now accept the iOS
+toolchain explicitly, distinguish Simulator from device builds, derive the
+otherwise-empty Xcode iOS processor field from the required single architecture,
+and exclude macOS-only AppKit fixtures and process tests. The same checked guest
+memory, deterministic scheduler, host services, and translated G7 fixture
+libraries used by the correctness ladder compile for arm64 iOS Simulator.
+The same four libraries also compile against the physical `iphoneos` 16.0 SDK
+as arm64 static archives without weakening their warning-as-error contracts.
+
+The native app links those four libraries rather than carrying an unrelated UI
+stub. A bounded, content-free startup check executes the translated `0x80001000`
+fixture against checked guest memory, validates the `KPGX` command, executes a
+scheduler thread, and reads the host monotonic clock. The exact binary contains
+the bridge and linked library symbols, and the package auditor now fails closed
+if that integration is absent. Runtime success still requires the protected
+single-Simulator launch after the active macOS game ends.

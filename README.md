@@ -40,7 +40,7 @@ signing material.
 | Input | Keyboard plus four independent Classic-controller slots; two-player full-race evidence passes |
 | Audio | Non-silent host playback, pause/resume, and live output-device migration pass instrumented continuity checks; subjective and long-session acceptance remain open |
 | Packaging | Original icon masters and macOS ICNS exist; installed-data relocation and a self-contained signed package are under final validation |
-| iPhone/iPad | Native arm64 Simulator shell builds with the exact pinned SunPad overlay and original icons; core gameplay and mobile acceptance remain open |
+| iPhone/iPad | Native arm64 shell builds with the exact SunPad overlay, original icons, and shared correctness libraries; retail gameplay and mobile acceptance remain open |
 | Distribution | Development source only; no game data and no release candidate |
 
 The evidence ledger, exact open rows, and known risks live in
@@ -110,9 +110,10 @@ the component's layout editing, controller handoff, accessibility behavior, and
 safe-area treatment; a separate tested adapter supplies Mario Kart Wii's Classic
 Controller mapping without changing the copied baseline. The native arm64
 Simulator shell, original icon catalog, privacy manifest, and package audit pass.
-The game core and KartPad-specific menu services remain under integration, and
-the mobile surface is not accepted until complete iPhone and iPad Simulator
-races pass with one Simulator booted at a time.
+It links and self-checks the shared checked-memory, scheduler, host, and translated
+fixture libraries. The full retail graph and KartPad-specific menu services remain
+under integration, and the mobile surface is not accepted until complete iPhone
+and iPad Simulator races pass with one Simulator booted at a time.
 
 ## Evidence-first development
 

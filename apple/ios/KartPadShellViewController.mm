@@ -1,5 +1,6 @@
 #import "KartPadShellViewController.h"
 
+#import "KartPadCoreBridge.h"
 #import "SunPadGameOverlay.h"
 #import "SunPadInputMixer.h"
 
@@ -39,7 +40,7 @@
 
     UILabel *status = [[UILabel alloc] initWithFrame:CGRectZero];
     status.translatesAutoresizingMaskIntoConstraints = NO;
-    status.text = @"KartPad mobile core integration";
+    status.text = KartPadCoreIntegrationSummary();
     status.textColor = [UIColor colorWithWhite:1.0 alpha:0.60];
     status.font = [UIFont systemFontOfSize:17.0 weight:UIFontWeightSemibold];
     status.accessibilityLabel = @"KartPad mobile core integration surface";
