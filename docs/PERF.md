@@ -18,6 +18,7 @@ substitutes for frame-time, guest-cadence, audio, memory, and soak evidence.
 | Three-player lifecycle stress | Captures showed 14.8–19.8 FPS and 18 audio drops | Rejected performance/audio sample |
 | Exact self-build first exercise | 43 dropped audio blocks / 16,512 bytes under compilation load | Fail signal; must be paired with exact frame/shader timeline |
 | Representative audio continuity | 2:00:18 completed; 175 stale blocks / 67,200 bytes, about 0.0073% of submitted bytes | Useful bounded telemetry; not G11 soak acceptance |
+| Exact `2cfb7e1` retained-cache title | Minimum effective FPS 59.001; maximum p99 17.701 ms; maximum worst 32.808 ms while the queue fell from 1,223 to 865 | Instrumentation pass only; short, non-fixture session |
 
 ## Acceptance contract
 
@@ -41,9 +42,10 @@ regression rejects the candidate even if its average FPS improves.
 
 ## Controlled experiment order
 
-1. Add bounded, machine-readable present telemetry with interval buckets,
-   p50/p95/p99/worst, effective-motion cadence, and pipeline queue counts.
-2. Run a warm-cache title/menu baseline without clearing any state.
+1. ~~Add bounded, machine-readable present telemetry with interval buckets,
+   p50/p95/p99/worst, effective-motion cadence, and pipeline queue counts.~~
+   Implemented and exercised at `2cfb7e1`; G11 is still open.
+2. Run a controlled warm-cache title/menu baseline without clearing any state.
 3. Copy the complete existing cache aside, clear only regenerable KartPad
    caches, and run the exact cold title/menu path once.
 4. Restore the copied cache and repeat the same path to prove the comparison

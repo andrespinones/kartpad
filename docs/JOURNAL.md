@@ -1092,3 +1092,27 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - A new 857-step macOS graph compiled and linked, then packaged and passed the fail-closed audit. The self-built app loaded the fresh extraction, reached live retail title/attract rendering at 60 FPS with non-silent audio, observed mapped A input, and exited 0 through native Quit with a clean session marker. No Simulator was booted.
 - Exact committed workflow source is `d6e320295aa29303325908e9bd1f5cc9e756a15c`; its exact-fingerprint package independently reached the title/audio path and quit cleanly. Signed executable SHA-256 is `7982af482b0f4fa0fe522606de1d0493a3dc88a13384ef37d9d542f03de33a99` and bundle-content SHA-256 is `bc53f9e82e2e7656d86170e59426b9ab79b4553366946b684824739fd9f0fc92`.
 - Classification: **Pass for the supported WBFS through private generation, complete macOS build, audited package, and runtime smoke; G13 remains open.** The exercise began from the current checkout with already present ignored reference pins/archives, not a fresh network Git clone. Automated source provisioning, native WBFS progress/resume/cache management, and public updater/notarization infrastructure remain. Evidence: `docs/artifacts/2026-08-30/g13-macos-wbfs-self-build.md`.
+
+## 2026-08-30 — G11 bounded presentation telemetry
+
+- Extended Aurora's bounded one-second presentation snapshot with p50, p99,
+  and worst intervals, then added content-free KartPad records every 300
+  presents with effective-motion FPS and queued/created pipeline counts. A new
+  strict parser rejects malformed/non-monotonic telemetry and passes its
+  synthetic self-test.
+- The first full build exposed an unrelated relative-path bug in the Mac
+  preparation script. Canonicalizing caller-supplied translation/source/build
+  paths and reconfiguring restored the translated header and data-section
+  assembly edges; the complete 29,065-function runtime then linked.
+- Exact source `2cfb7e161db8e3f4d69f658d163dcb8e3d242e6c` produced a package with
+  bundle-content SHA-256
+  `dc6ecdca64df7a031fde00ab63472f0130674e8705bd27196483d6a0005615de`.
+  The title path emitted three valid windows with minimum effective FPS 59.001,
+  maximum p99 17.701 ms, and maximum worst 32.808 ms while the pipeline queue
+  fell from 1,223 to 865. Native Command-Q wrote a clean session and no
+  Simulator was booted.
+- Classification: **Pass for performance instrumentation, strict parsing, full
+  compilation, exact package audit, live title telemetry, and clean shutdown;
+  G11 remains open.** The short retained-cache run is not a controlled
+  cold/warm pair, representative race, profile, or soak. Evidence:
+  `docs/artifacts/2026-08-30/g11-present-telemetry.md`.
