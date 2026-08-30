@@ -1231,3 +1231,28 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   main-thread time was 7.527/7.402 seconds. Both held 60 FPS with zero audio
   drops and clean exits. The mixed result is **neutral**, not a performance
   win; the correctness model remains accepted and G11 remains open.
+
+## 2026-08-30 — G14 current-core iPad race profile
+
+- Built the latest full FPSCR-effect-model graph as an audited IOSSIMULATOR app
+  from source `443fd69`; executable SHA-256 is
+  `08eafccd48a9e412bf133a55aed221d252bcd14c46c9ac5f4b44596fe2c669d7`.
+- Proved the exact SunPad `Show FPS Counter` preference now turns the runtime
+  overlay off and on immediately without relaunching. The exact copied snapshot
+  remains byte-identical; KartPad refreshes the preference in its patch layer.
+- Touch-navigated a normal twelve-racer 50cc Luigi Circuit Grand Prix. Across
+  35 live-race telemetry records, effective FPS remained 57.003–60.082, maximum
+  p99 was 19.767 ms, and the final record was 60.004 FPS / 16.765 ms p99.
+- Countered the repeated-frame ambiguity: the retail race clock advanced from
+  01:11.278 to 01:21.893 across a roughly ten-second wall-clock bracket, so the
+  stationary guest was advancing in real time rather than only presenting at
+  60 Hz.
+- A paired 20-second CPU sample retained floating-point exception bookkeeping
+  as the dominant leaf cost, but direct fenv leaves fell from 6,132 to 4,160
+  samples while `RuntimeMain` moved from 11,098 to 10,689. This is promising
+  reproduction evidence, not a claimed optimization. Physical footprint moved
+  from 710.6 to 700.8 MiB.
+- Classification: **Pass for current-core Simulator packaging, live settings,
+  real-time stationary-race cadence, telemetry, profiling, and clean shutdown;
+  physical-device and complete touch-race acceptance remain open.** Evidence:
+  `docs/artifacts/2026-08-30/g14-ipad-current-race-profile.md`.
