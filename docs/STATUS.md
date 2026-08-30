@@ -25,7 +25,7 @@ Updated: 2026-08-29
 
 ## Known-good state
 
-- Repository checkpoint: corrected repeated-race camera lifecycle repair `3c1d22f` is on `origin/main`; the exact playtested executable SHA-256 is `3d15b8dade09679c0cdc78dd6a40304f28d3888e0fb2471da365e32bc9b6d16f`.
+- Repository checkpoint: static distributable macOS packaging `17cee52` is on `origin/main`; the exact current gameplay-soak executable remains the earlier playtested build, while the newly packaged executable awaits its single-instance launch test.
 - Simulator state: no Simulator device is booted. KartPad will boot exactly one when a mobile gate requires it.
 - Buildable KartPad targets: host, memory, scheduler, semantic contracts, native subsystem smoke, translated semantic fixture, and provisional translated-frame app.
 - Input profile: WBFS containing clean PAL `RMCP01`, revision 0; original is read-only. Physical keyboard holds retain the full normalized Classic-stick range. Accessibility-generated GUI taps use a bounded 0.35 level for 250 ms; acceleration/reverse retain their 500 ms gameplay holds. Physical controllers and future touch input are unaffected.
@@ -65,7 +65,7 @@ Updated: 2026-08-29
 - G8 playback is proven by both the runtime's non-silent host-stream telemetry and an independent system-output loopback level capture. Subjective audio quality and latency remain hands-on G10/G11 rows.
 - Audio continuity instrumentation is bounded and cumulative. Its first uncontended diagnostic sample recorded 104,960 queue checks and 40,304,256 submitted bytes with zero post-start empty observations or drops. Replay pause/resume passes with zero empty observations and a bounded eight-block pause burst. Default-output migration also passes: two live route changes caused a bounded 101-block stale-data burst, then zero further drops through 98,304 checks; the original output was restored and gameplay remained live. Subjective listening and the required long session remain open.
 - The fresh-process Time Trial replacement check added a normal-load sample through 49,152 queue checks and 18,873,984 submitted bytes with zero post-start empty observations or drops. It strengthens ordinary menu/gameplay continuity but does not replace pause, default-device migration, or long-session acceptance.
-- The development app currently stores writable `UserData` caches/logs inside its signed bundle. A playtest mutated Dawn's cache and invalidated the bundle resource seal until it was re-signed; G13 packaging must relocate writable runtime state outside the app before distribution acceptance.
+- The portable development app intentionally stores writable `UserData` beside its executable and is not distributable. A separate 80 MiB arm64 package candidate now contains no writable/private state, links only Apple system libraries, declares macOS 14.0, uses the original icon, passes strict ad-hoc signature and package audits, and identifies source commit `17cee52`. Launching this exact candidate and proving that its writes land under Application Support remain open until the active single-instance long replay ends. Evidence: `docs/artifacts/2026-08-29/g13-macos-package/`.
 - Moonview Highway first use sampled at 1.3 FPS and recovered to roughly 46 FPS within 20 seconds, then remained around 46–54 FPS during focused checks. Exact guest completion passed, but G11/G36 must compare a controlled warm-cache rerun and resolve sustained frame pacing before performance acceptance.
 
 ## UI reference commitment
