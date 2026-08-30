@@ -3,7 +3,7 @@ set -euo pipefail
 
 repo_root="$(git rev-parse --show-toplevel)"
 runtime_ref="${repo_root}/ref/upstream/Wiicompiled/runtime"
-translation_root="${1:-${repo_root}/private/g6-real-translation}"
+translation_root="${1:-${repo_root}/private/g8-full-translation}"
 runtime_source="${2:-${repo_root}/build/g7-game-runtime-source}"
 runtime_build="${3:-${repo_root}/build/g7-game-runtime-build}"
 dawn_archive="${repo_root}/build/dependency-cache/dawn-darwin-arm64-v20260603.191052.tar.gz"

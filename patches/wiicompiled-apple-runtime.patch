@@ -16,12 +16,20 @@ diff -ruN --exclude=.git --exclude=third_party --exclude=build a/CMakeLists.txt 
  endif()
  if(NOT CMAKE_BUILD_TYPE STREQUAL "Release")
      message(FATAL_ERROR "WiiCompiled only supports Release builds")
-@@ -18,7 +17,7 @@
+@@ -18,7 +17,15 @@
  # aurora-main and its third-party tree stay unaffected.
  set(MKW_PROJECT_COMPILE_DEFINITIONS NOMINMAX)
 
 -set(CMAKE_CXX_STANDARD 17)
 +set(CMAKE_CXX_STANDARD 20)
++
++# Release binaries must not disclose the local checkout path through __FILE__
++# strings emitted by first-party sources and header-only dependencies.
++if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
++    add_compile_options(
++        "-ffile-prefix-map=${CMAKE_SOURCE_DIR}=."
++        "-fmacro-prefix-map=${CMAKE_SOURCE_DIR}=.")
++endif()
 
  # Declared before the vendored libraries so the third-party block below can
  # branch on it and so cmake/NativePrebuilt.cmake is included after the names it
@@ -35,7 +43,7 @@ diff -ruN --exclude=.git --exclude=third_party --exclude=build a/CMakeLists.txt 
 
  # The translator's explicit float casts are PPC single-precision rounding points.
  # Fast-math may erase them and change guest-visible integer conversions.
-@@ -109,13 +109,16 @@
+@@ -109,13 +109,24 @@
      if(NOT EXISTS ${MKW_AURORA_DIR}/CMakeLists.txt)
          message(FATAL_ERROR "Requested aurora-main but ${MKW_AURORA_DIR} is missing")
      endif()
@@ -53,7 +61,15 @@ diff -ruN --exclude=.git --exclude=third_party --exclude=build a/CMakeLists.txt 
 +    set(AURORA_DAWN_PACKAGE_URL_HASH
 +        "SHA256=084ffd2ef500d614e443e3d494738272134628867bad3270d67ee8b0fb5f0838"
 +        CACHE STRING "" FORCE)
-+    set(AURORA_SDL3_PROVIDER system CACHE STRING "" FORCE)
++    # Release products must not inherit whichever Homebrew packages happen to
++    # be installed on the build host. Build these pinned dependencies from
++    # source as static libraries under the declared deployment target.
++    set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
++    set(CMAKE_DISABLE_FIND_PACKAGE_absl TRUE CACHE BOOL "" FORCE)
++    set(CMAKE_DISABLE_FIND_PACKAGE_PNG TRUE CACHE BOOL "" FORCE)
++    set(CMAKE_DISABLE_FIND_PACKAGE_Freetype TRUE CACHE BOOL "" FORCE)
++    set(AURORA_SDL3_PROVIDER vendor CACHE STRING "" FORCE)
++    set(AURORA_SDL3_LINKAGE static CACHE STRING "" FORCE)
 +    set(AURORA_ENABLE_GX ON CACHE BOOL "" FORCE)
 +    set(AURORA_ENABLE_DVD OFF CACHE BOOL "" FORCE)
 
