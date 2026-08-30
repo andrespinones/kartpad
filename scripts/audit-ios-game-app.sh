@@ -63,9 +63,12 @@ symbols="$(nm -gj "${binary}")"
 for required_symbol in \
   _KartPadMobileRuntimeHostInstall \
   _KartPadMobileReadClassicInput \
+  _KartPadMobileReadClassicInputForPlayer \
   '_OBJC_CLASS_$_SDLUIKitSceneDelegate' \
+  '_OBJC_CLASS_$_KartPadPhysicalControllers' \
   '_OBJC_CLASS_$_SunPadGameOverlay' \
-  '_OBJC_CLASS_$_SunPadInputMixer'; do
+  '_OBJC_CLASS_$_SunPadInputMixer' \
+  '_OBJC_CLASS_$_SunPadControllerMappingStore'; do
   if ! rg -F -q "${required_symbol}" <<<"${symbols}"; then
     echo "game app is missing required mobile symbol: ${required_symbol}" >&2
     exit 69

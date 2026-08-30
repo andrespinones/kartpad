@@ -1,0 +1,261 @@
+#import "KartPadPhysicalControllers.h"
+
+#import "SunPadControllerSlots.h"
+#import "SunPadDiagnostics.h"
+#import "SunPadInputMixer.h"
+
+#import <GameController/GameController.h>
+
+#include <algorithm>
+#include <array>
+#include <cmath>
+#include <mutex>
+#include <vector>
+
+namespace {
+
+uintptr_t ControllerInstanceID(GCController *controller) {
+  return reinterpret_cast<uintptr_t>((__bridge void *)controller);
+}
+
+GCControllerPlayerIndex PlayerIndexForSlot(const std::size_t slot) {
+  switch (slot) {
+    case 0: return GCControllerPlayerIndex1;
+    case 1: return GCControllerPlayerIndex2;
+    case 2: return GCControllerPlayerIndex3;
+    case 3: return GCControllerPlayerIndex4;
+    default: return GCControllerPlayerIndexUnset;
+  }
+}
+
+SunPadPhysicalControllerButton PressedFaceButtons(GCExtendedGamepad *pad) {
+  uint8_t buttons = 0;
+  if (pad.buttonA.isPressed) buttons |= SunPadPhysicalControllerButtonA;
+  if (pad.buttonB.isPressed) buttons |= SunPadPhysicalControllerButtonB;
+  if (pad.buttonX.isPressed) buttons |= SunPadPhysicalControllerButtonX;
+  if (pad.buttonY.isPressed) buttons |= SunPadPhysicalControllerButtonY;
+  if (pad.leftShoulder.isPressed) {
+    buttons |= SunPadPhysicalControllerButtonLeftShoulder;
+  }
+  return static_cast<SunPadPhysicalControllerButton>(buttons);
+}
+
+KartPadPhysicalControllerSample SampleFromGamepad(GCExtendedGamepad *gamepad) {
+  KartPadPhysicalControllerSample sample;
+  sample.faceButtons = PressedFaceButtons(gamepad);
+  sample.menu = gamepad.buttonMenu.isPressed;
+  sample.dpadUp = gamepad.dpad.up.isPressed;
+  sample.dpadDown = gamepad.dpad.down.isPressed;
+  sample.dpadLeft = gamepad.dpad.left.isPressed;
+  sample.dpadRight = gamepad.dpad.right.isPressed;
+  sample.rightShoulder = gamepad.rightShoulder.isPressed;
+  sample.leftX = gamepad.leftThumbstick.xAxis.value;
+  sample.leftY = gamepad.leftThumbstick.yAxis.value;
+  sample.rightX = gamepad.rightThumbstick.xAxis.value;
+  sample.rightY = gamepad.rightThumbstick.yAxis.value;
+  sample.leftTrigger = gamepad.leftTrigger.value;
+  sample.rightTrigger = gamepad.rightTrigger.value;
+  return sample;
+}
+
+}  // namespace
+
+SunPadInputState KartPadAdaptPhysicalControllerSample(
+    const KartPadPhysicalControllerSample& sample,
+    const SunPadControllerButtonMapping mapping) noexcept {
+  SunPadInputState state{};
+  state.connected = 1;
+  state.buttons |= SunPadApplyControllerButtonMapping(mapping, sample.faceButtons);
+  if (sample.menu) state.buttons |= SunPadButtonStart;
+  if (sample.dpadUp) state.buttons |= SunPadButtonDpadUp;
+  if (sample.dpadDown) state.buttons |= SunPadButtonDpadDown;
+  if (sample.dpadLeft) state.buttons |= SunPadButtonDpadLeft;
+  if (sample.dpadRight) state.buttons |= SunPadButtonDpadRight;
+  state.stickX = static_cast<int8_t>(std::lround(
+      std::clamp(sample.leftX, -1.0f, 1.0f) * 127.0f));
+  state.stickY = static_cast<int8_t>(std::lround(
+      std::clamp(sample.leftY, -1.0f, 1.0f) * 127.0f));
+  state.cStickX = static_cast<int8_t>(std::lround(
+      std::clamp(sample.rightX, -1.0f, 1.0f) * 127.0f));
+  state.cStickY = static_cast<int8_t>(std::lround(
+      std::clamp(sample.rightY, -1.0f, 1.0f) * 127.0f));
+  state.triggerL = static_cast<uint8_t>(std::lround(
+      std::clamp(sample.leftTrigger, 0.0f, 1.0f) * 255.0f));
+  const uint8_t physicalTriggerR = static_cast<uint8_t>(std::lround(
+      std::clamp(sample.rightTrigger, 0.0f, 1.0f) * 255.0f));
+  state.triggerR = SunPadControllerRightTriggerPressure(
+      physicalTriggerR, sample.rightShoulder);
+  if (state.triggerL > 30) state.buttons |= SunPadButtonL;
+  if (physicalTriggerR > 30) state.buttons |= SunPadButtonR;
+  return state;
+}
+
+@implementation KartPadPhysicalControllers {
+  SunPadControllerSlots _slots;
+  NSMutableDictionary<NSNumber *, GCController *> *_configuredControllers;
+  std::mutex _stateMutex;
+  std::array<SunPadInputState, SunPadControllerSlots::kMaxPlayers> _states;
+  std::array<uint16_t, SunPadControllerSlots::kMaxPlayers> _latchedButtons;
+  BOOL _started;
+}
+
++ (instancetype)sharedControllers {
+  static KartPadPhysicalControllers *controllers = nil;
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    controllers = [[KartPadPhysicalControllers alloc] init];
+  });
+  return controllers;
+}
+
+- (instancetype)init {
+  self = [super init];
+  if (self != nil) {
+    _configuredControllers = [NSMutableDictionary dictionary];
+    _states = {};
+    _latchedButtons = {};
+  }
+  return self;
+}
+
+- (void)start {
+  if (_started) return;
+  _started = YES;
+  NSNotificationCenter *notifications = NSNotificationCenter.defaultCenter;
+  [notifications addObserver:self
+                    selector:@selector(controllerConnectionChanged:)
+                        name:GCControllerDidConnectNotification
+                      object:nil];
+  [notifications addObserver:self
+                    selector:@selector(controllerConnectionChanged:)
+                        name:GCControllerDidDisconnectNotification
+                      object:nil];
+  [self reconcileControllers];
+}
+
+- (void)stop {
+  if (!_started) return;
+  _started = NO;
+  [NSNotificationCenter.defaultCenter removeObserver:self];
+  for (GCController *controller in _configuredControllers.allValues) {
+    controller.extendedGamepad.valueChangedHandler = nil;
+    controller.playerIndex = GCControllerPlayerIndexUnset;
+  }
+  [_configuredControllers removeAllObjects];
+  _slots = {};
+  {
+    std::scoped_lock lock(_stateMutex);
+    _states = {};
+    _latchedButtons = {};
+  }
+  [[SunPadInputMixer sharedMixer] clearInputFromTouch:NO];
+}
+
+- (void)controllerConnectionChanged:(NSNotification *)notification {
+  (void)notification;
+  [self reconcileControllers];
+}
+
+- (void)publishController:(GCController *)controller
+                  gamepad:(GCExtendedGamepad *)gamepad {
+  const int slot = _slots.SlotFor(ControllerInstanceID(controller));
+  if (slot < 0 || slot >= static_cast<int>(SunPadControllerSlots::kMaxPlayers)) {
+    return;
+  }
+  const SunPadInputState state = KartPadAdaptPhysicalControllerSample(
+      SampleFromGamepad(gamepad), [SunPadControllerMappingStore mapping]);
+  {
+    std::scoped_lock lock(_stateMutex);
+    const std::size_t index = static_cast<std::size_t>(slot);
+    _latchedButtons[index] |= state.buttons & ~_states[index].buttons;
+    _states[index] = state;
+  }
+  if (slot == 0) {
+    [[SunPadInputMixer sharedMixer] setInputState:state fromTouch:NO];
+  }
+}
+
+- (void)configureController:(GCController *)controller
+                       slot:(const std::size_t)slot {
+  GCExtendedGamepad *gamepad = controller.extendedGamepad;
+  if (gamepad == nil) return;
+  __weak KartPadPhysicalControllers *weakSelf = self;
+  __weak GCController *weakController = controller;
+  gamepad.valueChangedHandler = ^(GCExtendedGamepad *pad,
+                                  GCControllerElement *element) {
+    (void)element;
+    dispatch_async(dispatch_get_main_queue(), ^{
+      KartPadPhysicalControllers *strongSelf = weakSelf;
+      GCController *strongController = weakController;
+      if (strongSelf != nil && strongController != nil) {
+        [strongSelf publishController:strongController gamepad:pad];
+      }
+    });
+  };
+  controller.playerIndex = PlayerIndexForSlot(slot);
+  [self publishController:controller gamepad:gamepad];
+}
+
+- (void)reconcileControllers {
+  NSArray<GCController *> *controllers = GCController.controllers;
+  std::vector<uintptr_t> instances;
+  for (GCController *controller in controllers) {
+    if (controller.extendedGamepad != nil) {
+      instances.push_back(ControllerInstanceID(controller));
+    }
+  }
+
+  const SunPadControllerReconcileResult result = _slots.Reconcile(instances);
+  for (const SunPadControllerSlotChange& change : result.removed) {
+    NSNumber *key = @(change.instance);
+    GCController *controller = _configuredControllers[key];
+    controller.extendedGamepad.valueChangedHandler = nil;
+    controller.playerIndex = GCControllerPlayerIndexUnset;
+    [_configuredControllers removeObjectForKey:key];
+    {
+      std::scoped_lock lock(_stateMutex);
+      _states[change.slot] = {};
+      _latchedButtons[change.slot] = 0;
+    }
+    if (change.slot == 0) {
+      [[SunPadInputMixer sharedMixer] clearInputFromTouch:NO];
+    }
+    SunPadLog(@"controller removed slot=%lu", (unsigned long)change.slot + 1);
+  }
+
+  for (GCController *controller in controllers) {
+    if (controller.extendedGamepad == nil) continue;
+    const uintptr_t instance = ControllerInstanceID(controller);
+    const int slot = _slots.SlotFor(instance);
+    if (slot < 0) continue;
+    NSNumber *key = @(instance);
+    if (_configuredControllers[key] != controller) {
+      _configuredControllers[key] = controller;
+      [self configureController:controller slot:static_cast<std::size_t>(slot)];
+      SunPadLog(@"controller assigned slot=%d vendor=%@", slot + 1,
+                controller.vendorName != nil ? controller.vendorName : @"unknown");
+    }
+  }
+}
+
+- (BOOL)consumePlayer:(NSUInteger)player state:(SunPadInputState *)state {
+  if (state == nullptr || player >= SunPadControllerSlots::kMaxPlayers) {
+    return NO;
+  }
+  std::scoped_lock lock(_stateMutex);
+  *state = _states[player];
+  state->buttons |= _latchedButtons[player];
+  _latchedButtons[player] = 0;
+  return state->connected != 0;
+}
+
+- (NSUInteger)connectedControllerCount {
+  std::scoped_lock lock(_stateMutex);
+  NSUInteger count = 0;
+  for (const SunPadInputState& state : _states) {
+    if (state.connected != 0) ++count;
+  }
+  return count;
+}
+
+@end

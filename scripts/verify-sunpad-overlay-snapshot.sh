@@ -15,6 +15,9 @@ files=(
   "apple/shared/SunPadSettings.mm"
   "apple/shared/SunPadDiagnostics.h"
   "apple/shared/SunPadDiagnostics.mm"
+  "apple/ios/SunPadControllerSlots.h"
+  "apple/shared/SunPadControllerMapping.h"
+  "apple/shared/SunPadControllerMapping.mm"
 )
 
 for upstream in "${files[@]}"; do

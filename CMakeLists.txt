@@ -328,5 +328,27 @@ if(BUILD_TESTING)
     target_link_libraries(kartpad_mobile_classic_input_tests PRIVATE
       "${MOBILE_FOUNDATION_FRAMEWORK}")
     add_test(NAME kartpad.mobile.classic-input COMMAND kartpad_mobile_classic_input_tests)
+
+    add_executable(kartpad_mobile_physical_controller_tests
+      runtime/tests/mobile_physical_controller_tests.mm
+      apple/mobile/KartPadClassicInput.mm
+      apple/mobile/KartPadPhysicalControllers.mm
+      apple/third_party/sunpad/SunPadControllerMapping.mm
+      apple/third_party/sunpad/SunPadInputMixer.mm
+      apple/third_party/sunpad/SunPadDiagnostics.mm)
+    target_include_directories(kartpad_mobile_physical_controller_tests PRIVATE
+      apple/mobile apple/third_party/sunpad)
+    target_compile_features(kartpad_mobile_physical_controller_tests PRIVATE cxx_std_20)
+    target_compile_options(kartpad_mobile_physical_controller_tests PRIVATE
+      -fobjc-arc -Wall -Wextra -Wpedantic -Werror
+      -Wno-c99-extensions
+      -Wno-gnu-statement-expression-from-macro-expansion
+      -Wno-gnu-conditional-omitted-operand
+      -Wno-missing-field-initializers)
+    find_library(MOBILE_GAME_CONTROLLER_FRAMEWORK GameController REQUIRED)
+    target_link_libraries(kartpad_mobile_physical_controller_tests PRIVATE
+      "${MOBILE_FOUNDATION_FRAMEWORK}" "${MOBILE_GAME_CONTROLLER_FRAMEWORK}")
+    add_test(NAME kartpad.mobile.physical-controller
+      COMMAND kartpad_mobile_physical_controller_tests)
   endif()
 endif()

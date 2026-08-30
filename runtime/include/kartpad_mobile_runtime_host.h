@@ -30,4 +30,9 @@ bool KartPadMobileReadRuntimeSettings(KartPadMobileRuntimeSettings *settings);
 // Classic Controller ABI. Returns false until the UIKit host is installed.
 bool KartPadMobileReadClassicInput(KartPadMobileClassicInputSnapshot *snapshot);
 
+// Reads touch plus the first physical controller for player zero, or the
+// independently assigned physical controller for players one through three.
+bool KartPadMobileReadClassicInputForPlayer(
+    unsigned int player, KartPadMobileClassicInputSnapshot *snapshot);
+
 }

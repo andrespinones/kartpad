@@ -1,6 +1,7 @@
 #import "kartpad_mobile_runtime_host.h"
 
 #import "KartPadClassicInput.h"
+#import "KartPadPhysicalControllers.h"
 #import "SunPadDiagnostics.h"
 #import "SunPadGameOverlay.h"
 #import "SunPadInputMixer.h"
@@ -110,6 +111,7 @@ UIViewController *KartPadVisibleViewController(UIWindow *window) {
   _overlay.delegate = self;
   [container addSubview:_overlay];
   [container bringSubviewToFront:_overlay];
+  [[KartPadPhysicalControllers sharedControllers] start];
 
   NSNotificationCenter *notifications = NSNotificationCenter.defaultCenter;
   [notifications addObserver:self
@@ -131,15 +133,28 @@ UIViewController *KartPadVisibleViewController(UIWindow *window) {
   if (controller == nil) {
     return;
   }
+  const NSUInteger controllerCount =
+      [KartPadPhysicalControllers sharedControllers].connectedControllerCount;
+  NSString *message = [NSString stringWithFormat:
+      @"Choose Multiplayer in Mario Kart Wii's Main Menu. Connected extended controllers are assigned automatically to Players 1–4; KartPad touch remains available for Player 1. Connected now: %lu.",
+      (unsigned long)controllerCount];
   UIAlertController *sheet =
       [UIAlertController alertControllerWithTitle:@"Multiplayer"
-                                          message:@"Choose Multiplayer in Mario Kart Wii's Main Menu, then pair or connect each player's controller. KartPad touch currently controls Player 1; additional native controller slots are the next multiplayer integration gate."
+                                          message:message
                                    preferredStyle:UIAlertControllerStyleActionSheet];
+  __weak KartPadRuntimeOverlayHost *weakSelf = self;
   [sheet addAction:[UIAlertAction actionWithTitle:@"Controller Setup…"
                                             style:UIAlertActionStyleDefault
                                           handler:^(UIAlertAction *action) {
     (void)action;
-    [self gameOverlayRequestsControllerMapping:self->_overlay];
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW,
+                                 (int64_t)(0.35 * NSEC_PER_SEC)),
+                   dispatch_get_main_queue(), ^{
+      KartPadRuntimeOverlayHost *strongSelf = weakSelf;
+      if (strongSelf != nil) {
+        [strongSelf gameOverlayRequestsControllerMapping:strongSelf->_overlay];
+      }
+    });
   }]];
   [sheet addAction:[UIAlertAction actionWithTitle:@"Continue Playing"
                                             style:UIAlertActionStyleCancel
@@ -153,6 +168,7 @@ UIViewController *KartPadVisibleViewController(UIWindow *window) {
 
 - (void)uninstall {
   [NSNotificationCenter.defaultCenter removeObserver:self];
+  [[KartPadPhysicalControllers sharedControllers] stop];
   [[SunPadInputMixer sharedMixer] clearInputFromTouch:YES];
   _overlay.delegate = nil;
   [_overlay removeFromSuperview];
@@ -166,6 +182,7 @@ UIViewController *KartPadVisibleViewController(UIWindow *window) {
 
 - (void)applicationDidBecomeActive:(NSNotification *)notification {
   (void)notification;
+  [[KartPadPhysicalControllers sharedControllers] reconcileControllers];
   [_overlay refreshControllerVisibility];
   [_overlay applySettings];
 }
@@ -207,8 +224,12 @@ UIViewController *KartPadVisibleViewController(UIWindow *window) {
 
 - (void)gameOverlayRequestsControllerMapping:(SunPadGameOverlay *)overlay {
   (void)overlay;
-  [self showIntegrationAlert:@"Controller Button Mapping"
-                     message:@"Touch is mapped directly to Mario Kart's Classic Controller ABI; physical remapping remains open."];
+  const NSUInteger count =
+      [KartPadPhysicalControllers sharedControllers].connectedControllerCount;
+  NSString *message = [NSString stringWithFormat:
+      @"Extended controllers connect automatically in stable Player 1–4 slots. Face buttons use SunPad's persisted A/B/X/Y/Z mapping; sticks, D-pad, Menu, shoulders, and triggers remain direct. Connected now: %lu.",
+      (unsigned long)count];
+  [self showIntegrationAlert:@"Controller Setup" message:message];
 }
 
 - (NSString *)gameOverlayDiagnosticContext:(SunPadGameOverlay *)overlay {
@@ -252,11 +273,23 @@ extern "C" bool KartPadMobileReadRuntimeSettings(
 
 extern "C" bool KartPadMobileReadClassicInput(
     KartPadMobileClassicInputSnapshot *snapshot) {
+  return KartPadMobileReadClassicInputForPlayer(0, snapshot);
+}
+
+extern "C" bool KartPadMobileReadClassicInputForPlayer(
+    unsigned int player, KartPadMobileClassicInputSnapshot *snapshot) {
   if (snapshot == nullptr || gRuntimeOverlayHost == nil) {
     return false;
   }
-  const SunPadInputState source =
-      [[SunPadInputMixer sharedMixer] consumeMergedState];
+  SunPadInputState source{};
+  if (player == 0) {
+    source = [[SunPadInputMixer sharedMixer] consumeMergedState];
+  } else if (player < 4) {
+    [[KartPadPhysicalControllers sharedControllers] consumePlayer:player
+                                                            state:&source];
+  } else {
+    return false;
+  }
   const KartPadClassicInputState adapted =
       kartpad::mobile::AdaptSunPadInput(source);
   snapshot->buttons = adapted.buttons;
