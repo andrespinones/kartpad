@@ -38,8 +38,8 @@ signing material.
 | Track coverage | All 32 retail tracks have exact native completion evidence |
 | Correctness | Darwin memory, scheduler, ABI, integer, scalar-FP, and paired-single gates pass against their defined oracles |
 | Input | Keyboard plus four independent Classic-controller slots; two-player full-race evidence passes |
-| Audio | Non-silent host playback, pause/resume, and live output-device migration pass instrumented continuity checks; subjective and long-session acceptance remain open |
-| Packaging | Original icon masters and macOS ICNS exist; installed-data relocation and a self-contained signed package are under final validation |
+| Audio | Non-silent host playback, pause/resume, live output-device migration, and a two-hour representative continuity run pass their instrumented subcases; subjective listening and the eight-hour soak remain open |
+| Packaging | The original icon and exact branded 80 MiB package pass audit, installed-storage, configured gameplay, save-preservation, and normal-close checks; the native first-run/settings/data-management shell remains open |
 | iPhone/iPad | Native arm64 shell builds with the exact SunPad overlay, original icons, and shared correctness libraries; retail gameplay and mobile acceptance remain open |
 | Distribution | Development source only; no game data and no release candidate |
 

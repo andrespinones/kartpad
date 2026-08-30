@@ -842,3 +842,25 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - Built `kartpad_host`, `kartpad_memory`, `kartpad_scheduler`, and `kartpad_g7_translated` as arm64 iOS Simulator static libraries, then compiled the same warning-as-error libraries and the complete unsigned shell against the physical `iphoneos` 16.0 SDK. The resulting Mach-O reports platform `IOS`, minimum 16.0, includes both iPhone/iPad icons, and links only Apple system libraries. This is build portability, not a signed-device claim.
 - Added a bounded startup bridge that executes the translated G7 command fixture through checked memory, validates its exact output, executes a scheduler thread, and checks the host monotonic clock. The app binary contains the bridge plus memory/scheduler/translated symbols; the package auditor now rejects a shell without this core integration.
 - Classification: **G14 core promotion in progress**. Cross-compilation and exact app linkage pass. The full retail graph is not linked and runtime success awaits the sole Simulator after the protected macOS soak; no boot, race, audio, save, lifecycle, or touch claim is made.
+
+## 2026-08-30 — G10 two-hour representative audio continuity
+
+- Ran exactly one native arm64 KartPad process for 2:00:18 with no Dolphin/reference process or Simulator active. Guest-state tracing observed 425,142 samples: 22 exact complete `240..18308` replay segments and one intentionally partial final segment.
+- Last observed cumulative audio telemetry reached 2,408,448 checks and 924,776,448 submitted bytes with zero empty-before-push observations. The bounded queue discarded 175 stale blocks / 67,200 bytes (about 0.0073% of submitted bytes) without sustained starvation; the stream did not emit an explicit final telemetry record.
+- A one-minute RSS sampler covered only the final 2,040 seconds: 35 samples, 227,040–263,600 KiB, first 257,984 KiB, last 262,000 KiB. It is useful bounded evidence, not a whole-run leak proof.
+- The process remained visibly live around 59–60 displayed FPS, closed normally, produced no new crash report, and preserved the RKSYS SHA-256 `ad79c24bc5eb0ba6bc8cd2836a55680621892b578a04ea49d8884a71a42c563a`.
+- Classification: **Pass for the long representative continuity subcase; PRD row 33 remains in progress.** Subjective listening remains hands-on, and G11 still requires its separate eight-hour soak. Evidence: `docs/artifacts/2026-08-30/g10-audio-two-hour.md`.
+
+## 2026-08-30 — G13 exact branded package, storage, and gameplay
+
+- Separated installed durable state under `~/Library/Application Support/KartPad` from rebuildable cache state under `~/Library/Caches/KartPad`; portable development mode remains beside the executable. Added fail-closed storage-layout and exact-package launch guards.
+- Corrected the installed initial-cache lookup to `Contents/Resources` and replaced a Windows-formatted NAND title path with the host path translator. A clean-storage run seeded 1,199 cache rows, created a real POSIX NAND hierarchy, and created no backslash-named component.
+- Branded the native process and game window as `KartPad`, then produced the exact source-`325d5f3` package. It is 80 MiB, native arm64, macOS 14.0+, Apple-system-only, ad-hoc signed, contains the original icon, and passes the fail-closed package audit at bundle-content hash `12e827fdaf206df3689ab0fe0b73fa7ebe20fe3827b538d8fe7c21e8ac25e3db`.
+- Launched that exact package with no Simulator/reference process, reached title, loaded `Player`, selected 50cc Mushroom Cup Grand Prix, reached live Luigi Circuit at a displayed 60 FPS, accepted accelerate input, and closed normally. The bundle and save remained unchanged.
+- Classification: **Pass for exact-package audit, installed storage, configured launch, and live gameplay; G13 remains in progress.** Native guided first run, settings, diagnostics, data management, update-in-place, and clean-clone self-build remain open. Evidence: `docs/artifacts/2026-08-30/g13-exact-macos-package.md`.
+
+## 2026-08-30 — supplied historical three-player crash report classified
+
+- Read the supplied macOS report for PID 67587: `EXC_BAD_ACCESS (SIGBUS)` at `0x0000100055440027`, top frame `func_805A2034`, after a second three-player race transition.
+- This is the already documented reclaimed-camera-node signature whose poisoned scene-heap pointer carried `0x55440003`. The guarded lifecycle correction and exact formerly failing second-race regression already pass; the report is retained as historical corroboration rather than classified as a new current-candidate crash.
+- Full three- and four-player races through standings remain open because fixing and regression-testing the transition does not itself prove PRD row 30.
