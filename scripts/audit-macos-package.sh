@@ -95,12 +95,14 @@ for shell_contract in \
   "Choose Extracted Mario Kart Wii Data" \
   "Choose Game Data" \
   "showControllerSettings:" \
+  "guestMemoryStrategy=flat-mach-vm" \
+  "reviewWarning=Review this report before sharing." \
   "KartPad currently supports RMCP01 (PAL), disc 0, revision 0 only." \
   "80d18895b39c63bd80f457398bfcbb91b7d16ac116a41a88967e954080155b05" \
   "Show KartPad Data" \
   "Show KartPad Cache" \
   "Save Diagnostics Report" \
-  "privacy=paths, game data, save contents, credentials, and logs omitted"; do
+  "privacy=paths, game data, translated code, save contents, credentials, device identifiers, and logs omitted"; do
   if ! rg -F -q "${shell_contract}" <<<"${executable_strings}"; then
     echo "package runtime lacks native shell contract: ${shell_contract}" >&2
     exit 70

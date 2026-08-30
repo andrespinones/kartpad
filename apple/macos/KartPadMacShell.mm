@@ -12,16 +12,18 @@
 
 static constexpr NSInteger kKartPadMenuTag = 0x4b505344;
 
+static NSURL *DirectoryURL(const std::filesystem::path &path) {
+  const std::string value = path.lexically_normal().string();
+  return [NSURL fileURLWithPath:[NSString stringWithUTF8String:value.c_str()]
+                   isDirectory:YES];
+}
+
 static NSURL *ApplicationSupportURL() {
-  return [NSURL fileURLWithPath:[NSHomeDirectory()
-      stringByAppendingPathComponent:@"Library/Application Support/KartPad"]
-                       isDirectory:YES];
+  return DirectoryURL(RuntimeConfigFile::ApplicationDataDirectory());
 }
 
 static NSURL *CacheURL() {
-  return [NSURL fileURLWithPath:[NSHomeDirectory()
-      stringByAppendingPathComponent:@"Library/Caches/KartPad"]
-                       isDirectory:YES];
+  return DirectoryURL(RuntimeConfigFile::CacheDataDirectory());
 }
 
 static NSString *YesNo(BOOL value) { return value ? @"yes" : @"no"; }
@@ -149,6 +151,7 @@ static NSString *DiagnosticsReport() {
   NSURL *support = ApplicationSupportURL();
   NSURL *cache = CacheURL();
   NSURL *config = [support URLByAppendingPathComponent:@"Config.toml"];
+  NSURL *logs = [support URLByAppendingPathComponent:@"Logs"];
   NSURL *save = [support
       URLByAppendingPathComponent:
           @"NAND/title/00010004/524d4350/data/rksys.dat"];
@@ -161,23 +164,80 @@ static NSString *DiagnosticsReport() {
   NSString *generated = [NSISO8601DateFormatter stringFromDate:NSDate.date
                                                      timeZone:NSTimeZone.localTimeZone
                                                 formatOptions:NSISO8601DateFormatWithInternetDateTime];
+  NSDictionary *fingerprint = nil;
+  NSURL *fingerprintURL = [NSBundle.mainBundle.executableURL.URLByDeletingLastPathComponent
+      URLByAppendingPathComponent:@"build-fingerprint.json"];
+  NSData *fingerprintData = [NSData dataWithContentsOfURL:fingerprintURL];
+  if (fingerprintData != nil) {
+    id object = [NSJSONSerialization JSONObjectWithData:fingerprintData
+                                                options:0
+                                                  error:nil];
+    if ([object isKindOfClass:NSDictionary.class]) fingerprint = object;
+  }
+  NSString *sourceCommit = fingerprint[@"SourceCommit"];
+  if (![sourceCommit isKindOfClass:NSString.class] || sourceCommit.length != 40) {
+    sourceCommit = @"unknown";
+  }
+  NSString *runtimeHash = fingerprint[@"UnsignedRuntimeSHA256"];
+  if (![runtimeHash isKindOfClass:NSString.class] || runtimeHash.length != 64) {
+    runtimeHash = @"unknown";
+  }
+
+  const RuntimeUserConfig runtime = RuntimeConfigFile::LoadConfigFile();
+  NSError *gameDataError = nil;
+  NSString *gameDataRoot = ConfiguredGameDataRoot();
+  const BOOL gameDataValid =
+      ValidateExtractedRoot(gameDataRoot, &gameDataError) == nil && gameDataError == nil;
+  NSUInteger mappingCount = 0;
+  for (const auto &mapping : runtime.controllerButtons) {
+    if (mapping && !mapping->empty()) ++mappingCount;
+  }
+  const float resolution = runtime.resolutionMultiplier.value_or(1.0f);
+  const uint32_t interpolation = runtime.frameInterpolationFps.value_or(0);
+  const NSInteger volume = lroundf(
+      std::clamp(runtime.audioVolume.value_or(1.0f), 0.0f, 1.0f) * 100.0f);
+  NSString *displayMode = @"windowed";
+  if (runtime.displayMode == "borderless") displayMode = @"borderless";
+  if (runtime.displayMode == "fullscreen") displayMode = @"fullscreen";
   return [NSString stringWithFormat:
       @"KartPad diagnostics\n"
-       "schema=1\n"
+       "schema=2\n"
        "generated=%@\n"
        "appVersion=%@\n"
        "appBuild=%@\n"
+       "sourceCommit=%@\n"
+       "unsignedRuntimeSHA256=%@\n"
        "os=%@\n"
        "architecture=arm64\n"
+       "productProfile=RMCP01-r0-base\n"
+       "rendererBackend=Metal\n"
+       "guestMemoryStrategy=flat-mach-vm\n"
+       "schedulerStrategy=cooperative-fibers\n"
+       "displayMode=%@\n"
+       "resolutionMultiplier=%.2f\n"
+       "frameInterpolationFPS=%u\n"
+       "audioVolumePercent=%ld\n"
+       "audioMuted=%@\n"
+       "networkEnabled=%@\n"
+       "controllerMappingsConfigured=%lu\n"
+       "gameDataConfigured=%@\n"
+       "gameDataValidated=%@\n"
        "applicationSupportExists=%@\n"
        "cacheExists=%@\n"
        "configExists=%@\n"
+       "logsExist=%@\n"
        "saveExists=%@\n"
-       "privacy=paths, game data, save contents, credentials, and logs omitted\n",
-      generated, version, build, NSProcessInfo.processInfo.operatingSystemVersionString,
+       "reviewWarning=Review this report before sharing. Runtime log text is not included.\n"
+       "privacy=paths, game data, translated code, save contents, credentials, device identifiers, and logs omitted\n",
+      generated, version, build, sourceCommit, runtimeHash,
+      NSProcessInfo.processInfo.operatingSystemVersionString, displayMode, resolution,
+      interpolation, (long)volume, YesNo(runtime.audioMuted.value_or(false)),
+      YesNo(runtime.networkEnabled.value_or(true)), (unsigned long)mappingCount,
+      YesNo(gameDataRoot.length > 0), YesNo(gameDataValid),
       YesNo([files fileExistsAtPath:support.path]),
       YesNo([files fileExistsAtPath:cache.path]),
       YesNo([files fileExistsAtPath:config.path]),
+      YesNo([files fileExistsAtPath:logs.path]),
       YesNo([files fileExistsAtPath:save.path])];
 }
 
