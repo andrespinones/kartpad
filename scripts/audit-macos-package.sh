@@ -87,6 +87,10 @@ done
 
 executable_strings="$(strings "${executable}")"
 for shell_contract in \
+  "KartPad Settings" \
+  "Render resolution" \
+  "Controller mappings remain available from Controller settings in the in-game F10 bar." \
+  "Changes are saved safely and apply the next time KartPad launches." \
   "Show KartPad Data" \
   "Show KartPad Cache" \
   "Save Diagnostics Report" \
