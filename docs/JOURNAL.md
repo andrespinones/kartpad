@@ -1296,3 +1296,27 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   pacing and the profiled AOT runtime rather than an incompatible SunPad clock
   switch. Evidence:
   `docs/artifacts/2026-08-30/g14-ipad-current-race-profile.md`.
+
+## 2026-08-30 — G11 interrupted macOS soak and audio-pressure finding
+
+- Started an exact, audited `2282e2c` macOS candidate under the strict
+  minute-sample soak monitor. The trace covered 15,010 seconds with a maximum
+  61-second sample gap before the operator stopped the visible runtimes. The
+  Simulator shell had been left open even though `simctl` consistently showed
+  zero booted devices; that failed the user's one-visible-runtime expectation.
+- The partial memory trace ranged from 257,120 to 1,125,792 KiB and repeatedly
+  returned to low-water states. Its post-15-minute slope was -137,681.6
+  KiB/hour over 236 samples; threads remained between 23 and 28. This strongly
+  contradicts monotonic growth for the sampled duration but cannot replace the
+  missing eight-hour leak/end-state evidence.
+- Audio submitted 1,934,438,016 bytes through 5,038,080 queue checks with zero
+  empty-before-push observations, but dropped 480 blocks / 184,320 bytes in
+  bursts around scene exits. Some bursts coincided with pipeline compilation
+  and 137--154 ms frame stalls; others did not, isolating the fixed 120 ms
+  maximum queue as insufficient for broader transition pressure.
+- The save remained byte-identical at SHA-256
+  `ad79c24bc5eb0ba6bc8cd2836a55680621892b578a04ea49d8884a71a42c563a`.
+  Classification: **interrupted diagnostic; fail for audio and not an
+  eight-hour soak pass.** Next work is a bounded queue-cap counterbalance,
+  followed by a fresh single-visible-runtime soak. Evidence:
+  `docs/artifacts/2026-08-30/g11-interrupted-macos-soak.md`.

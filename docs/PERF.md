@@ -23,6 +23,7 @@ substitutes for frame-time, guest-cadence, audio, memory, and soak evidence.
 | Exact `2cfb7e1` immediate warm title relaunch | Minimum effective FPS 59.963; maximum p99 17.264 ms; maximum worst 25.966 ms; zero audio drops | Controlled title improvement; race/soak evidence still open |
 | macOS one-vs-six priority-worker sweep | One worker ranged from 55.460–59.868 minimum effective FPS; six workers ranged from 52.000–59.974 as machine-level Metal state warmed | Confounded; one-worker default reverted |
 | Three-player stationary VS, ~310 s live | Typical 29.94–30.10 effective FPS with p50 33.2–33.6 ms and p99 33.9–35.4 ms; 29 audio blocks / 11,136 bytes dropped | Native 30 Hz cadence mostly stable; audio fail and no standings |
+| Interrupted exact `2282e2c` macOS attract soak | 4:10:10 sampled; RSS 257,120–1,125,792 KiB with negative post-warmup slope; 23–28 threads; 480 audio blocks / 184,320 bytes dropped across scene transitions; save unchanged | Diagnostic memory/thread pass signal; audio fail; operator-stopped and not row-38 acceptance |
 
 ## Acceptance contract
 
@@ -64,6 +65,12 @@ regression rejects the candidate even if its average FPS improves.
    regressions and improve p99/worst, not merely average FPS.
 8. After representative scenes pass, run launch/race stress and the required
    eight-hour macOS soak with memory/thread/leak and clean-shutdown checks.
+
+The first automated soak attempt was intentionally retained as an interrupted
+diagnostic. It exposed a fixed 120 ms queue ceiling that overflows during some
+scene exits even after pipelines are warm. Counterbalance bounded queue
+headroom before repeating the required eight-hour run; do not accept a larger
+cap unless observed queue depth drains and latency remains bounded.
 
 ## Current hypotheses—not conclusions
 
