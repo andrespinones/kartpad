@@ -42,7 +42,7 @@ cmake -S "${runtime_source}" -B "${xcode_build}" -G Xcode \
   -DCMAKE_OSX_SYSROOT=iphonesimulator \
   -DCMAKE_OSX_ARCHITECTURES=arm64 \
   -DCMAKE_OSX_DEPLOYMENT_TARGET=16.0 \
-  -DMKW_AURORA_DIR="${repo_root}/ref/upstream/Wiicompiled/aurora-main" \
+  -DMKW_AURORA_DIR="${runtime_source}/aurora-main" \
   -DAURORA_DAWN_PACKAGE_URL="file://${dawn_archive}" \
   -DAURORA_DAWN_PACKAGE_URL_HASH="SHA256=${dawn_sha256}" \
   -DMKW_TRANSLATED_SHARD_MANIFEST="${translation_root}/build_shards/shards.cmake" \

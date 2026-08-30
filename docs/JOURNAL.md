@@ -934,3 +934,18 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - Rebuilt and audited the complete retail Simulator app. The fail-closed auditor now requires the per-player bridge and controller classes; executable SHA-256 is `be38d5d261e5ec8baa95bbe840b85e69ab7ad7b3db18f5e2e82cbf6e02e2977c`.
 - Booted exactly one iPhone 17 Pro Simulator. The preserved game data loaded into live gameplay, the Simulator extended `Gamepad` registered in Player 1, `Multiplayer…` reported one connected controller, and `Controller Setup…` presented the mapping/slot guidance after a corrected action-sheet transition.
 - Classification: **Pass for four-channel controller publication, runtime linkage/audit, Simulator discovery, and Multiplayer/Controller Setup UI.** Physical-device controller feel and a complete controller-driven multiplayer race remain hands-on gates. Evidence: `docs/artifacts/2026-08-30/g14-controller-multiplayer/`.
+
+## 2026-08-30 — rejected three-player standings automation
+
+- Launched one native development runtime with three independently registered Classic slots and entered retail 3 Player VS Race. Luigi Circuit and SNES Mario Circuit 3 both rendered the expected three player panes plus the legitimate fourth overview camera at the retail 30 FPS cadence; the process did not crash.
+- The baseline synthetic steering repeatedly left the course and never reached standings. Its content-private trace contains 15,723 samples, zero finish segments, and SHA-256 `eeb6ec4ca472fc4fcfe6f86208b2ddf537b9fad548510f729417442cbe8eb863`; the two largest uninterrupted race-time spans were `241..12001` and `240..14906`.
+- Changed only the accessibility fallback steering level from `0.35` to `0.18` in a throwaway candidate. It still became trapped in corners. That trace contains 4,127 samples, one `241..6483` incomplete segment, zero finishes, and SHA-256 `acef1bf8b12c3203a980ed405f3ae9d8e7d73f4998a34f3bf2b410528e9e111f`.
+- Rejected and fully reverted the unproven `0.18` change. Classification: **no standings progress and no current runtime crash**. This is a synthetic-driver limitation; a hands-on three-/four-player standings cycle remains open.
+
+## 2026-08-30 — G14 opaque letterbox and Multiplayer regression
+
+- Diagnosed the supplied edge artifacts as transparent presentation bands around the fitted game viewport. The intermediate Aurora snapshot cleared RGB but did not require opaque alpha, allowing stale Metal/Simulator content to remain visible outside the game.
+- Added one reproducible Aurora patch that clears the entire snapshot to opaque black. iOS preparation copies the immutable pinned Aurora checkout into the disposable runtime source before applying it; macOS and the reference checkout remain untouched.
+- Rebuilt and audited the complete 29,065-function Simulator app. The exact twelve-file SunPad verifier passes and the final executable SHA-256 is `4f7cc915762e90d70db1e11d35fd9255877f7e15e56b9510ab0878653d16204c`.
+- Booted exactly one iPhone 17 Pro Simulator. Matching title-intro and live-game states retain uniform black bands with no striped/checker/FPS leakage. The three-dot menu still presents `Multiplayer…`; its sheet reports one connected Simulator gamepad and exposes `Controller Setup…`.
+- Terminated the app and shut down the Simulator. Classification: **Pass for opaque fitted-output containment and Multiplayer UI regression; G14/G15 remain open.** Evidence: `docs/artifacts/2026-08-30/g14-opaque-letterbox/`.

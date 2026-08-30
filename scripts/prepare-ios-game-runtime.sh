@@ -42,6 +42,12 @@ fi
 
 mkdir -p "$(dirname "${runtime_source}")"
 cp -R "${runtime_ref}" "${runtime_source}"
+# Keep the immutable pinned Aurora checkout untouched. The iOS product builds
+# against this disposable copy so its opaque letterbox fix is reproducible.
+cp -R "${repo_root}/ref/upstream/Wiicompiled/aurora-main" \
+  "${runtime_source}/aurora-main"
+patch --batch -p1 -d "${runtime_source}/aurora-main" < \
+  "${repo_root}/patches/aurora-ios-opaque-letterbox.patch"
 patch --batch -p1 -d "${runtime_source}" < "${repo_root}/patches/wiicompiled-apple-runtime.patch"
 patch --batch -p1 -d "${runtime_source}" < "${repo_root}/patches/wiicompiled-ios-app-integration.patch"
 patch --batch -p1 -d "${runtime_source}" < "${repo_root}/patches/wiicompiled-ios-touch-core-buttons.patch"
@@ -80,7 +86,7 @@ cmake -S "${runtime_source}" -B "${runtime_build}" -G Ninja \
   -DCMAKE_OSX_SYSROOT=iphonesimulator \
   -DCMAKE_OSX_ARCHITECTURES=arm64 \
   -DCMAKE_OSX_DEPLOYMENT_TARGET=16.0 \
-  -DMKW_AURORA_DIR="${repo_root}/ref/upstream/Wiicompiled/aurora-main" \
+  -DMKW_AURORA_DIR="${runtime_source}/aurora-main" \
   -DAURORA_DAWN_PACKAGE_URL="file://${dawn_archive}" \
   -DMKW_TRANSLATED_SHARD_MANIFEST="${translation_root}/build_shards/shards.cmake" \
   -DMKW_KARTPAD_RUNTIME_INCLUDE="${repo_root}/runtime/include" \
