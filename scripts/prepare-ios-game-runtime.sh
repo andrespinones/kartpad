@@ -79,13 +79,23 @@ if [[ -f "${blob_asm}" ]] && ! rg -q '^\.globl _kData_' "${blob_asm}"; then
 fi
 
 generated_link="${repo_root}/build/generated"
-if [[ ! -e "${generated_link}" && ! -L "${generated_link}" ]]; then
-  ln -s "${translation_root}" "${generated_link}"
-elif [[ ! -L "${generated_link}" ||
-        "$(realpath "${generated_link}")" != "$(realpath "${translation_root}")" ]]; then
-  echo "ERROR: generated link does not select this translation: ${generated_link}" >&2
+if [[ -e "${generated_link}" && ! -L "${generated_link}" ]]; then
+  echo "ERROR: generated path exists and is not a symlink: ${generated_link}" >&2
   exit 1
 fi
+previous_generated_target=""
+if [[ -L "${generated_link}" ]]; then
+  previous_generated_target="$(readlink "${generated_link}")"
+fi
+restore_generated_link() {
+  if [[ -n "${previous_generated_target}" ]]; then
+    ln -sfn "${previous_generated_target}" "${generated_link}"
+  elif [[ -L "${generated_link}" ]]; then
+    rm "${generated_link}"
+  fi
+}
+trap restore_generated_link EXIT
+ln -sfn "${translation_root}" "${generated_link}"
 
 cmake -S "${runtime_source}" -B "${runtime_build}" -G Ninja \
   -DCMAKE_BUILD_TYPE=Release \
