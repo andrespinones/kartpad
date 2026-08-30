@@ -87,6 +87,15 @@ for motion_contract in \
   fi
 done
 
+for touch_contract in \
+  'Acceleration held' \
+  'Drift, hop, brake, or reverse.'; do
+  if ! rg -a -F -q "${touch_contract}" "${binary}"; then
+    echo "game app is missing the KartPad touch-control contract: ${touch_contract}" >&2
+    exit 69
+  fi
+done
+
 if ! rg -a -F -q '[KartPad] exact SunPad runtime overlay installed' "${binary}"; then
   echo "game app does not contain the exact-overlay runtime host" >&2
   exit 69
@@ -114,9 +123,19 @@ if [[ "${expected_platform}" == "IOSSIMULATOR" ]]; then
     echo "Simulator app is missing the import rollback test hook" >&2
     exit 69
   fi
-elif rg -a -F -q 'KARTPAD_IMPORT_FORCE_SWAP_FAILURE' "${binary}"; then
-  echo "device app contains the Simulator-only import rollback hook" >&2
-  exit 69
+  if ! rg -a -F -q 'KARTPAD_TOUCH_HOLD_SELF_TEST' "${binary}"; then
+    echo "Simulator app is missing the touch-hold test hook" >&2
+    exit 69
+  fi
+else
+  for simulator_only_contract in \
+    'KARTPAD_IMPORT_FORCE_SWAP_FAILURE' \
+    'KARTPAD_TOUCH_HOLD_SELF_TEST'; do
+    if rg -a -F -q "${simulator_only_contract}" "${binary}"; then
+      echo "device app contains Simulator-only contract: ${simulator_only_contract}" >&2
+      exit 69
+    fi
+  done
 fi
 
 echo "iOS ${expected_platform} full-game app audit passed: ${app}"

@@ -104,6 +104,16 @@ experiments, physical-device interaction, and a reproducible legal build path.
   mechanisms and do not persist no-op preferences. This supersedes the prior
   `bdb805b9...` wrapper binary without changing its translated game core.
 
+- The current touch-control candidate keeps the pinned twelve-file SunPad
+  snapshot byte-identical while adapting two behaviors in KartPad's owning
+  overlay: Classic R is a compact digital pill matching L, and an uninterrupted
+  one-second A touch changes to a cyan held-acceleration state until touch-up.
+  The focused Classic adapter passes; the full Simulator app audits at
+  executable SHA-256
+  `653943e6cfd1e965c70f743ede11fe464dadf3c752afdbe2ec7b3454ad9f631e`.
+  The iPhone visual/accessibility regression passes and its Simulator is shut
+  down; the same exact candidate is next for a sequential iPad regression.
+
 - About 14 GiB of host storage remains after private disc extraction, the full translated runtime build, and native trace evidence. Large generated products remain ignored; capacity must be checked before additional build graphs.
 - No human-only prerequisite currently blocks G0 or the independent parts of G1.
 - Physical-device, public-service, account, and hands-on acceptance rows remain future external prerequisites and are not claimed.

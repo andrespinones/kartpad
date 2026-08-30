@@ -1343,3 +1343,28 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   opened normally at 60 FPS. The native menu exposed **Controls…**, its full
   panel fit cleanly in dark mode with every row visible, and the clean
   application-menu Quit path closed the only runtime. No Simulator was opened.
+
+## 2026-08-30 — Mario Kart touch-control adaptation
+
+- Kept the pinned twelve-file SunPad snapshot byte-identical and implemented
+  the requested game-specific behavior in KartPad's owning overlay layer.
+- Replaced Sunshine's wide analog-pressure R presentation and semantics with a
+  compact digital Classic R button whose geometry matches L. Any nonzero touch
+  pressure now publishes a full digital R press, and release clears it.
+- Added an explicit sustained-acceleration state to A. SunPad's unchanged
+  mixer continues to assert A from touch-down until touch-up; after one
+  uninterrupted second KartPad turns the button cyan, adds a light haptic and
+  exposes `Acceleration held` to accessibility. Touch-up, cancellation,
+  backgrounding, and overlay removal all restore the normal state.
+- The deterministic Classic input adapter passes and the strengthened package
+  audit proves both touch contracts. The complete Simulator executable is
+  `653943e6cfd1e965c70f743ede11fe464dadf3c752afdbe2ec7b3454ad9f631e`.
+- Booted only the preserved iPhone 17 Pro Simulator. R rendered as the same
+  compact pill as L. A changed from green to cyan after the test hook's
+  one-second uninterrupted hold, exposed the held accessibility value, and
+  returned to green after release. The hook invokes only KartPad's visual
+  callbacks and cannot publish gameplay input. KartPad was terminated and the
+  iPhone and Simulator shell were shut down; zero runtimes remain.
+- Classification: **Pass for implementation, automated input mapping, package
+  audit, and iPhone visual/accessibility behavior.** Sequential iPad layout
+  verification remains next; hands-on physical touch feel remains external.

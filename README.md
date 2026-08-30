@@ -231,6 +231,11 @@ available without a separate controller:
 - **Left:** steering stick, D-pad, L, Start, and Select within thumb reach.
 - **Right:** action buttons, R/ZL/ZR, and a second stick for menu-compatible
   input.
+- **Mario Kart shoulders:** R is a compact digital control matching L rather
+  than SunPad's Sunshine-specific analog-pressure trigger.
+- **Held acceleration:** A stays asserted for the full touch. After one
+  uninterrupted second it turns cyan and adds light haptic feedback, then
+  returns to green and releases acceleration when the finger lifts.
 - **Customize:** move and resize controls independently, save separate phone
   and tablet arrangements, or reset to the exact default layout.
 - **Controller handoff:** touch stays Player 1; connected extended controllers

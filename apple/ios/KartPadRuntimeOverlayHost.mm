@@ -27,6 +27,19 @@
 @interface KartPadGameOverlay : SunPadGameOverlay
 @property(nonatomic, copy) void (^multiplayerRequested)(void);
 @property(nonatomic, copy) void (^motionSteeringRequested)(void);
+@property(nonatomic, weak) UIButton *kartPadGasButton;
+@property(nonatomic, strong) UIColor *kartPadGasRestColor;
+@property(nonatomic, assign) NSUInteger kartPadGasHoldGeneration;
+@property(nonatomic, assign) BOOL kartPadGasPressed;
+@property(nonatomic, assign) BOOL kartPadGasHoldSelfTestStarted;
+- (void)resetKartPadControlAppearance;
+@end
+
+// KartPad keeps SunPad's pinned implementation byte-identical. This narrow
+// declaration lets the owning subclass replace Sunshine's analog FLUDD
+// pressure semantics with Mario Kart Wii's ordinary digital Classic R button.
+@interface SunPadGameOverlay (KartPadControlHooks)
+- (void)rPressureChanged:(uint8_t)pressure fullPress:(BOOL)fullPress;
 @end
 
 namespace {
@@ -620,13 +633,59 @@ NSError *KartPadPerformGameDataImport(NSURL *url) {
 - (void)layoutSubviews {
   [super layoutSubviews];
   UIButton *menuButton = nil;
+  UIButton *leftShoulder = nil;
+  UIButton *rightShoulder = nil;
+  UIButton *gasButton = nil;
   for (UIView *candidate in self.subviews) {
-    if ([candidate isKindOfClass:UIButton.class] &&
-        [candidate.accessibilityLabel isEqualToString:@"Menu"]) {
-      menuButton = (UIButton *)candidate;
-      break;
+    if (![candidate isKindOfClass:UIButton.class]) continue;
+    UIButton *button = (UIButton *)candidate;
+    if ([button.accessibilityLabel isEqualToString:@"Menu"]) menuButton = button;
+    if ([button.accessibilityLabel isEqualToString:@"L"]) leftShoulder = button;
+    if ([button.accessibilityLabel isEqualToString:@"R"]) rightShoulder = button;
+    if ([button.accessibilityLabel isEqualToString:@"A"]) gasButton = button;
+  }
+
+  // Mario Kart's Classic R input is a normal digital shoulder button. Match
+  // L exactly and suppress SunPad's Sunshine-specific pressure-fill artwork.
+  if (leftShoulder != nil && rightShoulder != nil) {
+    rightShoulder.bounds = CGRectMake(0.0, 0.0,
+                                      CGRectGetWidth(leftShoulder.bounds),
+                                      CGRectGetHeight(leftShoulder.bounds));
+    rightShoulder.layer.cornerRadius =
+        MIN(CGRectGetWidth(rightShoulder.bounds),
+            CGRectGetHeight(rightShoulder.bounds)) * 0.5;
+    rightShoulder.accessibilityHint = @"Drift, hop, brake, or reverse.";
+    rightShoulder.accessibilityValue = @"Not pressed";
+    for (CALayer *layer in rightShoulder.layer.sublayers) {
+      if ([layer isKindOfClass:CAShapeLayer.class]) layer.hidden = YES;
     }
   }
+
+  if (gasButton != nil && self.kartPadGasButton != gasButton) {
+    self.kartPadGasButton = gasButton;
+    self.kartPadGasRestColor = gasButton.backgroundColor;
+    [gasButton addTarget:self action:@selector(kartPadGasDown:)
+         forControlEvents:UIControlEventTouchDown];
+    [gasButton addTarget:self action:@selector(kartPadGasUp:)
+         forControlEvents:UIControlEventTouchUpInside |
+                          UIControlEventTouchUpOutside |
+                          UIControlEventTouchCancel];
+#if TARGET_OS_SIMULATOR
+    if (!self.kartPadGasHoldSelfTestStarted &&
+        NSProcessInfo.processInfo.environment[@"KARTPAD_TOUCH_HOLD_SELF_TEST"] != nil) {
+      self.kartPadGasHoldSelfTestStarted = YES;
+      dispatch_async(dispatch_get_main_queue(), ^{
+        [self kartPadGasDown:gasButton];
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW,
+                                     (int64_t)(30.0 * NSEC_PER_SEC)),
+                       dispatch_get_main_queue(), ^{
+          [self kartPadGasUp:gasButton];
+        });
+      });
+    }
+#endif
+  }
+
   UIMenu *sourceMenu = menuButton.menu;
   if (sourceMenu == nil ||
       [sourceMenu.identifier isEqualToString:@"dev.kartpad.menu"]) {
@@ -706,6 +765,65 @@ NSError *KartPadPerformGameDataImport(NSURL *url) {
                                identifier:@"dev.kartpad.menu"
                                   options:sourceMenu.options
                                  children:children];
+}
+
+- (void)rPressureChanged:(uint8_t)pressure fullPress:(BOOL)fullPress {
+  (void)fullPress;
+  const BOOL pressed = pressure > 0;
+  [super rPressureChanged:pressed ? 255 : 0 fullPress:pressed];
+}
+
+- (void)kartPadGasDown:(UIButton *)button {
+  self.kartPadGasPressed = YES;
+  const NSUInteger generation = ++self.kartPadGasHoldGeneration;
+  __weak KartPadGameOverlay *weakSelf = self;
+  __weak UIButton *weakButton = button;
+  dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)NSEC_PER_SEC),
+                 dispatch_get_main_queue(), ^{
+    KartPadGameOverlay *strongSelf = weakSelf;
+    UIButton *strongButton = weakButton;
+    if (strongSelf == nil || strongButton == nil ||
+        !strongSelf.kartPadGasPressed ||
+        strongSelf.kartPadGasHoldGeneration != generation) {
+      return;
+    }
+    // SunPad already keeps A asserted from touch-down through touch-up. The
+    // delayed treatment makes that sustained acceleration state unmistakable.
+    strongButton.backgroundColor =
+        [UIColor colorWithRed:0.06 green:0.78 blue:0.92 alpha:0.98];
+    strongButton.layer.borderColor = UIColor.whiteColor.CGColor;
+    strongButton.layer.shadowColor =
+        [UIColor colorWithRed:0.06 green:0.78 blue:0.92 alpha:1.0].CGColor;
+    strongButton.layer.shadowOpacity = 0.9;
+    strongButton.layer.shadowRadius = 9.0;
+    strongButton.layer.shadowOffset = CGSizeZero;
+    strongButton.accessibilityValue = @"Acceleration held";
+    UIImpactFeedbackGenerator *feedback = [[UIImpactFeedbackGenerator alloc]
+        initWithStyle:UIImpactFeedbackStyleLight];
+    [feedback impactOccurred];
+  });
+}
+
+- (void)kartPadGasUp:(UIButton *)button {
+  self.kartPadGasPressed = NO;
+  ++self.kartPadGasHoldGeneration;
+  button.backgroundColor = self.kartPadGasRestColor;
+  button.layer.borderColor =
+      [UIColor colorWithWhite:1.0 alpha:0.36].CGColor;
+  button.layer.shadowOpacity = 0.0;
+  button.accessibilityValue = nil;
+}
+
+- (void)resetKartPadControlAppearance {
+  self.kartPadGasPressed = NO;
+  ++self.kartPadGasHoldGeneration;
+  if (self.kartPadGasButton != nil) {
+    self.kartPadGasButton.backgroundColor = self.kartPadGasRestColor;
+    self.kartPadGasButton.layer.borderColor =
+        [UIColor colorWithWhite:1.0 alpha:0.36].CGColor;
+    self.kartPadGasButton.layer.shadowOpacity = 0.0;
+    self.kartPadGasButton.accessibilityValue = nil;
+  }
 }
 
 @end
@@ -866,6 +984,9 @@ NSError *KartPadPerformGameDataImport(NSURL *url) {
   [[KartPadPhysicalControllers sharedControllers] stop];
   [[KartPadMotionSteering sharedSteering] stop];
   [[SunPadInputMixer sharedMixer] clearInputFromTouch:YES];
+  if ([_overlay isKindOfClass:KartPadGameOverlay.class]) {
+    [(KartPadGameOverlay *)_overlay resetKartPadControlAppearance];
+  }
   _overlay.delegate = nil;
   [_overlay removeFromSuperview];
   _overlay = nil;
@@ -874,6 +995,9 @@ NSError *KartPadPerformGameDataImport(NSURL *url) {
 - (void)applicationWillResignActive:(NSNotification *)notification {
   (void)notification;
   [[SunPadInputMixer sharedMixer] clearInputFromTouch:YES];
+  if ([_overlay isKindOfClass:KartPadGameOverlay.class]) {
+    [(KartPadGameOverlay *)_overlay resetKartPadControlAppearance];
+  }
   [[KartPadMotionSteering sharedSteering] stop];
 }
 
