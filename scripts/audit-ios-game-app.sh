@@ -61,6 +61,7 @@ done < <(otool -L "${binary}" | tail -n +2 | awk '{print $1}')
 
 symbols="$(nm -gj "${binary}")"
 for required_symbol in \
+  _KartPadMobileEnsureGameDataAvailable \
   _KartPadMobileRuntimeHostInstall \
   _KartPadMobileReadClassicInput \
   _KartPadMobileReadClassicInputForPlayer \
@@ -80,6 +81,8 @@ if ! rg -a -F -q '[KartPad] exact SunPad runtime overlay installed' "${binary}";
   exit 69
 fi
 for importer_contract in \
+  'Game Data Required' \
+  'Import from KartPad Folder' \
   'KartPad currently supports RMCP01 (PAL), disc 0, revision 0 only.' \
   'The validated RMCP01 data is stored privately.' \
   'GameData.import-' \

@@ -23,7 +23,7 @@ Verification:
 - Exact SunPad twelve-file snapshot at
   `e43f0ea6b797e5110787171957c9dc3c6213269c`: pass.
 - Rebuilt executable SHA-256:
-  `87636292fd6ea11b5bb7560d05d30f19858dbf3a22006daebd2c67deefb25efb`.
+  `30b78457e93a0ff75a9228d61366ede342d5546574da2ea672d0d67fc922f7d9`.
 - Exactly one iPhone 17 Pro / iOS 26.5 Simulator was booted. The real system
   folder picker opened and cancelled back to live gameplay.
 - The SunPad-folder path produced the expected bounded no-candidate alert for
@@ -50,8 +50,28 @@ Verification:
   `GameData`, retained the exact DOL and save hashes above, and left zero
   staging or rollback directories. A normal cold relaunch then returned to
   live gameplay. The hook is compiled out for physical iOS builds.
+- A no-data launch now stops before Aurora, Metal, or DVD initialization and
+  presents a native `Game Data Required` flow. Its real Files folder picker,
+  bounded empty-KartPad-folder alert, and full 2.5 GiB import were exercised.
+  After the successful swap, the early gate reloads the runtime configuration
+  and continues directly into the exact SunPad gameplay surface in that same
+  process; no relaunch is required.
+- A separate interrupted-launch recovery removed the active directory while
+  leaving exactly one `GameData.rollback-*` tree. The next ordinary launch
+  restored it automatically, preserved the supported DOL and save hashes,
+  removed the orphan, and reached live gameplay.
+- The final hardening test left a deliberately invalid active directory beside
+  a valid rollback. Onboarding appeared and retained the rollback. After the
+  invalid active directory was moved aside, the next launch restored the valid
+  tree, removed all import/rollback directories, preserved the DOL and save
+  hashes, and logged the exact SunPad runtime overlay installation.
+- The entire serialized 29,065-function graph was then prepared from the
+  immutable source pins and rebuilt cleanly through all 852 Ninja targets. Its
+  arm64 Simulator executable SHA-256 is
+  `966b76d284ff7524f6592667c45dbf63146d57fdf4aac42b1700accd722908f5`.
 
 `folder-picker.jpg`, `no-sunpad-folder-alert.jpg`, `full-import-success.jpg`,
-and `rollback-injected-failure.jpg` are the exercised UI states. Direct WBFS
-extraction, first-launch-with-no-data, and safe removal of active data remain
-open. No private game data is included in this evidence.
+`rollback-injected-failure.jpg`, `first-launch-required.jpg`, and
+`first-launch-runtime.jpg` are the exercised UI states. Direct WBFS extraction
+and safe removal of active data remain open. No private game data is included
+in this evidence.

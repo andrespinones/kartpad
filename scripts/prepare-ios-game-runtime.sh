@@ -52,6 +52,7 @@ patch --batch -p1 -d "${runtime_source}/aurora-main" < \
   "${repo_root}/patches/aurora-ios-simulator-single-pipeline-worker.patch"
 patch --batch -p1 -d "${runtime_source}" < "${repo_root}/patches/wiicompiled-apple-runtime.patch"
 patch --batch -p1 -d "${runtime_source}" < "${repo_root}/patches/wiicompiled-ios-app-integration.patch"
+patch --batch -p1 -d "${runtime_source}" < "${repo_root}/patches/wiicompiled-ios-first-launch-gate.patch"
 patch --batch -p1 -d "${runtime_source}" < "${repo_root}/patches/wiicompiled-ios-touch-core-buttons.patch"
 patch --batch -p1 -d "${runtime_source}" < "${repo_root}/patches/wiicompiled-ios-settings-bridge.patch"
 patch --batch -p1 -d "${runtime_source}" < "${repo_root}/patches/wiicompiled-ios-physical-controllers.patch"

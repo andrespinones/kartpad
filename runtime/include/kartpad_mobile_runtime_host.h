@@ -17,6 +17,10 @@ struct KartPadMobileRuntimeSettings {
 
 extern "C" {
 
+// Holds the iOS launch in a native import flow until a complete, validated
+// private RMCP01 data tree is available. Existing valid data returns directly.
+bool KartPadMobileEnsureGameDataAvailable();
+
 // Called after Aurora has created its SDL/UIKit Metal window.
 void KartPadMobileRuntimeHostInstall(void *sdlWindow);
 void KartPadMobileRuntimeHostUninstall();

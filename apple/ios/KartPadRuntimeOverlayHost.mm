@@ -181,7 +181,383 @@ void KartPadRemoveStaleImportDirectories(NSString *supportRoot) {
   }
 }
 
+NSError *KartPadGameDataError(NSInteger code, NSString *message) {
+  return [NSError errorWithDomain:@"dev.kartpad.gamedata" code:code userInfo:@{
+    NSLocalizedDescriptionKey: message,
+  }];
+}
+
+void KartPadRecoverInterruptedImport(NSString *supportRoot) {
+  NSFileManager *files = NSFileManager.defaultManager;
+  NSString *dataDirectory = [supportRoot stringByAppendingPathComponent:@"GameData"];
+  NSArray<NSString *> *entries =
+      [files contentsOfDirectoryAtPath:supportRoot error:nil] ?: @[];
+  NSMutableArray<NSString *> *rollbacks = [NSMutableArray array];
+  for (NSString *entry in entries) {
+    if ([entry hasPrefix:@"GameData.rollback-"]) {
+      [rollbacks addObject:entry];
+    }
+  }
+  [rollbacks sortUsingSelector:@selector(compare:)];
+  if (![files fileExistsAtPath:dataDirectory] && rollbacks.count == 1) {
+    NSString *rollback = [supportRoot stringByAppendingPathComponent:rollbacks.firstObject];
+    [files moveItemAtPath:rollback toPath:dataDirectory error:nil];
+  }
+  KartPadRemoveStaleImportDirectories(supportRoot);
+}
+
+void KartPadRemoveRollbackDirectories(NSString *supportRoot) {
+  NSFileManager *files = NSFileManager.defaultManager;
+  NSArray<NSString *> *entries =
+      [files contentsOfDirectoryAtPath:supportRoot error:nil] ?: @[];
+  for (NSString *entry in entries) {
+    if ([entry hasPrefix:@"GameData.rollback-"]) {
+      [files removeItemAtPath:[supportRoot stringByAppendingPathComponent:entry]
+                        error:nil];
+    }
+  }
+}
+
+BOOL KartPadInstalledGameDataIsValid() {
+  NSString *supportRoot = KartPadSupportRoot();
+  KartPadRecoverInterruptedImport(supportRoot);
+  NSString *dataDirectory = [supportRoot stringByAppendingPathComponent:@"GameData"];
+  NSError *error = nil;
+  if (KartPadValidateExtractedRoot(dataDirectory, &error) != nil || error != nil) {
+    return NO;
+  }
+  if (!KartPadEnsureRelativeDvdRoot(&error) || error != nil) {
+    return NO;
+  }
+  KartPadRemoveRollbackDirectories(supportRoot);
+  return YES;
+}
+
+NSError *KartPadPerformGameDataImport(NSURL *url) {
+  BOOL securityScoped = [url startAccessingSecurityScopedResource];
+  NSString *sourceRoot = KartPadResolvedExtractedRoot(url);
+  NSError *workError = nil;
+  NSString *validationError = KartPadValidateExtractedRoot(sourceRoot, &workError);
+  if (validationError != nil && workError == nil) {
+    workError = KartPadGameDataError(1, validationError);
+  }
+  if (workError != nil) {
+    if (securityScoped) {
+      [url stopAccessingSecurityScopedResource];
+    }
+    return workError;
+  }
+
+  NSString *supportRoot = KartPadSupportRoot();
+  NSString *staging = [supportRoot stringByAppendingPathComponent:
+      [NSString stringWithFormat:@"GameData.import-%@", NSUUID.UUID.UUIDString]];
+  NSFileManager *files = NSFileManager.defaultManager;
+  [files createDirectoryAtPath:supportRoot withIntermediateDirectories:YES
+                     attributes:@{NSFileProtectionKey:
+                         NSFileProtectionCompleteUntilFirstUserAuthentication}
+                          error:&workError];
+  if (workError == nil) {
+    KartPadRecoverInterruptedImport(supportRoot);
+    [files copyItemAtPath:sourceRoot toPath:staging error:&workError];
+  }
+  if (securityScoped) {
+    [url stopAccessingSecurityScopedResource];
+  }
+
+  if (workError == nil && !KartPadEnsureRelativeDvdRoot(&workError)) {
+    workError = workError ?: KartPadGameDataError(2, @"Could not update Config.toml.");
+  }
+
+  NSString *dataDirectory = [supportRoot stringByAppendingPathComponent:@"GameData"];
+  NSString *rollback = [supportRoot stringByAppendingPathComponent:
+      [NSString stringWithFormat:@"GameData.rollback-%@", NSUUID.UUID.UUIDString]];
+  BOOL movedExisting = NO;
+  if (workError == nil && [files fileExistsAtPath:dataDirectory]) {
+    movedExisting = [files moveItemAtPath:dataDirectory toPath:rollback error:&workError];
+  }
+#if TARGET_OS_SIMULATOR
+  if (workError == nil &&
+      [NSProcessInfo.processInfo.environment[@"KARTPAD_IMPORT_FORCE_SWAP_FAILURE"] boolValue]) {
+    workError = KartPadGameDataError(3, @"Injected Simulator swap failure.");
+  }
+#endif
+  if (workError == nil) {
+    [files moveItemAtPath:staging toPath:dataDirectory error:&workError];
+  }
+  if (workError != nil && movedExisting && ![files fileExistsAtPath:dataDirectory]) {
+    [files moveItemAtPath:rollback toPath:dataDirectory error:nil];
+  } else if (workError == nil && movedExisting) {
+    [files removeItemAtPath:rollback error:nil];
+  }
+  if (workError != nil) {
+    [files removeItemAtPath:staging error:nil];
+    return workError;
+  }
+
+  NSURL *dataURL = [NSURL fileURLWithPath:dataDirectory isDirectory:YES];
+  [dataURL setResourceValue:@YES forKey:NSURLIsExcludedFromBackupKey error:nil];
+  [files setAttributes:@{NSFileProtectionKey:
+      NSFileProtectionCompleteUntilFirstUserAuthentication}
+             ofItemAtPath:dataDirectory error:nil];
+  KartPadRemoveRollbackDirectories(supportRoot);
+  SunPadSettings *settings = SunPadSettings.sharedSettings;
+  settings.retainedGameDataPath = nil;
+  settings.extractedGameRoot = dataDirectory;
+  [settings synchronize];
+  return nil;
+}
+
 }  // namespace
+
+@interface KartPadFirstLaunchViewController : UIViewController
+@end
+
+@implementation KartPadFirstLaunchViewController
+
+- (void)viewDidLoad {
+  [super viewDidLoad];
+  self.view.backgroundColor = UIColor.systemBackgroundColor;
+
+  UILabel *title = [[UILabel alloc] init];
+  title.translatesAutoresizingMaskIntoConstraints = NO;
+  title.text = @"KartPad";
+  title.font = [UIFont systemFontOfSize:34.0 weight:UIFontWeightBold];
+  title.textAlignment = NSTextAlignmentCenter;
+
+  UILabel *message = [[UILabel alloc] init];
+  message.translatesAutoresizingMaskIntoConstraints = NO;
+  message.text = @"Your own extracted RMCP01 game data is required before play.";
+  message.font = [UIFont preferredFontForTextStyle:UIFontTextStyleBody];
+  message.textColor = UIColor.secondaryLabelColor;
+  message.textAlignment = NSTextAlignmentCenter;
+  message.numberOfLines = 0;
+
+  UIStackView *stack = [[UIStackView alloc] initWithArrangedSubviews:@[title, message]];
+  stack.translatesAutoresizingMaskIntoConstraints = NO;
+  stack.axis = UILayoutConstraintAxisVertical;
+  stack.spacing = 12.0;
+  [self.view addSubview:stack];
+  [NSLayoutConstraint activateConstraints:@[
+    [stack.centerXAnchor constraintEqualToAnchor:self.view.centerXAnchor],
+    [stack.centerYAnchor constraintEqualToAnchor:self.view.centerYAnchor],
+    [stack.leadingAnchor constraintGreaterThanOrEqualToAnchor:
+        self.view.safeAreaLayoutGuide.leadingAnchor constant:32.0],
+    [stack.trailingAnchor constraintLessThanOrEqualToAnchor:
+        self.view.safeAreaLayoutGuide.trailingAnchor constant:-32.0],
+  ]];
+}
+
+- (UIInterfaceOrientationMask)supportedInterfaceOrientations {
+  return UIInterfaceOrientationMaskLandscape;
+}
+
+@end
+
+@interface KartPadFirstLaunchHost : NSObject <UIDocumentPickerDelegate>
+@property(nonatomic, strong) UIWindow *window;
+@property(nonatomic, strong) KartPadFirstLaunchViewController *root;
+@property(nonatomic, assign) BOOL finished;
+@property(nonatomic, assign) BOOL succeeded;
+- (BOOL)run;
+- (void)showOptions;
+@end
+
+@implementation KartPadFirstLaunchHost
+
+- (UIWindowScene *)availableWindowScene {
+  for (UIScene *scene in UIApplication.sharedApplication.connectedScenes) {
+    if ([scene isKindOfClass:UIWindowScene.class]) {
+      return (UIWindowScene *)scene;
+    }
+  }
+  return nil;
+}
+
+- (NSArray<NSURL *> *)documentsRoots {
+  NSURL *documents = [NSFileManager.defaultManager
+      URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask].firstObject;
+  NSArray<NSURL *> *entries = documents == nil ? @[] :
+      [NSFileManager.defaultManager contentsOfDirectoryAtURL:documents
+          includingPropertiesForKeys:@[NSURLIsDirectoryKey]
+                             options:NSDirectoryEnumerationSkipsHiddenFiles error:nil];
+  NSMutableArray<NSURL *> *roots = [NSMutableArray array];
+  for (NSURL *entry in entries) {
+    NSNumber *directory = nil;
+    [entry getResourceValue:&directory forKey:NSURLIsDirectoryKey error:nil];
+    if (directory.boolValue && KartPadResolvedExtractedRoot(entry) != nil) {
+      [roots addObject:entry];
+    }
+  }
+  [roots sortUsingComparator:^NSComparisonResult(NSURL *left, NSURL *right) {
+    return [left.lastPathComponent localizedStandardCompare:right.lastPathComponent];
+  }];
+  return roots;
+}
+
+- (void)showMessage:(NSString *)title
+             detail:(NSString *)detail
+         completion:(void (^)(void))completion {
+  UIAlertController *alert =
+      [UIAlertController alertControllerWithTitle:title message:detail
+                                   preferredStyle:UIAlertControllerStyleAlert];
+  [alert addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault
+                                          handler:^(UIAlertAction *action) {
+    (void)action;
+    if (completion != nil) {
+      dispatch_after(dispatch_time(DISPATCH_TIME_NOW,
+                                   (int64_t)(0.35 * NSEC_PER_SEC)),
+                     dispatch_get_main_queue(), completion);
+    }
+  }]];
+  [self.root presentViewController:alert animated:YES completion:nil];
+}
+
+- (void)startImport:(NSURL *)url {
+  UIAlertController *progress =
+      [UIAlertController alertControllerWithTitle:@"Importing Game Data"
+                                          message:@"Validating and copying the extracted disc…"
+                                   preferredStyle:UIAlertControllerStyleAlert];
+  [self.root presentViewController:progress animated:YES completion:nil];
+  __weak KartPadFirstLaunchHost *weakSelf = self;
+  dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
+    NSError *error = KartPadPerformGameDataImport(url);
+    dispatch_async(dispatch_get_main_queue(), ^{
+      KartPadFirstLaunchHost *strongSelf = weakSelf;
+      if (strongSelf == nil) {
+        return;
+      }
+      [progress dismissViewControllerAnimated:YES completion:^{
+        if (error != nil) {
+          [strongSelf showMessage:@"Game Data Import Failed"
+                           detail:error.localizedDescription completion:^{
+            [strongSelf showOptions];
+          }];
+          return;
+        }
+        strongSelf.succeeded = YES;
+        strongSelf.finished = YES;
+      }];
+    });
+  });
+}
+
+- (void)chooseDocumentsRoot {
+  NSArray<NSURL *> *roots = [self documentsRoots];
+  if (roots.count == 0) {
+    [self showMessage:@"KartPad Folder"
+               detail:@"No extracted DATA folder was found. In Files, place it directly in On My iPhone or iPad → KartPad, then try again."
+           completion:^{ [self showOptions]; }];
+    return;
+  }
+  if (roots.count == 1) {
+    [self startImport:roots.firstObject];
+    return;
+  }
+  UIAlertController *choices =
+      [UIAlertController alertControllerWithTitle:@"Choose Game Data"
+                                          message:@"Select an extracted RMCP01 folder."
+                                   preferredStyle:UIAlertControllerStyleAlert];
+  for (NSURL *root in roots) {
+    [choices addAction:[UIAlertAction actionWithTitle:root.lastPathComponent
+                                                style:UIAlertActionStyleDefault
+                                              handler:^(UIAlertAction *action) {
+      (void)action;
+      dispatch_after(dispatch_time(DISPATCH_TIME_NOW,
+                                   (int64_t)(0.35 * NSEC_PER_SEC)),
+                     dispatch_get_main_queue(), ^{ [self startImport:root]; });
+    }]];
+  }
+  [choices addAction:[UIAlertAction actionWithTitle:@"Cancel"
+                                              style:UIAlertActionStyleCancel
+                                            handler:^(UIAlertAction *action) {
+    (void)action;
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW,
+                                 (int64_t)(0.35 * NSEC_PER_SEC)),
+                   dispatch_get_main_queue(), ^{ [self showOptions]; });
+  }]];
+  [self.root presentViewController:choices animated:YES completion:nil];
+}
+
+- (void)showOptions {
+  UIAlertController *options =
+      [UIAlertController alertControllerWithTitle:@"Game Data Required"
+          message:@"KartPad does not include Mario Kart Wii. Import your own extracted RMCP01 DATA folder to continue."
+          preferredStyle:UIAlertControllerStyleAlert];
+  [options addAction:[UIAlertAction actionWithTitle:@"Choose Extracted DATA Folder…"
+                                               style:UIAlertActionStyleDefault
+                                             handler:^(UIAlertAction *action) {
+    (void)action;
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW,
+                                 (int64_t)(0.35 * NSEC_PER_SEC)),
+                   dispatch_get_main_queue(), ^{
+      UIDocumentPickerViewController *picker =
+          [[UIDocumentPickerViewController alloc]
+              initForOpeningContentTypes:@[UTTypeFolder] asCopy:NO];
+      picker.delegate = self;
+      picker.allowsMultipleSelection = NO;
+      [self.root presentViewController:picker animated:YES completion:nil];
+    });
+  }]];
+  [options addAction:[UIAlertAction actionWithTitle:@"Import from KartPad Folder"
+                                               style:UIAlertActionStyleDefault
+                                             handler:^(UIAlertAction *action) {
+    (void)action;
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW,
+                                 (int64_t)(0.35 * NSEC_PER_SEC)),
+                   dispatch_get_main_queue(), ^{ [self chooseDocumentsRoot]; });
+  }]];
+  [self.root presentViewController:options animated:YES completion:nil];
+}
+
+- (void)documentPicker:(UIDocumentPickerViewController *)controller
+    didPickDocumentsAtURLs:(NSArray<NSURL *> *)urls {
+  (void)controller;
+  NSURL *url = urls.firstObject;
+  if (url != nil) {
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW,
+                                 (int64_t)(0.35 * NSEC_PER_SEC)),
+                   dispatch_get_main_queue(), ^{ [self startImport:url]; });
+  } else {
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW,
+                                 (int64_t)(0.35 * NSEC_PER_SEC)),
+                   dispatch_get_main_queue(), ^{ [self showOptions]; });
+  }
+}
+
+- (void)documentPickerWasCancelled:(UIDocumentPickerViewController *)controller {
+  (void)controller;
+  dispatch_after(dispatch_time(DISPATCH_TIME_NOW,
+                               (int64_t)(0.35 * NSEC_PER_SEC)),
+                 dispatch_get_main_queue(), ^{ [self showOptions]; });
+}
+
+- (BOOL)run {
+  if (KartPadInstalledGameDataIsValid()) {
+    return YES;
+  }
+  UIWindowScene *scene = [self availableWindowScene];
+  if (scene == nil) {
+    NSLog(@"[KartPad] no UIWindowScene is available for first-launch import");
+    return NO;
+  }
+  self.root = [[KartPadFirstLaunchViewController alloc] init];
+  self.window = [[UIWindow alloc] initWithWindowScene:scene];
+  self.window.windowLevel = UIWindowLevelAlert + 1.0;
+  self.window.rootViewController = self.root;
+  [self.window makeKeyAndVisible];
+  dispatch_async(dispatch_get_main_queue(), ^{ [self showOptions]; });
+  while (!self.finished) {
+    @autoreleasepool {
+      [NSRunLoop.currentRunLoop runMode:NSDefaultRunLoopMode
+                             beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.05]];
+    }
+  }
+  self.window.hidden = YES;
+  self.window = nil;
+  return self.succeeded;
+}
+
+@end
 
 @implementation KartPadGameOverlay
 
@@ -404,91 +780,7 @@ void KartPadRemoveStaleImportDirectories(NSString *supportRoot) {
 
   __weak KartPadRuntimeOverlayHost *weakSelf = self;
   dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
-    BOOL securityScoped = [url startAccessingSecurityScopedResource];
-    NSString *sourceRoot = KartPadResolvedExtractedRoot(url);
-    NSError *workError = nil;
-    NSString *validationError = KartPadValidateExtractedRoot(sourceRoot, &workError);
-    if (validationError != nil || workError != nil) {
-      if (securityScoped) {
-        [url stopAccessingSecurityScopedResource];
-      }
-      dispatch_async(dispatch_get_main_queue(), ^{
-        KartPadRuntimeOverlayHost *strongSelf = weakSelf;
-        if (strongSelf == nil) {
-          return;
-        }
-        [strongSelf->_gameDataProgressAlert dismissViewControllerAnimated:YES completion:^{
-          [strongSelf showIntegrationAlert:@"Game Data Not Imported"
-                                   message:validationError ?: workError.localizedDescription];
-        }];
-      });
-      return;
-    }
-
-    dispatch_async(dispatch_get_main_queue(), ^{
-      KartPadRuntimeOverlayHost *strongSelf = weakSelf;
-      if (strongSelf == nil) {
-        return;
-      }
-      strongSelf->_gameDataProgressAlert.message = @"Copying private game data…";
-    });
-    NSString *supportRoot = KartPadSupportRoot();
-    NSString *staging = [supportRoot stringByAppendingPathComponent:
-        [NSString stringWithFormat:@"GameData.import-%@", NSUUID.UUID.UUIDString]];
-    NSFileManager *files = NSFileManager.defaultManager;
-    [files createDirectoryAtPath:supportRoot withIntermediateDirectories:YES
-                       attributes:@{NSFileProtectionKey:
-                           NSFileProtectionCompleteUntilFirstUserAuthentication}
-                            error:&workError];
-    if (workError == nil) {
-      KartPadRemoveStaleImportDirectories(supportRoot);
-      [files copyItemAtPath:sourceRoot toPath:staging error:&workError];
-    }
-    if (securityScoped) {
-      [url stopAccessingSecurityScopedResource];
-    }
-
-    if (workError == nil && !KartPadEnsureRelativeDvdRoot(&workError)) {
-      workError = workError ?: [NSError errorWithDomain:@"dev.kartpad.gamedata"
-                                                   code:2 userInfo:@{
-        NSLocalizedDescriptionKey: @"Could not update Config.toml."
-      }];
-    }
-
-    NSString *dataDirectory = [supportRoot stringByAppendingPathComponent:@"GameData"];
-    NSString *rollback = [supportRoot stringByAppendingPathComponent:
-        [NSString stringWithFormat:@"GameData.rollback-%@", NSUUID.UUID.UUIDString]];
-    BOOL movedExisting = NO;
-    if (workError == nil && [files fileExistsAtPath:dataDirectory]) {
-      movedExisting = [files moveItemAtPath:dataDirectory toPath:rollback error:&workError];
-    }
-#if TARGET_OS_SIMULATOR
-    if (workError == nil &&
-        [NSProcessInfo.processInfo.environment[@"KARTPAD_IMPORT_FORCE_SWAP_FAILURE"] boolValue]) {
-      workError = [NSError errorWithDomain:@"dev.kartpad.gamedata"
-                                      code:3 userInfo:@{
-        NSLocalizedDescriptionKey: @"Injected Simulator swap failure."
-      }];
-    }
-#endif
-    if (workError == nil) {
-      [files moveItemAtPath:staging toPath:dataDirectory error:&workError];
-    }
-    if (workError != nil && movedExisting && ![files fileExistsAtPath:dataDirectory]) {
-      [files moveItemAtPath:rollback toPath:dataDirectory error:nil];
-    } else if (workError == nil && movedExisting) {
-      [files removeItemAtPath:rollback error:nil];
-    }
-    if (workError != nil) {
-      [files removeItemAtPath:staging error:nil];
-    }
-    if (workError == nil) {
-      NSURL *dataURL = [NSURL fileURLWithPath:dataDirectory isDirectory:YES];
-      [dataURL setResourceValue:@YES forKey:NSURLIsExcludedFromBackupKey error:nil];
-      [files setAttributes:@{NSFileProtectionKey:
-          NSFileProtectionCompleteUntilFirstUserAuthentication}
-                 ofItemAtPath:dataDirectory error:nil];
-    }
+    NSError *workError = KartPadPerformGameDataImport(url);
 
     dispatch_async(dispatch_get_main_queue(), ^{
       KartPadRuntimeOverlayHost *strongSelf = weakSelf;
@@ -502,10 +794,6 @@ void KartPadRemoveStaleImportDirectories(NSString *supportRoot) {
                                    message:workError.localizedDescription];
           return;
         }
-        SunPadSettings *settings = SunPadSettings.sharedSettings;
-        settings.retainedGameDataPath = nil;
-        settings.extractedGameRoot = dataDirectory;
-        [settings synchronize];
         [strongSelf showIntegrationAlert:@"Game Data Imported"
                                  message:@"The validated RMCP01 data is stored privately. Close and reopen KartPad to use the new copy."];
       }];
@@ -586,6 +874,17 @@ void KartPadRemoveStaleImportDirectories(NSString *supportRoot) {
 }
 
 @end
+
+extern "C" bool KartPadMobileEnsureGameDataAvailable() {
+  if (!NSThread.isMainThread) {
+    __block BOOL available = NO;
+    dispatch_sync(dispatch_get_main_queue(), ^{
+      available = [[[KartPadFirstLaunchHost alloc] init] run];
+    });
+    return available;
+  }
+  return [[[KartPadFirstLaunchHost alloc] init] run];
+}
 
 extern "C" void KartPadMobileRuntimeHostInstall(void *sdlWindow) {
   if (sdlWindow == nullptr || !NSThread.isMainThread) {

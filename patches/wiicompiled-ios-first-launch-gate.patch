@@ -1,0 +1,19 @@
+--- a/src/main.cpp
++++ b/src/main.cpp
+@@ -1180,0 +1181,9 @@
++#if defined(__APPLE__) && TARGET_OS_IOS
++        if (!KartPadMobileEnsureGameDataAvailable()) {
++            SetRuntimeExitCodeImpl(0);
++            ShutdownProcessTranscript();
++            return 0;
++        }
++        RuntimeConfigFile::Reload();
++#endif
++
+--- a/include/runtime_config.h
++++ b/include/runtime_config.h
+@@ -478,0 +479,4 @@
++inline void Reload() {
++    Mutable() = LoadConfigFile();
++}
++
