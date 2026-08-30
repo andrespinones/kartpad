@@ -2155,3 +2155,34 @@ diff -ruN --exclude=.git --exclude=third_party --exclude=build a/src/hle/storage
 +    // named sibling directory on POSIX instead of the real title hierarchy.
 +    const std::string titlePath = TranslateNandPath(CurrentNandDataDir().c_str());
      CreateDirectoryPath(titlePath);
+diff -ruN --exclude=.git --exclude=third_party --exclude=build a/src/product/base_product.cpp b/src/product/base_product.cpp
+--- a/src/product/base_product.cpp	2026-08-28 14:10:57
++++ b/src/product/base_product.cpp	2026-08-30 00:43:17
+@@ -5,7 +5,7 @@
+ const Descriptor& Active() noexcept {
+     static constexpr Descriptor descriptor{
+         Kind::BaseGame,
+-        "WiiCompiled",
++        "KartPad",
+     };
+     return descriptor;
+ }
+diff -ruN --exclude=.git --exclude=third_party --exclude=build a/src/settings_overlay.cpp b/src/settings_overlay.cpp
+--- a/src/settings_overlay.cpp	2026-08-28 14:10:57
++++ b/src/settings_overlay.cpp	2026-08-30 00:43:31
+@@ -795,9 +795,9 @@
+                                         ImGuiWindowFlags_NoNav |
+                                         ImGuiWindowFlags_NoSavedSettings |
+                                         ImGuiWindowFlags_NoBringToFrontOnFocus;
+-    if (ImGui::Begin("Wiicompiled Startup", nullptr, kFlags)) {
++    if (ImGui::Begin("KartPad Startup", nullptr, kFlags)) {
+         ImGui::SetWindowFontScale(1.25f);
+-        constexpr const char* kTitle = "WiiCompiled";
++        constexpr const char* kTitle = "KartPad";
+         const ImVec2 titleSize = ImGui::CalcTextSize(kTitle);
+         const float titleX = std::max(0.0f, (viewport->Size.x - titleSize.x) * 0.5f);
+         const float startY = std::max(0.0f, (viewport->Size.y - titleSize.y) * 0.5f);
+@@ -817,2 +817,2 @@
+-    ImGui::TextUnformatted("WiiCompiled");
++    ImGui::TextUnformatted("KartPad");
+     ImGui::Separator();

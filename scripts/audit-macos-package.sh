@@ -78,9 +78,9 @@ fi
 # their distinct platform directories. The focused runtime contract proves the
 # resolver behavior; these markers make the package audit reject an older
 # runtime that predates that contract.
-for storage_marker in "Application Support" "Caches"; do
-  if ! rg -F -x -q "${storage_marker}" < <(strings "${executable}"); then
-    echo "package runtime lacks installed storage marker: ${storage_marker}" >&2
+for runtime_marker in "Application Support" "Caches" "KartPad Startup"; do
+  if ! rg -F -x -q "${runtime_marker}" < <(strings "${executable}"); then
+    echo "package runtime lacks required product marker: ${runtime_marker}" >&2
     exit 70
   fi
 done
