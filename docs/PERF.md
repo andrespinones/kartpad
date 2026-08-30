@@ -21,6 +21,7 @@ substitutes for frame-time, guest-cadence, audio, memory, and soak evidence.
 | Exact `2cfb7e1` retained-cache title | Minimum effective FPS 59.001; maximum p99 17.701 ms; maximum worst 32.808 ms while the queue fell from 1,223 to 865 | Instrumentation pass only; short, non-fixture session |
 | Exact `2cfb7e1` empty-cache title | Minimum effective FPS 51.958; maximum p99 83.783 ms; maximum worst 85.094 ms; 20 audio blocks / 7,680 bytes dropped | Controlled fail signal |
 | Exact `2cfb7e1` immediate warm title relaunch | Minimum effective FPS 59.963; maximum p99 17.264 ms; maximum worst 25.966 ms; zero audio drops | Controlled title improvement; race/soak evidence still open |
+| macOS one-vs-six priority-worker sweep | One worker ranged from 55.460–59.868 minimum effective FPS; six workers ranged from 52.000–59.974 as machine-level Metal state warmed | Confounded; one-worker default reverted |
 
 ## Acceptance contract
 
@@ -68,6 +69,9 @@ regression rejects the candidate even if its average FPS improves.
 - The initial pipeline cache covers many common states but misses enough
   title- and track-specific combinations to cause visible compilation stalls.
 - Compilation competes with guest and audio work under heavy first-use load.
+- KartPad's application cache does not capture all relevant Metal/Dawn state:
+  a counterbalanced six-worker run became as smooth as the best one-worker run
+  after prior exercises. Worker count alone is not the root fix.
 - Moonview Highway's sustained 46–54 FPS after the visible queue shrinks may
   include a second CPU/GPU/synchronization bottleneck; it must not be described
   as only a shader-cache problem without a profile.

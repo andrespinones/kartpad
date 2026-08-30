@@ -1138,3 +1138,23 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   title-path difference, but representative Luigi Circuit/Moonview Highway
   pairs, CPU/GPU profiles, sustained frame pacing, and the eight-hour soak
   remain. Evidence: `docs/artifacts/2026-08-30/g11-present-telemetry.md`.
+
+## 2026-08-30 — G11 macOS pipeline-worker counterbalance
+
+- Compared exact six-worker source `2cfb7e1` with exact one-worker source
+  `64359cb` across reversible empty-application-cache legs. The one-worker
+  candidate ranged from 55.460 to 59.868 minimum effective FPS and from 55.101
+  to 16.990 ms maximum p99; six workers ranged from 52.000 to 59.974 minimum
+  effective FPS and from 59.646 to 17.596 ms maximum p99.
+- The final six-worker leg was the smoothest complete sample: 59.974 minimum
+  effective FPS, 17.596 ms maximum p99, 18.016 ms worst, and zero audio drops.
+  This followed prior Metal exercises despite an empty KartPad cache, proving
+  that application-cache state alone does not define a true cold GPU start.
+- Restored the original cache after every leg, retained generated caches and
+  logs privately, closed normally, and kept no Simulator device booted. The
+  original relative cache-tree hash remained
+  `34fafbdcd96c978d025b1604cf2fe74e14f1561d9d8aa1ea647d929226c7c031`.
+- Classification: **one-worker causality rejected; experimental default
+  reverted; G11 remains open.** Next work is deterministic race profiling with
+  explicit application and machine-level cache-state disclosure. Evidence:
+  `docs/artifacts/2026-08-30/g11-pipeline-worker-sweep.md`.
