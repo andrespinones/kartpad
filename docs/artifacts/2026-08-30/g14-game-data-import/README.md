@@ -42,7 +42,10 @@ Verification:
   compiler path crashed inside `MTLCompilerScheduler::assignQosToRequest`.
   KartPad now reproducibly limits only iOS Simulator pipeline compilation to
   one worker; physical-device and macOS worker policy is unchanged. The final
-  transcript reports one priority and one background worker.
+  transcript reports one priority and one background worker. A later supplied
+  crash report was classified as the same pre-fix six-worker incident; its
+  binary UUID and timestamps predate the current patch and candidate. See
+  `metal-compiler-crash-classification.md`.
 - The app was terminated and the Simulator shut down; none remains booted.
 - A Simulator-only launch environment forced failure after the installed tree
   had moved aside but before the staged tree could replace it. The importer
