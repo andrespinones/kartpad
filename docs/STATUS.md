@@ -16,7 +16,7 @@ Updated: 2026-08-30
 | G3 Host portability | Pass | Native arm64 host library/contracts pass; Darwin graph contains no Win32/x86-only link token; manifest recorded |
 | G4 Guest memory | Pass | Checked Darwin path passes conformance, lifecycle, randomized stress, microprogram, ASan/UBSan; safe Mach VM feasibility probe passes |
 | G5 Guest scheduler | Pass | Explicit state machine passes lifecycle/priority/VI/register tests and two deterministic million-operation runs under Release and ASan/UBSan |
-| G6 PPC/AArch64 semantics | Pass | 250,227-check arm64/x86 hashes match; Dolphin oracle, sanitizers, translator 579/579, translated scalar/paired state, scheduler/callback persistence, and all 10,836 title units pass |
+| G6 PPC/AArch64 semantics | Pass | 250,227-check arm64/x86 hashes match; Dolphin oracle, sanitizers, translator 582/582, translated scalar/paired state, scheduler/callback persistence, and all 10,836 title units pass |
 | G7 Native Metal frame | Pass | Real PAL wrist-strap frame visible at 60 FPS; reproducible Apple runtime patch and capture evidence recorded |
 | G8 macOS boots/input | Pass | Full DOL+StaticR intro/title/menu, audible output, A/directional/1 navigation; evidence under `docs/artifacts/2026-08-28/g8-title-menu/` |
 | G9 first race/save | Pass | 100cc VS standings/result/menu cycle, changed save hash, clean quit/relaunch with `Player` intact, and `Nin★sato 01:29.670` replay; evidence under `docs/artifacts/2026-08-28/g9-race-save/` |
@@ -68,7 +68,7 @@ experiments, physical-device interaction, and a reproducible legal build path.
 - Buildable KartPad targets: host, memory, scheduler, semantic contracts, native subsystem smoke, translated semantic fixture, and provisional translated-frame app.
 - Input profile: WBFS containing clean PAL `RMCP01`, revision 0; original is read-only. Physical keyboard holds retain the full normalized Classic-stick range. Accessibility-generated GUI taps use a bounded 0.35 level for 250 ms; acceleration/reverse retain their 500 ms gameplay holds. Physical controllers and future touch input are unaffected.
 - WiiCompiled baseline: required commit/tree verified in a detached, push-disabled partial clone.
-- Translator baseline: immutable upstream remains 570/570; KartPad's reproducible FPSCR lowering patch passes 579/579 on native arm64 with .NET SDK 8.0.130.
+- Translator baseline: immutable upstream remains 570/570; KartPad's reproducible FPSCR lowering patch passes 582/582 on native arm64 with .NET SDK 8.0.130. Stateful scalar/paired FP, comparison, FPSCR move, and exception-control helpers now expose their hidden FPSCR reads/writes to ABI and interprocedural liveness analysis instead of masquerading as pure calls.
 - Gameplay baseline: hashed Dolphin 5.0-17995 arm64/Vulkan/HLE binary boots `RMCP01`, creates an isolated license/save, reaches Luigi Circuit and its official staff ghost, and recovers to 60 FPS/VPS after shader warmup.
 - Portability baseline: `kartpad_host` and its contract suite compile/link/run natively for arm64 macOS; manifest is under `docs/artifacts/2026-08-28/`.
 - Memory baseline: checked/table guest memory is the accepted correctness path; evidence is `docs/artifacts/2026-08-28/g4-guest-memory.md`.

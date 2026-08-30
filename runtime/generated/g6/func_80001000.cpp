@@ -11,6 +11,7 @@ extern "C" void func_80001000(CpuContext* MKW_RESTRICT ctx)
     uint32_t r6_psq_tmp_1 = 0;
     uint32_t r6_psq_tmp_2 = 0;
     uint32_t r6_psq_tmp_3 = 0;
+    uint8_t* guest_range_0 = nullptr;
 
     uint32_t r3 = ctx->gpr[3];
     uint32_t r4 = ctx->gpr[4];
@@ -57,8 +58,17 @@ extern "C" void func_80001000(CpuContext* MKW_RESTRICT ctx)
     MemoryInline::FlatWriteRam32(r3, r5);
     r6 = 0x80010000u;
     r6 = (r6 | 4096);
-    f1.d = MemoryInline::FlatReadFloat32(r6);
-    f2.d = MemoryInline::FlatReadFloat32((r6 + 4));
+    guest_range_0 = MemoryInline::ResolveRangeHost(r6, 0, 48u, true, false);
+    {
+        const auto resolved_pair = MemoryInline::ReadResolvedPair32(guest_range_0, 0u);
+        if (resolved_pair.valid) {
+            f1.d = PpcBitCastToFloatInline(resolved_pair.first);
+            f2.d = PpcBitCastToFloatInline(resolved_pair.second);
+        } else {
+            f1.d = MemoryInline::ReadResolvedFloat32(guest_range_0, 0u, r6);
+            f2.d = MemoryInline::ReadResolvedFloat32(guest_range_0, 4u, (r6 + 4));
+        }
+    }
     PpcFaddsStateInline(f3.d, f1.d, f2.d);
     MemoryInline::FlatWriteRamFloat32((r3 + 4), f3.d);
     // psq_load w=0 quant=0 (using PPC_PsqL)
@@ -71,31 +81,36 @@ extern "C" void func_80001000(CpuContext* MKW_RESTRICT ctx)
     // psq_store w=0 quant=0 (using PPC_PsqSt)
     r3_psq_tmp_0 = (r3 + 8);
     PPC_PsqStGqrInline<0u, 0u>(ctx, mkw_gqr0, r3_psq_tmp_0, f6.d);
-    f7.d = MemoryInline::FlatReadFloat32((r6 + 24));
+    f7.d = MemoryInline::ReadResolvedFloat32(guest_range_0, 24u, (r6 + 24));
     PpcFdivsStateInline(f8.d, f1.d, f7.d);
     MemoryInline::FlatWriteRamFloat32((r3 + 16), f8.d);
-    f9.d = MemoryInline::FlatReadFloat32((r6 + 28));
-    f10.d = MemoryInline::FlatReadFloat32((r6 + 32));
+    {
+        const auto resolved_pair = MemoryInline::ReadResolvedPair32(guest_range_0, 28u);
+        if (resolved_pair.valid) {
+            f9.d = PpcBitCastToFloatInline(resolved_pair.first);
+            f10.d = PpcBitCastToFloatInline(resolved_pair.second);
+        } else {
+            f9.d = MemoryInline::ReadResolvedFloat32(guest_range_0, 28u, (r6 + 28));
+            f10.d = MemoryInline::ReadResolvedFloat32(guest_range_0, 32u, (r6 + 32));
+        }
+    }
     PpcFaddsStateInline(f11.d, f9.d, f10.d);
     MemoryInline::FlatWriteRamFloat32((r3 + 20), f11.d);
     PPC_Mtfsb1(24);
-    f12.d = MemoryInline::FlatReadFloat32((r6 + 36));
+    f12.d = MemoryInline::ReadResolvedFloat32(guest_range_0, 36u, (r6 + 36));
     PpcFaddsStateInline(f12.d, f9.d, f10.d);
     MemoryInline::FlatWriteRamFloat32((r3 + 24), f12.d);
-    f13.d = MemoryInline::FlatReadFloat32((r6 + 40));
+    f13.d = MemoryInline::ReadResolvedFloat32(guest_range_0, 40u, (r6 + 40));
     PpcFctiwzStateInline(f14.d, f13.d);
-    mkw_gqr0 = ctx->gqr[0];
     PpcFctiwStateInline(f15.d, f13.d);
-    mkw_gqr0 = ctx->gqr[0];
     PpcFctiwStateInline(f13.d, f9.d);
-    mkw_gqr0 = ctx->gqr[0];
-    f16.d = MemoryInline::FlatReadFloat32((r6 + 36));
+    f16.d = MemoryInline::ReadResolvedFloat32(guest_range_0, 36u, (r6 + 36));
     PpcFmaddsStateInline(f16.d, f9.d, f7.d, f1.d);
     PPC_Mtfsb1(27);
-    f17.d = MemoryInline::FlatReadFloat32((r6 + 36));
+    f17.d = MemoryInline::ReadResolvedFloat32(guest_range_0, 36u, (r6 + 36));
     PpcSetPairedFprInline(f17, PpcFresValueStateInline(f17.d, f7.d));
-    f18.d = MemoryInline::FlatReadFloat32((r6 + 36));
-    f19.d = MemoryInline::FlatReadFloat32((r6 + 12));
+    f18.d = MemoryInline::ReadResolvedFloat32(guest_range_0, 36u, (r6 + 36));
+    f19.d = MemoryInline::ReadResolvedFloat32(guest_range_0, 12u, (r6 + 12));
     PpcFrsqrteStateInline(f18.d, f19.d);
     // psq_load w=0 quant=0 (using PPC_PsqL)
     r6_psq_tmp_2 = (r6 + 24);
@@ -107,7 +122,7 @@ extern "C" void func_80001000(CpuContext* MKW_RESTRICT ctx)
     PpcSetPairedFprInline(f24, PPC_PsqLGqrInline<0u, 0u>(ctx, mkw_gqr0, r6_psq_tmp_3));
     PpcSetPairedFprInline(f25, PPC_PsNegInline(f24.d));
     PpcSetPairedFprInline(f26, PPC_PsAddInline(f24.d, f25.d));
-    f23.d = MemoryInline::FlatReadFloat32((r6 + 44));
+    f23.d = MemoryInline::ReadResolvedFloat32(guest_range_0, 44u, (r6 + 44));
     (void)PpcCompareStateInline(true, f23.d, f1.d);
     SetCRFloatResident(cr, 3, f23.d, f1.d);
 }
@@ -168,5 +183,5 @@ extern "C" void func_80001000(CpuContext* MKW_RESTRICT ctx)
 
 }
 
-// RECOMP_GUEST_ABI gpr_read=0xFFFFFF87 gpr_write=0xFFFFFFFF gpr_return=0x00000018 fpr_read=0xFFFFC003 fpr_write=0xFFFFFFFF fpr_return=0x00000002 cr_read=0xFF cr_write=0xFF xer_read=1 xer_write=1 fence=1
-// RECOMP_REGISTRATION base 0x80001000 func_80001000 preserves=false fpr_mask=0x07FFC000
+// RECOMP_GUEST_ABI gpr_read=0x00000000 gpr_write=0x00000078 gpr_return=0x00000018 fpr_read=0x00800002 fpr_write=0x07FFFFFE fpr_return=0x00000002 cr_read=0xFF cr_write=0x78 xer_read=1 xer_write=0 fence=0
+// RECOMP_REGISTRATION base 0x80001000 func_80001000 preserves=false fpr_mask=0x0777C000

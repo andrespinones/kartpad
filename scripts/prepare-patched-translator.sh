@@ -9,7 +9,7 @@ patch_file="$repo/patches/wiicompiled-fpscr-state.patch"
 mkdir -p "$stage"
 rsync -a --delete --exclude .git --exclude bin --exclude obj \
   "$upstream/" "$stage/"
-git apply --unidiff-zero --unsafe-paths --directory="$stage" "$patch_file"
+git apply --recount --unidiff-zero --unsafe-paths --directory="$stage" "$patch_file"
 
 dotnet_bin=/opt/homebrew/opt/dotnet@8/bin/dotnet
 project="$stage/translator/src/Translator.Cli/Translator.Cli.csproj"

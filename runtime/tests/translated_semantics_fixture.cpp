@@ -39,6 +39,26 @@ float FlatReadFloat32(std::uint32_t address) {
 void FlatWriteRamFloat32(std::uint32_t address,double value) {
   guest_memory->Store(address,4,std::bit_cast<std::uint32_t>(static_cast<float>(value)));
 }
+std::uint8_t* ResolveRangeHost(std::uint32_t base,std::int32_t min_offset,
+                              std::uint32_t length,bool needs_read,bool needs_write) {
+  (void)base;
+  (void)min_offset;
+  (void)length;
+  (void)needs_read;
+  (void)needs_write;
+  return nullptr;
+}
+ResolvedLoadPair ReadResolvedPair32(std::uint8_t* host,std::uint32_t range_offset) {
+  (void)host;
+  (void)range_offset;
+  return {};
+}
+float ReadResolvedFloat32(std::uint8_t* host,std::uint32_t range_offset,
+                          std::uint32_t address) {
+  (void)host;
+  (void)range_offset;
+  return FlatReadFloat32(address);
+}
 }
 
 int main() {

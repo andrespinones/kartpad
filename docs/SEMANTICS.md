@@ -19,7 +19,7 @@ G6 is **Pass**. The portable contract is green on arm64 and x86_64/Rosetta, stat
 | Real title surface | supplied PAL DOL hash matches WiiCompiled's pin; strict translation from `0x800060A4` emitted 10,836 functions with unsupported instructions disabled; all emitted units syntax-compile against KartPad's portable state/memory/ABI shim | Pass on native arm64 AppleClang |
 | Sanitizers | complete arm64 contract and translated fixture | ASan/UBSan Pass |
 
-Both Release architectures report 250,227 checks and state hash `0xccd5757c4c0643d4`. The translated/stateful fixture additionally executes VE-enabled paired add with `+inf + -inf` in both lanes, writes both canonical NaNs, and records VXISI; final FPSCR is `0xe7991393`. All prior scalar/paired-estimate, comparison, conversion, suppression, and checked-memory assertions remain green. KartPad's patch is applied only to an ignored copy of the immutable pin and its adjusted translator suite passes 579/579.
+Both Release architectures report 250,227 checks and state hash `0xccd5757c4c0643d4`. The translated/stateful fixture additionally executes VE-enabled paired add with `+inf + -inf` in both lanes, writes both canonical NaNs, and records VXISI; final FPSCR is `0xe7991393`. All prior scalar/paired-estimate, comparison, conversion, suppression, and checked-memory assertions remain green. KartPad's patch is applied only to an ignored copy of the immutable pin and its adjusted translator suite passes 582/582. The helper-effect catalog and architectural liveness pass now model hidden FPSCR reads and writes for every stateful FP family, including the No-NI specializations, so compact native variants cannot silently lose exception state.
 
 ## Oracle boundary
 

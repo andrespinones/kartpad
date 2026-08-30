@@ -1204,3 +1204,23 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   Simulator was booted. Evidence:
   `docs/artifacts/2026-08-30/g11-moonview-profile.md` and
   `docs/artifacts/2026-08-30/g11-arm64-fpsr-experiment.md`.
+
+## 2026-08-30 — G11 FPSCR effect-model prerequisite
+
+- Found that KartPad's stateful FP lowering updated `CpuContext.fpscr` at
+  runtime while the inherited helper-effect catalog still classified those IR
+  helpers as pure. That made ABI and architectural liveness summaries blind to
+  hidden FPSCR input/output and made any dead-state optimization unsound.
+- Added explicit FPSCR read/write effects for scalar, No-NI, paired,
+  comparison, move, and exception-control helpers, and taught both ABI and
+  state-liveness analysis to consume them. Unknown calls remain conservative
+  full-context boundaries.
+- Rebuilt the patch from immutable upstream, updated the checked translated
+  fixture for the now-precise non-boundary helpers, and retained checked-memory
+  fallback coverage for resolved ranges. The full arm64/x86 differential,
+  translated fixture, ASan/UBSan passes, Dolphin oracle, and 582/582 translator
+  tests pass with unchanged hash `0xccd5757c4c0643d4` and FPSCR `0xe7991393`.
+- Classification: **correctness prerequisite accepted; no runtime speedup is
+  claimed yet; G11 remains open.** The next full-title generation will measure
+  how many false full-context fences disappear before any FPSCR elision is
+  considered.
