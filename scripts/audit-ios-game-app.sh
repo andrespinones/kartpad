@@ -79,6 +79,20 @@ if ! rg -a -F -q '[KartPad] exact SunPad runtime overlay installed' "${binary}";
   echo "game app does not contain the exact-overlay runtime host" >&2
   exit 69
 fi
+for importer_contract in \
+  'KartPad currently supports RMCP01 (PAL), disc 0, revision 0 only.' \
+  'The validated RMCP01 data is stored privately.' \
+  'GameData.import-' \
+  'NSFileProtectionCompleteUntilFirstUserAuthentication'; do
+  if ! rg -a -F -q "${importer_contract}" "${binary}"; then
+    echo "game app is missing the private game-data importer contract: ${importer_contract}" >&2
+    exit 69
+  fi
+done
+if rg -a -F -q "game-data importer is not connected" "${binary}"; then
+  echo "game app still contains the placeholder game-data importer" >&2
+  exit 69
+fi
 
 echo "iOS ${expected_platform} full-game app audit passed: ${app}"
 shasum -a 256 "${binary}" "${app}/Assets.car" "${app}/PrivacyInfo.xcprivacy"
