@@ -2,6 +2,13 @@
 
 This file is append-only. Evidence paths refer to sanitized, publishable artifacts unless explicitly marked private and ignored.
 
+## 2026-08-29 — G15 exact SunPad overlay baseline and Classic input adapter
+
+- Imported the exact SunPad touch overlay, settings, input state, and mixer from pinned commit `e43f0ea6b797e5110787171957c9dc3c6213269c`, together with the complete GPLv3 text and explicit upstream provenance. A repository verifier proves the seven source files and license remain byte-identical to the local pinned reference.
+- Used Nintendo's *Mario Kart Wii Instruction Booklet* Classic Controller diagram rather than inferred mappings. Added a separate adapter from SunPad's normalized GameCube-shaped input to KartPad's existing Classic ABI: A accelerate, B/R drift-brake, L item, X/ZR rear view, Plus pause, and D-pad trick/wheelie.
+- Added an arm64 Objective-C++ contract test covering every button independently, their simultaneous union, both sticks, and connection state. The focused build/test, exact-snapshot verifier, repository safety audit, and `git diff --check` pass.
+- Classification: **mobile source integration in progress**. Direct-copy and input-boundary evidence pass; no Simulator gameplay, visual comparison, or touch-feel acceptance is claimed yet. Evidence: `docs/artifacts/2026-08-29/g15-sunpad-overlay.md`.
+
 ## 2026-08-28 — G0 workspace initialization
 
 - Goal: establish the workspace and evidence system before modifying or translating private game data.

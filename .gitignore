@@ -23,6 +23,7 @@ build-*/
 **/obj/
 DerivedData/
 /artifacts/
+/tmp/
 *.app
 *.ipa
 *.dSYM

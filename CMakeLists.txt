@@ -241,5 +241,18 @@ if(BUILD_TESTING)
       target_link_libraries(kartpad_apple_subsystem_smoke PRIVATE "${${framework}_FRAMEWORK}")
     endforeach()
     add_test(NAME kartpad.subsystems.apple-smoke COMMAND kartpad_apple_subsystem_smoke)
+
+    add_executable(kartpad_mobile_classic_input_tests
+      runtime/tests/mobile_classic_input_tests.mm
+      apple/mobile/KartPadClassicInput.mm)
+    target_include_directories(kartpad_mobile_classic_input_tests PRIVATE
+      apple/mobile apple/third_party/sunpad)
+    target_compile_features(kartpad_mobile_classic_input_tests PRIVATE cxx_std_20)
+    target_compile_options(kartpad_mobile_classic_input_tests PRIVATE
+      -fobjc-arc -Wall -Wextra -Wpedantic -Werror)
+    find_library(MOBILE_FOUNDATION_FRAMEWORK Foundation REQUIRED)
+    target_link_libraries(kartpad_mobile_classic_input_tests PRIVATE
+      "${MOBILE_FOUNDATION_FRAMEWORK}")
+    add_test(NAME kartpad.mobile.classic-input COMMAND kartpad_mobile_classic_input_tests)
   endif()
 endif()
