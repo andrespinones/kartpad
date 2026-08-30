@@ -54,3 +54,22 @@ The visual-only hook still calls only the subclass appearance callbacks. The
 separate input probe is opt-in, publishes the bounded test input deliberately,
 and is compiled out of physical-iOS builds. Physical-device touch feel and
 haptic acceptance are not claimed.
+
+## Physical-iOS compile boundary
+
+`scripts/check-ios-device-runtime-host.sh` compiles the same
+`KartPadRuntimeOverlayHost.mm` against `iphoneos` 16.0 using the full game's
+resolved Objective-C++ build arguments. It verifies the output is an arm64
+`IOS` object and rejects the import rollback, visual-hold, and input-hold test
+strings. Result:
+
+```text
+physical-iOS runtime host compile passed
+58df58a0577dd6c3276ec67c93bbf67955c6e1531a3912323cbb5881b72d4a55
+```
+
+The independent unsigned physical-device shell also rebuilt and passed its IOS
+package audit at executable SHA-256
+`574a1d874cb9b889c6ee7ff4c7c16e64115abdcb605ffd37291c632d7e841ee2`.
+These checks establish source/platform compilation and packaging only; they do
+not claim a full translated device link or hardware execution.

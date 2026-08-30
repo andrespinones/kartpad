@@ -389,6 +389,7 @@ full release matrix remain open.
 | [`scripts/prepare-disc.sh`](scripts/prepare-disc.sh) | Validate and privately extract the supported disc profile |
 | [`scripts/translate-base.sh`](scripts/translate-base.sh) | Produce the ignored full ARM64 translation graph |
 | [`scripts/build-ios-game-app.sh`](scripts/build-ios-game-app.sh) | Build the full iPhone/iPad Simulator game app |
+| [`scripts/check-ios-device-runtime-host.sh`](scripts/check-ios-device-runtime-host.sh) | Compile the exact UIKit runtime host for physical iOS and reject Simulator-only hooks |
 | [`scripts/audit-macos-package.sh`](scripts/audit-macos-package.sh) | Reject malformed or privacy-unsafe Mac packages |
 | [`scripts/audit-ios-game-app.sh`](scripts/audit-ios-game-app.sh) | Reject private data, unsafe linkage, and incomplete iOS bundles |
 | [`apple/macos/`](apple/macos/) | Native Mac shell, settings, diagnostics, and runtime integration |

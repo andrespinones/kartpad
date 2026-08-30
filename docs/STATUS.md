@@ -118,6 +118,12 @@ experiments, physical-device interaction, and a reproducible legal build path.
   matches L, A enters `Acceleration held`, and release restores its normal
   state while retail rendering continues underneath. Each device and the
   Simulator shell were shut down before the next launch; zero runtimes remain.
+  The exact updated UIKit host also compiles as an arm64 `IOS` 16.0 object with
+  SHA-256
+  `58df58a0577dd6c3276ec67c93bbf67955c6e1531a3912323cbb5881b72d4a55`;
+  the reproducible check proves every Simulator-only test contract is absent.
+  The unsigned physical-device shell and original icon catalog independently
+  rebuild and pass their `IOS` package audit.
 
 - About 14 GiB of host storage remains after private disc extraction, the full translated runtime build, and native trace evidence. Large generated products remain ignored; capacity must be checked before additional build graphs.
 - No human-only prerequisite currently blocks G0 or the independent parts of G1.

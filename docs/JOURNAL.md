@@ -1397,3 +1397,21 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - Classification: **Pass for the requested gameplay-input hold and release
   semantics, not merely their visual treatment.** The opt-in probe is compiled
   out of physical-iOS builds and the package audit rejects it on that target.
+
+## 2026-08-30 — Physical-iOS touch-host compile boundary
+
+- Added `scripts/check-ios-device-runtime-host.sh` so the exact UIKit host used
+  by the full Simulator game is compiled again against the physical
+  `iphoneos` SDK rather than treating preprocessor inspection as evidence.
+- The script reuses the full game's resolved Objective-C++ include/define
+  response, changes only the Apple target/sysroot, requires an arm64 `IOS`
+  16.0 object, and rejects all three Simulator-only test contracts by string.
+- The current host compiles at SHA-256
+  `58df58a0577dd6c3276ec67c93bbf67955c6e1531a3912323cbb5881b72d4a55`.
+  The unsigned physical-device shell also rebuilt and passed its IOS package
+  audit; executable SHA-256 is
+  `574a1d874cb9b889c6ee7ff4c7c16e64115abdcb605ffd37291c632d7e841ee2`.
+- No Simulator or game runtime was launched. Classification: **Pass for exact
+  modified-host compilation, conditional probe exclusion, and the independent
+  physical-device shell/package boundary.** This is not a full translated
+  physical-device link, signed install, or hardware execution claim.
