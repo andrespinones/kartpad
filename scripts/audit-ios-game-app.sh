@@ -1,0 +1,81 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ $# -lt 1 || $# -gt 2 || "$1" != /* || "$1" != *.app ]]; then
+  echo "usage: $0 /absolute/path/to/KartPad.app [IOSSIMULATOR|IOS]" >&2
+  exit 64
+fi
+
+app="$1"
+expected_platform="${2:-IOSSIMULATOR}"
+if [[ "${expected_platform}" != "IOSSIMULATOR" && "${expected_platform}" != "IOS" ]]; then
+  echo "expected platform must be IOSSIMULATOR or IOS" >&2
+  exit 64
+fi
+
+plist="${app}/Info.plist"
+binary="${app}/KartPad"
+test -d "${app}"
+test -x "${binary}"
+test -f "${plist}"
+test -f "${app}/PrivacyInfo.xcprivacy"
+test -f "${app}/Assets.car"
+test -f "${app}/initial_pipeline_cache.db"
+test -f "${app}/dsp_coef.bin"
+plutil -lint "${plist}" "${app}/PrivacyInfo.xcprivacy" >/dev/null
+test "$(plutil -extract CFBundleIdentifier raw "${plist}")" = "dev.kartpad.app"
+test "$(plutil -extract CFBundleExecutable raw "${plist}")" = "KartPad"
+test "$(plutil -extract MinimumOSVersion raw "${plist}")" = "16.0"
+test "$(plutil -extract UIApplicationSceneManifest.UISceneConfigurations.UIWindowSceneSessionRoleApplication.0.UISceneDelegateClassName raw "${plist}")" = "SDLUIKitSceneDelegate"
+test "$(plutil -extract CFBundleIcons.CFBundlePrimaryIcon.CFBundleIconName raw "${plist}")" = "AppIcon"
+test "$(plutil -extract CFBundleIcons~ipad.CFBundlePrimaryIcon.CFBundleIconName raw "${plist}")" = "AppIcon"
+
+if [[ "$(file -b "${binary}")" != *"Mach-O 64-bit executable arm64"* ]]; then
+  echo "KartPad game runtime is not arm64 Mach-O" >&2
+  exit 65
+fi
+build_metadata="$(vtool -show-build "${binary}")"
+if [[ "$(awk '/platform/{print $2; exit}' <<<"${build_metadata}")" != "${expected_platform}" ]] ||
+   [[ "$(awk '/minos/{print $2; exit}' <<<"${build_metadata}")" != "16.0" ]]; then
+  echo "binary is not an ${expected_platform} 16.0 artifact" >&2
+  exit 65
+fi
+
+for forbidden in '*.wbfs' '*.iso' '*.rvz' '*.wia' '*.gcz' 'rksys.dat' '*.mobileprovision'; do
+  forbidden_path="$(find "${app}" -name "${forbidden}" -print -quit)"
+  if [[ -n "${forbidden_path}" ]]; then
+    echo "game app contains forbidden private/signing data: ${forbidden}" >&2
+    exit 70
+  fi
+done
+
+while IFS= read -r dependency; do
+  case "${dependency}" in
+    /System/Library/*|/usr/lib/*) ;;
+    *)
+      echo "game app contains non-system dependency: ${dependency}" >&2
+      exit 69
+      ;;
+  esac
+done < <(otool -L "${binary}" | tail -n +2 | awk '{print $1}')
+
+symbols="$(nm -gj "${binary}")"
+for required_symbol in \
+  _KartPadMobileRuntimeHostInstall \
+  _KartPadMobileReadClassicInput \
+  '_OBJC_CLASS_$_SDLUIKitSceneDelegate' \
+  '_OBJC_CLASS_$_SunPadGameOverlay' \
+  '_OBJC_CLASS_$_SunPadInputMixer'; do
+  if ! rg -F -q "${required_symbol}" <<<"${symbols}"; then
+    echo "game app is missing required mobile symbol: ${required_symbol}" >&2
+    exit 69
+  fi
+done
+
+if ! rg -a -F -q '[KartPad] exact SunPad runtime overlay installed' "${binary}"; then
+  echo "game app does not contain the exact-overlay runtime host" >&2
+  exit 69
+fi
+
+echo "iOS ${expected_platform} full-game app audit passed: ${app}"
+shasum -a 256 "${binary}" "${app}/Assets.car" "${app}/PrivacyInfo.xcprivacy"
