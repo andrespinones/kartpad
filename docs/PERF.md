@@ -22,6 +22,7 @@ substitutes for frame-time, guest-cadence, audio, memory, and soak evidence.
 | Exact `2cfb7e1` empty-cache title | Minimum effective FPS 51.958; maximum p99 83.783 ms; maximum worst 85.094 ms; 20 audio blocks / 7,680 bytes dropped | Controlled fail signal |
 | Exact `2cfb7e1` immediate warm title relaunch | Minimum effective FPS 59.963; maximum p99 17.264 ms; maximum worst 25.966 ms; zero audio drops | Controlled title improvement; race/soak evidence still open |
 | macOS one-vs-six priority-worker sweep | One worker ranged from 55.460–59.868 minimum effective FPS; six workers ranged from 52.000–59.974 as machine-level Metal state warmed | Confounded; one-worker default reverted |
+| Three-player stationary VS, ~310 s live | Typical 29.94–30.10 effective FPS with p50 33.2–33.6 ms and p99 33.9–35.4 ms; 29 audio blocks / 11,136 bytes dropped | Native 30 Hz cadence mostly stable; audio fail and no standings |
 
 ## Acceptance contract
 

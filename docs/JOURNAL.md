@@ -1158,3 +1158,22 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   reverted; G11 remains open.** Next work is deterministic race profiling with
   explicit application and machine-level cache-state disclosure. Evidence:
   `docs/artifacts/2026-08-30/g11-pipeline-worker-sweep.md`.
+
+## 2026-08-30 — G10 three-player stationary timeout experiment
+
+- Proved that repeated normal UI keyboard events can sustain acceleration;
+  isolated accessibility taps were the earlier gap. Short feedback-guided
+  steering pulses still did not provide a repeatable racing line, so the
+  bounded Grand Prix calibration was exited without claiming completion.
+- Registered three independent keyboard-backed Classic channels and launched a
+  normal 100cc three-player Luigi Circuit VS race with Mario, Luigi, and Yoshi.
+  All local racers remained stationary while the CPU field raced for about 310
+  live seconds. The four panes held the retail 30 Hz cadence, but no FINISH,
+  DNF timer, results, or standings transition occurred.
+- Audio reached 29 dropped blocks / 11,136 bytes. Normal pause/quit and
+  Command-Q wrote a clean session; the save remained byte-identical at SHA-256
+  `ad79c24bc5eb0ba6bc8cd2836a55680621892b578a04ea49d8884a71a42c563a`.
+- Classification: **stationary-player shortcut falsified; row 30 and
+  three-player audio remain open.** At least one local finisher requires
+  sustained physical input or a separately proven normal input-driving method.
+  Evidence: `docs/artifacts/2026-08-30/g10-three-player-stationary-timeout.md`.
