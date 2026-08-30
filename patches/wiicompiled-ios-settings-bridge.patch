@@ -38,23 +38,25 @@ index f6b908e..1c8f033 100644
                "frame_interpolation_fps = 0\n"
                "display_mode = \"windowed\"\n"
 diff --git a/src/settings_overlay.cpp b/src/settings_overlay.cpp
-index db9be6c..5274f74 100644
+index db9be6c..1fb9754 100644
 --- a/src/settings_overlay.cpp
 +++ b/src/settings_overlay.cpp
-@@ -5,6 +5,12 @@
+@@ -5,6 +5,14 @@
  #include "game_graphics_options.h"
  #include "music_attenuation.h"
  #include "runtime_config.h"
 +#if defined(__APPLE__)
 +#include <TargetConditionals.h>
 +#if TARGET_OS_IOS
++#include "aurora_events.h"
 +#include "kartpad_mobile_runtime_host.h"
++#include <dolphin/gx/GXAurora.h>
 +#endif
 +#endif
  #include "runtime_log.h"
 
  #include <imgui.h>
-@@ -910,6 +916,19 @@ void PersistDisplayModeIfChanged() {
+@@ -910,6 +918,41 @@ void PersistDisplayModeIfChanged() {
  }
  } // namespace
 
@@ -67,6 +69,28 @@ index db9be6c..5274f74 100644
 +    KartPadMobileRuntimeSettings settings{};
 +    if (KartPadMobileReadRuntimeSettings(&settings)) {
 +        g_showFps = settings.showFps != 0;
++        static int lastAspectMode = -1;
++        const int aspectMode = std::clamp(settings.aspectRatioMode, 0, 2);
++        if (aspectMode != lastAspectMode) {
++            uint32_t surfaceWidth = 0;
++            uint32_t surfaceHeight = 0;
++            AuroraGetSurfaceSize(&surfaceWidth, &surfaceHeight);
++            if (surfaceWidth != 0 && surfaceHeight != 0) {
++                ConfigureMkwMobileAspectMode(aspectMode, surfaceWidth,
++                                             surfaceHeight);
++                lastAspectMode = aspectMode;
++                RT_LOG(RT_TAG_CONFIG) << "mobile runtime aspectMode=" << aspectMode << std::endl;
++            }
++        }
++        static float lastResolutionScale = -1.0f;
++        const float resolutionScale =
++            std::clamp(settings.resolutionScale, 1.0f, 4.0f);
++        if (std::fabs(resolutionScale - lastResolutionScale) > 0.001f) {
++            g_resolutionScale = resolutionScale;
++            VISetFrameBufferScale(resolutionScale);
++            lastResolutionScale = resolutionScale;
++            RT_LOG(RT_TAG_CONFIG) << "mobile runtime resolutionScale=" << resolutionScale << std::endl;
++        }
 +    }
 +#endif
 +}
@@ -74,7 +98,7 @@ index db9be6c..5274f74 100644
  void InitializeRuntimeSettings() noexcept {
      controller_mapping_wizard::LoadPersistedMappings();
      ApplyConfiguredMappings();
-@@ -957,6 +976,7 @@ void HandleEvents(const AuroraEvent* events) noexcept {
+@@ -957,6 +1000,7 @@ void HandleEvents(const AuroraEvent* events) noexcept {
  }
 
  void Draw() noexcept {
