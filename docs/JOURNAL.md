@@ -795,3 +795,10 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - A later normal live-input run completed all real checkpoints and laps in `05:01.445`, displayed `Saved ghost data for Player!`, and replaced the personal best. Its strict private trace accepts race time `240..18308`, 18,069 consecutive racing samples, and finish stage 4.
 - A second fresh process loaded the `Player 05:01.445` card. The final save SHA-256 is `ad79c24bc5eb0ba6bc8cd2836a55680621892b578a04ea49d8884a71a42c563a`; the bounded relaunch audio sample ended with zero empty observations and zero dropped blocks.
 - Classification: **PRD row 26 Pass.** Evidence and complete diagnostic boundary: `docs/artifacts/2026-08-29/g10-time-trial-record/`.
+
+## 2026-08-29 — G10 replay pause/resume audio continuity
+
+- Ran the durable `Player 05:01.445` SNES Mario Circuit 3 replay in the sole signed native process, opened the retail pause menu for 15 seconds, selected `Continue Replay`, and observed the ghost resume normally.
+- Before pause, the bounded queue reached 40,960 checks with zero empty observations or drops. While paused it reached its latency cap and deliberately discarded eight stale blocks (3,072 bytes); no underrun occurred. After resume, the count remained exactly eight through 81,920 checks and 31,453,824 submitted bytes, proving no continuing starvation or drop cascade.
+- The live save remained byte-identical at SHA-256 `ad79c24bc5eb0ba6bc8cd2836a55680621892b578a04ea49d8884a71a42c563a`.
+- Classification: **Pass for PRD row 33's pause/resume subcase; row 33 remains in progress.** Output-device migration, subjective listening, and the required long session remain open. Evidence: `docs/artifacts/2026-08-29/g10-audio-pause-resume/`.
