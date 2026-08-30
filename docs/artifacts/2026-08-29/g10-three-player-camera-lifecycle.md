@@ -17,6 +17,8 @@ The following normal retail sequence reproduced the same crash three times:
 
 Each failure was an `EXC_BAD_ACCESS` in translated guest function `func_805A2034`. Focused instrumentation at the shared race-camera list walker showed a reclaimed camera object still linked after scene teardown. Its player slot was `0xff`; the retail camera update sign-extended that value to `-1` and selected the word immediately before the active kart-object array. The resulting accessor value was the deterministic reclaimed-memory sentinel `0x55440003`.
 
+An independently retained macOS report (incident `971E643B-5DC8-49AE-BB03-50AAC083B40C`) later corroborated the same failure. It records `EXC_BAD_ACCESS (SIGBUS)` in `func_805A2034` at guest-mapped address `0x100055440027`: guest address `0x55440027`, exactly the reclaimed scene-heap sentinel `0x55440003` plus the translated 36-byte field access. The report belongs to an earlier dynamic development binary (UUID `37EA5AFE-E0BF-3496-ADE3-F1340876C3AA`, version `0.0.1`, bundle `dev.kartpad.runtime-spike`) that loaded Homebrew SDL; it is not the corrected development binary or the static package candidate. The report therefore strengthens the diagnosis but is not a new failure of the corrected build.
+
 Local macOS reports were created at 07:01:07, 07:34:32, and 07:52:05. They remain outside the repository because full diagnostic reports can contain host-specific data.
 
 ## Rejected broad repair
