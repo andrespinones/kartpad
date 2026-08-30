@@ -44,6 +44,8 @@ mkdir -p "$(dirname "${runtime_source}")"
 cp -R "${runtime_ref}" "${runtime_source}"
 patch --batch -p1 -d "${runtime_source}" < "${repo_root}/patches/wiicompiled-apple-runtime.patch"
 patch --batch -p1 -d "${runtime_source}" < "${repo_root}/patches/wiicompiled-ios-app-integration.patch"
+patch --batch -p1 -d "${runtime_source}" < "${repo_root}/patches/wiicompiled-ios-touch-core-buttons.patch"
+patch --batch -p1 -d "${runtime_source}" < "${repo_root}/patches/wiicompiled-ios-settings-bridge.patch"
 
 mkdir -p "${runtime_source}/third_party/sse2neon"
 curl --fail --location --silent --show-error \

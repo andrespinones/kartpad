@@ -4,6 +4,7 @@
 #import "SunPadDiagnostics.h"
 #import "SunPadGameOverlay.h"
 #import "SunPadInputMixer.h"
+#import "SunPadSettings.h"
 
 #import <SDL3/SDL_properties.h>
 #import <SDL3/SDL_video.h>
@@ -14,6 +15,10 @@
 @interface KartPadRuntimeOverlayHost : NSObject <SunPadGameOverlayDelegate>
 - (instancetype)initWithSDLWindow:(SDL_Window *)window;
 - (void)uninstall;
+@end
+
+@interface KartPadGameOverlay : SunPadGameOverlay
+@property(nonatomic, copy) void (^multiplayerRequested)(void);
 @end
 
 namespace {
@@ -29,6 +34,47 @@ UIViewController *KartPadVisibleViewController(UIWindow *window) {
 }
 
 }  // namespace
+
+@implementation KartPadGameOverlay
+
+- (void)layoutSubviews {
+  [super layoutSubviews];
+  UIButton *menuButton = nil;
+  for (UIView *candidate in self.subviews) {
+    if ([candidate isKindOfClass:UIButton.class] &&
+        [candidate.accessibilityLabel isEqualToString:@"Menu"]) {
+      menuButton = (UIButton *)candidate;
+      break;
+    }
+  }
+  UIMenu *sourceMenu = menuButton.menu;
+  if (sourceMenu == nil ||
+      [sourceMenu.identifier isEqualToString:@"dev.kartpad.menu"]) {
+    return;
+  }
+
+  __weak KartPadGameOverlay *weakSelf = self;
+  UIAction *multiplayer =
+      [UIAction actionWithTitle:@"Multiplayer…"
+                          image:[UIImage systemImageNamed:@"person.2.fill"]
+                     identifier:@"dev.kartpad.multiplayer"
+                        handler:^(__kindof UIAction *action) {
+                          (void)action;
+                          if (weakSelf.multiplayerRequested != nil) {
+                            weakSelf.multiplayerRequested();
+                          }
+                        }];
+  NSMutableArray<UIMenuElement *> *children =
+      [NSMutableArray arrayWithObject:multiplayer];
+  [children addObjectsFromArray:sourceMenu.children];
+  menuButton.menu = [UIMenu menuWithTitle:@"KartPad"
+                                    image:sourceMenu.image
+                               identifier:@"dev.kartpad.menu"
+                                  options:sourceMenu.options
+                                 children:children];
+}
+
+@end
 
 @implementation KartPadRuntimeOverlayHost {
   __weak UIWindow *_window;
@@ -51,7 +97,13 @@ UIViewController *KartPadVisibleViewController(UIWindow *window) {
   }
 
   _window = uiWindow;
-  _overlay = [[SunPadGameOverlay alloc] initWithFrame:container.bounds];
+  KartPadGameOverlay *overlay =
+      [[KartPadGameOverlay alloc] initWithFrame:container.bounds];
+  __weak KartPadRuntimeOverlayHost *weakSelf = self;
+  overlay.multiplayerRequested = ^{
+    [weakSelf showMultiplayerAccess];
+  };
+  _overlay = overlay;
   _overlay.autoresizingMask = UIViewAutoresizingFlexibleWidth |
                               UIViewAutoresizingFlexibleHeight;
   _overlay.backgroundColor = UIColor.clearColor;
@@ -71,6 +123,32 @@ UIViewController *KartPadVisibleViewController(UIWindow *window) {
   SunPadDiagnosticsStart();
   NSLog(@"[KartPad] exact SunPad runtime overlay installed");
   return self;
+}
+
+- (void)showMultiplayerAccess {
+  [[SunPadInputMixer sharedMixer] clearInputFromTouch:YES];
+  UIViewController *controller = KartPadVisibleViewController(_window);
+  if (controller == nil) {
+    return;
+  }
+  UIAlertController *sheet =
+      [UIAlertController alertControllerWithTitle:@"Multiplayer"
+                                          message:@"Choose Multiplayer in Mario Kart Wii's Main Menu, then pair or connect each player's controller. KartPad touch currently controls Player 1; additional native controller slots are the next multiplayer integration gate."
+                                   preferredStyle:UIAlertControllerStyleActionSheet];
+  [sheet addAction:[UIAlertAction actionWithTitle:@"Controller Setup…"
+                                            style:UIAlertActionStyleDefault
+                                          handler:^(UIAlertAction *action) {
+    (void)action;
+    [self gameOverlayRequestsControllerMapping:self->_overlay];
+  }]];
+  [sheet addAction:[UIAlertAction actionWithTitle:@"Continue Playing"
+                                            style:UIAlertActionStyleCancel
+                                          handler:nil]];
+  UIPopoverPresentationController *popover = sheet.popoverPresentationController;
+  popover.sourceView = _overlay;
+  popover.sourceRect = CGRectMake(CGRectGetMidX(_overlay.bounds),
+                                  CGRectGetMidY(_overlay.bounds), 1.0, 1.0);
+  [controller presentViewController:sheet animated:YES completion:nil];
 }
 
 - (void)uninstall {
@@ -158,6 +236,18 @@ extern "C" void KartPadMobileRuntimeHostInstall(void *sdlWindow) {
 extern "C" void KartPadMobileRuntimeHostUninstall() {
   [gRuntimeOverlayHost uninstall];
   gRuntimeOverlayHost = nil;
+}
+
+extern "C" bool KartPadMobileReadRuntimeSettings(
+    KartPadMobileRuntimeSettings *settings) {
+  if (settings == nullptr) {
+    return false;
+  }
+  SunPadSettings *source = [SunPadSettings sharedSettings];
+  settings->aspectRatioMode = static_cast<int>(source.aspectRatioMode);
+  settings->resolutionScale = source.renderScaleFloat;
+  settings->showFps = source.showFPSCounter ? 1 : 0;
+  return true;
 }
 
 extern "C" bool KartPadMobileReadClassicInput(

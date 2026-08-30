@@ -9,11 +9,22 @@ struct KartPadMobileClassicInputSnapshot {
   int connected = 0;
 };
 
+struct KartPadMobileRuntimeSettings {
+  int aspectRatioMode = 0;
+  float resolutionScale = 1.0f;
+  int showFps = 0;
+};
+
 extern "C" {
 
 // Called after Aurora has created its SDL/UIKit Metal window.
 void KartPadMobileRuntimeHostInstall(void *sdlWindow);
 void KartPadMobileRuntimeHostUninstall();
+
+// Reads the persisted settings owned by the exact SunPad shell before Aurora
+// creates the mobile render surface. Aspect modes match SunPadSettings:
+// 0 = original 4:3, 1 = fixed 16:9, 2 = experimental surface fill.
+bool KartPadMobileReadRuntimeSettings(KartPadMobileRuntimeSettings *settings);
 
 // Consumes the exact SunPad mixer's latched state and maps it to the Mario Kart
 // Classic Controller ABI. Returns false until the UIKit host is installed.

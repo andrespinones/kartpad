@@ -1,0 +1,67 @@
+diff --git a/src/hle/input/kpad.cpp b/src/hle/input/kpad.cpp
+index 4d6f893..152461f 100644
+--- a/src/hle/input/kpad.cpp
++++ b/src/hle/input/kpad.cpp
+@@ -403,6 +403,20 @@ uint32_t ClassicButtonForScancode(uint32_t chan, SDL_Scancode code)
+     }
+ }
+
++uint32_t CoreButtonsForClassic(uint32_t classic)
++{
++    uint32_t core = 0;
++    if ((classic & kClassicButtonA) != 0) core |= kWpadButtonA;
++    if ((classic & kClassicButtonB) != 0) core |= kWpadButtonB;
++    if ((classic & kClassicButtonPlus) != 0) core |= kWpadButtonPlus;
++    if ((classic & kClassicButtonMinus) != 0) core |= kWpadButtonMinus;
++    if ((classic & kClassicButtonLeft) != 0) core |= kWpadButtonLeft;
++    if ((classic & kClassicButtonRight) != 0) core |= kWpadButtonRight;
++    if ((classic & kClassicButtonDown) != 0) core |= kWpadButtonDown;
++    if ((classic & kClassicButtonUp) != 0) core |= kWpadButtonUp;
++    return core;
++}
++
+ bool SDLCALL WatchKeyboardEvent(void*, SDL_Event* event)
+ {
+     if (event->type == SDL_EVENT_KEY_DOWN && !event->key.repeat) {
+@@ -617,7 +631,7 @@ extern "C" int32_t KPAD__Read_HLE(uint32_t chan, uint32_t statusPtr, uint32_t co
+     // tick. KPAD sampling must only expose its current state; consuming here
+     // ties ghost cadence to host presentation and drifts when the two differ.
+     const GhostSample ghost = fixtureActive ? Fixture().Current() : GhostSample{};
+-    const uint32_t hold = !fixtureActive ?
++    uint32_t hold = !fixtureActive ?
+         (ReadKeyboardButtons(chan) | pending) : 0;
+     uint32_t classicHold = fixtureActive ? ClassicButtonsForGhost(ghost) :
+         (ReadClassicButtons(chan) | pendingClassic);
+@@ -628,6 +642,7 @@ extern "C" int32_t KPAD__Read_HLE(uint32_t chan, uint32_t statusPtr, uint32_t co
+     if (!fixtureActive && chan == 0 &&
+         KartPadMobileReadClassicInput(&mobileInput) && mobileInput.connected) {
+         classicHold |= mobileInput.buttons;
++        hold |= CoreButtonsForClassic(mobileInput.buttons);
+         stick = {mobileInput.leftStickX, mobileInput.leftStickY};
+     }
+ #endif
+@@ -673,9 +688,8 @@ extern "C" int32_t KPAD__GetUnifiedWpadStatus_HLE(uint32_t chan, uint32_t status
+     try {
+         auto* status = Memory::GetPointer(statusPtr, kKpadUnifiedStatusSize);
+         std::memset(status, 0, kKpadUnifiedStatusSize);
+-        Memory::Write16(statusPtr + 0x00,
+-                        static_cast<uint16_t>(Fixture().Active() ? 0 :
+-                                              ReadKeyboardButtons(chan)));
++        uint32_t coreButtons = Fixture().Active() ? 0 :
++                                                   ReadKeyboardButtons(chan);
+         Memory::Write8(statusPtr + 0x28, kWpadExtensionClassic);
+         const auto& ghost = Fixture().Current();
+         uint32_t classicButtons = Fixture().Active() ?
+@@ -687,9 +701,12 @@ extern "C" int32_t KPAD__GetUnifiedWpadStatus_HLE(uint32_t chan, uint32_t status
+         if (!Fixture().Active() && chan == 0 &&
+             KartPadMobileReadClassicInput(&mobileInput) && mobileInput.connected) {
+             classicButtons |= mobileInput.buttons;
++            coreButtons |= CoreButtonsForClassic(mobileInput.buttons);
+             stick = {mobileInput.leftStickX, mobileInput.leftStickY};
+         }
+ #endif
++        Memory::Write16(statusPtr + 0x00,
++                        static_cast<uint16_t>(coreButtons));
+         Memory::Write16(statusPtr + 0x2A,
+                         static_cast<uint16_t>(classicButtons));
+         const auto stickX = static_cast<int16_t>(stick[0] * 511.0f);

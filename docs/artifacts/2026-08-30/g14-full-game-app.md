@@ -16,13 +16,14 @@ This checkpoint promotes the previously linked 29,065-function retail runtime in
 
 ## Reproducible source
 
-The integration is serialized in `patches/wiicompiled-ios-app-integration.patch`, applied after `patches/wiicompiled-apple-runtime.patch`. A fresh copy of `ref/upstream/Wiicompiled/runtime` accepted both patches, and these integrated files matched the compiled source byte-for-byte:
+The integration is serialized in four ordered patches: the Apple runtime, iOS app integration, mobile core-button bridge, and mobile settings/aspect bridge. A fresh copy of `ref/upstream/Wiicompiled/runtime` accepted all four patches, and the generated source matched the compiled source byte-for-byte.
 
 | File | SHA-256 |
 |---|---|
 | `cmake/PublicProducts.cmake` | `3ddb3a165b382d825c4005e9df028f0374038124345419586d8fa5a2dcdb519b` |
-| `src/main.cpp` | `c5515140a8494188dd3c2b3e2f57a007c41be27c11f64ba87bad85a3c65f698f` |
-| `src/hle/input/kpad.cpp` | `6d87a22e83e99d18278ffb2694c9b1344a553fc3bfb0e019b363bf7ee0af6c92` |
+| `src/main.cpp` | `3ddc6aaa5e6fb03e283910d0176c8b526dabab42c4c0bb98fce93fef650035cc` |
+| `src/hle/input/kpad.cpp` | `b943fc1887ed17d4f0c94f10858cb1986cc0b7f8d88ca420a8c1de24aee5adaa` |
+| `src/dynamic_aspect.cpp` | `6b9928c9c0e2d633f2fa573a8c1624ff9deb1d4cb394d7c994a06bc8dcafadf1` |
 
 The first compile correctly rejected Objective-C++ sources that inherited the runtime's C++ precompiled header. The tracked fix marks only the six mobile `.mm` files `SKIP_PRECOMPILE_HEADERS`; the translated C++ graph retains its existing PCH and release options.
 
@@ -45,10 +46,10 @@ App: `build/g14-ios-game-app-xcode/Release-iphonesimulator/KartPad.app`
 
 | Artifact | SHA-256 |
 |---|---|
-| `KartPad` executable | `9a5d69076299324e7f33ae10366a97cdccc512dc4af87c0d77fcdb4af35d4ca0` |
+| `KartPad` executable | `e31a0d0a8f5583b497141c93aeb63aa40b5ab2e0c2b6f79b3e27cb47322497b7` |
 | `Assets.car` | `18de0779809a419002a50074b1d9e45e83aa89dfaa4e4355e8ed26c45c7fb346` |
 | `PrivacyInfo.xcprivacy` | `343dbc92a22d95a896d5bb894f439d655ac8e15d0fcc7fe72500bd5fcaba1740` |
 
 ## Classification
 
-Pass for full retail runtime-to-native-app compile, link, resources, lifecycle ownership, exact-overlay embedding, touch-to-Classic ABI wiring, and package audit. G14 remains open. The next gate is a single iPhone Simulator launch, runtime-log diagnosis, title/menu/Metal/audio/touch playtest, save/relaunch, and a complete race; the iPhone must be terminated and shut down before repeating on iPad.
+Pass for full retail runtime-to-native-app compile, link, resources, lifecycle ownership, exact-overlay embedding, touch-to-Classic/core ABI wiring, settings/aspect bridging, and package audit. The iPhone retail-launch follow-up is recorded in `g14-full-game-simulator/README.md`; G14 remains open for complete race/save/relaunch and the sequential iPad pass.
