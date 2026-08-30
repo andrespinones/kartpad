@@ -23,7 +23,7 @@ Verification:
 - Exact SunPad twelve-file snapshot at
   `e43f0ea6b797e5110787171957c9dc3c6213269c`: pass.
 - Rebuilt executable SHA-256:
-  `30b78457e93a0ff75a9228d61366ede342d5546574da2ea672d0d67fc922f7d9`.
+  `9a6cd90f15a4174369445a65875aa27627efa717e94a28bff37f1845104e3019`.
 - Exactly one iPhone 17 Pro / iOS 26.5 Simulator was booted. The real system
   folder picker opened and cancelled back to live gameplay.
 - The SunPad-folder path produced the expected bounded no-candidate alert for
@@ -68,10 +68,24 @@ Verification:
 - The entire serialized 29,065-function graph was then prepared from the
   immutable source pins and rebuilt cleanly through all 852 Ninja targets. Its
   arm64 Simulator executable SHA-256 is
-  `966b76d284ff7524f6592667c45dbf63146d57fdf4aac42b1700accd722908f5`.
+  `07c4da68ae6d08d0cb0045bbf84f641d65e708285517271490687861d79b7afd`.
+- `Remove Stored Game Data` now schedules deletion instead of removing files
+  underneath the running guest. The native follow-up explains that removal
+  occurs before emulation on the next launch and provides `Undo`. Undo removed
+  only the marker and retained the complete active tree.
+- The exercised destructive path retained the active tree until normal app
+  termination. On relaunch, the early gate removed the complete 2.5 GiB copy,
+  all import/rollback directories, and the marker before emulator startup,
+  then returned to `Game Data Required`. The save remained byte-identical at
+  SHA-256 `87473fa67e0ec2345d471584979217f6dbd7316ed47db054ce565269ef316d58`.
+- A disposable clean iPhone Simulator held all destructive-test data. The
+  first attempted CoreSimulator clone was rejected before app launch because
+  its cloned registry retained source-device absolute paths. The genuinely new
+  device was terminated, shut down, and deleted after the test; none remains
+  booted and the preserved iPhone container was never modified.
 
 `folder-picker.jpg`, `no-sunpad-folder-alert.jpg`, `full-import-success.jpg`,
 `rollback-injected-failure.jpg`, `first-launch-required.jpg`, and
-`first-launch-runtime.jpg` are the exercised UI states. Direct WBFS extraction
-and safe removal of active data remain open. No private game data is included
-in this evidence.
+`first-launch-runtime.jpg`, `removal-scheduled.png`, and `removal-applied.png`
+are the exercised UI states. Direct WBFS extraction remains open. No private
+game data is included in this evidence.

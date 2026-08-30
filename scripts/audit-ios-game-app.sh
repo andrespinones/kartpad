@@ -83,6 +83,8 @@ fi
 for importer_contract in \
   'Game Data Required' \
   'Import from KartPad Folder' \
+  'RemoveGameDataOnNextLaunch' \
+  'Game Data Removal Scheduled' \
   'KartPad currently supports RMCP01 (PAL), disc 0, revision 0 only.' \
   'The validated RMCP01 data is stored privately.' \
   'GameData.import-' \

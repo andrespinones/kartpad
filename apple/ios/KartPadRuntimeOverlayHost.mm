@@ -43,6 +43,11 @@ NSString *KartPadSupportRoot() {
       @"Library/Application Support"] stringByAppendingPathComponent:@"KartPad"];
 }
 
+NSString *KartPadRemovalMarkerPath() {
+  return [KartPadSupportRoot() stringByAppendingPathComponent:
+      @"RemoveGameDataOnNextLaunch"];
+}
+
 NSString *KartPadSHA256ForFile(NSString *path, NSError **error) {
   NSData *data = [NSData dataWithContentsOfFile:path options:NSDataReadingMappedIfSafe
                                          error:error];
@@ -185,6 +190,39 @@ NSError *KartPadGameDataError(NSInteger code, NSString *message) {
   return [NSError errorWithDomain:@"dev.kartpad.gamedata" code:code userInfo:@{
     NSLocalizedDescriptionKey: message,
   }];
+}
+
+NSError *KartPadApplyScheduledGameDataRemoval() {
+  NSFileManager *files = NSFileManager.defaultManager;
+  NSString *marker = KartPadRemovalMarkerPath();
+  if (![files fileExistsAtPath:marker]) {
+    return nil;
+  }
+
+  NSString *supportRoot = KartPadSupportRoot();
+  NSArray<NSString *> *entries =
+      [files contentsOfDirectoryAtPath:supportRoot error:nil] ?: @[];
+  for (NSString *entry in entries) {
+    if ([entry isEqualToString:@"GameData"] ||
+        [entry hasPrefix:@"GameData.import-"] ||
+        [entry hasPrefix:@"GameData.rollback-"]) {
+      NSError *error = nil;
+      if (![files removeItemAtPath:[supportRoot stringByAppendingPathComponent:entry]
+                            error:&error]) {
+        return error ?: KartPadGameDataError(4, @"Could not remove stored game data.");
+      }
+    }
+  }
+  NSError *markerError = nil;
+  if (![files removeItemAtPath:marker error:&markerError]) {
+    return markerError ?: KartPadGameDataError(5, @"Could not finish game-data removal.");
+  }
+
+  SunPadSettings *settings = SunPadSettings.sharedSettings;
+  settings.retainedGameDataPath = nil;
+  settings.extractedGameRoot = nil;
+  [settings synchronize];
+  return nil;
 }
 
 void KartPadRecoverInterruptedImport(NSString *supportRoot) {
@@ -532,7 +570,12 @@ NSError *KartPadPerformGameDataImport(NSURL *url) {
 }
 
 - (BOOL)run {
-  if (KartPadInstalledGameDataIsValid()) {
+  NSError *removalError = KartPadApplyScheduledGameDataRemoval();
+  if (removalError != nil) {
+    NSLog(@"[KartPad] scheduled game-data removal failed: %@",
+          removalError.localizedDescription);
+  }
+  if (removalError == nil && KartPadInstalledGameDataIsValid()) {
     return YES;
   }
   UIWindowScene *scene = [self availableWindowScene];
@@ -545,7 +588,17 @@ NSError *KartPadPerformGameDataImport(NSURL *url) {
   self.window.windowLevel = UIWindowLevelAlert + 1.0;
   self.window.rootViewController = self.root;
   [self.window makeKeyAndVisible];
-  dispatch_async(dispatch_get_main_queue(), ^{ [self showOptions]; });
+  if (removalError != nil) {
+    dispatch_async(dispatch_get_main_queue(), ^{
+      [self showMessage:@"Game Data Removal Failed"
+                 detail:removalError.localizedDescription completion:^{
+        self.finished = YES;
+        self.succeeded = NO;
+      }];
+    });
+  } else {
+    dispatch_async(dispatch_get_main_queue(), ^{ [self showOptions]; });
+  }
   while (!self.finished) {
     @autoreleasepool {
       [NSRunLoop.currentRunLoop runMode:NSDefaultRunLoopMode
@@ -849,8 +902,55 @@ NSError *KartPadPerformGameDataImport(NSURL *url) {
 
 - (void)gameOverlayRequestsGameDataRemoval:(SunPadGameOverlay *)overlay {
   (void)overlay;
-  [self showIntegrationAlert:@"Remove Stored Game Data"
-                     message:@"No private game image is retained by this candidate."];
+  [[SunPadInputMixer sharedMixer] clearInputFromTouch:YES];
+  NSString *supportRoot = KartPadSupportRoot();
+  NSError *error = nil;
+  [NSFileManager.defaultManager createDirectoryAtPath:supportRoot
+                          withIntermediateDirectories:YES
+                                           attributes:@{NSFileProtectionKey:
+      NSFileProtectionCompleteUntilFirstUserAuthentication}
+                                                error:&error];
+  if (error == nil) {
+    [@"remove-on-next-launch\n" writeToFile:KartPadRemovalMarkerPath()
+                                   atomically:YES encoding:NSUTF8StringEncoding
+                                      error:&error];
+  }
+  if (error != nil) {
+    [self showIntegrationAlert:@"Game Data Removal Failed"
+                       message:error.localizedDescription];
+    return;
+  }
+
+  UIViewController *controller = KartPadVisibleViewController(_window);
+  if (controller == nil) {
+    [NSFileManager.defaultManager removeItemAtPath:KartPadRemovalMarkerPath()
+                                             error:nil];
+    return;
+  }
+  __weak KartPadRuntimeOverlayHost *weakSelf = self;
+  UIAlertController *alert = [UIAlertController
+      alertControllerWithTitle:@"Game Data Removal Scheduled"
+                       message:@"KartPad will remove the private game-data copy before emulation starts on the next launch. Saves and control settings are not affected."
+                preferredStyle:UIAlertControllerStyleAlert];
+  [alert addAction:[UIAlertAction actionWithTitle:@"Undo"
+                                             style:UIAlertActionStyleCancel
+                                           handler:^(UIAlertAction *action) {
+    (void)action;
+    NSError *undoError = nil;
+    if (![NSFileManager.defaultManager removeItemAtPath:KartPadRemovalMarkerPath()
+                                                  error:&undoError]) {
+      dispatch_after(dispatch_time(DISPATCH_TIME_NOW,
+                                   (int64_t)(0.35 * NSEC_PER_SEC)),
+                     dispatch_get_main_queue(), ^{
+        [weakSelf showIntegrationAlert:@"Undo Failed"
+                               message:undoError.localizedDescription];
+      });
+    }
+  }]];
+  [alert addAction:[UIAlertAction actionWithTitle:@"OK"
+                                             style:UIAlertActionStyleDefault
+                                           handler:nil]];
+  [controller presentViewController:alert animated:YES completion:nil];
 }
 
 - (void)gameOverlayRequestsControllerMapping:(SunPadGameOverlay *)overlay {
