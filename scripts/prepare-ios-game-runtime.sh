@@ -47,10 +47,14 @@ cp -R "${runtime_ref}" "${runtime_source}"
 cp -R "${repo_root}/ref/upstream/Wiicompiled/aurora-main" \
   "${runtime_source}/aurora-main"
 patch --batch -p1 -d "${runtime_source}/aurora-main" < \
+  "${repo_root}/patches/aurora-present-telemetry.patch"
+patch --batch -p1 -d "${runtime_source}/aurora-main" < \
   "${repo_root}/patches/aurora-ios-opaque-letterbox.patch"
 patch --batch -p1 -d "${runtime_source}/aurora-main" < \
   "${repo_root}/patches/aurora-ios-simulator-single-pipeline-worker.patch"
 patch --batch -p1 -d "${runtime_source}" < "${repo_root}/patches/wiicompiled-apple-runtime.patch"
+patch --batch -p1 -d "${runtime_source}" < \
+  "${repo_root}/patches/wiicompiled-present-telemetry.patch"
 patch --batch -p1 -d "${runtime_source}" < "${repo_root}/patches/wiicompiled-ios-app-integration.patch"
 patch --batch -p1 -d "${runtime_source}" < "${repo_root}/patches/wiicompiled-ios-first-launch-gate.patch"
 patch --batch -p1 -d "${runtime_source}" < "${repo_root}/patches/wiicompiled-ios-touch-core-buttons.patch"

@@ -2,10 +2,16 @@
 set -euo pipefail
 
 repo_root="$(git rev-parse --show-toplevel)"
+absolute_from_repo() {
+  case "$1" in
+    /*) printf '%s\n' "$1" ;;
+    *) printf '%s/%s\n' "${repo_root}" "$1" ;;
+  esac
+}
 runtime_ref="${repo_root}/ref/upstream/Wiicompiled/runtime"
-translation_root="${1:-${repo_root}/private/g8-full-translation}"
-runtime_source="${2:-${repo_root}/build/g7-game-runtime-source}"
-runtime_build="${3:-${repo_root}/build/g7-game-runtime-build}"
+translation_root="$(absolute_from_repo "${1:-private/g8-full-translation}")"
+runtime_source="$(absolute_from_repo "${2:-build/g7-game-runtime-source}")"
+runtime_build="$(absolute_from_repo "${3:-build/g7-game-runtime-build}")"
 dawn_archive="${repo_root}/build/dependency-cache/dawn-darwin-arm64-v20260603.191052.tar.gz"
 sse2neon_url="https://raw.githubusercontent.com/DLTcollab/sse2neon/13a42df35dc7fcc94f987568e7274a998bb6cc86/sse2neon.h"
 sse2neon_sha256="44b9fa3dec3a52ea473246e04b9f692a4e5b0ed654299eef7fe7ec3049e223e0"
@@ -29,8 +35,16 @@ fi
 
 mkdir -p "$(dirname "${runtime_source}")"
 cp -R "${runtime_ref}" "${runtime_source}"
+# Build against a disposable Aurora copy so performance instrumentation never
+# mutates the immutable pinned reference checkout.
+cp -R "${repo_root}/ref/upstream/Wiicompiled/aurora-main" \
+  "${runtime_source}/aurora-main"
+patch --batch -p1 -d "${runtime_source}/aurora-main" < \
+  "${repo_root}/patches/aurora-present-telemetry.patch"
 patch -p1 -d "${runtime_source}" < "${repo_root}/patches/wiicompiled-apple-runtime.patch"
 patch -p1 -d "${runtime_source}" < "${repo_root}/patches/wiicompiled-macos-shell.patch"
+patch --batch -p1 -d "${runtime_source}" < \
+  "${repo_root}/patches/wiicompiled-present-telemetry.patch"
 
 mkdir -p "${runtime_source}/third_party/sse2neon"
 curl --fail --location --silent --show-error \
@@ -72,7 +86,7 @@ cmake -S "${runtime_source}" -B "${runtime_build}" -G Ninja \
   -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_OSX_ARCHITECTURES=arm64 \
   -DCMAKE_OSX_DEPLOYMENT_TARGET=14.0 \
-  -DMKW_AURORA_DIR="${repo_root}/ref/upstream/Wiicompiled/aurora-main" \
+  -DMKW_AURORA_DIR="${runtime_source}/aurora-main" \
   -DAURORA_DAWN_PACKAGE_URL="file://${dawn_archive}" \
   -DMKW_TRANSLATED_SHARD_MANIFEST="${translation_root}/build_shards/shards.cmake" \
   -DMKW_KARTPAD_RUNTIME_INCLUDE="${repo_root}/runtime/include" \
