@@ -97,3 +97,28 @@ claimed speedup and not permission to weaken guest FPSCR behavior.
   thermals, memory pressure, sustained performance, and motion acceptance are
   still required before mobile promotion.
 
+## Follow-up: live display settings
+
+Source `049ee94` extended the same KartPad-owned refresh bridge to the two other
+SunPad menu groups that do not advertise a restart requirement. The exact
+copied menu files remain byte-identical.
+
+The incrementally rebuilt Xcode app passed the strict IOSSIMULATOR audit with
+executable SHA-256
+`bdb805b933e9cbce3e921dba11063af18fd6b18eaebdb36c447bbae24f71f2d8`.
+On a single iPad Pro 13-inch (M5) Simulator process:
+
+- `Original 4:3 -> 16:9 (Experimental)` immediately produced the expected
+  opaque-black top and bottom bands while keeping the touch layout fitted.
+- `16:9 (Experimental) -> Original 4:3` immediately restored the full 4:3
+  presentation.
+- `1x (Native) -> 2x -> 1x (Native)` applied in-process without relaunching.
+- Bounded runtime records confirmed the exact sequence:
+  `aspectMode=0, resolutionScale=1, aspectMode=1, aspectMode=0,
+  resolutionScale=2, resolutionScale=1`.
+
+The patch reads the current Metal surface only when the aspect preference
+changes and calls the existing framebuffer-scale API only when the resolution
+preference changes. It does no per-frame reconfiguration in steady state. The
+full patch stack applies from immutable upstream, the exact SunPad snapshot
+passes, the app exited normally, and the sole Simulator was shut down.

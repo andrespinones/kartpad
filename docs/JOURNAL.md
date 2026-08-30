@@ -1256,3 +1256,23 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   real-time stationary-race cadence, telemetry, profiling, and clean shutdown;
   physical-device and complete touch-race acceptance remain open.** Evidence:
   `docs/artifacts/2026-08-30/g14-ipad-current-race-profile.md`.
+
+## 2026-08-30 — G14 live mobile display settings
+
+- Found that SunPad's aspect-ratio and render-resolution actions do not say
+  restart required, but KartPad sampled both only at launch. Extended the
+  KartPad-owned host bridge without changing the exact copied SunPad files.
+- The full runtime patch stack applies from immutable upstream. Both Ninja and
+  Xcode incremental builds link, and the strict IOSSIMULATOR app audit passes;
+  executable SHA-256 is
+  `bdb805b933e9cbce3e921dba11063af18fd6b18eaebdb36c447bbae24f71f2d8`.
+- In one iPad Simulator process, 4:3 switched visibly to fixed 16:9 and back,
+  and native resolution switched to 2x and back. Runtime records captured the
+  exact `0 -> 1 -> 0` aspect and `1 -> 2 -> 1` scale transitions.
+- Steady state remains cheap: surface size and aspect are reconfigured only
+  when the aspect choice changes; framebuffer scale is updated only when the
+  scale changes. The app exited cleanly and the sole Simulator was shut down.
+- Classification: **Pass for live aspect/resolution menu semantics and exact
+  SunPad preservation; physical-device visual/performance acceptance remains
+  open.** Evidence:
+  `docs/artifacts/2026-08-30/g14-ipad-current-race-profile.md`.
