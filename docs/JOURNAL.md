@@ -1224,3 +1224,10 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   claimed yet; G11 remains open.** The next full-title generation will measure
   how many false full-context fences disappear before any FPSCR elision is
   considered.
+- Full-title follow-up regenerated 29,637 functions (1,093 emitted files
+  changed), built/audited exact package `2282e2c`, and ran a back-to-back
+  title attract-race Time Profiler counterbalance against exact `2cfb7e1`.
+  Candidate/control sampled CPU was 10.432/10.813 seconds, but candidate/control
+  main-thread time was 7.527/7.402 seconds. Both held 60 FPS with zero audio
+  drops and clean exits. The mixed result is **neutral**, not a performance
+  win; the correctness model remains accepted and G11 remains open.
