@@ -34,6 +34,15 @@ Verification:
 - Complete 29,065-function arm64 Simulator compile/link and strengthened app
   audit: pass. Executable SHA-256:
   `c87a1c4ef6577dce0e72b27c4070d611cae6f4b7a5e59284cd6bb1d94f12e25c`.
+- A second, fresh preparation from the immutable pinned runtime and Aurora
+  sources applied the complete patch sequence and completed the new 853-step
+  Ninja graph. Its standalone arm64 `IOSSIMULATOR` link has SHA-256
+  `06238bd24c37235524375b7a12fbb0ca522b156b51936bf5be97049f5da5e500`,
+  links CoreMotion and only Apple system dependencies, exports the motion and
+  exact SunPad classes, and retains the exact snapshot hash above. This Ninja
+  output proves clean source/link reproduction; it intentionally does not
+  replace the Xcode package audit because Ninja does not compile the asset
+  catalog into `Assets.car`.
 - Unsigned arm64 physical-iOS shell compile/link and IOS package audit: pass.
 - Exactly one iPhone 17 Pro / iOS 26.5 Simulator launched. The live retail game
   retained the exact touch overlay, the menu exposed the new owned action, and
