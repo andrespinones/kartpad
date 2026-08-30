@@ -96,13 +96,17 @@ for shell_contract in \
   "Choose Game Data" \
   "showControllerSettings:" \
   "guestMemoryStrategy=flat-mach-vm" \
-  "reviewWarning=Review this report before sharing." \
+  "schema=3" \
+  "sessionTailLimitBytes=4096" \
+  "currentSessionTailBegin" \
+  "previousSessionTailBegin" \
+  "reviewWarning=Review this report before sharing. Arbitrary runtime text may still require review." \
   "KartPad currently supports RMCP01 (PAL), disc 0, revision 0 only." \
   "80d18895b39c63bd80f457398bfcbb91b7d16ac116a41a88967e954080155b05" \
   "Show KartPad Data" \
   "Show KartPad Cache" \
   "Save Diagnostics Report" \
-  "privacy=paths, game data, translated code, save contents, credentials, device identifiers, and logs omitted"; do
+  "privacy=personal paths are replaced; game data, translated code, save contents, credentials, device identifiers, signing material, and unbounded logs are omitted"; do
   if ! rg -F -q "${shell_contract}" <<<"${executable_strings}"; then
     echo "package runtime lacks native shell contract: ${shell_contract}" >&2
     exit 70

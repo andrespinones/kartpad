@@ -8,6 +8,8 @@
 #include <SDL3/SDL_keycode.h>
 #include <SDL3/SDL_scancode.h>
 
+#include <cstdlib>
+
 #include "runtime_config.h"
 
 static constexpr NSInteger kKartPadMenuTag = 0x4b505344;
@@ -27,6 +29,132 @@ static NSURL *CacheURL() {
 }
 
 static NSString *YesNo(BOOL value) { return value ? @"yes" : @"no"; }
+
+static NSURL *SessionLogsURL() {
+  return [ApplicationSupportURL() URLByAppendingPathComponent:@"Logs"
+                                                   isDirectory:YES];
+}
+
+static NSURL *CurrentSessionURL() {
+  return [SessionLogsURL() URLByAppendingPathComponent:@"session-current.log"];
+}
+
+static NSURL *PreviousSessionURL() {
+  return [SessionLogsURL() URLByAppendingPathComponent:@"session-previous.log"];
+}
+
+static NSURL *ActiveSessionMarkerURL() {
+  return [SessionLogsURL() URLByAppendingPathComponent:@".session-active"];
+}
+
+static NSString *SessionTimestamp() {
+  return [NSISO8601DateFormatter stringFromDate:NSDate.date
+                                       timeZone:NSTimeZone.localTimeZone
+                                  formatOptions:NSISO8601DateFormatWithInternetDateTime];
+}
+
+static void AppendSessionLine(NSString *line) {
+  if (line.length == 0) return;
+  NSFileHandle *handle = [NSFileHandle fileHandleForWritingToURL:CurrentSessionURL()
+                                                          error:nil];
+  if (handle == nil) return;
+  [handle seekToEndOfFile];
+  [handle writeData:[[line stringByAppendingString:@"\n"]
+                        dataUsingEncoding:NSUTF8StringEncoding]];
+  [handle closeFile];
+}
+
+static void MarkSessionClean() {
+  @autoreleasepool {
+    if (![NSFileManager.defaultManager
+            fileExistsAtPath:ActiveSessionMarkerURL().path]) {
+      return;
+    }
+    AppendSessionLine([NSString stringWithFormat:@"ended=%@", SessionTimestamp()]);
+    AppendSessionLine(@"endedCleanly=yes");
+    [NSFileManager.defaultManager removeItemAtURL:ActiveSessionMarkerURL()
+                                            error:nil];
+  }
+}
+
+static void MarkSessionCleanAtExit() { MarkSessionClean(); }
+
+static void BeginSession() {
+  NSFileManager *files = NSFileManager.defaultManager;
+  NSURL *logs = SessionLogsURL();
+  [files createDirectoryAtURL:logs
+  withIntermediateDirectories:YES
+                   attributes:nil
+                        error:nil];
+  const BOOL hadCurrent = [files fileExistsAtPath:CurrentSessionURL().path];
+  const BOOL previousWasActive =
+      [files fileExistsAtPath:ActiveSessionMarkerURL().path];
+  if (hadCurrent) {
+    [files removeItemAtURL:PreviousSessionURL() error:nil];
+    [files moveItemAtURL:CurrentSessionURL()
+                   toURL:PreviousSessionURL()
+                   error:nil];
+  }
+
+  NSString *previousClean = hadCurrent ? YesNo(!previousWasActive) : @"unknown";
+  NSString *manifest = [NSString stringWithFormat:
+      @"KartPad bounded session log\n"
+       "schema=1\n"
+       "started=%@\n"
+       "productProfile=RMCP01-r0-base\n"
+       "rendererBackend=Metal\n"
+       "guestMemoryStrategy=flat-mach-vm\n"
+       "schedulerStrategy=cooperative-fibers\n"
+       "previousSessionClean=%@\n"
+       "currentSessionState=active\n",
+      SessionTimestamp(), previousClean];
+  [manifest writeToURL:CurrentSessionURL()
+            atomically:YES
+              encoding:NSUTF8StringEncoding
+                 error:nil];
+  [@"active\n" writeToURL:ActiveSessionMarkerURL()
+               atomically:YES
+                 encoding:NSUTF8StringEncoding
+                    error:nil];
+  static dispatch_once_t once;
+  dispatch_once(&once, ^{ std::atexit(MarkSessionCleanAtExit); });
+}
+
+static NSString *RedactedSessionTail(NSURL *url) {
+  static constexpr NSUInteger kMaximumTailBytes = 4096;
+  NSData *data = [NSData dataWithContentsOfURL:url
+                                      options:NSDataReadingMappedIfSafe
+                                        error:nil];
+  if (data == nil) return @"unavailable";
+  const NSUInteger offset = data.length > kMaximumTailBytes
+      ? data.length - kMaximumTailBytes : 0;
+  NSData *tailData = [data subdataWithRange:NSMakeRange(offset, data.length - offset)];
+  NSString *tail = [[NSString alloc] initWithData:tailData
+                                         encoding:NSUTF8StringEncoding];
+  if (tail == nil) return @"unreadable";
+
+  NSMutableString *redacted = [tail mutableCopy];
+  NSArray<NSString *> *patterns = @[
+    @"/Users/[^/\\s]+", @"/home/[^/\\s]+", @"[A-Za-z]:\\\\Users\\\\[^\\\\\\s]+"
+  ];
+  for (NSString *pattern in patterns) {
+    NSRegularExpression *expression =
+        [NSRegularExpression regularExpressionWithPattern:pattern options:0 error:nil];
+    [expression replaceMatchesInString:redacted
+                               options:0
+                                 range:NSMakeRange(0, redacted.length)
+                          withTemplate:@"<personal-path>"];
+  }
+  NSString *user = NSUserName();
+  if (user.length > 0) {
+    [redacted replaceOccurrencesOfString:user
+                              withString:@"<user>"
+                                 options:0
+                                   range:NSMakeRange(0, redacted.length)];
+  }
+  return [redacted stringByTrimmingCharactersInSet:
+      NSCharacterSet.newlineCharacterSet];
+}
 
 static NSString *SHA256ForFile(NSString *path, NSError **error) {
   NSData *data = [NSData dataWithContentsOfFile:path
@@ -188,6 +316,10 @@ static NSString *DiagnosticsReport() {
   NSString *gameDataRoot = ConfiguredGameDataRoot();
   const BOOL gameDataValid =
       ValidateExtractedRoot(gameDataRoot, &gameDataError) == nil && gameDataError == nil;
+  const BOOL currentSessionActive =
+      [files fileExistsAtPath:ActiveSessionMarkerURL().path];
+  NSString *currentSessionTail = RedactedSessionTail(CurrentSessionURL());
+  NSString *previousSessionTail = RedactedSessionTail(PreviousSessionURL());
   NSUInteger mappingCount = 0;
   for (const auto &mapping : runtime.controllerButtons) {
     if (mapping && !mapping->empty()) ++mappingCount;
@@ -201,7 +333,7 @@ static NSString *DiagnosticsReport() {
   if (runtime.displayMode == "fullscreen") displayMode = @"fullscreen";
   return [NSString stringWithFormat:
       @"KartPad diagnostics\n"
-       "schema=2\n"
+       "schema=3\n"
        "generated=%@\n"
        "appVersion=%@\n"
        "appBuild=%@\n"
@@ -227,8 +359,12 @@ static NSString *DiagnosticsReport() {
        "configExists=%@\n"
        "logsExist=%@\n"
        "saveExists=%@\n"
-       "reviewWarning=Review this report before sharing. Runtime log text is not included.\n"
-       "privacy=paths, game data, translated code, save contents, credentials, device identifiers, and logs omitted\n",
+       "currentSessionActive=%@\n"
+       "sessionTailLimitBytes=4096\n"
+       "currentSessionTailBegin\n%@\ncurrentSessionTailEnd\n"
+       "previousSessionTailBegin\n%@\npreviousSessionTailEnd\n"
+       "reviewWarning=Review this report before sharing. Arbitrary runtime text may still require review.\n"
+       "privacy=personal paths are replaced; game data, translated code, save contents, credentials, device identifiers, signing material, and unbounded logs are omitted\n",
       generated, version, build, sourceCommit, runtimeHash,
       NSProcessInfo.processInfo.operatingSystemVersionString, displayMode, resolution,
       interpolation, (long)volume, YesNo(runtime.audioMuted.value_or(false)),
@@ -238,7 +374,8 @@ static NSString *DiagnosticsReport() {
       YesNo([files fileExistsAtPath:cache.path]),
       YesNo([files fileExistsAtPath:config.path]),
       YesNo([files fileExistsAtPath:logs.path]),
-      YesNo([files fileExistsAtPath:save.path])];
+      YesNo([files fileExistsAtPath:save.path]), YesNo(currentSessionActive),
+      currentSessionTail, previousSessionTail];
 }
 
 @interface KartPadMacShellController : NSObject
@@ -258,11 +395,14 @@ static NSString *DiagnosticsReport() {
     if (![window isKindOfClass:NSPanel.class] && window.isVisible) {
       // Let Aurora observe the native close event. Its window-close path
       // flushes placement state and exits without running C++ teardown from a
-      // translated guest fiber.
+      // translated guest fiber. That direct exit does not run atexit handlers,
+      // so persist the clean marker immediately before handing off.
+      MarkSessionClean();
       [window performClose:sender];
       return;
     }
   }
+  MarkSessionClean();
   [NSApp terminate:sender];
 }
 
@@ -710,6 +850,7 @@ void KartPadMacShellInstall(void) {
 
 bool KartPadMacShellPrepareGameData(void) {
   @autoreleasepool {
+    BeginSession();
     RuntimeConfigFile::EnsureConfigFile();
     NSError *error = nil;
     NSString *configured = ConfiguredGameDataRoot();
