@@ -779,3 +779,10 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - No public-service connection, data consent, Dolphin, or Simulator was used. The private log contains DWC initialization with no error/panic signature; the app closed normally.
 - The live RKSYS remained byte-identical to the all-cups fixture at SHA-256 `f09f809cb13bedb6959cf05aeb550fe7c19db2ea74fcc3cf61665d5b0b7b90ec`. Private trace SHA-256 is `02eb3c43f1d10302301472ae38dadf976c568297aac639a4da28f6123c4fc186`; private log SHA-256 is `71269bd71150c5016ac5d5a252dba92acf9cf59d15340fcb52aeed2f5d5a2e6f`.
 - Evidence: `docs/artifacts/2026-08-29/g10-obsolete-services/`. Its 1,327 audio drops are rejected from audio/performance acceptance.
+
+## 2026-08-29 — G10 accessibility steering cadence refinement
+
+- The first honest 50cc Mushroom Cup attempts exposed a second GUI-input limitation after full physical keyboard range was restored: 50 ms synthetic axis pulses left neutral gaps between accessibility-generated taps, while extending full-strength pulses to 250 ms made each correction too coarse.
+- Split physical and synthetic axis levels. Real keyboard holds retain the full normalized endpoint; synthesized GUI taps use 0.35 for 250 ms. Controllers and future touch input remain unchanged.
+- Rebuilt and re-sealed the arm64 app. A clean Luigi Circuit smoke run took the opening bend with bounded single-tap corrections; all incomplete cup traces remain rejected, and Grand Prix progression is still open.
+- Public patch SHA-256 is `c7aa6bdcdba3dd49bcfb325bbb0074d2a92ee9a6a4c208dbbc1edbb1aabc78be`; closed executable SHA-256 is `454a9eebbeb0d680c77a52480970b512842a3a46c89ef37483f82d3187a2a0fe`.

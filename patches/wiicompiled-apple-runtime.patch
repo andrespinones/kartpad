@@ -1026,7 +1026,7 @@ diff -ruN --exclude=.git --exclude=third_party --exclude=build a/src/hle/input/k
 +constexpr uint32_t kKpadUnifiedStatusSize = 0x38;
 +constexpr uint64_t kSyntheticHoldNs = 500'000'000;
 +constexpr uint64_t kSyntheticMenuHoldNs = 80'000'000;
-+constexpr uint64_t kSyntheticStickHoldNs = 50'000'000;
++constexpr uint64_t kSyntheticStickHoldNs = 250'000'000;
 +constexpr uint8_t kWpadExtensionClassic = 0x02;
 +constexpr uint8_t kWpadFormatClassic = 0x06;
 +constexpr uint32_t kWpadButtonLeft = 0x0001;
@@ -1475,6 +1475,15 @@ diff -ruN --exclude=.git --exclude=third_party --exclude=build a/src/hle/input/k
 +    return physicallyDown || syntheticallyDown;
 +}
 +
++float ReadKeyboardAxisLevel(const bool* keys, int keyCount, SDL_Scancode code)
++{
++    if (static_cast<int>(code) < keyCount && keys[code]) return 1.0f;
++    const auto scancode = static_cast<size_t>(code);
++    const bool syntheticallyDown = scancode < g_syntheticExpiryNs.size() &&
++        g_syntheticExpiryNs[scancode].load(std::memory_order_acquire) > SDL_GetTicksNS();
++    return syntheticallyDown ? 0.35f : 0.0f;
++}
++
 +uint32_t ReadKeyboardButtons(uint32_t chan)
 +{
 +    int keyCount = 0;
@@ -1507,18 +1516,15 @@ diff -ruN --exclude=.git --exclude=third_party --exclude=build a/src/hle/input/k
 +{
 +    int keyCount = 0;
 +    const bool* keys = SDL_GetKeyboardState(&keyCount);
-+    constexpr float kKeyboardStickScale = 1.0f;
 +    const std::array<SDL_Scancode, 4> profile = chan == 0 ?
 +        std::array<SDL_Scancode, 4>{SDL_SCANCODE_A, SDL_SCANCODE_D, SDL_SCANCODE_S, SDL_SCANCODE_W} :
 +        chan == 1 ? std::array<SDL_Scancode, 4>{SDL_SCANCODE_T, SDL_SCANCODE_Y, SDL_SCANCODE_H, SDL_SCANCODE_G} :
 +        chan == 2 ? std::array<SDL_Scancode, 4>{SDL_SCANCODE_J, SDL_SCANCODE_L, SDL_SCANCODE_K, SDL_SCANCODE_I} :
 +                    std::array<SDL_Scancode, 4>{SDL_SCANCODE_Z, SDL_SCANCODE_V, SDL_SCANCODE_N, SDL_SCANCODE_B};
-+    const float x = kKeyboardStickScale *
-+                    ((IsKeyDown(keys, keyCount, profile[1]) ? 1.0f : 0.0f) -
-+                     (IsKeyDown(keys, keyCount, profile[0]) ? 1.0f : 0.0f));
-+    const float y = kKeyboardStickScale *
-+                    ((IsKeyDown(keys, keyCount, profile[3]) ? 1.0f : 0.0f) -
-+                     (IsKeyDown(keys, keyCount, profile[2]) ? 1.0f : 0.0f));
++    const float x = ReadKeyboardAxisLevel(keys, keyCount, profile[1]) -
++                    ReadKeyboardAxisLevel(keys, keyCount, profile[0]);
++    const float y = ReadKeyboardAxisLevel(keys, keyCount, profile[3]) -
++                    ReadKeyboardAxisLevel(keys, keyCount, profile[2]);
 +    return {x, y};
 +}
 +
