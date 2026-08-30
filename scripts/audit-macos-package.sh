@@ -58,11 +58,24 @@ while IFS= read -r macho; do
   done < <(otool -L "${macho}" | tail -n +2 | awk '{print $1}')
 done < <(find "${contents}/MacOS" "${contents}/Frameworks" -type f -perm -111 -print)
 
-if find "${contents}/MacOS" "${contents}/Frameworks" -type f -perm -111 -print0 | \
-  xargs -0 strings | rg -F -q "${HOME}/"; then
+if rg -F -q "${HOME}/" < <(
+  find "${contents}/MacOS" "${contents}/Frameworks" -type f -perm -111 -print0 | \
+    xargs -0 strings
+); then
   echo "package embeds the builder's home-directory path" >&2
   exit 70
 fi
+
+# The installed Apple layout must keep durable data and regenerable caches in
+# their distinct platform directories. The focused runtime contract proves the
+# resolver behavior; these markers make the package audit reject an older
+# runtime that predates that contract.
+for storage_marker in "Application Support" "Caches"; do
+  if ! rg -F -x -q "${storage_marker}" < <(strings "${executable}"); then
+    echo "package runtime lacks installed storage marker: ${storage_marker}" >&2
+    exit 70
+  fi
+done
 
 codesign --verify --deep --strict --verbose=2 "${app}"
 app_hash="$(find "${app}" -type f -print0 | sort -z | xargs -0 shasum -a 256 | shasum -a 256 | awk '{print $1}')"
