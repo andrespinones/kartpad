@@ -139,6 +139,11 @@ def summarize(directory: Path) -> dict[str, object]:
                 "os_version",
                 "os_build",
                 "power_source",
+                "save_file",
+                "save_size_start",
+                "save_size_end",
+                "save_sha256_start",
+                "save_sha256_end",
             )
         },
     }

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if [[ $# -lt 1 || $# -gt 4 ]]; then
-  echo "usage: $0 PID [DURATION_SECONDS] [INTERVAL_SECONDS] [ABSOLUTE_OUTPUT_DIR]" >&2
+if [[ $# -lt 1 || $# -gt 5 ]]; then
+  echo "usage: $0 PID [DURATION_SECONDS] [INTERVAL_SECONDS] [ABSOLUTE_OUTPUT_DIR] [ABSOLUTE_SAVE_FILE]" >&2
   exit 64
 fi
 
@@ -11,6 +11,7 @@ pid="$1"
 duration_seconds="${2:-28800}"
 interval_seconds="${3:-60}"
 output_dir="${4:-${repo_root}/private/macos-soak-$(date -u +%Y%m%dT%H%M%SZ)}"
+save_file="${5:-}"
 
 case "${pid}" in
   ''|*[!0-9]*) echo "PID must be a positive integer" >&2; exit 64 ;;
@@ -28,6 +29,10 @@ fi
 if [[ "${output_dir}" != /* || "${output_dir}" != "${repo_root}/private/"* ]]; then
   echo "output directory must be an absolute path below ${repo_root}/private" >&2
   exit 64
+fi
+if [[ -n "${save_file}" && ( "${save_file}" != /* || ! -f "${save_file}" ) ]]; then
+  echo "save file must be an existing absolute path" >&2
+  exit 66
 fi
 if ! kill -0 "${pid}" 2>/dev/null; then
   echo "process ${pid} is not running" >&2
@@ -59,6 +64,11 @@ start_utc="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
   echo "os_version=$(sw_vers -productVersion)"
   echo "os_build=$(sw_vers -buildVersion)"
   echo "power_source=$(pmset -g batt | head -1 | tr -d "'" | sed 's/^[[:space:]]*//')"
+  if [[ -n "${save_file}" ]]; then
+    echo "save_file=${save_file}"
+    echo "save_size_start=$(stat -f %z "${save_file}")"
+    echo "save_sha256_start=$(shasum -a 256 "${save_file}" | awk '{print $1}')"
+  fi
 } > "${metadata}"
 
 echo "utc,elapsed_seconds,rss_kib,cpu_percent,thread_count" > "${samples}"
@@ -101,6 +111,10 @@ set -e
   echo "completed_duration=true"
   echo "leaks_exit_status=${leaks_status}"
   echo "process_alive_at_end=$(kill -0 "${pid}" 2>/dev/null && echo true || echo false)"
+  if [[ -n "${save_file}" && -f "${save_file}" ]]; then
+    echo "save_size_end=$(stat -f %z "${save_file}")"
+    echo "save_sha256_end=$(shasum -a 256 "${save_file}" | awk '{print $1}')"
+  fi
 } >> "${metadata}"
 
 echo "macOS soak monitoring complete: ${output_dir}"
