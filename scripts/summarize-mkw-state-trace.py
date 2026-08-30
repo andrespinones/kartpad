@@ -85,7 +85,11 @@ def read_trace(path: Path) -> list[dict[str, int]]:
     return rows
 
 
-def race_segments(rows: list[dict[str, int]]) -> list[RaceSegment]:
+def race_segments(
+    rows: list[dict[str, int]], race_time_step: int = 1
+) -> list[RaceSegment]:
+    if race_time_step not in (1, 2):
+        raise TraceError("race-time step must be 1 or 2")
     spans: list[tuple[int, int]] = []
     start: int | None = None
     for index, row in enumerate(rows):
@@ -93,7 +97,8 @@ def race_segments(rows: list[dict[str, int]]) -> list[RaceSegment]:
             start is not None
             and row["stage"] == 2
             and rows[index - 1]["stage"] == 2
-            and row["race_time"] == rows[index - 1]["race_time"] + 1
+            and row["race_time"]
+            == rows[index - 1]["race_time"] + race_time_step
         )
         if row["stage"] == 2 and start is None:
             start = index
@@ -180,12 +185,30 @@ def _self_test() -> None:
     else:
         raise AssertionError("unfinished race segment was accepted")
 
+    thirty_hz_rows = [
+        {"sample": index, "retrace": 200 + index * 2, "stage": stage, "race_time": time}
+        for index, (stage, time) in enumerate(
+            [(1, 238), (2, 240), (2, 242), (2, 244), (4, 246), (0, 0)]
+        )
+    ]
+    thirty_hz_segments = race_segments(thirty_hz_rows, race_time_step=2)
+    assert len(thirty_hz_segments) == 1
+    assert require_completion(thirty_hz_segments, None).frames == 3
+    assert len(race_segments(thirty_hz_rows)) == 3
+
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("trace", type=Path, nargs="?", help="native state-trace CSV")
     parser.add_argument("--require-complete", action="store_true")
     parser.add_argument("--expected-input-frames", type=int)
+    parser.add_argument(
+        "--race-time-step",
+        type=int,
+        choices=(1, 2),
+        default=1,
+        help="expected increment between sampled race_time values (2 for retail 3/4-player cadence)",
+    )
     parser.add_argument("--self-test", action="store_true")
     args = parser.parse_args()
 
@@ -199,9 +222,11 @@ def main() -> int:
             parser.error("trace is required unless --self-test is used")
         if args.expected_input_frames is not None and not args.require_complete:
             parser.error("--expected-input-frames requires --require-complete")
+        if args.expected_input_frames is not None and args.race_time_step != 1:
+            parser.error("--expected-input-frames currently requires --race-time-step 1")
 
         rows = read_trace(args.trace)
-        segments = race_segments(rows)
+        segments = race_segments(rows, race_time_step=args.race_time_step)
         accepted = (
             require_completion(segments, args.expected_input_frames)
             if args.require_complete
