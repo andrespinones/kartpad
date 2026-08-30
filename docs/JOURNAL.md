@@ -786,3 +786,12 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - Split physical and synthetic axis levels. Real keyboard holds retain the full normalized endpoint; synthesized GUI taps use 0.35 for 250 ms. Controllers and future touch input remain unchanged.
 - Rebuilt and re-sealed the arm64 app. A clean Luigi Circuit smoke run took the opening bend with bounded single-tap corrections; all incomplete cup traces remain rejected, and Grand Prix progression is still open.
 - Public patch SHA-256 is `c7aa6bdcdba3dd49bcfb325bbb0074d2a92ee9a6a4c208dbbc1edbb1aabc78be`; closed executable SHA-256 is `454a9eebbeb0d680c77a52480970b512842a3a46c89ef37483f82d3187a2a0fe`.
+
+## 2026-08-29 — G10 Time Trial personal-record lifecycle
+
+- Created and saved a `Player 01:38.880` SNES Mario Circuit 3 personal ghost through the retail result flow. A fresh process loaded the record and its `Watch Replay` path consumed the full stored stream through finish before the normal automatic replay loop.
+- Personal Time Trial ghosts are authentically replaced by beating the stored best. Added a strict private-fixture tool that changes only the selected leaderboard timer plus core CRC and leaves the ghost payload untouched; its positive and refusal self-tests pass.
+- Rejected an expert-stream divergence, two existing-PB grid-origin mismatches, and a live run that exceeded the retail recorder budget. None is acceptance evidence.
+- A later normal live-input run completed all real checkpoints and laps in `05:01.445`, displayed `Saved ghost data for Player!`, and replaced the personal best. Its strict private trace accepts race time `240..18308`, 18,069 consecutive racing samples, and finish stage 4.
+- A second fresh process loaded the `Player 05:01.445` card. The final save SHA-256 is `ad79c24bc5eb0ba6bc8cd2836a55680621892b578a04ea49d8884a71a42c563a`; the bounded relaunch audio sample ended with zero empty observations and zero dropped blocks.
+- Classification: **PRD row 26 Pass.** Evidence and complete diagnostic boundary: `docs/artifacts/2026-08-29/g10-time-trial-record/`.
