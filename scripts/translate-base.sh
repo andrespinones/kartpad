@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(git rev-parse --show-toplevel)"
+image="${1:-${repo_root}/ref/Mario Kart Wii.wbfs}"
+manifest="${repo_root}/tools/mkwii-rmcp01-base.yml"
+output="${repo_root}/private/self-build/translation"
+functions="${output}/functions"
+metadata="${output}/base_translation_output.json"
+shards="${output}/build_shards"
+dotnet_bin="/opt/homebrew/opt/dotnet@8/bin/dotnet"
+translator="${repo_root}/build/wiicompiled-fpscr/translator/src/Translator.Cli/bin/Release/net8.0/Translator.Cli.dll"
+translation_jobs="${KARTPAD_TRANSLATION_JOBS:-2}"
+
+[[ "${translation_jobs}" =~ ^[1-8]$ ]] || {
+  echo "ERROR: KARTPAD_TRANSLATION_JOBS must be an integer from 1 through 8" >&2
+  exit 64
+}
+"${repo_root}/scripts/prepare-disc.sh" "${image}"
+"${repo_root}/scripts/prepare-patched-translator.sh"
+
+"${dotnet_bin}" "${translator}" translate-recursive 0x800060A4 \
+  --project "${manifest}" --threads "${translation_jobs}" --prune-stale \
+  --output-metadata "${metadata}"
+"${repo_root}/scripts/inject-g10-rkg-fixture-hook.py" \
+  "${functions}/func_8051FC84.cpp"
+"${repo_root}/scripts/inject-g10-camera-lifecycle-guard.py" \
+  "${functions}/func_805A1A8C.cpp"
+"${dotnet_bin}" "${translator}" generate-data-init --project "${manifest}"
+
+blob_asm="${output}/data_sections_init_blobs.S"
+if ! rg -q '^\.globl _kData_' "${blob_asm}"; then
+  perl -0pi -e 's/^\.globl (kData_[^\n]+)\n\1:/\.globl $1\n.globl _$1\n$1:\n_$1:/mg' "${blob_asm}"
+fi
+"${dotnet_bin}" "${translator}" emit-build-shards \
+  --project "${manifest}" \
+  --base-metadata "${metadata}" \
+  --base-functions-dir "${functions}" \
+  --native-source-dir "${repo_root}/build/wiicompiled-fpscr/runtime/src" \
+  --out "${shards}"
+
+[[ -f "${functions}/func_8055531C.cpp" && -f "${shards}/shards.cmake" ]]
+function_count="$(find "${functions}" -name 'func_*.cpp' -type f | wc -l | tr -d ' ')"
+[[ "${function_count}" == 29637 ]] || {
+  echo "ERROR: expected 29637 translated functions, found ${function_count}" >&2
+  exit 70
+}
+rg -q '^set\(MKW_BASE_FUNCTION_COUNT 29065\)$' "${shards}/shards.cmake"
+echo "Generated validated private RMCP01 base graph: ${function_count} functions"

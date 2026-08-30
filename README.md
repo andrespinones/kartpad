@@ -89,8 +89,21 @@ Run the portable correctness gates:
 ./scripts/test-ppc-semantics.sh
 ```
 
-After producing the ignored translated title graph, build the patched Apple
-runtime and package it as a self-contained app:
+Build from the pinned supported image in one fail-closed local workflow:
+
+```sh
+./scripts/self-build-macos.sh /path/to/your/Mario-Kart-Wii.wbfs
+```
+
+The workflow verifies the complete supported image hash, extracts it read-only
+with pinned `nodtool`, validates `RMCP01` revision 0 plus the DOL/REL hashes,
+translates the full private title graph with bounded parallelism, builds the
+patched Apple runtime, and audits the signed local app. All extracted and
+translated outputs stay under ignored `private/`; the app stays under ignored
+`build/`. Existing valid extraction/translation work can be resumed.
+
+To build from an already produced ignored translation graph, run the lower
+level steps directly:
 
 ```sh
 ./scripts/prepare-g7-game-runtime.sh
@@ -120,10 +133,9 @@ or non-system dynamic dependencies enter the app bundle. Installation and
 signing remain local development steps; this repository does not publish a
 playable app artifact.
 
-The game-runtime workflow is still being consolidated into a clean-clone
-single command. See [`docs/GOAL-LOOP.md`](docs/GOAL-LOOP.md) for the execution
-rules and [`docs/JOURNAL.md`](docs/JOURNAL.md) for reproducible commands and
-dated results.
+See [`docs/GOAL-LOOP.md`](docs/GOAL-LOOP.md) for the execution rules and
+[`docs/JOURNAL.md`](docs/JOURNAL.md) for reproducible commands and dated
+results.
 
 ## Controls and mobile direction
 
