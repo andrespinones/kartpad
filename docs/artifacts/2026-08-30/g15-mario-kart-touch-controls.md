@@ -26,8 +26,13 @@ without modifying the pinned upstream snapshot.
   `653943e6cfd1e965c70f743ede11fe464dadf3c752afdbe2ec7b3454ad9f631e`.
 - Sole iPhone 17 Pro Simulator: compact R geometry, one-second cyan A state,
   `Acceleration held` accessibility state, and release reset — pass.
-- Shutdown: zero KartPad processes, zero Simulator processes, and zero booted
-  devices after the iPhone check.
+- After iPhone shutdown, sole iPad Pro 13-inch Simulator with the same binary:
+  matching compact L/R pills in landscape, one-second cyan A state,
+  `Acceleration held` accessibility state, release reset, and uninterrupted
+  retail rendering — pass.
+- Shutdown: each device was terminated and shut down before the next launch;
+  the final state has zero KartPad processes, zero Simulator processes, and
+  zero booted devices.
 
 The Simulator-only visual hook calls only the subclass appearance callbacks;
 it does not call SunPad's input publisher and is compiled out of physical-iOS

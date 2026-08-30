@@ -1366,5 +1366,14 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   callbacks and cannot publish gameplay input. KartPad was terminated and the
   iPhone and Simulator shell were shut down; zero runtimes remain.
 - Classification: **Pass for implementation, automated input mapping, package
-  audit, and iPhone visual/accessibility behavior.** Sequential iPad layout
-  verification remains next; hands-on physical touch feel remains external.
+  audit, and iPhone visual/accessibility behavior.** Hands-on physical touch
+  feel remains external.
+- After the pushed iPhone checkpoint, booted only the preserved iPad Pro
+  13-inch Simulator with the same audited executable. In the requested
+  landscape scene, R and L rendered as matching compact pills while live retail
+  rendering continued. The isolated visual hook then changed A from green to
+  cyan, exposed `Acceleration held`, and returned both appearance and
+  accessibility state to normal after release. Terminated KartPad, shut down
+  the iPad, and closed Simulator; zero runtimes remain.
+- Classification addendum: **Pass for sequential iPad layout, held-state, and
+  release-state verification on the exact iPhone-tested binary.**

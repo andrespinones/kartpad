@@ -111,8 +111,10 @@ experiments, physical-device interaction, and a reproducible legal build path.
   The focused Classic adapter passes; the full Simulator app audits at
   executable SHA-256
   `653943e6cfd1e965c70f743ede11fe464dadf3c752afdbe2ec7b3454ad9f631e`.
-  The iPhone visual/accessibility regression passes and its Simulator is shut
-  down; the same exact candidate is next for a sequential iPad regression.
+  Sequential iPhone and iPad visual/accessibility regressions both pass: R
+  matches L, A enters `Acceleration held`, and release restores its normal
+  state while retail rendering continues underneath. Each device and the
+  Simulator shell were shut down before the next launch; zero runtimes remain.
 
 - About 14 GiB of host storage remains after private disc extraction, the full translated runtime build, and native trace evidence. Large generated products remain ignored; capacity must be checked before additional build graphs.
 - No human-only prerequisite currently blocks G0 or the independent parts of G1.
