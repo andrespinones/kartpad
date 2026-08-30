@@ -4,7 +4,7 @@ diff --git a/cmake/PublicProducts.cmake b/cmake/PublicProducts.cmake
 @@ -267,6 +267,22 @@ if(TARGET mkw_base_sensitive)
      target_sources(WiiCompiled PRIVATE $<TARGET_OBJECTS:mkw_base_sensitive>)
  endif()
- 
+
 +set(MKW_KARTPAD_REPO_ROOT "" CACHE PATH
 +    "KartPad repository root used to embed Apple product-shell sources")
 +if(APPLE AND NOT CMAKE_SYSTEM_NAME STREQUAL "iOS" AND MKW_KARTPAD_REPO_ROOT)
@@ -27,24 +27,36 @@ diff --git a/cmake/PublicProducts.cmake b/cmake/PublicProducts.cmake
 diff --git a/src/main.cpp b/src/main.cpp
 --- a/src/main.cpp
 +++ b/src/main.cpp
-@@ -59,6 +59,10 @@
+@@ -59,6 +59,11 @@
  #include <dolphin/gx/GXAurora.h>
  #include <dolphin/vi.h>
  
 +#if defined(__APPLE__)
 +extern "C" void KartPadMacShellInstall(void);
++extern "C" bool KartPadMacShellPrepareGameData(void);
 +#endif
 +
  // Defined in `runtime/src/hle/vi.cpp` (used by GX/VI HLE).
  extern std::atomic_bool g_auroraFrameActive;
  extern "C" int g_gxFrameCount;
-@@ -1333,6 +1337,9 @@ int RuntimeMain(int argc, char** argv) {
+@@ -1333,6 +1338,10 @@ int RuntimeMain(int argc, char** argv) {
  }
  
  int main(int argc, char** argv) {
 +#if defined(__APPLE__)
++    if (!KartPadMacShellPrepareGameData()) return 0;
 +    KartPadMacShellInstall();
 +#endif
      return RuntimeMain(argc, argv);
  }
  extern "C" bool g_dynamicAspectRatioEnabled = false;
+diff --git a/include/runtime_config.h b/include/runtime_config.h
+--- a/include/runtime_config.h
++++ b/include/runtime_config.h
+@@ -471,4 +471,7 @@ inline const RuntimeUserConfig& Get() {
+     static RuntimeUserConfig config = LoadConfigFile();
+     return config;
+ }
++inline void Reload() {
++    const_cast<RuntimeUserConfig&>(Get()) = LoadConfigFile();
++}
