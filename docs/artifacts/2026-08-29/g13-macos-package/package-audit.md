@@ -41,4 +41,13 @@ The first static-link attempt was rejected because configuration incorrectly ret
 - `plutil -lint` passes; package and executable both declare macOS 14.0.
 - Repository safety audit and patch dry-run against the pinned WiiCompiled source pass.
 
+## Static-source archive verification
+
+The static build initially inherited unhashed tag archives for Abseil 20240722.0 and SDL 3.4.4. KartPad now predeclares those two FetchContent inputs with SHA-256 before Aurora configures them:
+
+- Abseil: `f50e5ac311a81382da7fa75b97310e4b9006474f9560ac46f54a9967f07d4ae3`
+- SDL: `ee712dbe6a89bb140bbfc2ce72358fb5ee5cc2240abeabd54855012db30b3864`
+
+CMake's generated URL metadata records both expected hashes, and the downloaded archive bytes match. Reconfiguration succeeded, Ninja reported no work, and the generated runtime remained byte-identical at `4c12eadfd5edf0dd106b76692bef82d8162026684969c7b498a0d3a830f4a0a5`. The already-hashed Dawn, libpng, FreeType, xxHash, fmt, ImGui, SQLite, zstd, and Tracy inputs remain unchanged.
+
 The app bundle is an ignored local artifact and is not published to Git. It will not be launched while the single long-session gameplay process is active.

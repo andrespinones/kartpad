@@ -75,7 +75,29 @@ diff -ruN --exclude=.git --exclude=third_party --exclude=build a/CMakeLists.txt 
 
      # Provide a tiny stub for DXProgrammableCapture when the SDK/PIX headers are
      # missing (common on MinGW). Dawn only includes the header; no symbols are
-@@ -206,6 +209,12 @@
+@@ -138,6 +157,20 @@
+     set(SDL_STATIC ON CACHE BOOL "" FORCE)
+     set(SDL_TEST OFF CACHE BOOL "" FORCE)
+-
++    # FetchContent uses the first declaration for a dependency. Declare the
++    # two Aurora source archives that lack upstream URL_HASH values before the
++    # Aurora subdirectory so tag retargeting or archive mutation fails closed.
++    include(FetchContent)
++    FetchContent_Declare(abseil-cpp
++        URL https://github.com/abseil/abseil-cpp/archive/refs/tags/20240722.0.tar.gz
++        URL_HASH SHA256=f50e5ac311a81382da7fa75b97310e4b9006474f9560ac46f54a9967f07d4ae3
++        DOWNLOAD_EXTRACT_TIMESTAMP TRUE
++        EXCLUDE_FROM_ALL)
++    FetchContent_Declare(SDL
++        URL https://github.com/libsdl-org/SDL/releases/download/release-3.4.4/SDL3-3.4.4.tar.gz
++        URL_HASH SHA256=ee712dbe6a89bb140bbfc2ce72358fb5ee5cc2240abeabd54855012db30b3864
++        DOWNLOAD_EXTRACT_TIMESTAMP TRUE
++        EXCLUDE_FROM_ALL)
++
+     # MinGW/WSL can choke on SDL precompiled headers; disable PCH for aurora/SDL.
+     set(CMAKE_DISABLE_PRECOMPILE_HEADERS ON)
+     # Isolate aurora build products to a subdirectory under the main build dir.
+@@ -206,6 +224,12 @@
  set(MKW_CPU_BASELINE_SOURCE "${CMAKE_CURRENT_LIST_DIR}/src/host_cpu_baseline.cpp")
  list(REMOVE_ITEM SOURCES ${MKW_BASE_PRODUCT_SOURCE} ${MKW_RETRO_REWIND_PRODUCT_SOURCE}
       ${MKW_CPU_BASELINE_SOURCE})

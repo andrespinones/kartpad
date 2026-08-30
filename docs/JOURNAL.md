@@ -818,3 +818,9 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - The regenerated candidate identifies committed source `17cee52d92b70b73e8216a8469dfba668cf4022d`, is arm64 with a macOS 14.0 floor, has only Apple system dynamic dependencies, contains no builder-home path or disc image, and passes strict ad-hoc codesign and bundle audits.
 - Candidate hashes: unsigned packaged runtime `544e47f42718db5894127cef7712374d2fd871a6cac55645a87a0b6ec6af2303`; signed executable `05f868bc6826ee009356abc236e9ce507a123e687d86ced0fb33665ab1a11d36`; bundle-content audit `8a8ff8b38aa699070f3e6ad20a251a4adafb0a3d5cdb7df71aed90bacecbd602`.
 - Classification: **Pass for G13 build/link/package audit only.** Exact-package launch, Application Support relocation, and gameplay remain open. The candidate was not launched because the one-game-instance rule protects the active long replay. Evidence: `docs/artifacts/2026-08-29/g13-macos-package/`.
+
+## 2026-08-29 — G13 static-source archive pin completion
+
+- Audited every FetchContent input used by the new static macOS graph. Aurora already enforced hashes for Dawn, libpng, FreeType, xxHash, fmt, ImGui, SQLite, zstd, and Tracy; only Abseil 20240722.0 and SDL 3.4.4 lacked archive digests.
+- Declared those two inputs before Aurora so CMake's first-declaration rule enforces exact SHA-256 values. Generated URL metadata now contains the expected hashes, both downloaded archives match, patch dry-run passes, and reconfiguration succeeds.
+- Ninja reported no work and the runtime remained byte-identical at SHA-256 `4c12eadfd5edf0dd106b76692bef82d8162026684969c7b498a0d3a830f4a0a5`, confirming a reproducibility-only change.
