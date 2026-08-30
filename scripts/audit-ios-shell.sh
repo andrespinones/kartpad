@@ -36,7 +36,8 @@ if [[ "$(awk '/platform/{print $2; exit}' <<<"${build_metadata}")" != "${expecte
 fi
 
 for forbidden in '*.wbfs' '*.iso' '*.rvz' '*.wia' '*.gcz' '*.mobileprovision'; do
-  if find "${app}" -name "${forbidden}" -print -quit | rg -q .; then
+  forbidden_path="$(find "${app}" -name "${forbidden}" -print -quit)"
+  if [[ -n "${forbidden_path}" ]]; then
     echo "Simulator shell contains forbidden private/signing data: ${forbidden}" >&2
     exit 70
   fi
@@ -52,14 +53,17 @@ while IFS= read -r dependency; do
   esac
 done < <(otool -L "${binary}" | tail -n +2 | awk '{print $1}')
 
-if strings "${binary}" | rg -F -q '/Users/'; then
+binary_strings="$(strings "${binary}")"
+binary_symbols="$(nm -gj "${binary}")"
+
+if rg -F -q '/Users/' <<<"${binary_strings}"; then
   echo "Simulator shell embeds a builder home path" >&2
   exit 70
 fi
 
-if ! nm -gj "${binary}" | rg -q 'KartPadCoreIntegrationSummary' ||
-   ! strings "${binary}" | rg -F -q 'KartPad mobile core checks passed' ||
-   ! strings "${binary}" | rg -F -q 'translated fixture output mismatch'; then
+if ! rg -q 'KartPadCoreIntegrationSummary' <<<"${binary_symbols}" ||
+   ! rg -F -q 'KartPad mobile core checks passed' <<<"${binary_strings}" ||
+   ! rg -F -q 'translated fixture output mismatch' <<<"${binary_strings}"; then
   echo "Simulator shell does not contain the linked mobile core self-check" >&2
   exit 69
 fi

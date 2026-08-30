@@ -4,8 +4,27 @@
 #import "SunPadDiagnostics.h"
 
 @interface KartPadAppDelegate : UIResponder <UIApplicationDelegate>
+@end
+
+@interface KartPadSceneDelegate : UIResponder <UIWindowSceneDelegate>
 @property(nonatomic, strong) UIWindow *window;
 @end
+
+static void KartPadRequestLandscapeGeometry(UIWindow *window) {
+    UIViewController *rootViewController = window.rootViewController;
+    [rootViewController setNeedsUpdateOfSupportedInterfaceOrientations];
+
+    UIWindowScene *windowScene = window.windowScene;
+    if (windowScene == nil)
+        return;
+    UIWindowSceneGeometryPreferencesIOS *preferences =
+        [[UIWindowSceneGeometryPreferencesIOS alloc]
+            initWithInterfaceOrientations:UIInterfaceOrientationMaskLandscape];
+    [windowScene requestGeometryUpdateWithPreferences:preferences
+                                         errorHandler:^(NSError *error) {
+        NSLog(@"[KartPad] landscape geometry request failed: %@", error);
+    }];
+}
 
 @implementation KartPadAppDelegate
 
@@ -21,19 +40,48 @@
     (void)application;
     (void)launchOptions;
     SunPadDiagnosticsStart();
-    self.window = [[UIWindow alloc] initWithFrame:UIScreen.mainScreen.bounds];
-    self.window.rootViewController = [[KartPadShellViewController alloc] init];
-    [self.window makeKeyAndVisible];
     return YES;
 }
 
-- (void)applicationWillResignActive:(UIApplication *)application {
+- (UISceneConfiguration *)application:(UIApplication *)application
+    configurationForConnectingSceneSession:(UISceneSession *)connectingSceneSession
+                                    options:(UISceneConnectionOptions *)options {
     (void)application;
+    (void)options;
+    UISceneConfiguration *configuration =
+        [[UISceneConfiguration alloc] initWithName:@"KartPad Configuration"
+                                       sessionRole:connectingSceneSession.role];
+    configuration.delegateClass = KartPadSceneDelegate.class;
+    return configuration;
+}
+
+@end
+
+@implementation KartPadSceneDelegate
+
+- (void)scene:(UIScene *)scene
+    willConnectToSession:(UISceneSession *)session
+                options:(UISceneConnectionOptions *)connectionOptions {
+    (void)session;
+    (void)connectionOptions;
+    if (![scene isKindOfClass:UIWindowScene.class])
+        return;
+    self.window = [[UIWindow alloc] initWithWindowScene:(UIWindowScene *)scene];
+    self.window.rootViewController = [[KartPadShellViewController alloc] init];
+    [self.window makeKeyAndVisible];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        KartPadRequestLandscapeGeometry(self.window);
+    });
+}
+
+- (void)sceneWillResignActive:(UIScene *)scene {
+    (void)scene;
     [(KartPadShellViewController *)self.window.rootViewController clearTransientInput];
 }
 
-- (void)applicationDidBecomeActive:(UIApplication *)application {
-    (void)application;
+- (void)sceneDidBecomeActive:(UIScene *)scene {
+    (void)scene;
+    KartPadRequestLandscapeGeometry(self.window);
     [(KartPadShellViewController *)self.window.rootViewController resumeAfterForeground];
 }
 

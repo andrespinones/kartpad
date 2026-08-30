@@ -864,3 +864,21 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - Read the supplied macOS report for PID 67587: `EXC_BAD_ACCESS (SIGBUS)` at `0x0000100055440027`, top frame `func_805A2034`, after a second three-player race transition.
 - This is the already documented reclaimed-camera-node signature whose poisoned scene-heap pointer carried `0x55440003`. The guarded lifecycle correction and exact formerly failing second-race regression already pass; the report is retained as historical corroboration rather than classified as a new current-candidate crash.
 - Full three- and four-player races through standings remain open because fixing and regression-testing the transition does not itself prove PRD row 30.
+
+## 2026-08-30 — rejected honest Grand Prix driving attempt
+
+- Backed up the installed and portable configuration/save state before launching the sole exact macOS package. The pre-run RKSYS SHA-256 was `ad79c24bc5eb0ba6bc8cd2836a55680621892b578a04ea49d8884a71a42c563a`.
+- Started a normal 50cc Mushroom Cup as Mario / Standard Kart M / Automatic and reached live Luigi Circuit at the displayed 60 FPS target. Accessibility-generated accelerate and steering inputs were accepted, but the synthetic driver left the course boundary and never resumed retail checkpoint progression.
+- The rejected trace contains 25,034 samples, stayed in race stage 2 with observed race time `240..24063`, and has SHA-256 `785f8163e4f54bb293ba8b3ebf25e8faa5f7e3c547f822103611f52f45ad7936`. It has no accepted completion segment and is retained as test-control evidence only.
+- KartPad closed normally, produced no new crash, and the save remained byte-identical. Classification: **no Grand Prix progress and no candidate runtime defect**; honest progression remains open.
+
+## 2026-08-30 — G14/G15 dual-Simulator shell runtime checkpoint
+
+- The first iPad rebuild still carried a stale configure-time `Info.plist` without the newly added scene manifest. Regenerated the CMake Xcode project, verified `UIApplicationSceneManifest` in the built product, and moved lifecycle ownership to a `UIWindowSceneDelegate` with an explicit landscape geometry request.
+- Removed dependence on `UIScreen.mainScreen.bounds`; the root view now receives its size from the active scene. Both iPhone 17 Pro and iPad Pro 13-inch classes launch the linked mobile core and show `KartPad mobile core checks passed`, render the byte-identical SunPad overlay, expose the complete persistent three-dot menu, and return from background with input cleared and the overlay active.
+- On iPadOS 26, the accepted landscape scene is letterboxed while the simulated hardware remains physically portrait, then fills the display after hardware rotation. This matches Apple's iPadOS 26 scene/windowing model and is not misclassified as race or touch-feel acceptance.
+- The compact iPhone menu scrolls to controller mapping, touch settings, game data, and report actions. Touch settings and the layout editor are reachable; the game-data delegate currently shows a bounded integration alert and is not a real-import claim.
+- Corrected an intermittent shell-auditor failure caused by producer/`rg -q` pipelines under `pipefail`; captured `find`, `strings`, and `nm` output now makes the oracle deterministic. Simulator and device artifacts each passed 50 consecutive audits, the exact SunPad snapshot and Classic-input contract pass, and repository safety passes.
+- A rejected intermediate permanently locked the first landscape orientation and made the opposite iPhone landscape side upside down. Removed that lock and rotated the final candidate through both landscape sides; both remain upright.
+- Final Simulator executable SHA-256 is `91a202f0ee62212b3c23d1616bda9a9595a6c498ca9ff4aa21de10b8723d11cd`; unsigned device executable SHA-256 is `c380a319a972971b74e0b2684824e7dde520788804bf8e1a1e712ecc556a632b`. Both Simulator classes were fully terminated and shut down; none remains booted.
+- Classification: **Pass for exercised G14/G15 shell-level subcases; G14/G15 remain open.** The retail graph, real import/services, Metal gameplay, audio, saves, complete touch-driven races, controller handoff, gyro, and physical-device execution remain unclaimed. Evidence: `docs/artifacts/2026-08-30/g14-simulator-shell/`.

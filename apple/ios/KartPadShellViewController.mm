@@ -25,7 +25,9 @@
 }
 
 - (void)loadView {
-    self.view = [[UIView alloc] initWithFrame:UIScreen.mainScreen.bounds];
+    // The scene owns the view's eventual size. UIScreen bounds may describe the
+    // physical iPad orientation instead of this scene's requested orientation.
+    self.view = [[UIView alloc] initWithFrame:CGRectZero];
     self.view.backgroundColor = UIColor.blackColor;
 
     _metalSurface = [[KartPadMetalSurface alloc] initWithFrame:self.view.bounds];
@@ -60,6 +62,14 @@
 
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations {
     return UIInterfaceOrientationMaskLandscape;
+}
+
+- (BOOL)shouldAutorotate {
+    return YES;
+}
+
+- (UIInterfaceOrientation)preferredInterfaceOrientationForPresentation {
+    return UIInterfaceOrientationLandscapeRight;
 }
 
 - (BOOL)prefersHomeIndicatorAutoHidden {

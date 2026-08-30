@@ -40,7 +40,7 @@ signing material.
 | Input | Keyboard plus four independent Classic-controller slots; two-player full-race evidence passes |
 | Audio | Non-silent host playback, pause/resume, live output-device migration, and a two-hour representative continuity run pass their instrumented subcases; subjective listening and the eight-hour soak remain open |
 | Packaging | The original icon and exact branded 80 MiB package pass audit, installed-storage, configured gameplay, save-preservation, and normal-close checks; the native first-run/settings/data-management shell remains open |
-| iPhone/iPad | Native arm64 shell builds with the exact SunPad overlay, original icons, and shared correctness libraries; retail gameplay and mobile acceptance remain open |
+| iPhone/iPad | The native arm64 shell now runs on both iPhone and iPad Simulator with the exact SunPad overlay/menu, original icons, linked core self-check, rotation policy, and foreground lifecycle; retail gameplay and mobile acceptance remain open |
 | Distribution | Development source only; no game data and no release candidate |
 
 The evidence ledger, exact open rows, and known risks live in
@@ -109,11 +109,13 @@ GPLv3 touch-control component and persistent **•••** menu directly. It pre
 the component's layout editing, controller handoff, accessibility behavior, and
 safe-area treatment; a separate tested adapter supplies Mario Kart Wii's Classic
 Controller mapping without changing the copied baseline. The native arm64
-Simulator shell, original icon catalog, privacy manifest, and package audit pass.
-It links and self-checks the shared checked-memory, scheduler, host, and translated
-fixture libraries. The full retail graph and KartPad-specific menu services remain
-under integration, and the mobile surface is not accepted until complete iPhone
-and iPad Simulator races pass with one Simulator booted at a time.
+Simulator shell now launches on both an iPhone 17 Pro and an iPad Pro 13-inch
+class, and its original icon catalog, privacy manifest, scene lifecycle, linked
+core self-check, and package audit pass. The same source graph also builds and
+audits as an unsigned physical-device artifact. The full retail graph and real
+KartPad menu services remain under integration, and the mobile surface is not
+accepted until complete iPhone and iPad Simulator races pass with one Simulator
+booted at a time.
 
 ## Evidence-first development
 
