@@ -122,3 +122,24 @@ changes and calls the existing framebuffer-scale API only when the resolution
 preference changes. It does no per-frame reconfiguration in steady state. The
 full patch stack applies from immutable upstream, the exact SunPad snapshot
 passes, the app exited normally, and the sole Simulator was shut down.
+
+## Follow-up: inherited experiments are explicit
+
+The exact SunPad menu also contains two restart-required experiments whose
+implementations are product-specific: Sunshine's 90% emulated-clock mode and
+its GMSE01 60 FPS patch. KartPad's ahead-of-time Mario Kart Wii runtime exposes
+neither mechanism. Leaving the inherited actions active would persist settings
+that KartPad could not honor.
+
+Source `f9ee662` keeps the exact visible titles and system icons, but the
+KartPad-owned menu wrapper replaces only those two handlers. Each now presents
+an `Unavailable in KartPad` explanation naming the incompatible feature,
+states that stable retail timing remains active, and confirms that no setting
+was changed. The copied SunPad snapshot remains byte-identical.
+
+The rebuilt app passed the strict IOSSIMULATOR audit with executable SHA-256
+`0459d6948e856547dcbe77f7b1839ff7882a8cf73cb0c3052c5c53ff99e98d90`.
+Both actions were exercised over live Mario Kart Wii rendering in one iPad
+Simulator process. The expected alerts appeared, neither experimental defaults
+key was created, the app was terminated normally, and the sole Simulator was
+shut down.

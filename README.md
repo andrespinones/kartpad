@@ -342,6 +342,15 @@ That work can stall guest progress and pressure the audio queue. Cache
 coverage, bounded compilation, and sustained frame pacing are active release
 gates; a displayed 60 FPS counter in one scene is not treated as acceptance.
 
+### Do the inherited experimental modes speed up KartPad?
+
+No. Those visually retained SunPad menu rows target Sunshine-specific runtime
+features: a 90% emulated CPU clock and a GMSE01 60 FPS patch. KartPad explains
+that they are unavailable and does not persist either preference. Use 1x
+render resolution while diagnosing performance; KartPad's actual work is
+tracked through frame-time telemetry, real guest-clock cadence, and CPU/GPU
+profiles rather than an incompatible switch.
+
 ### Can I download a playable app?
 
 No public playable artifact is distributed. The repository currently provides

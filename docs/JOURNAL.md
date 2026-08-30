@@ -1276,3 +1276,23 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   SunPad preservation; physical-device visual/performance acceptance remains
   open.** Evidence:
   `docs/artifacts/2026-08-30/g14-ipad-current-race-profile.md`.
+
+## 2026-08-30 — G14 honest inherited experiments
+
+- Traced SunPad's restart-required experiments to Sunshine-specific runtime
+  features: a 90% emulated CPU clock and a GMSE01 60 FPS patch. KartPad's AOT
+  Mario Kart Wii runtime implements neither, so the inherited actions were
+  silently persisting settings they could not affect.
+- Kept the exact visible action titles/icons and the byte-identical SunPad
+  snapshot. KartPad's existing wrapper now replaces only their handlers with
+  explicit `Unavailable in KartPad` explanations and never changes either
+  preference.
+- The Xcode app rebuild and strict IOSSIMULATOR audit pass; executable SHA-256
+  is `0459d6948e856547dcbe77f7b1839ff7882a8cf73cb0c3052c5c53ff99e98d90`.
+  Both alerts were exercised above live rendering, neither defaults key was
+  created, and the sole Simulator shut down cleanly.
+- Classification: **Pass for honest experimental-menu behavior; no performance
+  gain is claimed.** KartPad performance remains governed by measured frame
+  pacing and the profiled AOT runtime rather than an incompatible SunPad clock
+  switch. Evidence:
+  `docs/artifacts/2026-08-30/g14-ipad-current-race-profile.md`.

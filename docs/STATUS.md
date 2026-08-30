@@ -81,6 +81,13 @@ experiments, physical-device interaction, and a reproducible legal build path.
 
 ## Active risks and blockers
 
+- The newest audited Simulator menu-contract candidate has executable SHA-256
+  `0459d6948e856547dcbe77f7b1839ff7882a8cf73cb0c3052c5c53ff99e98d90`.
+  SunPad's Sunshine-specific 90%-clock and GMSE01 60 FPS rows retain their
+  exact visible titles/icons but now explain that KartPad cannot apply those
+  mechanisms and do not persist no-op preferences. This supersedes the prior
+  `bdb805b9...` wrapper binary without changing its translated game core.
+
 - About 14 GiB of host storage remains after private disc extraction, the full translated runtime build, and native trace evidence. Large generated products remain ignored; capacity must be checked before additional build graphs.
 - No human-only prerequisite currently blocks G0 or the independent parts of G1.
 - Physical-device, public-service, account, and hands-on acceptance rows remain future external prerequisites and are not claimed.
