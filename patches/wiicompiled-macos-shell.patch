@@ -1,0 +1,50 @@
+diff --git a/cmake/PublicProducts.cmake b/cmake/PublicProducts.cmake
+--- a/cmake/PublicProducts.cmake
++++ b/cmake/PublicProducts.cmake
+@@ -267,6 +267,22 @@ if(TARGET mkw_base_sensitive)
+     target_sources(WiiCompiled PRIVATE $<TARGET_OBJECTS:mkw_base_sensitive>)
+ endif()
+ 
++set(MKW_KARTPAD_REPO_ROOT "" CACHE PATH
++    "KartPad repository root used to embed Apple product-shell sources")
++if(APPLE AND NOT CMAKE_SYSTEM_NAME STREQUAL "iOS" AND MKW_KARTPAD_REPO_ROOT)
++    set(MKW_KARTPAD_MACOS_DIR "${MKW_KARTPAD_REPO_ROOT}/apple/macos")
++    set(MKW_KARTPAD_MACOS_SHELL "${MKW_KARTPAD_MACOS_DIR}/KartPadMacShell.mm")
++    if(NOT EXISTS "${MKW_KARTPAD_MACOS_SHELL}")
++        message(FATAL_ERROR "Missing KartPad macOS shell: ${MKW_KARTPAD_MACOS_SHELL}")
++    endif()
++    target_sources(WiiCompiled PRIVATE "${MKW_KARTPAD_MACOS_SHELL}")
++    target_include_directories(WiiCompiled PRIVATE "${MKW_KARTPAD_MACOS_DIR}")
++    set_source_files_properties("${MKW_KARTPAD_MACOS_SHELL}"
++        PROPERTIES COMPILE_OPTIONS "-fobjc-arc" SKIP_PRECOMPILE_HEADERS TRUE)
++    target_link_libraries(WiiCompiled PRIVATE
++        "-framework AppKit" "-framework UniformTypeIdentifiers")
++endif()
++
+ if(MKW_HAVE_RETRO_REWIND)
+     add_executable(RetroRewind "${MKW_RETRO_REWIND_PRODUCT_SOURCE}" ${MKW_RETRO_REGISTRATION_SOURCES})
+     mkw_configure_product(RetroRewind)
+diff --git a/src/main.cpp b/src/main.cpp
+--- a/src/main.cpp
++++ b/src/main.cpp
+@@ -59,6 +59,10 @@
+ #include <dolphin/gx/GXAurora.h>
+ #include <dolphin/vi.h>
+ 
++#if defined(__APPLE__)
++extern "C" void KartPadMacShellInstall(void);
++#endif
++
+ // Defined in `runtime/src/hle/vi.cpp` (used by GX/VI HLE).
+ extern std::atomic_bool g_auroraFrameActive;
+ extern "C" int g_gxFrameCount;
+@@ -1333,6 +1337,9 @@ int RuntimeMain(int argc, char** argv) {
+ }
+ 
+ int main(int argc, char** argv) {
++#if defined(__APPLE__)
++    KartPadMacShellInstall();
++#endif
+     return RuntimeMain(argc, argv);
+ }
+ extern "C" bool g_dynamicAspectRatioEnabled = false;

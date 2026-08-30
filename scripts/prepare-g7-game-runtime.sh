@@ -30,6 +30,7 @@ fi
 mkdir -p "$(dirname "${runtime_source}")"
 cp -R "${runtime_ref}" "${runtime_source}"
 patch -p1 -d "${runtime_source}" < "${repo_root}/patches/wiicompiled-apple-runtime.patch"
+patch -p1 -d "${runtime_source}" < "${repo_root}/patches/wiicompiled-macos-shell.patch"
 
 mkdir -p "${runtime_source}/third_party/sse2neon"
 curl --fail --location --silent --show-error \
@@ -63,6 +64,7 @@ cmake -S "${runtime_source}" -B "${runtime_build}" -G Ninja \
   -DAURORA_DAWN_PACKAGE_URL="file://${dawn_archive}" \
   -DMKW_TRANSLATED_SHARD_MANIFEST="${translation_root}/build_shards/shards.cmake" \
   -DMKW_KARTPAD_RUNTIME_INCLUDE="${repo_root}/runtime/include" \
+  -DMKW_KARTPAD_REPO_ROOT="${repo_root}" \
   -DMKW_TRANSLATED_COMPILE_JOBS=2
 cmake --build "${runtime_build}" --target WiiCompiled --parallel 4
 

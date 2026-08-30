@@ -85,6 +85,18 @@ for runtime_marker in "Application Support" "Caches" "KartPad Startup"; do
   fi
 done
 
+executable_strings="$(strings "${executable}")"
+for shell_contract in \
+  "Show KartPad Data" \
+  "Show KartPad Cache" \
+  "Save Diagnostics Report" \
+  "privacy=paths, game data, save contents, credentials, and logs omitted"; do
+  if ! rg -F -q "${shell_contract}" <<<"${executable_strings}"; then
+    echo "package runtime lacks native shell contract: ${shell_contract}" >&2
+    exit 70
+  fi
+done
+
 codesign --verify --deep --strict --verbose=2 "${app}"
 app_hash="$(find "${app}" -type f -print0 | sort -z | xargs -0 shasum -a 256 | shasum -a 256 | awk '{print $1}')"
 echo "macOS package audit passed: ${app}"
