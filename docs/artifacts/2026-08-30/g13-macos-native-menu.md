@@ -47,6 +47,7 @@ exercise.
 ## Remaining G13 boundary
 
 This checkpoint does not claim the complete native application goal. Native
-first-run WBFS/extracted-data setup, user-facing settings and controller
-mapping, richer privacy-safe runtime breadcrumbs, update-in-place, and the
+display/audio settings subsequently pass in `g13-macos-settings/`. Native
+first-run WBFS/extracted-data setup, controller-mapping entry from the native
+shell, richer privacy-safe runtime breadcrumbs, update-in-place, and the
 clean-clone self-build/package exercise remain open.
