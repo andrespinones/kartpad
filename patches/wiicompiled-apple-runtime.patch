@@ -327,17 +327,27 @@ diff -ruN --exclude=.git --exclude=third_party --exclude=build a/include/ppc_run
 diff -ruN --exclude=.git --exclude=third_party --exclude=build a/include/runtime_config.h b/include/runtime_config.h
 --- a/include/runtime_config.h	2026-08-28 14:10:57
 +++ b/include/runtime_config.h	2026-08-28 18:31:35
-@@ -17,6 +17,9 @@
+@@ -6,6 +6,7 @@
+ #include <cmath>
+ #include <cstddef>
+ #include <cstdint>
++#include <cstdlib>
+ #include <filesystem>
+ #include <fstream>
+ #include <iostream>
+@@ -17,6 +18,11 @@
  #include <utility>
  #include <vector>
  #include <toml.hpp>
 +#ifdef __APPLE__
 +#include <mach-o/dyld.h>
++#include <pwd.h>
++#include <unistd.h>
 +#endif
  #ifdef _WIN32
  #ifndef WIN32_LEAN_AND_MEAN
  #define WIN32_LEAN_AND_MEAN
-@@ -155,6 +158,15 @@
+@@ -155,6 +161,15 @@
          }
          buffer.resize(buffer.size() * 2);
      }
@@ -353,6 +363,25 @@ diff -ruN --exclude=.git --exclude=third_party --exclude=build a/include/runtime
  #else
      return std::nullopt;
  #endif
+@@ -197,6 +212,18 @@
+         CoTaskMemFree(rawPath);
+         return directory;
+     }
++#elif defined(__APPLE__)
++    // A normal app bundle must never write saves, caches, configuration, or
++    // logs into its signed resources. HOME is container-aware for a future
++    // sandboxed build; the account database is a defensive non-sandboxed
++    // fallback for unusual launch environments that omit HOME.
++    if (const char* home = std::getenv("HOME"); home && *home) {
++        return std::filesystem::path(home) / "Library" / "Application Support" / "KartPad";
++    }
++    if (const passwd* account = getpwuid(getuid());
++        account && account->pw_dir && *account->pw_dir) {
++        return std::filesystem::path(account->pw_dir) / "Library" / "Application Support" / "KartPad";
++    }
+ #endif
+     return std::filesystem::current_path() / kApplicationDirectoryName;
+ }
 diff -ruN --exclude=.git --exclude=third_party --exclude=build a/src/apple/guest_flat_memory_apple.cpp b/src/apple/guest_flat_memory_apple.cpp
 --- a/src/apple/guest_flat_memory_apple.cpp	1969-12-31 18:00:00
 +++ b/src/apple/guest_flat_memory_apple.cpp	2026-08-28 18:30:22
