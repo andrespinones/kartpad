@@ -59,6 +59,12 @@ hundreds of shaders finished compiling; Moonview Highway has fallen to 1.3 FPS
 on first use and later recovered only to roughly 46–54 FPS. Audio telemetry has
 also recorded bounded drops during heavy compilation.
 
+A matched title-path test makes that cache boundary concrete: from empty cache,
+minimum effective FPS was 51.958 with an 83.783 ms maximum p99 and 20 dropped
+audio blocks; the immediate warm relaunch held at least 59.963 effective FPS
+with a 17.264 ms maximum p99 and zero drops. Track-level cold/warm profiling is
+still required.
+
 Those numbers are observations, not promises. The current performance gate is
 a controlled cold-cache/warm-cache comparison with frame-time percentiles,
 shader-cache accounting, audio-drop accounting, representative races, and a

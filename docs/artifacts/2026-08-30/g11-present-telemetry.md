@@ -65,11 +65,45 @@ fingerprint was repackaged, observed a 110.184 ms worst interval and 54.569
 minimum effective FPS while the background queue drained. That result is a
 useful fail signal, not candidate acceptance.
 
+## Reversible empty-cache / warm-cache pair
+
+The exact package then ran a matched title/attract comparison. Before the
+experiment, the complete six-file, 22 MiB KartPad cache was moved to a private
+backup with tree SHA-256
+`8df42bdd8d909471e87491005ac69144edca7c0088b59bf0b33ec4449e9669c4`.
+No app, game, or Simulator process was active during the move.
+
+| Metric | Empty cache | Immediate warm relaunch |
+|---|---:|---:|
+| Telemetry windows | 13 | 14 |
+| Minimum effective FPS | 51.958 | 59.963 |
+| Maximum p99 interval | 83.783 ms | 17.264 ms |
+| Maximum worst interval | 85.094 ms | 25.966 ms |
+| First queued / created pipelines | 534 / 665 | 0 / 1,200 |
+| Last queued / created pipelines | 0 / 1,200 | 0 / 1,200 |
+| Audio empty-before-push | 0 | 0 |
+| Audio dropped blocks / bytes | 20 / 7,680 | 0 / 0 |
+
+The cold log SHA-256 is
+`aa7c2fa8240654fdd38fc3c422c55f97459e47ea6c8f987215ddd08aef0d113f`;
+the immediate warm log SHA-256 is
+`4851a78983c97af9b0fc99a096056d78e914053bf668d0aa5106d72d1586bb78`.
+Both private logs remain outside Git. Both sessions ended cleanly.
+
+After the warm run, the experiment cache was retained under ignored `private/`
+and the original cache was restored. Its recomputed tree hash exactly matched
+the pre-experiment value above. This isolates the observed improvement to
+regenerable cache state rather than a source, app, save, or configuration
+change.
+
 ## Classification
 
 **Pass for bounded presentation/pipeline instrumentation, strict summary
-parsing, full Mac compilation, exact package audit, live telemetry, and clean
-shutdown. G11 remains open.** This was not a controlled cold-cache/warm-cache
-pair, a representative race fixture, a CPU/GPU profile, or a soak. The next
-step is a reversible cache experiment using the exact package and paired audio
-telemetry.
+parsing, full Mac compilation, exact package audit, a controlled reversible
+empty-cache/warm-cache title pair with paired audio telemetry, and clean
+shutdown. G11 remains open.** The empty-cache title run is a quantified failure
+and the warm result is a strong improvement, but this is not yet a
+representative race fixture, a CPU/GPU profile, or a soak. The next performance
+step is the same paired measurement on deterministic Luigi Circuit and
+Moonview Highway paths, followed by profiling the remaining cold critical
+path.

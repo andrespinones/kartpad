@@ -19,6 +19,8 @@ substitutes for frame-time, guest-cadence, audio, memory, and soak evidence.
 | Exact self-build first exercise | 43 dropped audio blocks / 16,512 bytes under compilation load | Fail signal; must be paired with exact frame/shader timeline |
 | Representative audio continuity | 2:00:18 completed; 175 stale blocks / 67,200 bytes, about 0.0073% of submitted bytes | Useful bounded telemetry; not G11 soak acceptance |
 | Exact `2cfb7e1` retained-cache title | Minimum effective FPS 59.001; maximum p99 17.701 ms; maximum worst 32.808 ms while the queue fell from 1,223 to 865 | Instrumentation pass only; short, non-fixture session |
+| Exact `2cfb7e1` empty-cache title | Minimum effective FPS 51.958; maximum p99 83.783 ms; maximum worst 85.094 ms; 20 audio blocks / 7,680 bytes dropped | Controlled fail signal |
+| Exact `2cfb7e1` immediate warm title relaunch | Minimum effective FPS 59.963; maximum p99 17.264 ms; maximum worst 25.966 ms; zero audio drops | Controlled title improvement; race/soak evidence still open |
 
 ## Acceptance contract
 
@@ -45,11 +47,13 @@ regression rejects the candidate even if its average FPS improves.
 1. ~~Add bounded, machine-readable present telemetry with interval buckets,
    p50/p95/p99/worst, effective-motion cadence, and pipeline queue counts.~~
    Implemented and exercised at `2cfb7e1`; G11 is still open.
-2. Run a controlled warm-cache title/menu baseline without clearing any state.
-3. Copy the complete existing cache aside, clear only regenerable KartPad
-   caches, and run the exact cold title/menu path once.
-4. Restore the copied cache and repeat the same path to prove the comparison
-   itself is reversible.
+2. ~~Run a controlled warm-cache title/menu baseline without clearing any
+   state.~~ Exact immediate warm title evidence is recorded at `2cfb7e1`.
+3. ~~Copy the complete existing cache aside, clear only regenerable KartPad
+   caches, and run the exact cold title/menu path once.~~ The empty-cache title
+   run is recorded as a quantified failure.
+4. ~~Restore the copied cache and repeat the same path to prove the comparison
+   itself is reversible.~~ The original cache tree hash matched after restore.
 5. Repeat the cold/warm pair on deterministic Luigi Circuit and Moonview
    Highway fixtures, pairing frame telemetry with audio telemetry.
 6. Rank CPU, GPU, shader compilation, synchronization, and guest-thread stalls;

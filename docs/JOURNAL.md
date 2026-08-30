@@ -1116,3 +1116,25 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   G11 remains open.** The short retained-cache run is not a controlled
   cold/warm pair, representative race, profile, or soak. Evidence:
   `docs/artifacts/2026-08-30/g11-present-telemetry.md`.
+
+## 2026-08-30 — G11 reversible title cache comparison
+
+- Moved the complete six-file, 22 MiB regenerable KartPad cache into an ignored
+  private backup, leaving saves/configuration and the exact `2cfb7e1` package
+  unchanged. The pre-experiment cache tree SHA-256 was
+  `8df42bdd8d909471e87491005ac69144edca7c0088b59bf0b33ec4449e9669c4`.
+- The empty-cache title run recorded minimum effective FPS 51.958, maximum p99
+  83.783 ms, maximum worst 85.094 ms, and 20 dropped audio blocks / 7,680 bytes.
+  The queue reached zero and the run later stabilized near 60 FPS; that recovery
+  does not erase the cold failure.
+- The immediate warm relaunch recorded minimum effective FPS 59.963, maximum
+  p99 17.264 ms, maximum worst 25.966 ms, zero queued pipelines from the first
+  record, and zero audio drops through two telemetry intervals.
+- Both runs exited cleanly. The generated experiment cache was retained under
+  ignored `private/`, the original cache was restored, and its recomputed tree
+  hash matched exactly. No Simulator was booted.
+- Classification: **Pass for a reversible, controlled empty-cache/warm-cache
+  title comparison; G11 remains open.** Cache state materially explains this
+  title-path difference, but representative Luigi Circuit/Moonview Highway
+  pairs, CPU/GPU profiles, sustained frame pacing, and the eight-hour soak
+  remain. Evidence: `docs/artifacts/2026-08-30/g11-present-telemetry.md`.
