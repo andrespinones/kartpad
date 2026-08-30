@@ -43,7 +43,7 @@ diff -ruN --exclude=.git --exclude=third_party --exclude=build a/CMakeLists.txt 
 
  # The translator's explicit float casts are PPC single-precision rounding points.
  # Fast-math may erase them and change guest-visible integer conversions.
-@@ -109,13 +109,24 @@
+@@ -109,13 +109,36 @@
      if(NOT EXISTS ${MKW_AURORA_DIR}/CMakeLists.txt)
          message(FATAL_ERROR "Requested aurora-main but ${MKW_AURORA_DIR} is missing")
      endif()
@@ -58,9 +58,21 @@ diff -ruN --exclude=.git --exclude=third_party --exclude=build a/CMakeLists.txt 
 +    set(AURORA_DAWN_VERSION v20260603.191052 CACHE STRING "" FORCE)
 +    set(AURORA_DAWN_PACKAGE_URL "" CACHE STRING
 +        "file:// URL for the pinned Dawn Darwin arm64 archive")
-+    set(AURORA_DAWN_PACKAGE_URL_HASH
-+        "SHA256=084ffd2ef500d614e443e3d494738272134628867bad3270d67ee8b0fb5f0838"
-+        CACHE STRING "" FORCE)
++    string(TOLOWER "${CMAKE_OSX_SYSROOT}" MKW_APPLE_SYSROOT_LOWER)
++    if(CMAKE_SYSTEM_NAME STREQUAL "iOS" AND
++       MKW_APPLE_SYSROOT_LOWER MATCHES "iphonesimulator")
++        set(AURORA_DAWN_PACKAGE_URL_HASH
++            "SHA256=c9272faca14a307e4545ea83cb66ab2f65e87fa33a0a687bf5c702666271bc03"
++            CACHE STRING "" FORCE)
++    elseif(CMAKE_SYSTEM_NAME STREQUAL "iOS")
++        set(AURORA_DAWN_PACKAGE_URL_HASH
++            "SHA256=a361fcca75929fa5c766cfcde979c010a6da7d805e5db8e15c75e73fd8260e78"
++            CACHE STRING "" FORCE)
++    else()
++        set(AURORA_DAWN_PACKAGE_URL_HASH
++            "SHA256=084ffd2ef500d614e443e3d494738272134628867bad3270d67ee8b0fb5f0838"
++            CACHE STRING "" FORCE)
++    endif()
 +    # Release products must not inherit whichever Homebrew packages happen to
 +    # be installed on the build host. Build these pinned dependencies from
 +    # source as static libraries under the declared deployment target.
@@ -75,7 +87,7 @@ diff -ruN --exclude=.git --exclude=third_party --exclude=build a/CMakeLists.txt 
 
      # Provide a tiny stub for DXProgrammableCapture when the SDK/PIX headers are
      # missing (common on MinGW). Dawn only includes the header; no symbols are
-@@ -138,6 +157,20 @@
+@@ -138,6 +163,20 @@
      set(SDL_STATIC ON CACHE BOOL "" FORCE)
      set(SDL_TEST OFF CACHE BOOL "" FORCE)
 -
@@ -97,7 +109,32 @@ diff -ruN --exclude=.git --exclude=third_party --exclude=build a/CMakeLists.txt 
      # MinGW/WSL can choke on SDL precompiled headers; disable PCH for aurora/SDL.
      set(CMAKE_DISABLE_PRECOMPILE_HEADERS ON)
      # Isolate aurora build products to a subdirectory under the main build dir.
-@@ -206,6 +224,12 @@
+@@ -146,6 +185,23 @@
+-    add_subdirectory(${MKW_AURORA_DIR} ${CMAKE_BINARY_DIR}/aurora-build EXCLUDE_FROM_ALL)
++    # CMake's iOS toolchain roots package searches inside the SDK. Aurora's
++    # pinned Dawn archive is an explicit, verified install tree outside that
++    # root, so allow host-path package discovery only while resolving Aurora's
++    # declared dependencies. This does not permit host libraries to satisfy
++    # target links: every imported archive is still selected by its pinned URL
++    # and digest and audited as an iOS artifact.
++    set(MKW_SAVED_FIND_ROOT_PATH_MODE_PACKAGE "${CMAKE_FIND_ROOT_PATH_MODE_PACKAGE}")
++    if(CMAKE_SYSTEM_NAME STREQUAL "iOS")
++        set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE BOTH)
++    endif()
++    add_subdirectory(${MKW_AURORA_DIR} ${CMAKE_BINARY_DIR}/aurora-build EXCLUDE_FROM_ALL)
++    if(CMAKE_SYSTEM_NAME STREQUAL "iOS")
++        if(MKW_SAVED_FIND_ROOT_PATH_MODE_PACKAGE)
++            set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE "${MKW_SAVED_FIND_ROOT_PATH_MODE_PACKAGE}")
++        else()
++            unset(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE)
++        endif()
++    endif()
+     set(CMAKE_DISABLE_PRECOMPILE_HEADERS OFF)
+
+     # Keep upstream Aurora split: several sources intentionally use file-local
+     names that collide under this repo's aggressive unity build settings.
+     set(AURORA_TARGETS aurora_core aurora_gx aurora_pad aurora_si aurora_mtx aurora_vi)
+@@ -206,6 +249,12 @@
  set(MKW_CPU_BASELINE_SOURCE "${CMAKE_CURRENT_LIST_DIR}/src/host_cpu_baseline.cpp")
  list(REMOVE_ITEM SOURCES ${MKW_BASE_PRODUCT_SOURCE} ${MKW_RETRO_REWIND_PRODUCT_SOURCE}
       ${MKW_CPU_BASELINE_SOURCE})
@@ -110,7 +147,7 @@ diff -ruN --exclude=.git --exclude=third_party --exclude=build a/CMakeLists.txt 
 
  # The translator emits the complete, content-addressed source graph. Consuming
  # this one manifest keeps configure independent of the 28k generated function
-@@ -226,4 +235,12 @@
+@@ -226,4 +260,12 @@
      "${MKW_RETRO_REWIND_FUNCTION_COUNT} Retro Rewind functions")
 
  set(MKW_RUNTIME_SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}")
@@ -141,7 +178,7 @@ diff -ruN --exclude=.git --exclude=third_party --exclude=build a/cmake/PublicPro
      SDL_MAIN_HANDLED
 -    _DISABLE_STRING_ANNOTATION _DISABLE_VECTOR_ANNOTATION)
 +    _DISABLE_STRING_ANNOTATION _DISABLE_VECTOR_ANNOTATION
-+    $<$<PLATFORM_ID:Darwin>:_XOPEN_SOURCE>)
++    $<$<PLATFORM_ID:Darwin,iOS>:_XOPEN_SOURCE>)
  target_link_libraries(mkw_runtime_common PRIVATE
      aurora::gx aurora::pad aurora::si aurora::vi aurora::mtx)
  target_link_libraries(mkw_runtime_common PRIVATE mkw::pugixml mkw::toml11 mkw::cryptopp)
@@ -1095,7 +1132,7 @@ diff -ruN --exclude=.git --exclude=third_party --exclude=build a/src/fiber_manag
 diff -ruN --exclude=.git --exclude=third_party --exclude=build a/src/hle/input/kpad.cpp b/src/hle/input/kpad.cpp
 --- a/src/hle/input/kpad.cpp	2026-08-28 14:10:57
 +++ b/src/hle/input/kpad.cpp	2026-08-29 04:48:55
-@@ -1,23 +1,756 @@
+@@ -1,23 +1,765 @@
  #include "hle_stubs.h"
 +#include "memory.h"
 
@@ -2144,7 +2181,10 @@ diff -ruN --exclude=.git --exclude=third_party --exclude=build a/src/system_brid
 diff -ruN --exclude=.git --exclude=third_party --exclude=build a/src/hle/storage/nand_isfs.cpp b/src/hle/storage/nand_isfs.cpp
 --- a/src/hle/storage/nand_isfs.cpp	2026-08-28 14:10:57
 +++ b/src/hle/storage/nand_isfs.cpp	2026-08-30 00:35:10
-@@ -807,6 +807,5 @@
+@@ -804,11 +804,10 @@
+ int32_t ISFS_OpenLib_Initialize(CpuContext* ctx) {
+     g_isfsInitialized = true;
+     
 -    // Create the title data directory if it doesn't exist
 -    char titlePath[256];
 -    const std::string& base = GetNandBasePath();
@@ -2155,6 +2195,8 @@ diff -ruN --exclude=.git --exclude=third_party --exclude=build a/src/hle/storage
 +    // named sibling directory on POSIX instead of the real title hierarchy.
 +    const std::string titlePath = TranslateNandPath(CurrentNandDataDir().c_str());
      CreateDirectoryPath(titlePath);
+ 
+     if (!ctx) {
 diff -ruN --exclude=.git --exclude=third_party --exclude=build a/src/product/base_product.cpp b/src/product/base_product.cpp
 --- a/src/product/base_product.cpp	2026-08-28 14:10:57
 +++ b/src/product/base_product.cpp	2026-08-30 00:43:17
