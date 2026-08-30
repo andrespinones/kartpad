@@ -94,6 +94,7 @@ for shell_contract in \
   "Game Data Required" \
   "Choose Extracted Mario Kart Wii Data" \
   "Choose Game Data" \
+  "showControllerSettings:" \
   "KartPad currently supports RMCP01 (PAL), disc 0, revision 0 only." \
   "80d18895b39c63bd80f457398bfcbb91b7d16ac116a41a88967e954080155b05" \
   "Show KartPad Data" \

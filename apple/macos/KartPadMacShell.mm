@@ -4,6 +4,10 @@
 #import <CommonCrypto/CommonDigest.h>
 #import <UniformTypeIdentifiers/UniformTypeIdentifiers.h>
 
+#include <SDL3/SDL_events.h>
+#include <SDL3/SDL_keycode.h>
+#include <SDL3/SDL_scancode.h>
+
 #include "runtime_config.h"
 
 static constexpr NSInteger kKartPadMenuTag = 0x4b505344;
@@ -218,6 +222,28 @@ static NSString *DiagnosticsReport() {
   alert.informativeText =
       @"KartPad validated the RMCP01 data. Quit and reopen KartPad to use it.";
   [alert runModal];
+}
+
+- (void)showControllerSettings:(id)sender {
+  (void)sender;
+  [NSApp activateIgnoringOtherApps:YES];
+  for (NSWindow *window in NSApp.windows) {
+    if (![window isKindOfClass:NSPanel.class] && window.isVisible) {
+      [window makeKeyAndOrderFront:nil];
+      break;
+    }
+  }
+
+  SDL_Event event{};
+  event.type = SDL_EVENT_KEY_DOWN;
+  event.key.scancode = SDL_SCANCODE_F10;
+  event.key.key = SDLK_F10;
+  event.key.down = true;
+  if (!SDL_PushEvent(&event)) return;
+  event.type = SDL_EVENT_KEY_UP;
+  event.key.type = SDL_EVENT_KEY_UP;
+  event.key.down = false;
+  SDL_PushEvent(&event);
 }
 
 - (NSTextField *)label:(NSString *)text {
@@ -597,6 +623,13 @@ static void InstallMenu() {
       keyEquivalent:@""];
   gameData.target = Controller();
   [appMenu insertItem:gameData atIndex:insertIndex++];
+
+  NSMenuItem *controllerSettings = [[NSMenuItem alloc]
+      initWithTitle:@"Controller Settings…"
+             action:@selector(showControllerSettings:)
+      keyEquivalent:@""];
+  controllerSettings.target = Controller();
+  [appMenu insertItem:controllerSettings atIndex:insertIndex++];
 
   NSString *diagnosticsTitle =
       [@"Save Diagnostics Report" stringByAppendingString:@"…"];
