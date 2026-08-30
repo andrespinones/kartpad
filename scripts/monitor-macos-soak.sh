@@ -35,8 +35,8 @@ if ! kill -0 "${pid}" 2>/dev/null; then
 fi
 
 executable="$(ps -o comm= -p "${pid}" | sed 's/^[[:space:]]*//')"
-if [[ "${executable}" != */KartPad.app/Contents/MacOS/KartPad &&
-      "${executable}" != */KartPad.app/Contents/MacOS/WiiCompiled-bin ]]; then
+if [[ "${executable}" != *.app/Contents/MacOS/KartPad &&
+      "${executable}" != *.app/Contents/MacOS/WiiCompiled-bin ]]; then
   echo "process ${pid} is not a KartPad app executable: ${executable}" >&2
   exit 65
 fi
