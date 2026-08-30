@@ -919,3 +919,10 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - Touch created a new `Player` license, reached Main Menu, selected the default 50cc Mushroom Cup flow, and reached live Luigi Circuit. Home/background and foreground resume returned to the game.
 - The resulting `rksys.dat` SHA-256 `5291cecd0ae1749a7996dfd8f3bc53978a9af08fe9aaf639a831214d6bb24f42` remained byte-identical across terminate/relaunch, and the `Player` license was visible after relaunch.
 - Shut down the iPad after evidence capture; no Simulator remains booted. Classification: **Pass for sequential iPad retail boot, Metal/title/menu, touch first-run and race entry, menu scaling, lifecycle, and save/relaunch preservation; G14/G15 remain open for completed races and hands-on control/audio acceptance.** Evidence: `docs/artifacts/2026-08-30/g14-full-game-simulator/`.
+
+## 2026-08-30 — G14 iPhone reinstall and save/relaunch closure
+
+- With every Simulator shut down, installed the same audited iPhone candidate through the guarded runner. The install migrated the app container again while preserving relative `dvd_root = "GameData"`, extracted `main.dol` SHA-256 `80d18895b39c63bd80f457398bfcbb91b7d16ac116a41a88967e954080155b05`, and the existing save.
+- Touch skipped the intro, loaded the preserved `Player` license, and reached Main Menu. Terminated and relaunched the app, then repeated the touch path through the same license to Single Player.
+- The iPhone `rksys.dat` remained byte-identical at SHA-256 `87473fa67e0ec2345d471584979217f6dbd7316ed47db054ce565269ef316d58` across terminate/relaunch. Shut down the iPhone afterward; no Simulator remains booted.
+- Classification: **Pass for iPhone reinstall/container migration and save/relaunch preservation.** Together with the prior iPad hash proof, save/relaunch now passes on both Simulator classes; complete touch-driven races and hands-on control/audio remain open. Evidence: `docs/artifacts/2026-08-30/g14-full-game-simulator/iphone-save-relaunch-main-menu.jpeg`.

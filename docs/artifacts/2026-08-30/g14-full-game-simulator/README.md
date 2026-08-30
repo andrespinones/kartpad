@@ -51,6 +51,7 @@ Observed end-to-end behavior on this candidate:
 - A plus D-pad navigation opens Multiplayer → 2 Players → Register Controllers.
 - The full flow reaches 50cc Mushroom Cup → Luigi Circuit and live race state.
 - Background/Home and foreground resume preserve the running game and clear touch state.
+- Reinstall migrated the iPhone container again while preserving relative `GameData`, the staged title, and the existing `Player` save. The iPhone `rksys.dat` SHA-256 `87473fa67e0ec2345d471584979217f6dbd7316ed47db054ce565269ef316d58` remained byte-identical across terminate/relaunch, and touch returned through the preserved license to Single Player.
 
 The pinned SunPad files remain byte-identical. A KartPad-owned subclass adds a top-level `Multiplayer…` action around the unchanged source menu. The action opens a native setup sheet explaining Player 1 touch and routes to the existing controller-mapping UI. The native entry and the retail two-player controller-registration screen were both exercised.
 
@@ -72,6 +73,7 @@ The pinned SunPad files remain byte-identical. A KartPad-owned subclass adds a t
 - `iphone-multiplayer-menu.jpeg`
 - `iphone-multiplayer-pair-screen.jpeg`
 - `iphone-live-race-touch.jpeg`
+- `iphone-save-relaunch-main-menu.jpeg`
 - `title-mac-vs-iphone-16x9.png`
 - `title-oracle-vs-iphone-4x3.png`
 - `ipad-stable-original-4x3.jpeg`
@@ -81,4 +83,4 @@ The pinned SunPad files remain byte-identical. A KartPad-owned subclass adds a t
 
 ## Classification
 
-Pass for sequential iPhone/iPad retail boot, Metal presentation, container migration, stable aspect default, bounded iPhone 16:9 option, title/menu touch navigation, Multiplayer access, controller-registration entry, live-race entry on both device classes, iPad license save/relaunch, and background/foreground recovery. G14/G15 remain open pending complete touch-driven races, iPhone save/relaunch acceptance, controller handoff, and hands-on touch/audio acceptance.
+Pass for sequential iPhone/iPad retail boot, Metal presentation, container migration, stable aspect default, bounded iPhone 16:9 option, title/menu touch navigation, Multiplayer access, controller-registration entry, live-race entry on both device classes, save/relaunch preservation on both device classes, and background/foreground recovery. G14/G15 remain open pending complete touch-driven races, controller handoff, and hands-on touch/audio acceptance.
