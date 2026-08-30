@@ -2,7 +2,7 @@
 
 <p align="center">
   <strong>Mario Kart Wii on Apple Silicon Mac, iPhone, and iPad through static recompilation and Metal.</strong><br>
-  Native macOS gameplay today; a touch-first iPhone and iPad shell is the next product stage.
+  Native macOS gameplay plus touch-first iPhone and iPad development builds using private user-supplied game data.
 </p>
 
 <p align="center">
@@ -40,7 +40,7 @@ signing material.
 | Input | Keyboard plus four independent Classic-controller slots; two-player full-race evidence passes |
 | Audio | Non-silent host playback, pause/resume, live output-device migration, and a two-hour representative continuity run pass their instrumented subcases; subjective listening and the eight-hour soak remain open |
 | Packaging | The original icon and exact branded 80 MiB package pass audit, installed-storage, configured gameplay, save-preservation, and normal-close checks; the native first-run/settings/data-management shell remains open |
-| iPhone/iPad | The native arm64 shell now runs on both iPhone and iPad Simulator with the exact SunPad overlay/menu, original icons, linked core self-check, rotation policy, and foreground lifecycle; retail gameplay and mobile acceptance remain open |
+| iPhone/iPad | The full 29,065-function arm64 retail app boots, reaches live races, imports private extracted data, preserves saves, and resumes on iPhone and iPad Simulator with the exact SunPad touch/menu source; complete touch races and physical-device acceptance remain open |
 | Distribution | Development source only; no game data and no release candidate |
 
 The evidence ledger, exact open rows, and known risks live in
@@ -50,14 +50,22 @@ treated as gameplay acceptance by itself.
 
 ## Game data
 
-KartPad never downloads or bundles Nintendo data. Development currently uses a
-locally owned PAL `RMCP01` revision 0 disc image that is verified, kept
-read-only, and ignored by Git. Extracted files, translations, caches, saves,
-logs, and captures stay in ignored local directories.
+KartPad never downloads or bundles Nintendo data. Development uses a locally
+owned PAL `RMCP01` revision 0 image that is verified, kept read-only, and
+ignored by Git. Extracted files, translations, caches, saves, logs, and private
+captures stay in ignored local directories.
 
-A finished app will provide a local import flow for a user-supplied supported
-image. Until that shell is complete, the repository is intended for developers
-who can reproduce the pinned translation workflow.
+On iPhone and iPad, first launch stops before emulation and asks for an
+extracted `RMCP01` `DATA` folder. KartPad validates the disc identity and
+runtime-critical files, copies the 2.5 GiB tree into private Application
+Support with iOS data protection, excludes it from backup, and atomically
+activates it. Interrupted imports recover or roll back; replacement never
+silently discards the last valid copy. Removal is explicit, undoable until
+relaunch, and occurs before emulation while preserving saves.
+
+The translated ARM64 graph is compiled and signed on the Mac. The mobile app
+imports non-executable game data only; it contains no PowerPC JIT, runtime
+compiler, or executable-code download.
 
 ## Developer workflow
 
@@ -92,6 +100,26 @@ runtime and package it as a self-contained app:
 ./scripts/audit-macos-package.sh "$PWD/build/KartPad.app"
 ```
 
+Prepare and build the complete iOS Simulator runtime from the same private
+translation graph:
+
+```sh
+./scripts/prepare-ios-game-runtime.sh \
+  private/g8-full-translation \
+  build/ios-game-runtime-source \
+  build/ios-game-runtime-build
+./scripts/build-ios-game-app.sh \
+  build/ios-game-runtime-source \
+  build/ios-game-app-xcode \
+  private/g8-full-translation
+```
+
+The build scripts verify the exact SunPad source snapshot and dependency pins,
+compile only ARM64 code, and fail if private game data, saves, signing material,
+or non-system dynamic dependencies enter the app bundle. Installation and
+signing remain local development steps; this repository does not publish a
+playable app artifact.
+
 The game-runtime workflow is still being consolidated into a clean-clone
 single command. See [`docs/GOAL-LOOP.md`](docs/GOAL-LOOP.md) for the execution
 rules and [`docs/JOURNAL.md`](docs/JOURNAL.md) for reproducible commands and
@@ -104,18 +132,63 @@ The development macOS keyboard bridge maps directional keys to menu movement,
 Classic Controller stick. Native controller discovery and four stable local
 slots are implemented separately from the keyboard fallback.
 
-The iPhone/iPad shell compiles a byte-identical pinned snapshot of SunPad's
-GPLv3 touch-control component and persistent **•••** menu directly. It preserves
-the component's layout editing, controller handoff, accessibility behavior, and
-safe-area treatment; a separate tested adapter supplies Mario Kart Wii's Classic
-Controller mapping without changing the copied baseline. The native arm64
-Simulator shell now launches on both an iPhone 17 Pro and an iPad Pro 13-inch
-class, and its original icon catalog, privacy manifest, scene lifecycle, linked
-core self-check, and package audit pass. The same source graph also builds and
-audits as an unsigned physical-device artifact. The full retail graph and real
-KartPad menu services remain under integration, and the mobile surface is not
-accepted until complete iPhone and iPad Simulator races pass with one Simulator
-booted at a time.
+The iPhone/iPad app compiles a byte-identical pinned snapshot of SunPad's GPLv3
+touch-control component and persistent **•••** menu directly. It preserves the
+component's independently editable phone/tablet layouts, safe-area treatment,
+multitouch, accessibility labels, settings, diagnostics, and controller-handoff
+behavior. A separate tested adapter supplies Mario Kart Wii's Classic Controller
+ABI without changing the copied baseline.
+
+KartPad's owning layer adds two actions ahead of SunPad's unchanged menu:
+
+- **Multiplayer…** reports connected controllers, stable Player 1–4 assignment,
+  and opens controller setup guidance. Players 2–4 publish independent retail
+  KPAD channels while touch remains Player 1.
+- **Motion Steering…** is default-off and provides recenter, inversion, and
+  0.5×/1×/2× sensitivity. Touch can override it, physical controllers take
+  priority, and backgrounding clears the live motion state.
+
+The full retail graph boots on iPhone 17 Pro and iPad Pro 13-inch Simulator,
+reaches title/menu/live Luigi Circuit, survives background/foreground, and
+preserves exact save hashes across relaunch. The original icon catalog, privacy
+manifest, opaque fitted-output bands, package boundary, and unsigned physical
+device compilation pass. Simulator motion sensors are unavailable by design;
+physical motion feel, complete touch/motion races, physical controller handoff,
+and physical-device performance/audio remain hands-on gates.
+
+## First launch on iPhone or iPad
+
+KartPad does not include Mario Kart Wii and cannot compile game code on-device.
+For a locally built development app:
+
+1. Prepare the supported private translation and extracted `RMCP01` data on the
+   Mac from your own disc image.
+2. Put the extracted `DATA` folder in Files, or choose it from another Files
+   provider when KartPad asks for game data.
+3. Launch KartPad and choose **Choose Extracted DATA Folder…**.
+4. Leave the app open while it validates, protects, stages, and activates the
+   copy. A successful first import continues into the game in the same session.
+5. Later, use **••• → Game Data & Saves** to reimport or schedule removal.
+
+Saves live separately from the extracted game-data tree. Reimport and removal
+retain them; uninstalling the app still removes its whole Apple container.
+
+## Mobile screenshots
+
+<table>
+  <tr>
+    <td width="50%"><img src="docs/artifacts/2026-08-30/g14-full-game-simulator/iphone-live-race-touch.jpeg" alt="KartPad live Luigi Circuit gameplay with the touch overlay on iPhone Simulator"></td>
+    <td width="50%"><img src="docs/artifacts/2026-08-30/g14-full-game-simulator/ipad-live-race-touch.jpeg" alt="KartPad live Luigi Circuit gameplay with the touch overlay on iPad Simulator"></td>
+  </tr>
+  <tr>
+    <td align="center"><strong>iPhone retail runtime</strong><br>Metal gameplay with the exact SunPad touch surface.</td>
+    <td align="center"><strong>iPad retail runtime</strong><br>The independent tablet layout scales across the larger safe area.</td>
+  </tr>
+</table>
+
+These are Simulator development-build captures using game data supplied
+privately by the device owner. No game image, extracted data, save, or playable
+binary is part of this repository.
 
 ## Evidence-first development
 
