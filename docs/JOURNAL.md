@@ -1177,3 +1177,30 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   three-player audio remain open.** At least one local finisher requires
   sustained physical input or a separately proven normal input-driving method.
   Evidence: `docs/artifacts/2026-08-30/g10-three-player-stationary-timeout.md`.
+
+## 2026-08-30 — G11 Moonview CPU/GPU profile and FPSR counterbalance
+
+- A 30-second Time Profiler capture of stationary Moonview Highway sampled
+  16.219 CPU-seconds. The main thread held 89.4%; `feclearexcept` and
+  `fetestexcept` accounted for 37.6% and 8.8% of leaf time. A separate 20-second
+  Metal System Trace measured 12.15% union KartPad GPU occupancy, no drawable
+  waits, no warm shader compilation, and stable 545.39–545.42 MiB allocation.
+- A direct arm64 FPSR experiment preserved the exact 250,227-check cross-arch
+  hash, translated fixture, sanitized suites, and 579/579 translator tests. Its
+  focused multiply benchmark improved 26.0%.
+- The production counterbalance falsified the microbenchmark result: direct
+  FPSR recorded 17.575 sampled CPU-seconds / 14.918 main-thread seconds versus
+  17.392 / 14.719 for the original libc control. Both held 60 FPS. Samples
+  moved from libc symbols into inlined PPC helpers, demonstrating that the
+  serialized architectural access—not libc spelling—is the cost. The runtime
+  experiment and benchmark were reverted.
+- Static follow-up ranks translator data flow above more FPSR micro-tuning:
+  the full graph has 43,649 stateful scalar FP call sites but only 12 explicit
+  FPSCR observer/mutator sites across three of 106 shards. Any value-only
+  lowering must be proven interprocedurally dead before observers, enabled
+  exception behavior, and guest-state boundaries.
+- Classification: **direct FPSR optimization rejected; G11 remains open.** Raw
+  traces stay ignored/private, both packages audited and exited cleanly, and no
+  Simulator was booted. Evidence:
+  `docs/artifacts/2026-08-30/g11-moonview-profile.md` and
+  `docs/artifacts/2026-08-30/g11-arm64-fpsr-experiment.md`.

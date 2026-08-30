@@ -55,7 +55,7 @@ and 13.266 ms at maximum. The built-in display reported 60 surface swaps in
 each complete one-second bucket. The evidence therefore does not rank steady
 GPU execution as the bottleneck in this fixture.
 
-## Next bounded experiment
+## First bounded experiment
 
 On arm64, replace only the host `feclearexcept`/`fetestexcept` plumbing used by
 the existing PowerPC semantic helpers with direct FPSR clear/read operations.
@@ -63,3 +63,8 @@ Translate the FPSR overflow, underflow, and inexact bits back into the same
 standard exception-mask contract. Accept the experiment only if the narrow
 semantic contracts, translated fixture, cross-architecture hashes, and broader
 G6 suites remain exact, then compare the same packaged Moonview fixture.
+
+That experiment was implemented, correctness-tested, packaged, and then
+rejected after a counterbalanced production profile showed no CPU reduction.
+See `g11-arm64-fpsr-experiment.md` for the complete result and the next ranked
+direction.
