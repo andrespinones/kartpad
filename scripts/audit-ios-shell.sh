@@ -1,12 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if [[ $# -ne 1 || "$1" != /* || "$1" != *.app ]]; then
-  echo "usage: $0 /absolute/path/to/KartPad.app" >&2
+if [[ $# -lt 1 || $# -gt 2 || "$1" != /* || "$1" != *.app ]]; then
+  echo "usage: $0 /absolute/path/to/KartPad.app [IOSSIMULATOR|IOS]" >&2
   exit 64
 fi
 
 app="$1"
+expected_platform="${2:-IOSSIMULATOR}"
+if [[ "${expected_platform}" != "IOSSIMULATOR" && "${expected_platform}" != "IOS" ]]; then
+  echo "expected platform must be IOSSIMULATOR or IOS" >&2
+  exit 64
+fi
 plist="${app}/Info.plist"
 binary="${app}/KartPad"
 
@@ -24,9 +29,9 @@ if [[ "$(file -b "${binary}")" != *"Mach-O 64-bit executable arm64"* ]]; then
   exit 65
 fi
 build_metadata="$(vtool -show-build "${binary}")"
-if [[ "$(awk '/platform/{print $2; exit}' <<<"${build_metadata}")" != "IOSSIMULATOR" ]] ||
+if [[ "$(awk '/platform/{print $2; exit}' <<<"${build_metadata}")" != "${expected_platform}" ]] ||
    [[ "$(awk '/minos/{print $2; exit}' <<<"${build_metadata}")" != "16.0" ]]; then
-  echo "binary is not an iOS Simulator 16.0 artifact" >&2
+  echo "binary is not an ${expected_platform} 16.0 artifact" >&2
   exit 65
 fi
 
@@ -59,4 +64,4 @@ if ! nm -gj "${binary}" | rg -q 'KartPadCoreIntegrationSummary' ||
   exit 69
 fi
 
-echo "iOS Simulator shell audit passed: ${app}"
+echo "iOS ${expected_platform} shell audit passed: ${app}"

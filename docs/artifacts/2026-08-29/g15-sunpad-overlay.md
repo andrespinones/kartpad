@@ -80,8 +80,10 @@ otherwise-empty Xcode iOS processor field from the required single architecture,
 and exclude macOS-only AppKit fixtures and process tests. The same checked guest
 memory, deterministic scheduler, host services, and translated G7 fixture
 libraries used by the correctness ladder compile for arm64 iOS Simulator.
-The same four libraries also compile against the physical `iphoneos` 16.0 SDK
-as arm64 static archives without weakening their warning-as-error contracts.
+The same four libraries and complete unsigned shell also compile against the
+physical `iphoneos` 16.0 SDK as an arm64 `IOS` app without weakening the core
+libraries' warning-as-error contracts. This proves source and link portability,
+not signing, installation, launch, or physical-device behavior.
 
 The native app links those four libraries rather than carrying an unrelated UI
 stub. A bounded, content-free startup check executes the translated `0x80001000`
