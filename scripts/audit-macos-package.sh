@@ -24,7 +24,10 @@ test "${bundle_identifier}" = "dev.kartpad.app"
 test -x "${executable}"
 test -f "${contents}/Resources/${icon_name%.icns}.icns"
 test -f "${contents}/MacOS/dsp_coef.bin"
-test -f "${contents}/MacOS/initial_pipeline_cache.db"
+if [[ ! -f "${contents}/Resources/initial_pipeline_cache.db" ]]; then
+  echo "package lacks its read-only initial pipeline cache resource" >&2
+  exit 66
+fi
 test -d "${contents}/MacOS/wii_bootstrap/shared2/wc24"
 if [[ "$(file -b "${executable}")" != *"Mach-O 64-bit executable arm64"* ]]; then
   echo "main executable is not arm64 Mach-O" >&2
@@ -42,6 +45,11 @@ for forbidden in portable.txt UserData Config.toml '*.wbfs' '*.iso' '*.rvz' '*.w
     exit 70
   fi
 done
+
+if find "${app}" -name '*\\*' -print -quit | rg -q .; then
+  echo "package contains a Windows-style path component" >&2
+  exit 70
+fi
 
 while IFS= read -r macho; do
   while IFS= read -r dependency; do

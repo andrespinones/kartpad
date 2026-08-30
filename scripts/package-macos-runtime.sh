@@ -55,7 +55,7 @@ mkdir -p "${macos}" "${resources}" "${frameworks}"
 cp "${runtime_binary}" "${macos}/KartPad"
 chmod 0755 "${macos}/KartPad"
 cp "${runtime_build}/dsp_coef.bin" "${macos}/dsp_coef.bin"
-cp "${runtime_build}/initial_pipeline_cache.db" "${macos}/initial_pipeline_cache.db"
+cp "${runtime_build}/initial_pipeline_cache.db" "${resources}/initial_pipeline_cache.db"
 cp -R "${runtime_build}/wii_bootstrap" "${macos}/wii_bootstrap"
 cp "${icon_file}" "${resources}/KartPad.icns"
 

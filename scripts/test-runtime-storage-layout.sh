@@ -11,6 +11,14 @@ if [[ ! -f "${header}" || ! -f "${toml_include}/toml.hpp" ]]; then
   exit 66
 fi
 
+nand_isfs="${runtime_source}/src/hle/storage/nand_isfs.cpp"
+if [[ ! -f "${nand_isfs}" ]] ||
+   rg -F -q '"%s\\title\\%08x\\%08x\\data"' "${nand_isfs}" ||
+   ! rg -F -q 'TranslateNandPath(CurrentNandDataDir().c_str())' "${nand_isfs}"; then
+  echo "runtime retains a Windows-only managed-NAND title path" >&2
+  exit 1
+fi
+
 probe_parent="$(mktemp -d)"
 trap 'rm -rf "${probe_parent}"' EXIT
 probe_root="$(cd "${probe_parent}" && pwd -P)"

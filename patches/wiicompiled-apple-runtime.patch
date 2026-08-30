@@ -2141,3 +2141,17 @@ diff -ruN --exclude=.git --exclude=third_party --exclude=build a/src/system_brid
 
 
  #include "abi_bridge.h"
+diff -ruN --exclude=.git --exclude=third_party --exclude=build a/src/hle/storage/nand_isfs.cpp b/src/hle/storage/nand_isfs.cpp
+--- a/src/hle/storage/nand_isfs.cpp	2026-08-28 14:10:57
++++ b/src/hle/storage/nand_isfs.cpp	2026-08-30 00:35:10
+@@ -807,6 +807,5 @@
+-    // Create the title data directory if it doesn't exist
+-    char titlePath[256];
+-    const std::string& base = GetNandBasePath();
+-    std::snprintf(titlePath, sizeof(titlePath), "%s\\title\\%08x\\%08x\\data",
+-                  base.c_str(), kNandTitleIdHi, CurrentMkwTitleIdLo());
++    // Use the same platform-aware Wii-to-host path translation as every other
++    // NAND operation. A literal Windows separator creates one incorrectly
++    // named sibling directory on POSIX instead of the real title hierarchy.
++    const std::string titlePath = TranslateNandPath(CurrentNandDataDir().c_str());
+     CreateDirectoryPath(titlePath);
