@@ -802,3 +802,10 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - Before pause, the bounded queue reached 40,960 checks with zero empty observations or drops. While paused it reached its latency cap and deliberately discarded eight stale blocks (3,072 bytes); no underrun occurred. After resume, the count remained exactly eight through 81,920 checks and 31,453,824 submitted bytes, proving no continuing starvation or drop cascade.
 - The live save remained byte-identical at SHA-256 `ad79c24bc5eb0ba6bc8cd2836a55680621892b578a04ea49d8884a71a42c563a`.
 - Classification: **Pass for PRD row 33's pause/resume subcase; row 33 remains in progress.** Output-device migration, subjective listening, and the required long session remain open. Evidence: `docs/artifacts/2026-08-29/g10-audio-pause-resume/`.
+
+## 2026-08-29 — G10 live output-device migration
+
+- Ran the durable `Player 05:01.445` SNES Mario Circuit 3 replay in the sole signed native process. With no Simulator or reference emulator active, changed the macOS default output from the user's original `Jump Desktop Audio` to `MacBook Air Speakers`, observed active replay, then restored and verified the original output.
+- Pre-switch telemetry reached 57,344 checks with zero empty observations and zero drops. The two route transitions deliberately discarded 101 stale blocks (38,784 bytes) in bounded bursts; no empty observation occurred. The counter then remained exactly 101 through 98,304 checks and 37,709,568 submitted bytes while the replay remained visibly live.
+- The app closed normally, the final queue was bounded at 6,468/15,360 bytes, and the RKSYS save remained byte-identical at SHA-256 `ad79c24bc5eb0ba6bc8cd2836a55680621892b578a04ea49d8884a71a42c563a`.
+- Classification: **Pass for PRD row 33's output-device-change subcase.** This proves continuity and recovery without sustained underrun or latency growth; it does not claim subjective absence of a transient. Subjective listening and the required long representative session remain open. Evidence: `docs/artifacts/2026-08-29/g10-audio-device-migration/`.
