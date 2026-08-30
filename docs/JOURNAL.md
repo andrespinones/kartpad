@@ -1377,3 +1377,23 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   the iPad, and closed Simulator; zero runtimes remain.
 - Classification addendum: **Pass for sequential iPad layout, held-state, and
   release-state verification on the exact iPhone-tested binary.**
+
+## 2026-08-30 — End-to-end held-acceleration input proof
+
+- Tightened the prior visual proof into a Simulator-only input-boundary probe.
+  The opt-in hook dispatches the real A control's existing SunPad touch-down
+  and touch-up actions, samples the shared mixer through KartPad's Classic
+  adapter after 1.1 seconds, and publishes only bounded pass/fail breadcrumbs.
+- Rebuilt and audited the complete arm64 IOSSIMULATOR application at executable
+  SHA-256
+  `7c3c6a4ddda8a2d89d42e4a867dfc6c1e43aadd4635c28a2870e302e525956be`.
+  The exact SunPad verifier and focused Classic adapter suite still pass.
+- Booted only the preserved iPhone 17 Pro Simulator. In the live runtime, the
+  probe observed held Classic buttons `0x00000010` after the full one-second
+  interval and released buttons `0x00000000` after touch-up. The A
+  accessibility hint independently reported `Input self-test passed`.
+- Terminated KartPad, shut down the iPhone, and closed Simulator. Zero game or
+  Simulator runtimes remain.
+- Classification: **Pass for the requested gameplay-input hold and release
+  semantics, not merely their visual treatment.** The opt-in probe is compiled
+  out of physical-iOS builds and the package audit rejects it on that target.

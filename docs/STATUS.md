@@ -108,9 +108,12 @@ experiments, physical-device interaction, and a reproducible legal build path.
   snapshot byte-identical while adapting two behaviors in KartPad's owning
   overlay: Classic R is a compact digital pill matching L, and an uninterrupted
   one-second A touch changes to a cyan held-acceleration state until touch-up.
-  The focused Classic adapter passes; the full Simulator app audits at
+  The focused Classic adapter passes. A Simulator-only end-to-end probe now
+  drives the real SunPad touch-down/up targets and observes the mapped Classic
+  state inside the live app: held `0x00000010`, released `0x00000000`. The full
+  Simulator app audits at
   executable SHA-256
-  `653943e6cfd1e965c70f743ede11fe464dadf3c752afdbe2ec7b3454ad9f631e`.
+  `7c3c6a4ddda8a2d89d42e4a867dfc6c1e43aadd4635c28a2870e302e525956be`.
   Sequential iPhone and iPad visual/accessibility regressions both pass: R
   matches L, A enters `Acceleration held`, and release restores its normal
   state while retail rendering continues underneath. Each device and the

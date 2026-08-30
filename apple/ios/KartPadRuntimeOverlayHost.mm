@@ -32,6 +32,7 @@
 @property(nonatomic, assign) NSUInteger kartPadGasHoldGeneration;
 @property(nonatomic, assign) BOOL kartPadGasPressed;
 @property(nonatomic, assign) BOOL kartPadGasHoldSelfTestStarted;
+@property(nonatomic, assign) BOOL kartPadGasInputSelfTestStarted;
 - (void)resetKartPadControlAppearance;
 @end
 
@@ -664,6 +665,8 @@ NSError *KartPadPerformGameDataImport(NSURL *url) {
   if (gasButton != nil && self.kartPadGasButton != gasButton) {
     self.kartPadGasButton = gasButton;
     self.kartPadGasRestColor = gasButton.backgroundColor;
+    gasButton.accessibilityHint =
+        @"Hold for one second to confirm continuous acceleration.";
     [gasButton addTarget:self action:@selector(kartPadGasDown:)
          forControlEvents:UIControlEventTouchDown];
     [gasButton addTarget:self action:@selector(kartPadGasUp:)
@@ -680,6 +683,45 @@ NSError *KartPadPerformGameDataImport(NSURL *url) {
                                      (int64_t)(30.0 * NSEC_PER_SEC)),
                        dispatch_get_main_queue(), ^{
           [self kartPadGasUp:gasButton];
+        });
+      });
+    }
+    if (!self.kartPadGasInputSelfTestStarted &&
+        NSProcessInfo.processInfo.environment[@"KARTPAD_TOUCH_INPUT_SELF_TEST"] != nil) {
+      self.kartPadGasInputSelfTestStarted = YES;
+      dispatch_async(dispatch_get_main_queue(), ^{
+        [gasButton sendActionsForControlEvents:UIControlEventTouchDown];
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW,
+                                     (int64_t)(1.1 * NSEC_PER_SEC)),
+                       dispatch_get_main_queue(), ^{
+          const SunPadInputState held =
+              [[SunPadInputMixer sharedMixer] consumeMergedState];
+          const KartPadClassicInputState heldClassic =
+              kartpad::mobile::AdaptSunPadInput(held);
+          const BOOL heldPassed =
+              (heldClassic.buttons & kartpad::mobile::kClassicButtonA) != 0;
+          gasButton.accessibilityValue = heldPassed
+              ? @"Acceleration held · input verified"
+              : @"Acceleration hold input test failed";
+          NSLog(@"[KartPad] touch A hold self-test: %@ (classic=%08x)",
+                heldPassed ? @"held pass" : @"held FAIL", heldClassic.buttons);
+          [gasButton sendActionsForControlEvents:UIControlEventTouchUpInside];
+          dispatch_after(dispatch_time(DISPATCH_TIME_NOW,
+                                       (int64_t)(0.1 * NSEC_PER_SEC)),
+                         dispatch_get_main_queue(), ^{
+            const SunPadInputState released =
+                [[SunPadInputMixer sharedMixer] consumeMergedState];
+            const KartPadClassicInputState releasedClassic =
+                kartpad::mobile::AdaptSunPadInput(released);
+            const BOOL releasePassed =
+                (releasedClassic.buttons & kartpad::mobile::kClassicButtonA) == 0;
+            gasButton.accessibilityHint = releasePassed
+                ? @"Acceleration releases when your finger lifts. Input self-test passed."
+                : @"Acceleration release input test failed.";
+            NSLog(@"[KartPad] touch A release self-test: %@ (classic=%08x)",
+                  releasePassed ? @"release pass" : @"release FAIL",
+                  releasedClassic.buttons);
+          });
         });
       });
     }
