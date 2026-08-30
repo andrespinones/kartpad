@@ -4,7 +4,13 @@ Updated: 2026-08-30
 
 ## Current goal
 
-**G10 — macOS offline compatibility complete** is the lowest unmet goal. G0–G9 pass. Staff-ghost determinism is bit-exact on N64 Mario Raceway. Both Battle rows, the normal two-player split-screen race, and the complete Time Trial personal-record lifecycle now pass.
+**Release convergence — practical macOS controls plus sequential iPhone/iPad
+acceptance.** At the user's direction, the eight-hour macOS soak is no longer
+the active milestone. The software already boots and plays on all three Apple
+targets; the immediate work is to finish the Mac interaction surface and then
+verify one iPhone and one iPad runtime sequentially. The strict goal ledger
+below remains honest about broader compatibility and physical-device rows that
+are not required to block this focused product pass.
 
 ## Goal ledger
 

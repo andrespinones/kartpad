@@ -380,6 +380,7 @@ static NSString *DiagnosticsReport() {
 
 @interface KartPadMacShellController : NSObject
 @property(nonatomic, strong) NSPanel *settingsPanel;
+@property(nonatomic, strong) NSPanel *controlsPanel;
 @property(nonatomic, strong) NSPopUpButton *resolutionMenu;
 @property(nonatomic, strong) NSPopUpButton *displayModeMenu;
 @property(nonatomic, strong) NSButton *showFpsCheckbox;
@@ -444,6 +445,84 @@ static NSString *DiagnosticsReport() {
   event.key.type = SDL_EVENT_KEY_UP;
   event.key.down = false;
   SDL_PushEvent(&event);
+}
+
+- (void)showControls:(id)sender {
+  (void)sender;
+  if (self.controlsPanel == nil) {
+    self.controlsPanel = [[NSPanel alloc]
+        initWithContentRect:NSMakeRect(0, 0, 560, 430)
+                  styleMask:(NSWindowStyleMaskTitled | NSWindowStyleMaskClosable)
+                    backing:NSBackingStoreBuffered
+                      defer:NO];
+    self.controlsPanel.title = @"KartPad Controls";
+    self.controlsPanel.releasedWhenClosed = NO;
+
+    NSTextField *intro = [self label:
+        @"Player 1 can use the keyboard or any mapped game controller. Keyboard holds are analog-aware during races."];
+    intro.maximumNumberOfLines = 2;
+    intro.lineBreakMode = NSLineBreakByWordWrapping;
+
+    NSArray<NSArray<NSString *> *> *bindings = @[
+      @[@"Steer", @"W A S D"],
+      @[@"Accelerate / confirm", @"U or Return"],
+      @[@"Brake / reverse / back", @"M or Delete"],
+      @[@"Drift / manual hop", @"E"],
+      @[@"Use item", @"Left Shift (Classic L)"],
+      @[@"Tricks / menu directions", @"Arrow keys"],
+      @[@"Start / pause", @"Space"],
+      @[@"Select / minus", @"Tab"],
+      @[@"Classic X / Y", @"X / C"],
+      @[@"Classic ZL / ZR", @"Z / V"],
+      @[@"Runtime settings bar", @"F10"],
+    ];
+    NSMutableArray<NSView *> *rows = [NSMutableArray array];
+    for (NSArray<NSString *> *binding in bindings) {
+      NSTextField *action = [self label:binding[0]];
+      action.font = [NSFont systemFontOfSize:NSFont.systemFontSize
+                                      weight:NSFontWeightMedium];
+      [action.widthAnchor constraintEqualToConstant:205.0].active = YES;
+      NSTextField *keys = [self label:binding[1]];
+      NSStackView *row = [NSStackView stackViewWithViews:@[action, keys]];
+      row.orientation = NSUserInterfaceLayoutOrientationHorizontal;
+      row.alignment = NSLayoutAttributeFirstBaseline;
+      row.spacing = 18.0;
+      [rows addObject:row];
+    }
+
+    NSTextField *more = [self label:
+        @"Use Controller Settings… to assign connected controllers, customize buttons and sticks, or manage Players 2–4."];
+    more.textColor = NSColor.secondaryLabelColor;
+    more.maximumNumberOfLines = 2;
+    more.lineBreakMode = NSLineBreakByWordWrapping;
+
+    NSMutableArray<NSView *> *views = [NSMutableArray arrayWithObject:intro];
+    [views addObjectsFromArray:rows];
+    [views addObject:more];
+    NSStackView *content = [NSStackView stackViewWithViews:views];
+    content.translatesAutoresizingMaskIntoConstraints = NO;
+    content.orientation = NSUserInterfaceLayoutOrientationVertical;
+    content.alignment = NSLayoutAttributeLeading;
+    content.spacing = 12.0;
+    self.controlsPanel.contentView = [NSView new];
+    [self.controlsPanel.contentView addSubview:content];
+    [NSLayoutConstraint activateConstraints:@[
+      [content.leadingAnchor constraintEqualToAnchor:self.controlsPanel.contentView.leadingAnchor
+                                             constant:24.0],
+      [content.trailingAnchor constraintEqualToAnchor:self.controlsPanel.contentView.trailingAnchor
+                                              constant:-24.0],
+      [content.topAnchor constraintEqualToAnchor:self.controlsPanel.contentView.topAnchor
+                                         constant:24.0],
+      [content.bottomAnchor constraintLessThanOrEqualToAnchor:self.controlsPanel.contentView.bottomAnchor
+                                                      constant:-20.0],
+      [intro.widthAnchor constraintEqualToAnchor:content.widthAnchor],
+      [more.widthAnchor constraintEqualToAnchor:content.widthAnchor]
+    ]];
+  }
+
+  [self.controlsPanel center];
+  [self.controlsPanel makeKeyAndOrderFront:nil];
+  [NSApp activateIgnoringOtherApps:YES];
 }
 
 - (NSTextField *)label:(NSString *)text {
@@ -830,6 +909,14 @@ static void InstallMenu() {
       keyEquivalent:@""];
   controllerSettings.target = Controller();
   [appMenu insertItem:controllerSettings atIndex:insertIndex++];
+
+  NSMenuItem *controls = [[NSMenuItem alloc]
+      initWithTitle:@"Controls…"
+             action:@selector(showControls:)
+      keyEquivalent:@"/"];
+  controls.keyEquivalentModifierMask = NSEventModifierFlagCommand;
+  controls.target = Controller();
+  [appMenu insertItem:controls atIndex:insertIndex++];
 
   NSString *diagnosticsTitle =
       [@"Save Diagnostics Report" stringByAppendingString:@"…"];

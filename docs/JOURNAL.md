@@ -1320,3 +1320,26 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   eight-hour soak pass.** Next work is a bounded queue-cap counterbalance,
   followed by a fresh single-visible-runtime soak. Evidence:
   `docs/artifacts/2026-08-30/g11-interrupted-macos-soak.md`.
+
+## 2026-08-30 — macOS controls convergence
+
+- Reprioritized away from the eight-hour macOS soak toward the practical
+  three-platform finish line requested by the product owner: native Mac
+  controls, then one-at-a-time iPhone and iPad verification.
+- Added a native **Controls…** panel to the KartPad application menu. The panel
+  exposes the complete Player 1 keyboard scheme, controller-remapping path,
+  Players 2–4 guidance, and F10 runtime-settings shortcut without covering the
+  game window.
+- Completed the Classic keyboard surface with Left Shift → L/item and Tab →
+  minus/select. Existing steering, accelerate, brake/reverse, drift, D-pad,
+  Start, X/Y, and ZL/ZR bindings remain intact.
+- The candidate compiled and linked, its source patch applied cleanly to the
+  immutable runtime pin in dry-run mode, and the signed package passed the
+  strengthened native-shell audit. Unsigned executable SHA-256 is
+  `162007d4be078232c5f91707a193a313f3daebd2ec58578c8d90db0fdf84d4f3`;
+  audited bundle-content SHA-256 is
+  `5fbc01bf36428c4611358cc7d24e023fe168ec4b3ff203b9f4d8b9bcac77dff4`.
+- With zero Simulator process and zero booted device, the sole Mac candidate
+  opened normally at 60 FPS. The native menu exposed **Controls…**, its full
+  panel fit cleanly in dark mode with every row visible, and the clean
+  application-menu Quit path closed the only runtime. No Simulator was opened.

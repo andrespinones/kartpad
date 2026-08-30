@@ -1518,6 +1518,8 @@ diff -ruN --exclude=.git --exclude=third_party --exclude=build a/src/hle/input/k
 +    case SDL_SCANCODE_SPACE: return kClassicButtonPlus;
 +    case SDL_SCANCODE_Q: return kClassicButtonB;
 +    case SDL_SCANCODE_E: return kClassicButtonR;
++    case SDL_SCANCODE_LSHIFT: return kClassicButtonL;
++    case SDL_SCANCODE_TAB: return kClassicButtonMinus;
 +    case SDL_SCANCODE_ESCAPE: return kClassicButtonA;
 +    case SDL_SCANCODE_LEFT: return kClassicButtonLeft;
 +    case SDL_SCANCODE_RIGHT: return kClassicButtonRight;

@@ -88,6 +88,12 @@ done
 executable_strings="$(strings "${executable}")"
 for shell_contract in \
   "KartPad Settings" \
+  "KartPad Controls" \
+  "Use item" \
+  "Left Shift (Classic L)" \
+  "Select / minus" \
+  "Runtime settings bar" \
+  "showControls:" \
   "Render resolution" \
   "Controller mappings remain available from Controller settings in the in-game F10 bar." \
   "Changes are saved safely and apply the next time KartPad launches." \

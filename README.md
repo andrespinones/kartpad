@@ -204,17 +204,19 @@ if a replacement is rejected.
 
 The **KartPad** application menu provides **Choose Game Data…**, **Show Game
 Data**, **Show Cache**, **Save Diagnostics Report…**, **Controller Settings…**,
-and the standard **Settings…** and **Quit** actions. Settings exposes the
-supported display, audio, and FPS-counter controls. Durable saves and
-configuration live in `~/Library/Application Support/KartPad`; regenerable
-graphics data lives in `~/Library/Caches/KartPad`.
+**Controls…**, and the standard **Settings…** and **Quit** actions. Settings
+exposes the supported display, audio, and FPS-counter controls. Durable saves
+and configuration live in `~/Library/Application Support/KartPad`;
+regenerable graphics data lives in `~/Library/Caches/KartPad`.
 
 ## Controls and mobile direction
 
-The development macOS keyboard bridge maps directional keys to menu movement,
-`U` to A/accelerate, `M` to B/reverse, and dedicated steering keys to the
-Classic Controller stick. Native controller discovery and four stable local
-slots are implemented separately from the keyboard fallback.
+The macOS keyboard bridge maps `WASD` to steering, `U`/Return to
+A/accelerate/confirm, `M`/Delete to B/brake/reverse/back, `E` to R/drift,
+Left Shift to L/item, arrows to the D-pad/tricks, Space to Start/pause, and Tab
+to Select/minus. The native **Controls…** panel (`Command-/`) keeps the full
+mapping visible in the app. Native controller discovery, remapping, and four
+stable local slots are implemented separately from the keyboard fallback.
 
 The iPhone/iPad app compiles a byte-identical pinned snapshot of SunPad's GPLv3
 touch-control component and persistent **•••** menu directly. It preserves the
