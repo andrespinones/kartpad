@@ -64,7 +64,7 @@ check_reference ref/upstream/wiimms-iso-tools \
   fc1c0b840cb3ac41ca6e4f1d5e16da12b47eab58 \
   c6ab6de655bc3b756c2c8b2719e8b111fdebb792
 
-disc_path='ref/Mario Kart Wii.wbfs'
+disc_path="${KARTPAD_DISC_PATH:-ref/Mario Kart Wii.wbfs}"
 [[ -f "$disc_path" ]] || {
   echo "ERROR: missing supplied WBFS: $disc_path" >&2
   exit 1
