@@ -93,6 +93,15 @@ if rg -a -F -q "game-data importer is not connected" "${binary}"; then
   echo "game app still contains the placeholder game-data importer" >&2
   exit 69
 fi
+if [[ "${expected_platform}" == "IOSSIMULATOR" ]]; then
+  if ! rg -a -F -q 'KARTPAD_IMPORT_FORCE_SWAP_FAILURE' "${binary}"; then
+    echo "Simulator app is missing the import rollback test hook" >&2
+    exit 69
+  fi
+elif rg -a -F -q 'KARTPAD_IMPORT_FORCE_SWAP_FAILURE' "${binary}"; then
+  echo "device app contains the Simulator-only import rollback hook" >&2
+  exit 69
+fi
 
 echo "iOS ${expected_platform} full-game app audit passed: ${app}"
 shasum -a 256 "${binary}" "${app}/Assets.car" "${app}/PrivacyInfo.xcprivacy"

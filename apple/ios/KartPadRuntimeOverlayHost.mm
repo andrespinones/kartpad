@@ -10,6 +10,7 @@
 #import <SDL3/SDL_properties.h>
 #import <SDL3/SDL_video.h>
 #import <CommonCrypto/CommonDigest.h>
+#import <TargetConditionals.h>
 #import <UIKit/UIKit.h>
 #import <UniformTypeIdentifiers/UniformTypeIdentifiers.h>
 
@@ -43,36 +44,13 @@ NSString *KartPadSupportRoot() {
 }
 
 NSString *KartPadSHA256ForFile(NSString *path, NSError **error) {
-  NSInputStream *stream = [NSInputStream inputStreamWithFileAtPath:path];
-  [stream open];
-  if (stream.streamStatus == NSStreamStatusError) {
-    if (error != nullptr) {
-      *error = stream.streamError;
-    }
+  NSData *data = [NSData dataWithContentsOfFile:path options:NSDataReadingMappedIfSafe
+                                         error:error];
+  if (data == nil || data.length > UINT32_MAX) {
     return nil;
   }
-
-  CC_SHA256_CTX context;
-  CC_SHA256_Init(&context);
-  uint8_t buffer[1024 * 1024];
-  while (true) {
-    NSInteger count = [stream read:buffer maxLength:sizeof(buffer)];
-    if (count < 0) {
-      if (error != nullptr) {
-        *error = stream.streamError;
-      }
-      [stream close];
-      return nil;
-    }
-    if (count == 0) {
-      break;
-    }
-    CC_SHA256_Update(&context, buffer, (CC_LONG)count);
-  }
-  [stream close];
-
   unsigned char digest[CC_SHA256_DIGEST_LENGTH];
-  CC_SHA256_Final(digest, &context);
+  CC_SHA256(data.bytes, (CC_LONG)data.length, digest);
   NSMutableString *result =
       [NSMutableString stringWithCapacity:CC_SHA256_DIGEST_LENGTH * 2];
   for (NSUInteger index = 0; index < CC_SHA256_DIGEST_LENGTH; ++index) {
@@ -169,23 +147,23 @@ BOOL KartPadEnsureRelativeDvdRoot(NSError **error) {
     return NO;
   }
   NSRange whole = NSMakeRange(0, config.length);
-  if ([dvdLine firstMatchInString:config options:0 range:whole] != nil) {
-    config = [dvdLine stringByReplacingMatchesInString:config options:0 range:whole
-                                           withTemplate:@"dvd_root = \"GameData\""];
+  config = [dvdLine stringByReplacingMatchesInString:config options:0 range:whole
+                                         withTemplate:@""];
+  NSRegularExpression *paths = [NSRegularExpression
+      regularExpressionWithPattern:@"(?m)^\\s*\\[paths\\]\\s*$"
+                           options:0 error:error];
+  if (paths == nil) {
+    return NO;
+  }
+  NSTextCheckingResult *match =
+      [paths firstMatchInString:config options:0 range:NSMakeRange(0, config.length)];
+  if (match != nil) {
+    NSUInteger insertion = NSMaxRange(match.range);
+    config = [config stringByReplacingCharactersInRange:NSMakeRange(insertion, 0)
+                                              withString:@"\ndvd_root = \"GameData\""];
   } else {
-    NSRegularExpression *paths = [NSRegularExpression
-        regularExpressionWithPattern:@"(?m)^\\s*\\[paths\\]\\s*$"
-                             options:0 error:error];
-    NSTextCheckingResult *match =
-        [paths firstMatchInString:config options:0 range:NSMakeRange(0, config.length)];
-    if (match != nil) {
-      NSUInteger insertion = NSMaxRange(match.range);
-      config = [config stringByReplacingCharactersInRange:NSMakeRange(insertion, 0)
-                                                withString:@"\ndvd_root = \"GameData\""];
-    } else {
-      config = [config stringByAppendingString:
-          @"\n\n[paths]\ndvd_root = \"GameData\"\n"];
-    }
+    config = [config stringByAppendingString:
+        @"\n\n[paths]\ndvd_root = \"GameData\"\n"];
   }
   return [config writeToFile:configPath atomically:YES
                     encoding:NSUTF8StringEncoding error:error];
@@ -484,6 +462,15 @@ void KartPadRemoveStaleImportDirectories(NSString *supportRoot) {
     if (workError == nil && [files fileExistsAtPath:dataDirectory]) {
       movedExisting = [files moveItemAtPath:dataDirectory toPath:rollback error:&workError];
     }
+#if TARGET_OS_SIMULATOR
+    if (workError == nil &&
+        [NSProcessInfo.processInfo.environment[@"KARTPAD_IMPORT_FORCE_SWAP_FAILURE"] boolValue]) {
+      workError = [NSError errorWithDomain:@"dev.kartpad.gamedata"
+                                      code:3 userInfo:@{
+        NSLocalizedDescriptionKey: @"Injected Simulator swap failure."
+      }];
+    }
+#endif
     if (workError == nil) {
       [files moveItemAtPath:staging toPath:dataDirectory error:&workError];
     }
