@@ -654,9 +654,53 @@ NSError *KartPadPerformGameDataImport(NSURL *url) {
                             weakSelf.motionSteeringRequested();
                           }
                         }];
+  UIAction *(^unsupportedExperiment)(UIAction *, NSString *) =
+      ^UIAction *(UIAction *sourceAction, NSString *detail) {
+        UIAction *replacement =
+            [UIAction actionWithTitle:sourceAction.title
+                                image:sourceAction.image
+                           identifier:sourceAction.identifier
+                              handler:^(__kindof UIAction *action) {
+          (void)action;
+          UIAlertController *alert =
+              [UIAlertController alertControllerWithTitle:@"Unavailable in KartPad"
+                                                  message:detail
+                                           preferredStyle:UIAlertControllerStyleAlert];
+          [alert addAction:[UIAlertAction actionWithTitle:@"OK"
+                                                    style:UIAlertActionStyleDefault
+                                                  handler:nil]];
+          [weakSelf.window.rootViewController presentViewController:alert
+                                                           animated:YES
+                                                         completion:nil];
+        }];
+        replacement.state = UIMenuElementStateOff;
+        return replacement;
+      };
   NSMutableArray<UIMenuElement *> *children =
       [NSMutableArray arrayWithObjects:multiplayer, motionSteering, nil];
-  [children addObjectsFromArray:sourceMenu.children];
+  for (UIMenuElement *element in sourceMenu.children) {
+    if ([element isKindOfClass:UIAction.class]) {
+      UIAction *action = (UIAction *)element;
+      if ([action.title isEqualToString:
+              @"Experimental Performance Mode (Restart Required)"]) {
+        [children addObject:unsupportedExperiment(action,
+            @"This SunPad experiment changes Sunshine's emulated CPU clock. "
+             "KartPad's ahead-of-time Mario Kart Wii runtime does not expose "
+             "that clock mode, so stable real-time timing remains active and "
+             "no setting was changed.")];
+        continue;
+      }
+      if ([action.title isEqualToString:
+              @"Experimental 60 FPS (Restart Required)"]) {
+        [children addObject:unsupportedExperiment(action,
+            @"This SunPad experiment targets Sunshine's GMSE01 patch. It is "
+             "not compatible with KartPad's Mario Kart Wii runtime, so the "
+             "retail cadence remains active and no setting was changed.")];
+        continue;
+      }
+    }
+    [children addObject:element];
+  }
   menuButton.menu = [UIMenu menuWithTitle:@"KartPad"
                                     image:sourceMenu.image
                                identifier:@"dev.kartpad.menu"
