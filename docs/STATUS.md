@@ -23,6 +23,43 @@ Updated: 2026-08-30
 | G10 macOS offline compatibility | In progress | Row 22 passes all 32/32 retail tracks with every cup subset complete; ghost sync, save safety, vehicles/drift, items/AI/collisions, Time Trial row 26, Battle rows 27–28, two-player row 29, four full-range keyboard/controller slots, explicit GameCube-adapter limitation, privacy-safe obsolete-service fallback, and a two-hour representative audio-continuity run also pass their stated subcases. Continue honest Grand Prix progression, three/four-player standings cycles, and subjective/final audio acceptance |
 | G11–G18 | Gated | Await G10 |
 
+## Finish-line order
+
+The project is no longer blocked on proving that the game can run. The shortest
+credible path to a release is to close the remaining evidence and product gaps
+in dependency order:
+
+1. **Close G10 honestly:** finish representative Grand Prix progression,
+   complete three- and four-player race/standings cycles, and perform the
+   remaining subjective audio acceptance. Do not spend more time re-proving
+   already accepted tracks or modes.
+2. **Make G11 measurable before optimizing:** add bounded frame/pipeline
+   telemetry, establish reversible cold/warm fixtures, then attack the ranked
+   bottleneck. Shader-cache guesses without p99/worst evidence are not a plan.
+3. **Separate automation from hands-on gates:** run long stress, save, package,
+   cache, diagnostics, and Simulator work autonomously; keep only touch feel,
+   motion feel, subjective audio, physical thermals, and public-service access
+   on the human prerequisite list.
+4. **Finish the application boundary:** automate clean-clone source
+   provisioning, bring WBFS validation/extraction into the native first-run
+   experience with resumable progress, and complete license/notarization/update
+   infrastructure without ever bundling private data.
+5. **Promote to hardware only after Mac profiling is understood:** Simulator
+   proves integration, not physical touch, audio, thermal, memory, or sustained
+   performance. Run iPad first, then modern iPhone, using the same content-safe
+   telemetry contract.
+6. **Finish online through the local harness first:** complete protocol state,
+   impairment, reconnect, and full local race/results evidence before any
+   normal authorized external-service session.
+7. **Cut one exact candidate:** rerun the full 67-row matrix, package/privacy/
+   license audits, source self-build, and zero-P0/P1 review against the same
+   immutable commit and artifact hashes.
+
+The practical change in approach is to stop treating broad successful gameplay
+as the scarce resource. The scarce resource is now controlled evidence:
+repeatable multiplayer completion, frame-time instrumentation, reversible cache
+experiments, physical-device interaction, and a reproducible legal build path.
+
 ## Known-good state
 
 - Repository checkpoint: exact branded macOS gameplay-package source `325d5f3` is on `origin/main`. Its ignored 80 MiB arm64 package passes installed-storage, configured title/menu/live-race input, save-preservation, and normal-close checks with bundle-content hash `12e827fdaf206df3689ab0fe0b73fa7ebe20fe3827b538d8fe7c21e8ac25e3db`. Source `5781b99` adds the native data/cache/diagnostics menu without changing the gameplay core. Source `bed127f` adds the native display/audio Settings panel. Source `a5ee9fe` adds the native first-run extracted-data gate, reconfiguration action, complete fallback application menu, and safe menu-Quit route. Source `ac89225` exposes the existing in-game controller-mapping UI from that native menu. Source `c6f94b7` adds bounded technical context to the privacy-safe diagnostics report. Source `df98779` adds persistent clean/unclean session classification and capped/redacted current/previous tails; its exact package passes export, privacy scan, clean relaunch, and audit with bundle-content hash `893095ac96d66d036c61cbfa8af79b58eac3bdbf9d24b5da4fa44066111afcb6`. Source `d6e3202` adds the one-command WBFS-to-macOS self-build; its fresh extraction, 29,637-function translation, 857-step build, exact package audit/title/audio/clean-quit exercise, and byte-identical function/shard comparisons pass with bundle-content hash `bc53f9e82e2e7656d86170e59426b9ab79b4553366946b684824739fd9f0fc92`.
