@@ -401,10 +401,11 @@ diff -ruN --exclude=.git --exclude=third_party --exclude=build a/include/runtime
  #else
      return std::nullopt;
  #endif
-@@ -197,6 +212,18 @@
+@@ -196,7 +211,38 @@
+         const std::filesystem::path directory = std::filesystem::path(rawPath) / kApplicationDirectoryName;
          CoTaskMemFree(rawPath);
          return directory;
-     }
++    }
 +#elif defined(__APPLE__)
 +    // A normal app bundle must never write saves, caches, configuration, or
 +    // logs into its signed resources. HOME is container-aware for a future
@@ -416,10 +417,41 @@ diff -ruN --exclude=.git --exclude=third_party --exclude=build a/include/runtime
 +    if (const passwd* account = getpwuid(getuid());
 +        account && account->pw_dir && *account->pw_dir) {
 +        return std::filesystem::path(account->pw_dir) / "Library" / "Application Support" / "KartPad";
-+    }
+     }
  #endif
      return std::filesystem::current_path() / kApplicationDirectoryName;
++}
++
++inline std::filesystem::path CacheDataDirectory() {
++    if (const auto& portableRoot = PortableRootDirectory()) {
++        return *portableRoot / kPortableUserDataDirectoryName / "Cache";
++    }
++#ifdef __APPLE__
++    // Installed Apple apps keep regenerable renderer/texture caches out of
++    // durable Application Support. HOME is container-aware for a future
++    // sandboxed build; use the account database only when HOME is unavailable.
++    if (const char* home = std::getenv("HOME"); home && *home) {
++        return std::filesystem::path(home) / "Library" / "Caches" / "KartPad";
++    }
++    if (const passwd* account = getpwuid(getuid());
++        account && account->pw_dir && *account->pw_dir) {
++        return std::filesystem::path(account->pw_dir) / "Library" / "Caches" / "KartPad";
++    }
++#endif
++    return ApplicationDataDirectory() / "Cache";
  }
+diff -ruN --exclude=.git --exclude=third_party --exclude=build a/src/main.cpp b/src/main.cpp
+--- a/src/main.cpp	2026-08-28 14:10:57
++++ b/src/main.cpp	2026-08-29 23:53:19
+@@ -1179,7 +1179,7 @@
+         AuroraConfig auroraConfig = {};
+         auroraConfig.appName = RuntimeProduct::Active().displayName.data();
+         const auto applicationDataDirectory = RuntimeConfigFile::ApplicationDataDirectory();
+-        const auto rendererCacheDirectory = applicationDataDirectory / "Cache";
++        const auto rendererCacheDirectory = RuntimeConfigFile::CacheDataDirectory();
+         std::error_code rendererPathError;
+         std::filesystem::create_directories(rendererCacheDirectory, rendererPathError);
+         if (rendererPathError) {
 diff -ruN --exclude=.git --exclude=third_party --exclude=build a/src/apple/guest_flat_memory_apple.cpp b/src/apple/guest_flat_memory_apple.cpp
 --- a/src/apple/guest_flat_memory_apple.cpp	1969-12-31 18:00:00
 +++ b/src/apple/guest_flat_memory_apple.cpp	2026-08-28 18:30:22

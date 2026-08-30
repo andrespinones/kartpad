@@ -19,25 +19,38 @@ mkdir -p "${probe_root}/bin" "${probe_root}/fake-home"
 printf '%s\n' \
   '#include "runtime_config.h"' \
   '#include <iostream>' \
-  'int main() { std::cout << RuntimeConfigFile::ApplicationDataDirectory().string(); }' | \
+  'int main() {' \
+  '  std::cout << RuntimeConfigFile::ApplicationDataDirectory().string() << "\n";' \
+  '  std::cout << RuntimeConfigFile::CacheDataDirectory().string();' \
+  '}' | \
   "${CXX:-clang++}" -std=c++20 -Wno-deprecated-literal-operator -x c++ - \
     -I "${runtime_source}/include" -I "${toml_include}" -o "${probe_root}/bin/probe"
 
 installed_result="$(env HOME="${probe_root}/fake-home" "${probe_root}/bin/probe")"
 expected_installed="${probe_root}/fake-home/Library/Application Support/KartPad"
-if [[ "${installed_result}" != "${expected_installed}" ]]; then
-  echo "installed layout mismatch: ${installed_result}" >&2
+expected_installed_cache="${probe_root}/fake-home/Library/Caches/KartPad"
+installed_app_support="$(printf '%s\n' "${installed_result}" | sed -n '1p')"
+installed_cache="$(printf '%s\n' "${installed_result}" | sed -n '2p')"
+if [[ "${installed_app_support}" != "${expected_installed}" ||
+      "${installed_cache}" != "${expected_installed_cache}" ]]; then
+  echo "installed layout mismatch" >&2
   exit 1
 fi
 
 touch "${probe_root}/portable.txt"
 portable_result="$(env HOME="${probe_root}/fake-home" "${probe_root}/bin/probe")"
 expected_portable="${probe_root}/UserData"
-if [[ "${portable_result}" != "${expected_portable}" ]]; then
-  echo "portable layout mismatch: ${portable_result}" >&2
+expected_portable_cache="${probe_root}/UserData/Cache"
+portable_app_support="$(printf '%s\n' "${portable_result}" | sed -n '1p')"
+portable_cache="$(printf '%s\n' "${portable_result}" | sed -n '2p')"
+if [[ "${portable_app_support}" != "${expected_portable}" ||
+      "${portable_cache}" != "${expected_portable_cache}" ]]; then
+  echo "portable layout mismatch" >&2
   exit 1
 fi
 
 echo "Runtime storage-layout contract passed."
-echo "Installed: ${installed_result}"
-echo "Portable: ${portable_result}"
+echo "Installed durable: ${installed_app_support}"
+echo "Installed cache: ${installed_cache}"
+echo "Portable durable: ${portable_app_support}"
+echo "Portable cache: ${portable_cache}"
