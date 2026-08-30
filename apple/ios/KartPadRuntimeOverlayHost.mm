@@ -1,6 +1,7 @@
 #import "kartpad_mobile_runtime_host.h"
 
 #import "KartPadClassicInput.h"
+#import "KartPadMotionSteering.h"
 #import "KartPadPhysicalControllers.h"
 #import "SunPadDiagnostics.h"
 #import "SunPadGameOverlay.h"
@@ -15,6 +16,7 @@
 #import <UniformTypeIdentifiers/UniformTypeIdentifiers.h>
 
 #include <algorithm>
+#include <cmath>
 
 @interface KartPadRuntimeOverlayHost : NSObject <SunPadGameOverlayDelegate,
                                                  UIDocumentPickerDelegate>
@@ -24,6 +26,7 @@
 
 @interface KartPadGameOverlay : SunPadGameOverlay
 @property(nonatomic, copy) void (^multiplayerRequested)(void);
+@property(nonatomic, copy) void (^motionSteeringRequested)(void);
 @end
 
 namespace {
@@ -641,8 +644,18 @@ NSError *KartPadPerformGameDataImport(NSURL *url) {
                             weakSelf.multiplayerRequested();
                           }
                         }];
+  UIAction *motionSteering =
+      [UIAction actionWithTitle:@"Motion Steering…"
+                          image:[UIImage systemImageNamed:@"gyroscope"]
+                     identifier:@"dev.kartpad.motion-steering"
+                        handler:^(__kindof UIAction *action) {
+                          (void)action;
+                          if (weakSelf.motionSteeringRequested != nil) {
+                            weakSelf.motionSteeringRequested();
+                          }
+                        }];
   NSMutableArray<UIMenuElement *> *children =
-      [NSMutableArray arrayWithObject:multiplayer];
+      [NSMutableArray arrayWithObjects:multiplayer, motionSteering, nil];
   [children addObjectsFromArray:sourceMenu.children];
   menuButton.menu = [UIMenu menuWithTitle:@"KartPad"
                                     image:sourceMenu.image
@@ -681,6 +694,9 @@ NSError *KartPadPerformGameDataImport(NSURL *url) {
   overlay.multiplayerRequested = ^{
     [weakSelf showMultiplayerAccess];
   };
+  overlay.motionSteeringRequested = ^{
+    [weakSelf showMotionSteering];
+  };
   _overlay = overlay;
   _overlay.autoresizingMask = UIViewAutoresizingFlexibleWidth |
                               UIViewAutoresizingFlexibleHeight;
@@ -689,6 +705,7 @@ NSError *KartPadPerformGameDataImport(NSURL *url) {
   [container addSubview:_overlay];
   [container bringSubviewToFront:_overlay];
   [[KartPadPhysicalControllers sharedControllers] start];
+  [[KartPadMotionSteering sharedSteering] start];
 
   NSNotificationCenter *notifications = NSNotificationCenter.defaultCenter;
   [notifications addObserver:self
@@ -702,6 +719,63 @@ NSError *KartPadPerformGameDataImport(NSURL *url) {
   SunPadDiagnosticsStart();
   NSLog(@"[KartPad] exact SunPad runtime overlay installed");
   return self;
+}
+
+- (void)showMotionSteering {
+  [[SunPadInputMixer sharedMixer] clearInputFromTouch:YES];
+  UIViewController *controller = KartPadVisibleViewController(_window);
+  if (controller == nil) return;
+  KartPadMotionSteering *motion = [KartPadMotionSteering sharedSteering];
+  NSString *status = motion.sensorAvailable
+      ? [NSString stringWithFormat:
+            @"Tilt the device like a steering wheel. Current state: %@. Sensitivity: %.1fx. Physical controllers take priority.",
+            motion.enabled ? @"On" : @"Off", motion.sensitivity]
+      : @"Motion data is unavailable on this device or Simulator. Touch and physical-controller steering remain available.";
+  UIAlertController *sheet =
+      [UIAlertController alertControllerWithTitle:@"Motion Steering"
+                                          message:status
+                                   preferredStyle:UIAlertControllerStyleActionSheet];
+  if (motion.sensorAvailable) {
+    [sheet addAction:[UIAlertAction
+        actionWithTitle:motion.enabled ? @"Turn Off" : @"Turn On & Recenter"
+                    style:UIAlertActionStyleDefault
+                  handler:^(UIAlertAction *action) {
+      (void)action;
+      motion.enabled = !motion.enabled;
+      if (motion.enabled) [motion recenter];
+    }]];
+    if (motion.enabled) {
+      [sheet addAction:[UIAlertAction actionWithTitle:@"Recenter Now"
+                                               style:UIAlertActionStyleDefault
+                                             handler:^(UIAlertAction *action) {
+        (void)action;
+        [motion recenter];
+      }]];
+    }
+    [sheet addAction:[UIAlertAction
+        actionWithTitle:motion.inverted ? @"Use Standard Direction" : @"Invert Direction"
+                    style:UIAlertActionStyleDefault
+                  handler:^(UIAlertAction *action) {
+      (void)action;
+      motion.inverted = !motion.inverted;
+    }]];
+    [sheet addAction:[UIAlertAction
+        actionWithTitle:@"Cycle Sensitivity"
+                    style:UIAlertActionStyleDefault
+                  handler:^(UIAlertAction *action) {
+      (void)action;
+      const float current = motion.sensitivity;
+      motion.sensitivity = current < 0.75f ? 1.0f : (current < 1.5f ? 2.0f : 0.5f);
+    }]];
+  }
+  [sheet addAction:[UIAlertAction actionWithTitle:@"Continue Playing"
+                                            style:UIAlertActionStyleCancel
+                                          handler:nil]];
+  UIPopoverPresentationController *popover = sheet.popoverPresentationController;
+  popover.sourceView = _overlay;
+  popover.sourceRect = CGRectMake(CGRectGetMidX(_overlay.bounds),
+                                  CGRectGetMidY(_overlay.bounds), 1.0, 1.0);
+  [controller presentViewController:sheet animated:YES completion:nil];
 }
 
 - (void)showMultiplayerAccess {
@@ -746,6 +820,7 @@ NSError *KartPadPerformGameDataImport(NSURL *url) {
 - (void)uninstall {
   [NSNotificationCenter.defaultCenter removeObserver:self];
   [[KartPadPhysicalControllers sharedControllers] stop];
+  [[KartPadMotionSteering sharedSteering] stop];
   [[SunPadInputMixer sharedMixer] clearInputFromTouch:YES];
   _overlay.delegate = nil;
   [_overlay removeFromSuperview];
@@ -755,11 +830,13 @@ NSError *KartPadPerformGameDataImport(NSURL *url) {
 - (void)applicationWillResignActive:(NSNotification *)notification {
   (void)notification;
   [[SunPadInputMixer sharedMixer] clearInputFromTouch:YES];
+  [[KartPadMotionSteering sharedSteering] stop];
 }
 
 - (void)applicationDidBecomeActive:(NSNotification *)notification {
   (void)notification;
   [[KartPadPhysicalControllers sharedControllers] reconcileControllers];
+  [[KartPadMotionSteering sharedSteering] start];
   [_overlay refreshControllerVisibility];
   [_overlay applySettings];
 }
@@ -1032,8 +1109,17 @@ extern "C" bool KartPadMobileReadClassicInputForPlayer(
   } else {
     return false;
   }
-  const KartPadClassicInputState adapted =
+  KartPadClassicInputState adapted =
       kartpad::mobile::AdaptSunPadInput(source);
+  if (player == 0 &&
+      [KartPadPhysicalControllers sharedControllers].connectedControllerCount == 0) {
+    const float motion = [KartPadMotionSteering sharedSteering].currentSteering;
+    const int motionStick = static_cast<int>(std::lround(motion * 127.0f));
+    if (std::abs(motionStick) > std::abs(static_cast<int>(adapted.leftStickX))) {
+      adapted.leftStickX = static_cast<std::int8_t>(
+          std::clamp(motionStick, -127, 127));
+    }
+  }
   snapshot->buttons = adapted.buttons;
   snapshot->leftStickX = std::clamp(static_cast<float>(adapted.leftStickX) / 127.0f,
                                    -1.0f, 1.0f);

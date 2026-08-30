@@ -239,6 +239,7 @@ if(MKW_BUILD_IOS_SIMULATOR OR MKW_BUILD_IOS_DEVICE)
     "${KARTPAD_IOS_DIR}/KartPadShellViewController.mm"
     "${CMAKE_CURRENT_SOURCE_DIR}/apple/mobile/KartPadCoreBridge.mm"
     "${CMAKE_CURRENT_SOURCE_DIR}/apple/mobile/KartPadClassicInput.mm"
+    "${CMAKE_CURRENT_SOURCE_DIR}/apple/mobile/KartPadMotionSteering.mm"
     "${KARTPAD_SUNPAD_DIR}/SunPadGameOverlay.mm"
     "${KARTPAD_SUNPAD_DIR}/SunPadInputMixer.mm"
     "${KARTPAD_SUNPAD_DIR}/SunPadSettings.mm"
@@ -257,7 +258,7 @@ if(MKW_BUILD_IOS_SIMULATOR OR MKW_BUILD_IOS_DEVICE)
     -fobjc-arc -Wall -Wextra
     "-ffile-prefix-map=${CMAKE_CURRENT_SOURCE_DIR}=.")
   foreach(framework IN ITEMS
-      Foundation UIKit CoreGraphics QuartzCore Metal GameController UniformTypeIdentifiers)
+      Foundation UIKit CoreGraphics QuartzCore Metal GameController CoreMotion UniformTypeIdentifiers)
     find_library(KARTPAD_IOS_${framework}_FRAMEWORK ${framework} REQUIRED)
     target_link_libraries(KartPad PRIVATE "${KARTPAD_IOS_${framework}_FRAMEWORK}")
   endforeach()
@@ -350,5 +351,23 @@ if(BUILD_TESTING)
       "${MOBILE_FOUNDATION_FRAMEWORK}" "${MOBILE_GAME_CONTROLLER_FRAMEWORK}")
     add_test(NAME kartpad.mobile.physical-controller
       COMMAND kartpad_mobile_physical_controller_tests)
+
+    add_executable(kartpad_mobile_motion_steering_tests
+      runtime/tests/mobile_motion_steering_tests.mm
+      apple/mobile/KartPadMotionSteering.mm
+      apple/third_party/sunpad/SunPadDiagnostics.mm)
+    target_include_directories(kartpad_mobile_motion_steering_tests PRIVATE
+      apple/mobile apple/third_party/sunpad)
+    target_compile_features(kartpad_mobile_motion_steering_tests PRIVATE cxx_std_20)
+    target_compile_options(kartpad_mobile_motion_steering_tests PRIVATE
+      -fobjc-arc -Wall -Wextra -Wpedantic -Werror
+      -Wno-c99-extensions
+      -Wno-gnu-statement-expression-from-macro-expansion
+      -Wno-gnu-conditional-omitted-operand)
+    find_library(MOBILE_CORE_MOTION_FRAMEWORK CoreMotion REQUIRED)
+    target_link_libraries(kartpad_mobile_motion_steering_tests PRIVATE
+      "${MOBILE_FOUNDATION_FRAMEWORK}" "${MOBILE_CORE_MOTION_FRAMEWORK}")
+    add_test(NAME kartpad.mobile.motion-steering
+      COMMAND kartpad_mobile_motion_steering_tests)
   endif()
 endif()

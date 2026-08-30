@@ -67,11 +67,22 @@ for required_symbol in \
   _KartPadMobileReadClassicInputForPlayer \
   '_OBJC_CLASS_$_SDLUIKitSceneDelegate' \
   '_OBJC_CLASS_$_KartPadPhysicalControllers' \
+  '_OBJC_CLASS_$_KartPadMotionSteering' \
   '_OBJC_CLASS_$_SunPadGameOverlay' \
   '_OBJC_CLASS_$_SunPadInputMixer' \
   '_OBJC_CLASS_$_SunPadControllerMappingStore'; do
   if ! rg -F -q "${required_symbol}" <<<"${symbols}"; then
     echo "game app is missing required mobile symbol: ${required_symbol}" >&2
+    exit 69
+  fi
+done
+
+for motion_contract in \
+  'Motion Steering' \
+  'Turn On & Recenter' \
+  'KartPadMotionSteeringEnabled'; do
+  if ! rg -a -F -q "${motion_contract}" "${binary}"; then
+    echo "game app is missing the motion-steering contract: ${motion_contract}" >&2
     exit 69
   fi
 done
