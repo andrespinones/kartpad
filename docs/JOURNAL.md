@@ -1449,9 +1449,10 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - Corrected the tracked hunk header to 767 lines, independently applied it to a
   new pinned-runtime copy, and verified the generated KPAD source ends with the
   complete function. The resumed clean Simulator graph compiled and linked all
-  29,065 translated functions and passed the full package audit at executable
-  SHA-256
+  29,065 translated functions as a standalone link at executable SHA-256
   `db5be50d55916fd9bd9ed8be7dbee7fb7885edc21380687d8dc4cf9bef563cf1`.
+  That Ninja bundle retains unresolved Xcode Info.plist variables and lacks
+  `Assets.car`, so it is not claimed as installable or package-audited.
 - From that corrected clean source, configured a separate `iphoneos` Xcode
   directory against the pinned physical Dawn archive. The 29,065-function
   graph compiled, linked, and passed the strict `IOS` audit at executable
@@ -1463,7 +1464,7 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   `343dbc92a22d95a896d5bb894f439d655ac8e15d0fcc7fe72500bd5fcaba1740`.
 - No Simulator device or game runtime was launched; zero devices remain
   booted. Classification: **Pass for corrected patch-stack reproduction,
-  fresh full Simulator compilation, and fresh full physical-iOS compilation
+  fresh full Simulator code linking, and fresh full physical-iOS compilation
   and audit.** Signing, installation, and hands-on hardware acceptance remain
   external.
 
@@ -1485,3 +1486,28 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   tracked source or private input changed. Full pin/input verification and the
   repository safety audit then passed. Classification: **Pass for fail-fast
   patch metadata, clean pinned sources, and patch-chain reproduction.**
+
+## 2026-08-30 — Touch-modal held-input clearing
+
+- A live iPhone Simulator check opened the compact KartPad three-dot menu and
+  its lower Touch Control Settings action over retail rendering. Computer Use
+  keyboard navigation reached the lower menu rows, but its pointer drags did
+  not become finger swipes inside the embedded settings scroll view; direct
+  Move/Reset-row automation is therefore inconclusive rather than accepted.
+- Kept the twelve-file SunPad snapshot byte-identical and overrode only the
+  owning KartPad subclass's settings toggle. Opening or closing Touch Control
+  Settings now clears the complete touch mixer contribution and restores the A
+  button's normal appearance.
+- A Simulator-only boundary probe published the real A control, observed held
+  Classic buttons `0x00000010`, opened the actual settings path, and observed
+  released buttons `0x00000000`. The menu then exposed `Touch settings
+  input-clear self-test passed`, and live controls returned normally.
+- The full Simulator app rebuilt/audited at SHA-256
+  `de7d46bd5bd2c55c7b40acbeac1d4013aa800a5d2b086cf36dfaf2d88e218acb`.
+  The full physical-iOS app rebuilt/audited at SHA-256
+  `f8ed5777817894fffd84e0330659240e2e10731b072d2c60b0df3b1701db9375`;
+  its audit rejects the Simulator-only hook. The sole iPhone and app were
+  terminated and shut down; zero runtimes remain. Classification: **Pass for
+  touch-modal held-input clearing and cross-target compilation; lower-row
+  editor/reset UI automation remains inconclusive.** Evidence:
+  `docs/artifacts/2026-08-30/g15-touch-modal-input-clear/`.

@@ -33,6 +33,7 @@
 @property(nonatomic, assign) BOOL kartPadGasPressed;
 @property(nonatomic, assign) BOOL kartPadGasHoldSelfTestStarted;
 @property(nonatomic, assign) BOOL kartPadGasInputSelfTestStarted;
+@property(nonatomic, assign) BOOL kartPadModalInputSelfTestStarted;
 - (void)resetKartPadControlAppearance;
 @end
 
@@ -41,6 +42,8 @@
 // pressure semantics with Mario Kart Wii's ordinary digital Classic R button.
 @interface SunPadGameOverlay (KartPadControlHooks)
 - (void)rPressureChanged:(uint8_t)pressure fullPress:(BOOL)fullPress;
+- (void)clearTouchInput;
+- (void)toggleSettingsPanel;
 @end
 
 namespace {
@@ -631,6 +634,15 @@ NSError *KartPadPerformGameDataImport(NSURL *url) {
 
 @implementation KartPadGameOverlay
 
+- (void)toggleSettingsPanel {
+  // Opening or closing a touch-modal must never leave a gameplay control held.
+  // Keep this in KartPad's owner layer so the pinned SunPad snapshot remains
+  // byte-identical to its upstream reference.
+  [self clearTouchInput];
+  [self resetKartPadControlAppearance];
+  [super toggleSettingsPanel];
+}
+
 - (void)layoutSubviews {
   [super layoutSubviews];
   UIButton *menuButton = nil;
@@ -723,6 +735,27 @@ NSError *KartPadPerformGameDataImport(NSURL *url) {
                   releasedClassic.buttons);
           });
         });
+      });
+    }
+    if (!self.kartPadModalInputSelfTestStarted && menuButton != nil &&
+        NSProcessInfo.processInfo.environment[@"KARTPAD_TOUCH_MODAL_SELF_TEST"] != nil) {
+      self.kartPadModalInputSelfTestStarted = YES;
+      dispatch_async(dispatch_get_main_queue(), ^{
+        [gasButton sendActionsForControlEvents:UIControlEventTouchDown];
+        const KartPadClassicInputState before = kartpad::mobile::AdaptSunPadInput(
+            [[SunPadInputMixer sharedMixer] consumeMergedState]);
+        [self toggleSettingsPanel];
+        const KartPadClassicInputState after = kartpad::mobile::AdaptSunPadInput(
+            [[SunPadInputMixer sharedMixer] consumeMergedState]);
+        const BOOL passed =
+            (before.buttons & kartpad::mobile::kClassicButtonA) != 0 &&
+            (after.buttons & kartpad::mobile::kClassicButtonA) == 0;
+        menuButton.accessibilityHint = passed
+            ? @"Touch settings input-clear self-test passed."
+            : @"Touch settings input-clear self-test failed.";
+        NSLog(@"[KartPad] touch modal input self-test: %@ (before=%08x after=%08x)",
+              passed ? @"pass" : @"FAIL", before.buttons, after.buttons);
+        [self toggleSettingsPanel];
       });
     }
 #endif

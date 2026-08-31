@@ -44,8 +44,11 @@ pinned runtime preserves the complete function.
 - Fresh Simulator source/build directories: pass after correcting the tracked
   hunk and resuming the rejected build.
 - Original failure boundary: runtime unity compilation, step 757/853.
-- Corrected Simulator link/audit: pass; executable SHA-256
+- Corrected standalone Simulator link: pass; executable SHA-256
   `db5be50d55916fd9bd9ed8be7dbee7fb7885edc21380687d8dc4cf9bef563cf1`.
+- The standalone Ninja output deliberately retains generator placeholders in
+  `Info.plist` and has no Xcode-compiled `Assets.car`; it is a full-code link
+  boundary, not an installable or package-audited Simulator app.
 - Independent fresh physical-device Xcode directory: configure, compile, link,
   and strict `IOS` audit pass.
 - Fresh physical executable SHA-256:

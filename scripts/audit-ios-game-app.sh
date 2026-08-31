@@ -131,11 +131,16 @@ if [[ "${expected_platform}" == "IOSSIMULATOR" ]]; then
     echo "Simulator app is missing the touch-input test hook" >&2
     exit 69
   fi
+  if ! rg -a -F -q 'KARTPAD_TOUCH_MODAL_SELF_TEST' "${binary}"; then
+    echo "Simulator app is missing the touch-modal input-clear test hook" >&2
+    exit 69
+  fi
 else
   for simulator_only_contract in \
     'KARTPAD_IMPORT_FORCE_SWAP_FAILURE' \
     'KARTPAD_TOUCH_HOLD_SELF_TEST' \
-    'KARTPAD_TOUCH_INPUT_SELF_TEST'; do
+    'KARTPAD_TOUCH_INPUT_SELF_TEST' \
+    'KARTPAD_TOUCH_MODAL_SELF_TEST'; do
     if rg -a -F -q "${simulator_only_contract}" "${binary}"; then
       echo "device app contains Simulator-only contract: ${simulator_only_contract}" >&2
       exit 69

@@ -42,7 +42,7 @@ signing material.
 | Audio | Non-silent host playback, pause/resume, live output-device migration, and a two-hour representative continuity run pass their instrumented subcases; subjective listening and the eight-hour soak remain open |
 | Performance | Warm, simple scenes can report 60 FPS; first-use shader compilation and some tracks can fall far below real time. Stable frame pacing is **not yet accepted** |
 | Packaging | The original icon and exact branded 80 MiB package pass audit, installed-storage, configured gameplay, save-preservation, and normal-close checks; the native first-run/settings/data-management shell remains open |
-| iPhone/iPad | The full 29,065-function arm64 retail app boots, reaches live races, imports private extracted data, preserves saves, and resumes on iPhone and iPad Simulator; fresh Simulator and physical-iOS build directories reproduce the complete app with the exact SunPad touch/menu source |
+| iPhone/iPad | The full 29,065-function arm64 retail app boots, reaches live races, imports private extracted data, preserves saves, and resumes on iPhone and iPad Simulator; a fresh physical-iOS Xcode directory reproduces the complete unsigned device app with the exact SunPad touch/menu source |
 | Distribution | Development source only; no game data and no release candidate |
 
 The evidence ledger, exact open rows, and known risks live in
