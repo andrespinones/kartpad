@@ -16,6 +16,7 @@ dawn_archive="${repo_root}/build/dependency-cache/dawn-ios-arm64-v20260603.19105
 dawn_sha256="a361fcca75929fa5c766cfcde979c010a6da7d805e5db8e15c75e73fd8260e78"
 discio_source="${KARTPAD_DISCIO_SOURCE_DIR:-${repo_root}/build/dolphin-ios-discio-iphoneos-source}"
 discio_build="${KARTPAD_DISCIO_BUILD_DIR:-${repo_root}/build/dolphin-ios-discio-iphoneos-build}"
+app="${xcode_build}/Release-iphoneos/KartPad.app"
 
 if [[ ! -f "${runtime_source}/CMakeLists.txt" ]] ||
    ! rg -q 'MKW_KARTPAD_REPO_ROOT' "${runtime_source}/cmake/PublicProducts.cmake"; then
@@ -37,9 +38,36 @@ if [[ ! -f "${discio_source}/Source/Core/DiscIO/DiscExtractor.h" ||
   exit 66
 fi
 
+generated_link="${repo_root}/build/generated"
+if [[ -e "${generated_link}" && ! -L "${generated_link}" ]]; then
+  echo "ERROR: generated path exists and is not a symlink: ${generated_link}" >&2
+  exit 73
+fi
+previous_generated_target=""
+if [[ -L "${generated_link}" ]]; then
+  previous_generated_target="$(readlink "${generated_link}")"
+fi
+restore_generated_link() {
+  if [[ -n "${previous_generated_target}" ]]; then
+    ln -sfn "${previous_generated_target}" "${generated_link}"
+  elif [[ -L "${generated_link}" ]]; then
+    rm "${generated_link}"
+  fi
+}
+trap restore_generated_link EXIT
+ln -sfn "${translation_root}" "${generated_link}"
+
 "${repo_root}/scripts/verify-sunpad-overlay-snapshot.sh"
 plutil -lint "${repo_root}/apple/ios/RuntimeInfo.plist" \
   "${repo_root}/apple/ios/PrivacyInfo.xcprivacy" >/dev/null
+
+# A prior device deployment may have signed this reusable build product in
+# place. Remove only that generated signing residue before the unsigned build
+# so the privacy audit cannot inspect a stale profile from an older install.
+rm -f "${app}/embedded.mobileprovision"
+if [[ -d "${app}/_CodeSignature" ]]; then
+  rm -r "${app}/_CodeSignature"
+fi
 
 cmake -S "${runtime_source}" -B "${xcode_build}" -G Xcode \
   -DCMAKE_BUILD_TYPE=Release \
@@ -61,6 +89,5 @@ cmake -S "${runtime_source}" -B "${xcode_build}" -G Xcode \
 cmake --build "${xcode_build}" --config Release --target WiiCompiled -- \
   -sdk iphoneos CODE_SIGNING_ALLOWED=NO
 
-app="${xcode_build}/Release-iphoneos/KartPad.app"
 "${repo_root}/scripts/audit-ios-game-app.sh" "${app}" IOS
 echo "Built full translated physical-iOS game app: ${app}"

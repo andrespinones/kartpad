@@ -47,6 +47,11 @@
 - (void)clearTouchInput;
 - (void)toggleSettingsPanel;
 - (void)selectControlForEditing:(UIView *)control;
+- (void)reportProblem;
+- (void)createDiagnosticReportFromPrompt:(UIAlertController *)prompt
+                              openGitHub:(BOOL)openGitHub;
+- (void)openGitHubReportWithID:(NSString *)reportID
+                       answers:(NSDictionary<NSString *, NSString *> *)answers;
 @end
 
 namespace {
@@ -452,7 +457,8 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
   [self.view addSubview:stack];
   [NSLayoutConstraint activateConstraints:@[
     [stack.centerXAnchor constraintEqualToAnchor:self.view.centerXAnchor],
-    [stack.centerYAnchor constraintEqualToAnchor:self.view.centerYAnchor],
+    [stack.topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor
+                                    constant:32.0],
     [stack.leadingAnchor constraintGreaterThanOrEqualToAnchor:
         self.view.safeAreaLayoutGuide.leadingAnchor constant:32.0],
     [stack.trailingAnchor constraintLessThanOrEqualToAnchor:
@@ -676,6 +682,11 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
         self.succeeded = NO;
       }];
     });
+  } else if ([self documentsRoots].count == 1) {
+    // A WBFS copied into KartPad's Files-visible folder is an explicit import
+    // choice. Start it directly instead of layering another prompt over the
+    // first-launch explanation.
+    dispatch_async(dispatch_get_main_queue(), ^{ [self chooseDocumentsRoot]; });
   } else {
     dispatch_async(dispatch_get_main_queue(), ^{ [self showOptions]; });
   }
@@ -897,9 +908,19 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
     return;
   }
 
+  // A primary-menu button enters the selected state while its menu is being
+  // dismissed. The inherited overlay did not provide an image for that state,
+  // which made the ellipsis flash blank when the user tapped outside the menu.
+  UIImage *menuImage = [menuButton imageForState:UIControlStateNormal];
+  if (menuImage != nil) {
+    [menuButton setImage:menuImage forState:UIControlStateSelected];
+    [menuButton setImage:menuImage
+                forState:UIControlStateSelected | UIControlStateHighlighted];
+  }
+
   __weak KartPadGameOverlay *weakSelf = self;
   UIAction *multiplayer =
-      [UIAction actionWithTitle:@"Multiplayer…"
+      [UIAction actionWithTitle:@"Local Multiplayer…"
                           image:[UIImage systemImageNamed:@"person.2.fill"]
                      identifier:@"dev.kartpad.multiplayer"
                         handler:^(__kindof UIAction *action) {
@@ -918,58 +939,205 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
                             weakSelf.motionSteeringRequested();
                           }
                         }];
-  UIAction *(^unsupportedExperiment)(UIAction *, NSString *) =
-      ^UIAction *(UIAction *sourceAction, NSString *detail) {
-        UIAction *replacement =
-            [UIAction actionWithTitle:sourceAction.title
-                                image:sourceAction.image
-                           identifier:sourceAction.identifier
-                              handler:^(__kindof UIAction *action) {
-          (void)action;
-          UIAlertController *alert =
-              [UIAlertController alertControllerWithTitle:@"Unavailable in KartPad"
-                                                  message:detail
-                                           preferredStyle:UIAlertControllerStyleAlert];
-          [alert addAction:[UIAlertAction actionWithTitle:@"OK"
-                                                    style:UIAlertActionStyleDefault
-                                                  handler:nil]];
-          [weakSelf.window.rootViewController presentViewController:alert
-                                                           animated:YES
-                                                         completion:nil];
-        }];
-        replacement.state = UIMenuElementStateOff;
-        return replacement;
-      };
-  NSMutableArray<UIMenuElement *> *children =
-      [NSMutableArray arrayWithObjects:multiplayer, motionSteering, nil];
+  UIAction *reportProblem = nil;
+  NSMutableArray<UIMenuElement *> *mainItems = [NSMutableArray array];
   for (UIMenuElement *element in sourceMenu.children) {
     if ([element isKindOfClass:UIAction.class]) {
       UIAction *action = (UIAction *)element;
-      if ([action.title isEqualToString:
-              @"Experimental Performance Mode (Restart Required)"]) {
-        [children addObject:unsupportedExperiment(action,
-            @"This SunPad experiment changes Sunshine's emulated CPU clock. "
-             "KartPad's ahead-of-time Mario Kart Wii runtime does not expose "
-             "that clock mode, so stable real-time timing remains active and "
-             "no setting was changed.")];
+      if ([action.title isEqualToString:@"Report a Problem…"]) {
+        reportProblem = action;
         continue;
       }
-      if ([action.title isEqualToString:
-              @"Experimental 60 FPS (Restart Required)"]) {
-        [children addObject:unsupportedExperiment(action,
-            @"This SunPad experiment targets Sunshine's GMSE01 patch. It is "
-             "not compatible with KartPad's Mario Kart Wii runtime, so the "
-             "retail cadence remains active and no setting was changed.")];
+      if ([action.title hasPrefix:@"Experimental Performance Mode"] ||
+          [action.title hasPrefix:@"Experimental 60 FPS"]) {
+        // These are Sunshine-specific experiments inherited from SunPad.
+        // Mario Kart Wii already uses its retail 60 FPS cadence, and neither
+        // setting changes KartPad's ahead-of-time runtime.
         continue;
       }
     }
-    [children addObject:element];
+
+    if ([element isKindOfClass:UIMenu.class] &&
+        [element.title isEqualToString:@"Game Data & Saves"]) {
+      UIMenu *dataMenu = (UIMenu *)element;
+      NSMutableArray<UIMenuElement *> *dataItems = [NSMutableArray array];
+      for (UIMenuElement *dataElement in dataMenu.children) {
+        if ([dataElement isKindOfClass:UIAction.class] &&
+            [dataElement.title isEqualToString:@"Import from SunPad Folder"]) {
+          UIAction *sourceAction = (UIAction *)dataElement;
+          UIAction *replacement =
+              [UIAction actionWithTitle:@"Import from KartPad Folder"
+                                  image:sourceAction.image
+                             identifier:sourceAction.identifier
+                                handler:^(__kindof UIAction *action) {
+            (void)action;
+            [weakSelf.delegate gameOverlayRequestsGameDataFolderImport:weakSelf];
+          }];
+          replacement.attributes = sourceAction.attributes;
+          replacement.state = sourceAction.state;
+          replacement.discoverabilityTitle = sourceAction.discoverabilityTitle;
+          [dataItems addObject:replacement];
+        } else {
+          [dataItems addObject:dataElement];
+        }
+      }
+      [mainItems addObject:[UIMenu menuWithTitle:dataMenu.title
+                                           image:dataMenu.image
+                                      identifier:dataMenu.identifier
+                                         options:dataMenu.options
+                                        children:dataItems]];
+      continue;
+    }
+    [mainItems addObject:element];
   }
+
+  NSMutableArray<UIMenuElement *> *children =
+      [NSMutableArray arrayWithObjects:multiplayer, motionSteering, nil];
+  if (reportProblem != nil) [children addObject:reportProblem];
+  [children addObjectsFromArray:mainItems];
   menuButton.menu = [UIMenu menuWithTitle:@"KartPad"
                                     image:sourceMenu.image
                                identifier:@"dev.kartpad.menu"
                                   options:sourceMenu.options
                                  children:children];
+}
+
+- (void)reportProblem {
+  UIViewController *presenter = KartPadVisibleViewController(self.window);
+  if (presenter == nil) return;
+  UIAlertController *prompt =
+      [UIAlertController alertControllerWithTitle:@"Report a Problem"
+                                          message:@"Answer briefly and KartPad will add the technical details. If the problem is visual, take a screenshot first and attach it with the report on GitHub. The report never includes your game image, extracted files, saves, signing material, or controller inputs. GitHub reports and attachments are public."
+                                   preferredStyle:UIAlertControllerStyleAlert];
+  [prompt addTextFieldWithConfigurationHandler:^(UITextField *field) {
+    field.placeholder = @"What went wrong?";
+    field.clearButtonMode = UITextFieldViewModeWhileEditing;
+  }];
+  [prompt addTextFieldWithConfigurationHandler:^(UITextField *field) {
+    field.placeholder = @"Area and what you were doing (optional)";
+    field.clearButtonMode = UITextFieldViewModeWhileEditing;
+  }];
+  [prompt addTextFieldWithConfigurationHandler:^(UITextField *field) {
+    field.placeholder = @"Every time, sometimes, once, or not sure?";
+    field.clearButtonMode = UITextFieldViewModeWhileEditing;
+  }];
+  [prompt addAction:[UIAlertAction actionWithTitle:@"Cancel"
+                                              style:UIAlertActionStyleCancel
+                                            handler:nil]];
+  __weak KartPadGameOverlay *weakSelf = self;
+  [prompt addAction:[UIAlertAction actionWithTitle:@"Share Report…"
+                                              style:UIAlertActionStyleDefault
+                                            handler:^(UIAlertAction *action) {
+    (void)action;
+    [weakSelf createDiagnosticReportFromPrompt:prompt openGitHub:NO];
+  }]];
+  [prompt addAction:[UIAlertAction actionWithTitle:@"Report on GitHub"
+                                              style:UIAlertActionStyleDefault
+                                            handler:^(UIAlertAction *action) {
+    (void)action;
+    [weakSelf createDiagnosticReportFromPrompt:prompt openGitHub:YES];
+  }]];
+  prompt.preferredAction = prompt.actions.lastObject;
+  [presenter presentViewController:prompt animated:YES completion:nil];
+}
+
+- (void)createDiagnosticReportFromPrompt:(UIAlertController *)prompt
+                              openGitHub:(BOOL)openGitHub {
+  NSString *problem = prompt.textFields.count > 0 ? prompt.textFields[0].text : @"";
+  NSString *context = prompt.textFields.count > 1 ? prompt.textFields[1].text : @"";
+  NSString *frequency = prompt.textFields.count > 2 ? prompt.textFields[2].text : @"";
+  NSString *reportID = [NSString stringWithFormat:@"KP-%@",
+      [[[NSUUID UUID] UUIDString] substringToIndex:8]];
+  NSDictionary<NSString *, NSString *> *answers = @{
+    @"problem" : problem ?: @"",
+    @"context" : context ?: @"",
+    @"frequency" : frequency ?: @"",
+  };
+  NSString *technicalContext = [self.delegate gameOverlayDiagnosticContext:self];
+  SunPadLog(@"diagnostic report requested id=%@ destination=%@",
+            reportID, openGitHub ? @"github" : @"share-sheet");
+  NSError *error = nil;
+  NSURL *reportURL = SunPadDiagnosticsReportURL(
+      reportID, answers, technicalContext, &error);
+  UIViewController *presenter = KartPadVisibleViewController(self.window);
+  if (reportURL == nil) {
+    UIAlertController *alert =
+        [UIAlertController alertControllerWithTitle:@"Diagnostic Report Unavailable"
+                                            message:error.localizedDescription
+                                     preferredStyle:UIAlertControllerStyleAlert];
+    [alert addAction:[UIAlertAction actionWithTitle:@"OK"
+                                              style:UIAlertActionStyleDefault
+                                            handler:nil]];
+    [presenter presentViewController:alert animated:YES completion:nil];
+    return;
+  }
+
+  NSString *report = [NSString stringWithContentsOfURL:reportURL
+                                               encoding:NSUTF8StringEncoding
+                                                  error:nil];
+  if (report != nil) {
+    report = [report stringByReplacingOccurrencesOfString:
+        @"SunPad Diagnostic Report v2" withString:@"KartPad Diagnostic Report v2"];
+    report = [report stringByReplacingOccurrencesOfString:
+        @"issuesURL=https://github.com/chrissotraidis/sunpad/issues"
+                                                 withString:
+        @"issuesURL=https://github.com/chrissotraidis/kartpad/issues"];
+    [report writeToURL:reportURL atomically:YES
+               encoding:NSUTF8StringEncoding error:nil];
+  }
+
+  if (openGitHub) {
+    [self openGitHubReportWithID:reportID answers:answers];
+    return;
+  }
+
+  UIActivityViewController *share =
+      [[UIActivityViewController alloc] initWithActivityItems:@[reportURL]
+                                       applicationActivities:nil];
+  UIPopoverPresentationController *popover = share.popoverPresentationController;
+  UIButton *menuButton = (UIButton *)KartPadSubviewWithAccessibilityLabel(
+      self, @"Menu", UIButton.class);
+  popover.sourceView = menuButton ?: self;
+  popover.sourceRect = menuButton != nil ? menuButton.bounds : self.bounds;
+  [presenter presentViewController:share animated:YES completion:nil];
+}
+
+- (void)openGitHubReportWithID:(NSString *)reportID
+                       answers:(NSDictionary<NSString *, NSString *> *)answers {
+  NSBundle *bundle = NSBundle.mainBundle;
+  NSString *version = [bundle objectForInfoDictionaryKey:
+      @"CFBundleShortVersionString"] ?: @"unknown";
+  NSString *build = [bundle objectForInfoDictionaryKey:
+      @"CFBundleVersion"] ?: @"unknown";
+  NSString *platform =
+      self.traitCollection.userInterfaceIdiom == UIUserInterfaceIdiomPad
+          ? @"iPad" : @"iPhone";
+  NSString *problem = answers[@"problem"].length > 0
+      ? answers[@"problem"] : @"KartPad problem";
+  if (problem.length > 100) problem = [problem substringToIndex:100];
+  NSURLComponents *components = [NSURLComponents componentsWithString:
+      @"https://github.com/chrissotraidis/kartpad/issues/new"];
+  components.queryItems = @[
+    [NSURLQueryItem queryItemWithName:@"template" value:@"bug_report.yml"],
+    [NSURLQueryItem queryItemWithName:@"title"
+                                value:[NSString stringWithFormat:@"[Bug]: %@", problem]],
+    [NSURLQueryItem queryItemWithName:@"report-id" value:reportID],
+    [NSURLQueryItem queryItemWithName:@"revision"
+                                value:[NSString stringWithFormat:@"%@ (build %@)",
+                                                                   version, build]],
+    [NSURLQueryItem queryItemWithName:@"platform" value:platform],
+    [NSURLQueryItem queryItemWithName:@"performance-profile"
+                                value:[self.delegate gameOverlayPerformanceProfile:self]],
+    [NSURLQueryItem queryItemWithName:@"summary" value:answers[@"problem"]],
+    [NSURLQueryItem queryItemWithName:@"context" value:answers[@"context"]],
+    [NSURLQueryItem queryItemWithName:@"frequency" value:answers[@"frequency"]],
+  ];
+  NSURL *url = components.URL;
+  if (url == nil) return;
+  [UIApplication.sharedApplication openURL:url options:@{}
+                         completionHandler:^(BOOL success) {
+    if (!success) SunPadLog(@"diagnostic github open failed id=%@", reportID);
+  }];
 }
 
 - (void)rPressureChanged:(uint8_t)pressure fullPress:(BOOL)fullPress {
@@ -1154,10 +1322,10 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
   const NSUInteger controllerCount =
       [KartPadPhysicalControllers sharedControllers].connectedControllerCount;
   NSString *message = [NSString stringWithFormat:
-      @"Choose Multiplayer in Mario Kart Wii's Main Menu. Connected extended controllers are assigned automatically to Players 1–4; KartPad touch remains available for Player 1. Connected now: %lu.",
+      @"This setup is for local multiplayer. Choose Multiplayer in Mario Kart Wii's Main Menu. Connected extended controllers are assigned automatically to Players 1–4; KartPad touch remains available for Player 1. Online Nintendo WFC, Wiimmfi, and Retro Rewind play are not supported in this iPad build yet. Connected now: %lu.",
       (unsigned long)controllerCount];
   UIAlertController *sheet =
-      [UIAlertController alertControllerWithTitle:@"Multiplayer"
+      [UIAlertController alertControllerWithTitle:@"Local Multiplayer"
                                           message:message
                                    preferredStyle:UIAlertControllerStyleActionSheet];
   __weak KartPadRuntimeOverlayHost *weakSelf = self;
@@ -1416,7 +1584,7 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
   const NSUInteger count =
       [KartPadPhysicalControllers sharedControllers].connectedControllerCount;
   NSString *message = [NSString stringWithFormat:
-      @"Extended controllers connect automatically in stable Player 1–4 slots. Face buttons use SunPad's persisted A/B/X/Y/Z mapping; sticks, D-pad, Menu, shoulders, and triggers remain direct. Connected now: %lu.",
+      @"Extended controllers connect automatically in stable Player 1–4 slots. Face buttons use KartPad's persisted A/B/X/Y/Z mapping; sticks, D-pad, Menu, shoulders, and triggers remain direct. Connected now: %lu.",
       (unsigned long)count];
   [self showIntegrationAlert:@"Controller Setup" message:message];
 }

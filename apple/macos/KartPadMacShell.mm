@@ -939,6 +939,30 @@ bool KartPadMacShellPrepareGameData(void) {
   @autoreleasepool {
     BeginSession();
     RuntimeConfigFile::EnsureConfigFile();
+
+    // The command-line self-build has already extracted and validated the
+    // supplied WBFS. Let it hand that private tree to the app without forcing
+    // the user through an unrelated folder picker on first launch.
+    if (const char *prepared = std::getenv("KARTPAD_SELF_BUILD_GAME_DATA_ROOT");
+        prepared != nullptr && *prepared != '\0') {
+      NSString *root = [NSString stringWithUTF8String:prepared];
+      NSError *preparedError = nil;
+      NSString *validation = ValidateExtractedRoot(root, &preparedError);
+      const BOOL configured = validation == nil && preparedError == nil &&
+                              WriteGameDataRoot(root);
+      if (configured) {
+        std::cout << "[kartpad-macos] Configured validated self-build game data."
+                  << std::endl;
+      } else {
+        std::cerr << "[kartpad-macos] Unable to configure self-build game data: "
+                  << (preparedError.localizedDescription.UTF8String ?:
+                      validation.UTF8String ?: "unknown error")
+                  << std::endl;
+      }
+      MarkSessionClean();
+      return false;
+    }
+
     NSError *error = nil;
     NSString *configured = ConfiguredGameDataRoot();
     if (ValidateExtractedRoot(configured, &error) == nil && error == nil) {

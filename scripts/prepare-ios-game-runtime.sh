@@ -19,6 +19,12 @@ discio_source="${KARTPAD_DISCIO_SOURCE_DIR:-${repo_root}/build/dolphin-ios-disci
 discio_build="${KARTPAD_DISCIO_BUILD_DIR:-${repo_root}/build/dolphin-ios-discio-iphonesimulator-build}"
 sse2neon_url="https://raw.githubusercontent.com/DLTcollab/sse2neon/13a42df35dc7fcc94f987568e7274a998bb6cc86/sse2neon.h"
 sse2neon_sha256="44b9fa3dec3a52ea473246e04b9f692a4e5b0ed654299eef7fe7ec3049e223e0"
+prepare_only="${KARTPAD_PREPARE_ONLY:-0}"
+
+if [[ "${prepare_only}" != "0" && "${prepare_only}" != "1" ]]; then
+  echo "ERROR: KARTPAD_PREPARE_ONLY must be 0 or 1" >&2
+  exit 64
+fi
 
 if [[ "$(uname -s)" != "Darwin" || "$(uname -m)" != "arm64" ]]; then
   echo "ERROR: the iOS game-runtime build requires arm64 macOS" >&2
@@ -32,19 +38,23 @@ if [[ -e "${runtime_source}" || -e "${runtime_build}" ]]; then
   echo "ERROR: output already exists; choose fresh output paths" >&2
   exit 1
 fi
-if [[ ! -f "${dawn_archive}" ]]; then
+if [[ "${prepare_only}" == "0" && ! -f "${dawn_archive}" ]]; then
   echo "ERROR: missing pinned Simulator Dawn archive; run scripts/build-dawn-ios-simulator.sh" >&2
   exit 1
 fi
-if [[ ! -f "${discio_source}/Source/Core/DiscIO/DiscExtractor.h" ||
-      ! -f "${discio_build}/Source/Core/DiscIO/libdiscio.a" ]]; then
-  echo "ERROR: missing iOS Simulator DiscIO dependency; run scripts/build-ios-discio-probe.sh" >&2
-  exit 1
+if [[ "${prepare_only}" == "0" ]]; then
+  if [[ ! -f "${discio_source}/Source/Core/DiscIO/DiscExtractor.h" ||
+        ! -f "${discio_build}/Source/Core/DiscIO/libdiscio.a" ]]; then
+    echo "ERROR: missing iOS Simulator DiscIO dependency; run scripts/build-ios-discio-probe.sh" >&2
+    exit 1
+  fi
 fi
-actual_dawn_sha256="$(shasum -a 256 "${dawn_archive}" | awk '{print $1}')"
-if [[ "${actual_dawn_sha256}" != "${dawn_sha256}" ]]; then
-  echo "ERROR: Simulator Dawn hash mismatch: ${actual_dawn_sha256}" >&2
-  exit 1
+if [[ "${prepare_only}" == "0" ]]; then
+  actual_dawn_sha256="$(shasum -a 256 "${dawn_archive}" | awk '{print $1}')"
+  if [[ "${actual_dawn_sha256}" != "${dawn_sha256}" ]]; then
+    echo "ERROR: Simulator Dawn hash mismatch: ${actual_dawn_sha256}" >&2
+    exit 1
+  fi
 fi
 
 mkdir -p "$(dirname "${runtime_source}")"
@@ -60,6 +70,8 @@ patch --batch -p1 -d "${runtime_source}/aurora-main" < \
 patch --batch -p1 -d "${runtime_source}/aurora-main" < \
   "${repo_root}/patches/aurora-ios-simulator-single-pipeline-worker.patch"
 patch --batch -p1 -d "${runtime_source}" < "${repo_root}/patches/wiicompiled-apple-runtime.patch"
+patch --batch -p1 -d "${runtime_source}" < \
+  "${repo_root}/patches/wiicompiled-ios-arm64-fibers.patch"
 patch --batch -p1 -d "${runtime_source}" < \
   "${repo_root}/patches/wiicompiled-present-telemetry.patch"
 patch --batch -p1 -d "${runtime_source}" < "${repo_root}/patches/wiicompiled-ios-app-integration.patch"
@@ -77,6 +89,11 @@ actual_sse2neon_sha256="$(shasum -a 256 "${runtime_source}/third_party/sse2neon/
 if [[ "${actual_sse2neon_sha256}" != "${sse2neon_sha256}" ]]; then
   echo "ERROR: sse2neon hash mismatch: ${actual_sse2neon_sha256}" >&2
   exit 1
+fi
+
+if [[ "${prepare_only}" == "1" ]]; then
+  echo "Prepared integrated iOS runtime source: ${runtime_source}"
+  exit 0
 fi
 
 # Mach-O C symbols have a leading underscore. Publish both spellings for the
