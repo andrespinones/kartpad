@@ -17,6 +17,7 @@ dawn_sha256="a361fcca75929fa5c766cfcde979c010a6da7d805e5db8e15c75e73fd8260e78"
 discio_source="${KARTPAD_DISCIO_SOURCE_DIR:-${repo_root}/build/dolphin-ios-discio-iphoneos-source}"
 discio_build="${KARTPAD_DISCIO_BUILD_DIR:-${repo_root}/build/dolphin-ios-discio-iphoneos-build}"
 app="${xcode_build}/Release-iphoneos/KartPad.app"
+path_map_flags="-ffile-prefix-map=${repo_root}=KartPad -fmacro-prefix-map=${repo_root}=KartPad"
 
 if [[ ! -f "${runtime_source}/CMakeLists.txt" ]] ||
    ! rg -q 'MKW_KARTPAD_REPO_ROOT' "${runtime_source}/cmake/PublicProducts.cmake"; then
@@ -77,6 +78,10 @@ cmake -S "${runtime_source}" -B "${xcode_build}" -G Xcode \
   -DCMAKE_OSX_SYSROOT=iphoneos \
   -DCMAKE_OSX_ARCHITECTURES=arm64 \
   -DCMAKE_OSX_DEPLOYMENT_TARGET=16.0 \
+  -DCMAKE_C_FLAGS_RELEASE="-O3 -DNDEBUG ${path_map_flags}" \
+  -DCMAKE_CXX_FLAGS_RELEASE="-O3 -DNDEBUG ${path_map_flags}" \
+  -DCMAKE_OBJC_FLAGS_RELEASE="-O3 -DNDEBUG ${path_map_flags}" \
+  -DCMAKE_OBJCXX_FLAGS_RELEASE="-O3 -DNDEBUG ${path_map_flags}" \
   -DMKW_AURORA_DIR="${runtime_source}/aurora-main" \
   -DAURORA_DAWN_PACKAGE_URL="file://${dawn_archive}" \
   -DAURORA_DAWN_PACKAGE_URL_HASH="SHA256=${dawn_sha256}" \
@@ -90,4 +95,8 @@ cmake --build "${xcode_build}" --config Release --target WiiCompiled -- \
   -sdk iphoneos CODE_SIGNING_ALLOWED=NO
 
 "${repo_root}/scripts/audit-ios-game-app.sh" "${app}" IOS
+if rg -a -F -q "${repo_root}" "${app}/KartPad"; then
+  echo "ERROR: physical-iOS app exposes its private KartPad build path" >&2
+  exit 65
+fi
 echo "Built full translated physical-iOS game app: ${app}"

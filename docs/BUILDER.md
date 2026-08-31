@@ -1,0 +1,98 @@
+# KartPad Personal IPA Builder
+
+KartPad uses static recompilation. A playable app therefore has to translate
+the supported game executable on the user's Mac before Apple signing. The
+public Builder automates that local process; it is not an emulator, does not
+download game data, and does not make one universal playable IPA.
+
+## Current preview
+
+The first Builder preview supports one verified input: the pinned PAL
+`RMCP01` revision 0 WBFS development image. It produces an unsigned,
+personalized IPA for local signing. The Builder and compatibility metadata are
+public; disc data, extracted files, translated code, signing material, and the
+resulting IPA remain ignored and private.
+
+Requirements are an Apple Silicon Mac, Xcode, CMake, Ninja, Git, ripgrep,
+Python 3, .NET 8, and `nodtool` 2.0.0-alpha.9. Fetch the profile's exact pinned
+source checkouts and hash-verified physical-iOS Dawn archive once:
+
+```sh
+./scripts/build-user-ipa.sh bootstrap
+./scripts/build-user-ipa.sh doctor
+```
+
+The bootstrap fetches only dependencies declared by the selected profile,
+checks out exact commits, initializes their submodules, disables push URLs,
+and fails rather than modifying an unexpected or dirty existing checkout.
+
+Inspect an image without extracting it:
+
+```sh
+./scripts/build-user-ipa.sh inspect /path/to/Mario-Kart-Wii.wbfs
+```
+
+Build the private unsigned IPA:
+
+```sh
+./scripts/build-user-ipa.sh build /path/to/Mario-Kart-Wii.wbfs
+```
+
+The default output is ignored at
+`artifacts/KartPad-personal-unsigned.ipa`. Do not upload or redistribute that
+file: it contains translated code generated from the user's game executable.
+
+## Compatibility profiles
+
+Profiles live in `builder/profiles/` and are versioned JSON. They keep these
+concerns separate:
+
+- accepted container formats and exact full-image hashes;
+- disc ID, disc number, revision, and Wii magic;
+- extracted DOL and REL identities;
+- load addresses, memory layout, entry points, function map, injectors, and
+  expected translation counts.
+
+This design allows multiple verified WBFS/ISO container variants to point to
+one static-recompilation profile when extraction proves they contain the same
+DOL and REL. A different region or executable revision receives a separate
+profile because addresses and generated code can change. Unknown inputs always
+fail closed.
+
+To add compatibility:
+
+1. Verify the complete image and extract it read-only.
+2. Record the container SHA-256 only after establishing legal provenance.
+3. Compare the extracted DOL/REL hashes and disc header with an existing
+   profile.
+4. Add a container entry only if the executable identities are identical;
+   otherwise create and validate a new profile.
+5. Run `./scripts/test-kartpad-builder.sh` and a complete local build twice.
+
+## Repeatable builds and cache safety
+
+Validated extraction is cached by profile and complete input-image hash, so
+ordinary code changes do not extract the same disc again. Build and translation
+workspaces use a stricter key containing the input-image hash, canonical
+profile hash, Builder pipeline version, tracked source index, and current source
+diff. A code or profile change therefore cannot silently reuse an older app
+workspace. Extraction and translation stages validate their manifests before
+reuse and stage new extraction atomically. IPA ZIP entries are sorted, have fixed
+timestamps, and preserve executable permissions, so the same audited app and
+provenance produce byte-identical packages.
+
+The IPA embeds a content-safe `KartPadBuilderProvenance.json` containing hashes
+and profile identifiers, never local source paths. Packaging rejects disc
+images, saves, provisioning profiles, signatures, and explicitly supplied
+private path prefixes.
+
+## Release boundary
+
+Only the Builder source, profiles, tests, and documentation may be attached to
+a public release. Never publish a generated translation directory, app bundle,
+personal IPA, extracted game tree, save, signing certificate, or provisioning
+profile.
+
+Online multiplayer is almost complete but still pending end-to-end testing.
+That work is independent of Builder compatibility and is not claimed as
+working in this preview.

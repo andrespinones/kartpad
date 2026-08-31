@@ -2,10 +2,23 @@
 set -euo pipefail
 
 repo_root="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
-source_root="${1:-${repo_root}/ref/upstream/dolphin}"
+absolute_from_repo() {
+  case "$1" in
+    /*) printf '%s\n' "$1" ;;
+    *) printf '%s/%s\n' "${repo_root}" "$1" ;;
+  esac
+}
+source_root="$(absolute_from_repo "${1:-ref/upstream/dolphin}")"
 sdk="${4:-iphonesimulator}"
-work_source="${2:-${repo_root}/build/dolphin-ios-discio-${sdk}-source}"
-work_build="${3:-${repo_root}/build/dolphin-ios-discio-${sdk}-build}"
+work_source="$(absolute_from_repo "${2:-build/dolphin-ios-discio-${sdk}-source}")"
+work_build="$(absolute_from_repo "${3:-build/dolphin-ios-discio-${sdk}-build}")"
+path_map_flags="-ffile-prefix-map=${work_source}=Dolphin -fmacro-prefix-map=${work_source}=Dolphin"
+resume="${KARTPAD_DISCIO_RESUME:-0}"
+
+if [[ "${resume}" != "0" && "${resume}" != "1" ]]; then
+  echo "ERROR: KARTPAD_DISCIO_RESUME must be 0 or 1" >&2
+  exit 64
+fi
 
 case "${sdk}" in
   iphonesimulator)
@@ -41,27 +54,40 @@ for required in \
     exit 66
   fi
 done
-if [[ -e "${work_source}" || -e "${work_build}" ]]; then
+if [[ "${resume}" == "0" && ( -e "${work_source}" || -e "${work_build}" ) ]]; then
   echo "ERROR: work source/build already exists; choose fresh paths" >&2
   exit 73
 fi
 
-mkdir -p "$(dirname "${work_source}")" "$(dirname "${work_build}")"
-cp -R "${source_root}" "${work_source}"
-patch --batch -p1 -d "${work_source}" < \
-  "${repo_root}/patches/dolphin-ios-discio.patch"
-patch --batch -p1 -d "${work_source}" < \
-  "${repo_root}/patches/dolphin-ios-discio-coreless.patch"
-patch --batch -p1 -d "${work_source}/Externals/curl/curl" < \
-  "${repo_root}/patches/dolphin-curl-ios-pipe2.patch"
+if [[ "${resume}" == "0" ]]; then
+  mkdir -p "$(dirname "${work_source}")" "$(dirname "${work_build}")"
+  cp -R "${source_root}" "${work_source}"
+  patch --batch -p1 -d "${work_source}" < \
+    "${repo_root}/patches/dolphin-ios-discio.patch"
+  patch --batch -p1 -d "${work_source}" < \
+    "${repo_root}/patches/dolphin-ios-discio-coreless.patch"
+  patch --batch -p1 -d "${work_source}/Externals/curl/curl" < \
+    "${repo_root}/patches/dolphin-curl-ios-pipe2.patch"
+elif [[ ! -f "${work_build}/CMakeCache.txt" ||
+        ! -f "${work_source}/Source/Core/Common/FilesystemWatcher_iOS.cpp" ]]; then
+  echo "ERROR: DiscIO resume paths are not a configured KartPad worktree" >&2
+  exit 66
+fi
 
 cmake -S "${work_source}" -B "${work_build}" -G Ninja \
+  -DCMAKE_C_FLAGS="${path_map_flags}" \
+  -DCMAKE_CXX_FLAGS="${path_map_flags}" \
+  -DCMAKE_OBJC_FLAGS="${path_map_flags}" \
+  -DCMAKE_OBJCXX_FLAGS="${path_map_flags}" \
   -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_SYSTEM_NAME=iOS \
   -DCMAKE_SYSTEM_PROCESSOR=arm64 \
   -DCMAKE_OSX_SYSROOT="${cmake_sysroot}" \
   -DCMAKE_OSX_ARCHITECTURES=arm64 \
   -DCMAKE_OSX_DEPLOYMENT_TARGET=16.0 \
+  -DCMAKE_C_FLAGS_RELEASE="-O3 -DNDEBUG ${path_map_flags}" \
+  -DCMAKE_CXX_FLAGS_RELEASE="-O3 -DNDEBUG ${path_map_flags}" \
+  -DCMAKE_OBJCXX_FLAGS_RELEASE="-O3 -DNDEBUG ${path_map_flags}" \
   -DENABLE_QT=OFF \
   -DENABLE_NOGUI=OFF \
   -DENABLE_CLI_TOOL=OFF \
@@ -93,6 +119,10 @@ if [[ "$(xcrun vtool -show-build "${binary}" | awk '/platform/{print $2; exit}')
 fi
 if otool -L "${binary}" | rg -q '/opt/homebrew|/usr/local'; then
   echo "ERROR: DiscIO probe contains a host-only dependency" >&2
+  exit 65
+fi
+if rg -a -F -q "${work_source}" "${binary}"; then
+  echo "ERROR: DiscIO probe exposes its private build path" >&2
   exit 65
 fi
 

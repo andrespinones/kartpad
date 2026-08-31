@@ -19,19 +19,21 @@
 > [!IMPORTANT]
 > KartPad is still in development. A local unsigned IPA has been built, and
 > locally signed builds have been installed and accepted on physical iPhone
-> and iPad hardware. The current public GitHub release provides source code
-> rather than a downloadable IPA. Online play and Retro Rewind content are not
-> available yet.
+> and iPad hardware. The public Personal IPA Builder preview creates an
+> unsigned IPA locally from a supported user-owned disc image. It does not
+> publish a playable IPA or any game code. Online multiplayer is almost done
+> but remains pending end-to-end testing; Retro Rewind content is not available
+> yet.
 
 ## What is available now?
 
 | Question | Answer |
 |---|---|
 | Is this Dolphin or streaming? | No. WiiCompiled translates the game's PowerPC code ahead of time, then KartPad compiles it for ARM64 and presents it through Metal. |
-| Does an IPA exist? | Yes. A local unsigned IPA has been built, and locally signed builds have been accepted on physical iPhone and iPad hardware. It is not currently attached to the public GitHub release, so users must build and locally sign their own development app on an Apple Silicon Mac. |
+| Does an IPA exist? | Yes. The public Personal IPA Builder creates a private unsigned IPA locally, and locally signed builds have been accepted on physical iPhone and iPad hardware. A universal playable IPA cannot be published because static recompilation translates the user's game executable before Apple signing. |
 | Does it include Mario Kart Wii? | No. You must provide your own legally obtained supported PAL `RMCP01` revision 0 WBFS/ISO. |
 | Does it support Retro Rewind? | Not yet. The current build runs the original retail content, including its 32 tracks. Retro Rewind's extra tracks, characters, and other content are planned as an optional mode selected from the three-dot menu. |
-| Does online play work? | Not yet. Retro WFC login, matchmaking, and online racing are active work and are targeted for a near-term update. This networking work does not add Retro Rewind content and is not Wiimmfi support. |
+| Does online play work? | Not yet. Retro WFC login, matchmaking, and online racing are almost done but pending end-to-end testing. This networking work does not add Retro Rewind content and is not Wiimmfi support. |
 | Do touch, tilt, and controllers work? | Yes. They are implemented in the development IPA, and the app has been physically accepted on both iPhone and iPad. Feature tuning can continue independently of that device acceptance. |
 | Are Android and Apple TV supported? | Not currently. Apple TV is a possible target once the current build is stable. Android may be investigated later. |
 | How much storage does it need? | The app is about 80 MiB and the extracted game data is about 2.5 GiB. Keeping the WBFS/ISO on the device requires additional space, and building from source needs substantially more free storage. |
@@ -60,8 +62,8 @@ signing material.
 | Packaging | The original icon and exact branded 80 MiB package pass audit, installed-storage, configured gameplay, save-preservation, and normal-close checks; the native first-run/settings/data-management shell remains open |
 | iPhone/iPad | The full 29,065-function ARM64 retail app has been packaged as an unsigned IPA; locally signed builds have been installed and physically accepted on both iPhone and iPad, reaching live races, importing a supported private WBFS, and preserving saves |
 | Game content | Original retail Mario Kart Wii content only today; Retro Rewind content is planned as a future optional mode in the three-dot menu |
-| Online multiplayer | Not working yet; Retro WFC login, matchmaking, and racing are active work targeted for a near-term update |
-| Distribution | A local unsigned IPA exists and corresponding locally signed builds have passed physical-device acceptance; the current public release provides source code and no game data, but does not offer the IPA as a download |
+| Online multiplayer | Almost done, but Retro WFC login, matchmaking, rooms, and racing remain pending end-to-end testing |
+| Distribution | The public Personal IPA Builder creates a private unsigned IPA locally from a supported user-owned image; no playable IPA, game data, or translated game code is distributed |
 
 The evidence ledger, exact open rows, and known risks live in
 [`docs/STATUS.md`](docs/STATUS.md). The 67-row release matrix is in
@@ -119,6 +121,27 @@ the build scripts for identification; no disc content is tracked or
 distributed.
 
 ## Build from source
+
+### Build a personal unsigned IPA
+
+KartPad's public Builder performs static recompilation on the user's Apple
+Silicon Mac before signing:
+
+```sh
+./scripts/build-user-ipa.sh bootstrap
+./scripts/build-user-ipa.sh inspect /path/to/Mario-Kart-Wii.wbfs
+./scripts/build-user-ipa.sh build /path/to/Mario-Kart-Wii.wbfs
+```
+
+The resulting `artifacts/KartPad-personal-unsigned.ipa` is private and must not
+be redistributed because it contains translated code generated from the
+user's game executable. Compatibility is profile-driven: additional verified
+WBFS/ISO containers can share a profile only when their extracted executables
+are identical, while different regions or revisions use separate profiles.
+See [`docs/BUILDER.md`](docs/BUILDER.md) for the cache, validation, extension,
+and release contracts.
+
+### Development workflows
 
 You need:
 
@@ -374,18 +397,18 @@ Useful starting points:
 
 ### Can I download an IPA or playable app?
 
-A local unsigned IPA exists, and locally signed builds have been installed and
-accepted on physical iPhone and iPad hardware. The IPA is not currently
-attached to the public GitHub release. For now, building the mobile development
-app requires an Apple Silicon Mac, Xcode, local signing, and your own supported
-disc image.
+There is no universal playable IPA download. KartPad uses static
+recompilation, so the public Personal IPA Builder translates a supported
+user-owned disc image on the user's Apple Silicon Mac and packages a private
+unsigned IPA before local signing. Locally signed builds from this process have
+been accepted on physical iPhone and iPad hardware.
 
 ### Does online multiplayer work?
 
-Not yet. KartPad is actively adding the Retro WFC networking path, but
-end-to-end login, matchmaking, rooms, and online races are not working or
-accepted yet. This is targeted for a near-term update. Retro WFC is not
-Wiimmfi, and adding its networking payload does not add Retro Rewind content.
+Not yet. The Retro WFC networking path is almost done, but end-to-end login,
+matchmaking, rooms, and online races remain pending testing and are not yet
+accepted. Retro WFC is not Wiimmfi, and adding its networking payload does not
+add Retro Rewind content.
 
 ### Does KartPad support Retro Rewind?
 
@@ -466,6 +489,9 @@ continue.
 
 | Path | Purpose |
 |---|---|
+| [`scripts/build-user-ipa.sh`](scripts/build-user-ipa.sh) | Identify a supported image and build a private unsigned IPA with the profile-driven Builder |
+| [`builder/profiles/`](builder/profiles/) | Versioned container, executable, and static-translation compatibility profiles |
+| [`docs/BUILDER.md`](docs/BUILDER.md) | Personal IPA workflow, cache design, compatibility extension, and public-release boundary |
 | [`scripts/self-build-macos.sh`](scripts/self-build-macos.sh) | Verify, extract, translate, build, sign, and audit a local macOS app |
 | [`scripts/prepare-disc.sh`](scripts/prepare-disc.sh) | Validate and privately extract the supported disc profile |
 | [`scripts/translate-base.sh`](scripts/translate-base.sh) | Produce the ignored full ARM64 translation graph |

@@ -94,8 +94,13 @@
       "version": "v20260603.191052",
       "darwinArm64Artifact": "dawn-darwin-arm64.tar.gz",
       "darwinArm64Sha256": "084ffd2ef500d614e443e3d494738272134628867bad3270d67ee8b0fb5f0838",
+      "iosArm64Artifact": "dawn-ios-arm64.tar.gz",
+      "iosArm64Url": "https://github.com/encounter/dawn-build/releases/download/v20260603.191052/dawn-ios-arm64.tar.gz",
+      "iosArm64Sha256": "a361fcca75929fa5c766cfcde979c010a6da7d805e5db8e15c75e73fd8260e78",
+      "iosSimulatorArm64Artifact": "dawn-ios-simulator-arm64.tar.gz",
+      "iosSimulatorArm64Sha256": "feb5c4e07da90c47d2f279bf83c43bc67db01dac1138cb9af8ea9b5b50c67fbf",
       "declaredAt": "ref/upstream/Wiicompiled/aurora-main/CMakeLists.txt",
-      "role": "Pinned WebGPU implementation used by vendored Aurora; Darwin arm64 artifact is hash-verified at configure time"
+      "role": "Pinned WebGPU implementation used by vendored Aurora; macOS and iOS artifacts are hash-verified at configure time"
     },
     {
       "name": "sse2neon",
