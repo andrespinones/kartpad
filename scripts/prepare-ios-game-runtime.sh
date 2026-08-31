@@ -15,6 +15,8 @@ runtime_build="$(absolute_from_repo "${3:-build/g14-ios-game-runtime-build}")"
 runtime_ref="${repo_root}/ref/upstream/Wiicompiled/runtime"
 dawn_archive="${repo_root}/build/dependency-cache/dawn-ios-simulator-arm64-v20260603.191052.tar.gz"
 dawn_sha256="c9272faca14a307e4545ea83cb66ab2f65e87fa33a0a687bf5c702666271bc03"
+discio_source="${KARTPAD_DISCIO_SOURCE_DIR:-${repo_root}/build/dolphin-ios-discio-iphonesimulator-source}"
+discio_build="${KARTPAD_DISCIO_BUILD_DIR:-${repo_root}/build/dolphin-ios-discio-iphonesimulator-build}"
 sse2neon_url="https://raw.githubusercontent.com/DLTcollab/sse2neon/13a42df35dc7fcc94f987568e7274a998bb6cc86/sse2neon.h"
 sse2neon_sha256="44b9fa3dec3a52ea473246e04b9f692a4e5b0ed654299eef7fe7ec3049e223e0"
 
@@ -32,6 +34,11 @@ if [[ -e "${runtime_source}" || -e "${runtime_build}" ]]; then
 fi
 if [[ ! -f "${dawn_archive}" ]]; then
   echo "ERROR: missing pinned Simulator Dawn archive; run scripts/build-dawn-ios-simulator.sh" >&2
+  exit 1
+fi
+if [[ ! -f "${discio_source}/Source/Core/DiscIO/DiscExtractor.h" ||
+      ! -f "${discio_build}/Source/Core/DiscIO/libdiscio.a" ]]; then
+  echo "ERROR: missing iOS Simulator DiscIO dependency; run scripts/build-ios-discio-probe.sh" >&2
   exit 1
 fi
 actual_dawn_sha256="$(shasum -a 256 "${dawn_archive}" | awk '{print $1}')"
@@ -61,6 +68,7 @@ patch --batch -p1 -d "${runtime_source}" < "${repo_root}/patches/wiicompiled-ios
 patch --batch -p1 -d "${runtime_source}" < "${repo_root}/patches/wiicompiled-ios-settings-bridge.patch"
 patch --batch -p1 -d "${runtime_source}" < "${repo_root}/patches/wiicompiled-ios-physical-controllers.patch"
 patch --batch -p1 -d "${runtime_source}" < "${repo_root}/patches/wiicompiled-ios-motion-steering.patch"
+patch --batch -p1 -d "${runtime_source}" < "${repo_root}/patches/wiicompiled-ios-discio-import.patch"
 
 mkdir -p "${runtime_source}/third_party/sse2neon"
 curl --fail --location --silent --show-error \
@@ -109,6 +117,8 @@ cmake -S "${runtime_source}" -B "${runtime_build}" -G Ninja \
   -DMKW_TRANSLATED_SHARD_MANIFEST="${translation_root}/build_shards/shards.cmake" \
   -DMKW_KARTPAD_RUNTIME_INCLUDE="${repo_root}/runtime/include" \
   -DMKW_KARTPAD_REPO_ROOT="${repo_root}" \
+  -DMKW_KARTPAD_DISCIO_SOURCE_DIR="${discio_source}" \
+  -DMKW_KARTPAD_DISCIO_BUILD_DIR="${discio_build}" \
   -DMKW_TRANSLATED_COMPILE_JOBS=2
 cmake --build "${runtime_build}" --target WiiCompiled --parallel 2
 

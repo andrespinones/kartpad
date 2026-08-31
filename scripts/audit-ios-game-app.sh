@@ -103,6 +103,8 @@ fi
 for importer_contract in \
   'Game Data Required' \
   'Import from KartPad Folder' \
+  'Opening disc image' \
+  'Game-file extraction was incomplete' \
   'RemoveGameDataOnNextLaunch' \
   'Game Data Removal Scheduled' \
   'KartPad currently supports RMCP01 (PAL), disc 0, revision 0 only.' \
@@ -116,6 +118,10 @@ for importer_contract in \
 done
 if rg -a -F -q "game-data importer is not connected" "${binary}"; then
   echo "game app still contains the placeholder game-data importer" >&2
+  exit 69
+fi
+if nm -gj "${binary}" | rg -q 'JitArm64|JitInterface|CachedInterpreter'; then
+  echo "game app contains an unexpected Dolphin execution-core symbol" >&2
   exit 69
 fi
 if [[ "${expected_platform}" == "IOSSIMULATOR" ]]; then

@@ -1,6 +1,7 @@
 #import "kartpad_mobile_runtime_host.h"
 
 #import "KartPadClassicInput.h"
+#import "KartPadDiscExtractor.h"
 #import "KartPadMotionSteering.h"
 #import "KartPadPhysicalControllers.h"
 #import "SunPadDiagnostics.h"
@@ -130,6 +131,22 @@ NSString *KartPadResolvedExtractedRoot(NSURL *selectedURL) {
     }
   }
   return nil;
+}
+
+BOOL KartPadURLIsSupportedDiscImage(NSURL *url) {
+  if (url == nil || !url.isFileURL) return NO;
+  NSString *extension = url.pathExtension.lowercaseString;
+  return [extension isEqualToString:@"wbfs"] ||
+         [extension isEqualToString:@"iso"];
+}
+
+NSArray<UTType *> *KartPadGameDataContentTypes() {
+  UTType *wbfs = [UTType typeWithFilenameExtension:@"wbfs"];
+  UTType *iso = [UTType typeWithFilenameExtension:@"iso"];
+  NSMutableArray<UTType *> *types = [NSMutableArray arrayWithObject:UTTypeFolder];
+  if (wbfs != nil) [types addObject:wbfs];
+  if (iso != nil) [types addObject:iso];
+  return types;
 }
 
 NSString *KartPadValidateExtractedRoot(NSString *root, NSError **error) {
@@ -321,21 +338,10 @@ BOOL KartPadInstalledGameDataIsValid() {
   return YES;
 }
 
-NSError *KartPadPerformGameDataImport(NSURL *url) {
+NSError *KartPadPerformGameDataImport(NSURL *url,
+                                      KartPadDiscExtractionProgress progress) {
   BOOL securityScoped = [url startAccessingSecurityScopedResource];
-  NSString *sourceRoot = KartPadResolvedExtractedRoot(url);
   NSError *workError = nil;
-  NSString *validationError = KartPadValidateExtractedRoot(sourceRoot, &workError);
-  if (validationError != nil && workError == nil) {
-    workError = KartPadGameDataError(1, validationError);
-  }
-  if (workError != nil) {
-    if (securityScoped) {
-      [url stopAccessingSecurityScopedResource];
-    }
-    return workError;
-  }
-
   NSString *supportRoot = KartPadSupportRoot();
   NSString *staging = [supportRoot stringByAppendingPathComponent:
       [NSString stringWithFormat:@"GameData.import-%@", NSUUID.UUID.UUIDString]];
@@ -346,10 +352,29 @@ NSError *KartPadPerformGameDataImport(NSURL *url) {
                           error:&workError];
   if (workError == nil) {
     KartPadRecoverInterruptedImport(supportRoot);
-    [files copyItemAtPath:sourceRoot toPath:staging error:&workError];
+    if (KartPadURLIsSupportedDiscImage(url)) {
+      [KartPadDiscExtractor extractImageAtPath:url.path toDirectory:staging
+                                      progress:progress error:&workError];
+    } else {
+      NSString *sourceRoot = KartPadResolvedExtractedRoot(url);
+      NSString *validationError = KartPadValidateExtractedRoot(sourceRoot, &workError);
+      if (validationError != nil && workError == nil) {
+        workError = KartPadGameDataError(1, validationError);
+      }
+      if (workError == nil) {
+        [files copyItemAtPath:sourceRoot toPath:staging error:&workError];
+      }
+    }
   }
   if (securityScoped) {
     [url stopAccessingSecurityScopedResource];
+  }
+
+  if (workError == nil) {
+    NSString *validationError = KartPadValidateExtractedRoot(staging, &workError);
+    if (validationError != nil && workError == nil) {
+      workError = KartPadGameDataError(1, validationError);
+    }
   }
 
   if (workError == nil && !KartPadEnsureRelativeDvdRoot(&workError)) {
@@ -414,7 +439,7 @@ NSError *KartPadPerformGameDataImport(NSURL *url) {
 
   UILabel *message = [[UILabel alloc] init];
   message.translatesAutoresizingMaskIntoConstraints = NO;
-  message.text = @"Your own extracted RMCP01 game data is required before play.";
+  message.text = @"Your own RMCP01 disc image or extracted game data is required before play.";
   message.font = [UIFont preferredFontForTextStyle:UIFontTextStyleBody];
   message.textColor = UIColor.secondaryLabelColor;
   message.textAlignment = NSTextAlignmentCenter;
@@ -472,7 +497,8 @@ NSError *KartPadPerformGameDataImport(NSURL *url) {
   for (NSURL *entry in entries) {
     NSNumber *directory = nil;
     [entry getResourceValue:&directory forKey:NSURLIsDirectoryKey error:nil];
-    if (directory.boolValue && KartPadResolvedExtractedRoot(entry) != nil) {
+    if ((directory.boolValue && KartPadResolvedExtractedRoot(entry) != nil) ||
+        (!directory.boolValue && KartPadURLIsSupportedDiscImage(entry))) {
       [roots addObject:entry];
     }
   }
@@ -503,12 +529,16 @@ NSError *KartPadPerformGameDataImport(NSURL *url) {
 - (void)startImport:(NSURL *)url {
   UIAlertController *progress =
       [UIAlertController alertControllerWithTitle:@"Importing Game Data"
-                                          message:@"Validating and copying the extracted disc…"
+                                          message:@"Validating your selected game data…"
                                    preferredStyle:UIAlertControllerStyleAlert];
   [self.root presentViewController:progress animated:YES completion:nil];
   __weak KartPadFirstLaunchHost *weakSelf = self;
   dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
-    NSError *error = KartPadPerformGameDataImport(url);
+    NSError *error = KartPadPerformGameDataImport(
+        url, ^(NSString *status, double fraction) {
+          progress.message = [NSString stringWithFormat:@"%@\n%.0f%%", status,
+                                                       fraction * 100.0];
+        });
     dispatch_async(dispatch_get_main_queue(), ^{
       KartPadFirstLaunchHost *strongSelf = weakSelf;
       if (strongSelf == nil) {
@@ -533,7 +563,7 @@ NSError *KartPadPerformGameDataImport(NSURL *url) {
   NSArray<NSURL *> *roots = [self documentsRoots];
   if (roots.count == 0) {
     [self showMessage:@"KartPad Folder"
-               detail:@"No extracted DATA folder was found. In Files, place it directly in On My iPhone or iPad → KartPad, then try again."
+               detail:@"No WBFS, ISO, or extracted DATA folder was found. In Files, place one directly in On My iPhone or iPad → KartPad, then try again."
            completion:^{ [self showOptions]; }];
     return;
   }
@@ -543,7 +573,7 @@ NSError *KartPadPerformGameDataImport(NSURL *url) {
   }
   UIAlertController *choices =
       [UIAlertController alertControllerWithTitle:@"Choose Game Data"
-                                          message:@"Select an extracted RMCP01 folder."
+                                          message:@"Select your RMCP01 WBFS, ISO, or extracted DATA folder."
                                    preferredStyle:UIAlertControllerStyleAlert];
   for (NSURL *root in roots) {
     [choices addAction:[UIAlertAction actionWithTitle:root.lastPathComponent
@@ -569,9 +599,9 @@ NSError *KartPadPerformGameDataImport(NSURL *url) {
 - (void)showOptions {
   UIAlertController *options =
       [UIAlertController alertControllerWithTitle:@"Game Data Required"
-          message:@"KartPad does not include Mario Kart Wii. Import your own extracted RMCP01 DATA folder to continue."
+          message:@"KartPad does not include Mario Kart Wii. Import your own RMCP01 WBFS, ISO, or extracted DATA folder to continue."
           preferredStyle:UIAlertControllerStyleAlert];
-  [options addAction:[UIAlertAction actionWithTitle:@"Choose Extracted DATA Folder…"
+  [options addAction:[UIAlertAction actionWithTitle:@"Choose WBFS, ISO, or DATA Folder…"
                                                style:UIAlertActionStyleDefault
                                              handler:^(UIAlertAction *action) {
     (void)action;
@@ -580,7 +610,7 @@ NSError *KartPadPerformGameDataImport(NSURL *url) {
                    dispatch_get_main_queue(), ^{
       UIDocumentPickerViewController *picker =
           [[UIDocumentPickerViewController alloc]
-              initForOpeningContentTypes:@[UTTypeFolder] asCopy:NO];
+              initForOpeningContentTypes:KartPadGameDataContentTypes() asCopy:NO];
       picker.delegate = self;
       picker.allowsMultipleSelection = NO;
       [self.root presentViewController:picker animated:YES completion:nil];
@@ -1209,7 +1239,7 @@ NSError *KartPadPerformGameDataImport(NSURL *url) {
   }
   UIDocumentPickerViewController *picker =
       [[UIDocumentPickerViewController alloc]
-          initForOpeningContentTypes:@[UTTypeFolder] asCopy:NO];
+          initForOpeningContentTypes:KartPadGameDataContentTypes() asCopy:NO];
   picker.delegate = self;
   picker.allowsMultipleSelection = NO;
   [controller presentViewController:picker animated:YES completion:nil];
@@ -1229,7 +1259,8 @@ NSError *KartPadPerformGameDataImport(NSURL *url) {
   for (NSURL *entry in entries) {
     NSNumber *directory = nil;
     [entry getResourceValue:&directory forKey:NSURLIsDirectoryKey error:nil];
-    if (directory.boolValue && KartPadResolvedExtractedRoot(entry) != nil) {
+    if ((directory.boolValue && KartPadResolvedExtractedRoot(entry) != nil) ||
+        (!directory.boolValue && KartPadURLIsSupportedDiscImage(entry))) {
       [roots addObject:entry];
     }
   }
@@ -1253,7 +1284,14 @@ NSError *KartPadPerformGameDataImport(NSURL *url) {
 
   __weak KartPadRuntimeOverlayHost *weakSelf = self;
   dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
-    NSError *workError = KartPadPerformGameDataImport(url);
+    NSError *workError = KartPadPerformGameDataImport(
+        url, ^(NSString *status, double fraction) {
+          KartPadRuntimeOverlayHost *strongSelf = weakSelf;
+          if (strongSelf != nil && strongSelf->_gameDataProgressAlert != nil) {
+            strongSelf->_gameDataProgressAlert.message =
+                [NSString stringWithFormat:@"%@\n%.0f%%", status, fraction * 100.0];
+          }
+        });
 
     dispatch_async(dispatch_get_main_queue(), ^{
       KartPadRuntimeOverlayHost *strongSelf = weakSelf;
@@ -1300,8 +1338,8 @@ NSError *KartPadPerformGameDataImport(NSURL *url) {
     return;
   }
   NSString *message = roots.count == 0
-      ? @"No extracted DATA folder was found. In Files, place it directly in On My iPhone → KartPad, then try again."
-      : @"Choose an extracted Mario Kart Wii DATA folder from On My iPhone → KartPad.";
+      ? @"No WBFS, ISO, or extracted DATA folder was found. In Files, place one directly in On My iPhone → KartPad, then try again."
+      : @"Choose a Mario Kart Wii WBFS, ISO, or extracted DATA folder from On My iPhone → KartPad.";
   UIAlertController *alert =
       [UIAlertController alertControllerWithTitle:@"KartPad Folder"
                                           message:message

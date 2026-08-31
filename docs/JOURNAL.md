@@ -1561,3 +1561,33 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   feasibility.** Full file-tree extraction and atomic integration into the
   existing KartPad mobile import flow remain open. Evidence:
   `docs/artifacts/2026-08-30/g15-ios-wbfs-discio/`.
+
+## 2026-08-30 — Native WBFS first launch and physical-acceptance handoff
+
+- Integrated pinned Dolphin DiscIO as a narrow iOS importer without linking
+  Dolphin's execution core into KartPad. The iOS package audit now requires the
+  WBFS import/error contract and rejects JIT, JitInterface, and cached-
+  interpreter symbols.
+- On one disposable no-data iPhone Simulator, selected the user's read-only
+  supported WBFS through the real first-launch path. KartPad extracted and
+  atomically activated the full 2.5 GiB/2,043-file tree, reproduced the accepted
+  DOL and StaticR hashes, continued into retail rendering in the same process,
+  accepted touch A, and reached the title on warm relaunch.
+- The physical-controller suite passed stable Player 1–4 assignment and stale-
+  input clearing. The exact SunPad owner behavior clears/hides touch when the
+  first real controller takes Player 1 and restores touch on disconnect; the
+  reference deliberately leaves touch visible for Simulator controllers, so
+  takeover feel is reserved for hardware acceptance.
+- Built the pinned DiscIO graph for `iphoneos`, then compiled all 29,065
+  translated functions into the complete unsigned arm64 `IOS` 16.0 app. The
+  strengthened audit passed at executable SHA-256
+  `b02c1c94dee58526169a08e73bbbe671e6f6ee31c1870517ef244e2651e9de92`;
+  icon `Assets.car` and privacy manifest hashes remain
+  `18de0779809a419002a50074b1d9e45e83aa89dfaa4e4355e8ed26c45c7fb346`
+  and `343dbc92a22d95a896d5bb894f439d655ac8e15d0fcc7fe72500bd5fcaba1740`.
+- No device app was signed, installed, or launched. The disposable Simulator
+  was deleted, zero Simulators remain booted, and the user's preserved
+  Simulator data was untouched. Classification: **Ready for sequential
+  physical iPad then iPhone acceptance.** Evidence:
+  `docs/artifacts/2026-08-30/g15-native-wbfs-import/` and
+  `docs/PHYSICAL-ACCEPTANCE.md`.

@@ -3,9 +3,9 @@ set -euo pipefail
 
 repo_root="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
 source_root="${1:-${repo_root}/ref/upstream/dolphin}"
-work_source="${2:-${repo_root}/build/dolphin-ios-discio-source}"
-work_build="${3:-${repo_root}/build/dolphin-ios-discio-build}"
 sdk="${4:-iphonesimulator}"
+work_source="${2:-${repo_root}/build/dolphin-ios-discio-${sdk}-source}"
+work_build="${3:-${repo_root}/build/dolphin-ios-discio-${sdk}-build}"
 
 case "${sdk}" in
   iphonesimulator)
@@ -32,7 +32,7 @@ if [[ -n "$(git -C "${source_root}" status --porcelain)" ]]; then
   exit 65
 fi
 for required in \
-  Externals/bzip2/bzip2/CMakeLists.txt \
+  Externals/bzip2/CMakeLists.txt \
   Externals/curl/curl/CMakeLists.txt \
   Externals/fmt/fmt/CMakeLists.txt \
   Externals/zstd/zstd/build/cmake/CMakeLists.txt; do
@@ -50,6 +50,8 @@ mkdir -p "$(dirname "${work_source}")" "$(dirname "${work_build}")"
 cp -R "${source_root}" "${work_source}"
 patch --batch -p1 -d "${work_source}" < \
   "${repo_root}/patches/dolphin-ios-discio.patch"
+patch --batch -p1 -d "${work_source}" < \
+  "${repo_root}/patches/dolphin-ios-discio-coreless.patch"
 patch --batch -p1 -d "${work_source}/Externals/curl/curl" < \
   "${repo_root}/patches/dolphin-curl-ios-pipe2.patch"
 

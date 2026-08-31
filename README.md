@@ -14,7 +14,7 @@
   <img alt="Metal renderer" src="https://img.shields.io/badge/renderer-Metal-5E5CE6">
   <img alt="Ahead-of-time static recompilation" src="https://img.shields.io/badge/PowerPC-static%20recompilation-FF9F0A">
   <img alt="macOS development target" src="https://img.shields.io/badge/macOS%20target-14%2B-0A84FF">
-  <img alt="iPhone and iPad Simulator development builds" src="https://img.shields.io/badge/iPhone%20%2F%20iPad-Simulator%20verified-30D158">
+  <img alt="iPhone and iPad device acceptance ready" src="https://img.shields.io/badge/iPhone%20%2F%20iPad-device%20acceptance%20ready-30D158">
   <img alt="Game data not included" src="https://img.shields.io/badge/game%20data-not%20included-FF453A">
 </p>
 
@@ -42,7 +42,7 @@ signing material.
 | Audio | Non-silent host playback, pause/resume, live output-device migration, and a two-hour representative continuity run pass their instrumented subcases; subjective listening and the eight-hour soak remain open |
 | Performance | Warm, simple scenes can report 60 FPS; first-use shader compilation and some tracks can fall far below real time. Stable frame pacing is **not yet accepted** |
 | Packaging | The original icon and exact branded 80 MiB package pass audit, installed-storage, configured gameplay, save-preservation, and normal-close checks; the native first-run/settings/data-management shell remains open |
-| iPhone/iPad | The full 29,065-function arm64 retail app boots, reaches live races, imports private extracted data, preserves saves, and resumes on iPhone and iPad Simulator; a fresh physical-iOS Xcode directory reproduces the complete unsigned device app with the exact SunPad touch/menu source |
+| iPhone/iPad | The full 29,065-function arm64 retail app boots, reaches live races, imports a private supported WBFS directly, preserves saves, and resumes in Simulator; the complete unsigned device build is ready for iPad-then-iPhone acceptance with native controller handoff |
 | Distribution | Development source only; no game data and no release candidate |
 
 The evidence ledger, exact open rows, and known risks live in
@@ -78,13 +78,14 @@ owned PAL `RMCP01` revision 0 image that is verified, kept read-only, and
 ignored by Git. Extracted files, translations, caches, saves, logs, and private
 captures stay in ignored local directories.
 
-On iPhone and iPad, first launch stops before emulation and asks for an
-extracted `RMCP01` `DATA` folder. KartPad validates the disc identity and
-runtime-critical files, copies the 2.5 GiB tree into private Application
-Support with iOS data protection, excludes it from backup, and atomically
-activates it. Interrupted imports recover or roll back; replacement never
-silently discards the last valid copy. Removal is explicit, undoable until
-relaunch, and occurs before emulation while preserving saves.
+On iPhone and iPad, first launch stops before emulation and accepts either the
+supported private `RMCP01` WBFS/ISO image or an extracted `DATA` folder.
+KartPad opens the image with a narrow native DiscIO importer, verifies the game
+identity and revision, extracts the runtime files on-device, validates the
+critical DOL, and atomically activates the protected private tree. Interrupted
+imports recover or roll back; replacement never silently discards the last
+valid copy. Removal is explicit, undoable until relaunch, and occurs before
+emulation while preserving saves.
 
 The translated ARM64 graph is compiled and signed on the Mac. The mobile app
 imports non-executable game data only; it contains no PowerPC JIT, runtime
@@ -174,6 +175,11 @@ Prepare and build the complete iOS Simulator runtime from the same private
 translation graph:
 
 ```sh
+./scripts/build-ios-discio-probe.sh \
+  ref/upstream/dolphin \
+  build/dolphin-ios-discio-iphonesimulator-source \
+  build/dolphin-ios-discio-iphonesimulator-build \
+  iphonesimulator
 ./scripts/prepare-ios-game-runtime.sh \
   private/g8-full-translation \
   build/ios-game-runtime-source \
@@ -181,6 +187,21 @@ translation graph:
 ./scripts/build-ios-game-app.sh \
   build/ios-game-runtime-source \
   build/ios-game-app-xcode \
+  private/g8-full-translation
+```
+
+Prepare the corresponding unsigned physical-device package without signing or
+installing it:
+
+```sh
+./scripts/build-ios-discio-probe.sh \
+  ref/upstream/dolphin \
+  build/dolphin-ios-discio-iphoneos-source \
+  build/dolphin-ios-discio-iphoneos-build \
+  iphoneos
+./scripts/build-ios-device-game-app.sh \
+  build/ios-game-runtime-source \
+  build/ios-device-game-app-xcode \
   private/g8-full-translation
 ```
 
@@ -238,16 +259,17 @@ available without a separate controller:
   returns to green and releases acceleration when the finger lifts.
 - **Customize:** move and resize controls independently, save separate phone
   and tablet arrangements, or reset to the exact default layout.
-- **Controller handoff:** touch stays Player 1; connected extended controllers
-  receive stable Player 1–4 slots and stale input is released on disconnect.
+- **Controller handoff:** the first extended controller takes Player 1, clears
+  held touch input, and hides touch controls by default. Disconnecting it
+  restores touch; additional controllers keep stable Player 2–4 slots.
 - **Menu:** the persistent **•••** opens display, controls, game data,
   diagnostics, multiplayer access, and motion steering.
 
 KartPad's owning layer adds two actions ahead of SunPad's unchanged menu:
 
 - **Multiplayer…** reports connected controllers, stable Player 1–4 assignment,
-  and opens controller setup guidance. Players 2–4 publish independent retail
-  KPAD channels while touch remains Player 1.
+  and opens controller setup guidance. The first controller takes over Player
+  1 from touch; Players 2–4 publish independent retail KPAD channels.
 - **Motion Steering…** is default-off and provides recenter, inversion, and
   0.5×/1×/2× sensitivity. Touch can override it, physical controllers take
   priority, and backgrounding clears the live motion state.
@@ -257,22 +279,27 @@ reaches title/menu/live Luigi Circuit, survives background/foreground, and
 preserves exact save hashes across relaunch. The original icon catalog, privacy
 manifest, opaque fitted-output bands, package boundary, and full 29,065-function
 unsigned physical-device build pass. Simulator motion sensors are unavailable by design;
-physical motion feel, complete touch/motion races, physical controller handoff,
-and physical-device performance/audio remain hands-on gates.
+physical motion feel, complete touch/motion races, physical controller takeover
+and restoration, and physical-device performance/audio are the next hands-on
+acceptance gates.
 
 ## First launch on iPhone or iPad
 
 KartPad does not include Mario Kart Wii and cannot compile game code on-device.
 For a locally built development app:
 
-1. Prepare the supported private translation and extracted `RMCP01` data on the
-   Mac from your own disc image.
-2. Put the extracted `DATA` folder in Files, or choose it from another Files
-   provider when KartPad asks for game data.
-3. Launch KartPad and choose **Choose Extracted DATA Folder…**.
-4. Leave the app open while it validates, protects, stages, and activates the
-   copy. A successful first import continues into the game in the same session.
+1. Build and locally sign KartPad on the Mac using your private translated
+   `RMCP01` graph.
+2. Put your supported `RMCP01` revision-0 WBFS/ISO in Files. An already
+   extracted `DATA` folder remains supported as a fallback.
+3. Launch KartPad and choose the disc image or extracted folder when prompted.
+4. Leave the app open while it extracts or copies, validates, protects, stages,
+   and activates the data. A successful first import continues into the game
+   in the same session.
 5. Later, use **••• → Game Data & Saves** to reimport or schedule removal.
+
+The exact iPad-then-iPhone hands-on procedure is in
+[`docs/PHYSICAL-ACCEPTANCE.md`](docs/PHYSICAL-ACCEPTANCE.md).
 
 Saves live separately from the extracted game-data tree. Reimport and removal
 retain them; uninstalling the app still removes its whole Apple container.
