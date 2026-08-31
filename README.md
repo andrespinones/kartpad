@@ -6,10 +6,6 @@
 </p>
 
 <p align="center">
-  <img src="branding/exports/KartPadIcon-1024.png" width="180" alt="KartPad app icon">
-</p>
-
-<p align="center">
   <img alt="Apple Silicon" src="https://img.shields.io/badge/Apple%20Silicon-arm64-0A84FF?logo=apple">
   <img alt="Metal renderer" src="https://img.shields.io/badge/renderer-Metal-5E5CE6">
   <img alt="Ahead-of-time static recompilation" src="https://img.shields.io/badge/PowerPC-static%20recompilation-FF9F0A">
@@ -18,7 +14,7 @@
   <img alt="Game data not included" src="https://img.shields.io/badge/game%20data-not%20included-FF453A">
 </p>
 
-![KartPad running a saved Mario Circuit 3 replay natively on macOS](docs/artifacts/2026-08-29/g10-audio-device-migration/stable-after-restore.png)
+![KartPad running a race on DK Summit on iPad](docs/images/kartpad-dk-summit-ipad.png)
 
 KartPad packages a native Apple ARM64 app around a
 [WiiCompiled](https://github.com/sonicdcer/WiiCompiled)-generated Mario Kart Wii
@@ -43,7 +39,8 @@ signing material.
 | Performance | Warm, simple scenes can report 60 FPS; first-use shader compilation and some tracks can fall far below real time. Stable frame pacing is **not yet accepted** |
 | Packaging | The original icon and exact branded 80 MiB package pass audit, installed-storage, configured gameplay, save-preservation, and normal-close checks; the native first-run/settings/data-management shell remains open |
 | iPhone/iPad | The full 29,065-function arm64 retail app boots, reaches live races, imports a private supported WBFS directly, preserves saves, and resumes in Simulator; the complete unsigned device build is ready for iPad-then-iPhone acceptance with native controller handoff |
-| Distribution | Development source only; no game data and no release candidate |
+| Online multiplayer | Implementation is nearing completion, but remains unsupported pending end-to-end testing |
+| Distribution | Public source release with no game data or publicly distributed playable binary |
 
 The evidence ledger, exact open rows, and known risks live in
 [`docs/STATUS.md`](docs/STATUS.md). The 67-row release matrix is in

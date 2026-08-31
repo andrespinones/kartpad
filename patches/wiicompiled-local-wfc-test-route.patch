@@ -1,0 +1,105 @@
+--- a/src/hle/net/network_internal.h
++++ b/src/hle/net/network_internal.h
+@@ -188,6 +188,8 @@
+
+ // network_core.cpp
+ bool RetroRewindProfileActive();
++std::string RoutedWfcDnsNode(std::string_view requestedNode);
++uint16_t RoutedWfcConnectPort(uint16_t requestedPort);
+ const std::array<uint8_t, 6>& RuntimeMacAddress();
+ uint64_t RuntimeGeneratedUserId();
+ void ZeroMemoryRange(uint32_t addr, uint32_t size);
+--- a/src/hle/net/network_core.cpp
++++ b/src/hle/net/network_core.cpp
+@@ -2,6 +2,7 @@
+
+ #include "console_identity.h"
+ #include "hle/net/network.h"
++#include "kartpad/network/local_wfc_test_route.h"
+ #include "runtime_config.h"
+ #include "runtime_log.h"
+ #include "runtime_product.h"
+@@ -10,6 +11,14 @@
+
+ bool RetroRewindProfileActive();
+
++std::string RoutedWfcDnsNode(std::string_view requestedNode) {
++    return KartPad::Network::RouteLocalWfcHost(RetroRewindProfileActive(), requestedNode);
++}
++
++uint16_t RoutedWfcConnectPort(uint16_t requestedPort) {
++    return KartPad::Network::RouteLocalWfcPort(RetroRewindProfileActive(), requestedPort);
++}
++
+ static std::mutex g_mutex;
+ static std::map<int32_t, DeviceKind> g_devices;
+ static int32_t g_nextDeviceFd = 2000;
+@@ -427,7 +436,7 @@
+
+     SetNonBlocking(native, true);
+     sockaddr_in addr = socket.peerAddr;
+-    addr.sin_port = htons(port);
++    addr.sin_port = htons(RoutedWfcConnectPort(port));
+     const int ret = connect(native, reinterpret_cast<sockaddr*>(&addr), sizeof(addr));
+     const int nativeErr = ret < 0 ? NormalizeConnectError(NativeLastError()) : 0;
+     int32_t result = 0;
+--- a/src/hle/net/network_socket.cpp
++++ b/src/hle/net/network_socket.cpp
+@@ -176,6 +176,10 @@
+             return -SO_EBADF;
+         }
+         sockaddr_in addr = ReadWiiSockAddr(inBuf + 8);
++        const uint16_t requestedPort = ntohs(addr.sin_port);
++        if (cmd == IOCTL_SO_CONNECT) {
++            addr.sin_port = htons(RoutedWfcConnectPort(requestedPort));
++        }
+         const int ret = (cmd == IOCTL_SO_BIND)
+             ? bind(s->native, reinterpret_cast<sockaddr*>(&addr), sizeof(addr))
+             : connect(s->native, reinterpret_cast<sockaddr*>(&addr), sizeof(addr));
+@@ -190,7 +194,7 @@
+             result = SocketResult(ret, false);
+         }
+         if (cmd == IOCTL_SO_CONNECT && result == 0) {
+-            s->peerPort = ntohs(addr.sin_port);
++            s->peerPort = requestedPort;
+             s->peerAddr = addr;
+             s->hasPeerAddr = true;
+         }
+--- a/src/hle/net/network_deferred.cpp
++++ b/src/hle/net/network_deferred.cpp
+@@ -119,6 +119,7 @@
+     NativeSocket nativeFd = kInvalidSocket;
+     uint64_t socketGeneration = 0;
+     sockaddr_in peerAddress{};
++    uint16_t requestedPeerPort = 0;
+     std::optional<int32_t> initialResult;
+ };
+
+@@ -233,7 +234,8 @@
+     }
+
+     addrinfo* nativeResults = nullptr;
+-    const char* node = completion.work.node.empty() ? nullptr : completion.work.node.c_str();
++    const std::string routedNode = RoutedWfcDnsNode(completion.work.node);
++    const char* node = routedNode.empty() ? nullptr : routedNode.c_str();
+     const char* service = completion.work.service.empty() ? nullptr : completion.work.service.c_str();
+     const int gai = getaddrinfo(node, service, hintPtr, &nativeResults);
+     if (gai != 0 || !nativeResults) {
+@@ -452,6 +454,8 @@
+     work.nativeFd = socket->native;
+     work.socketGeneration = socket->generation;
+     work.peerAddress = ReadWiiSockAddr(inBuf + 8u);
++    work.requestedPeerPort = ntohs(work.peerAddress.sin_port);
++    work.peerAddress.sin_port = htons(RoutedWfcConnectPort(work.requestedPeerPort));
+     work.timeout = NetworkPollContract::Timeout::FromMilliseconds(
+         NetworkConnectContract::kGuestBlockingTimeoutMilliseconds);
+     return DeferredConnectPreparation::Ready(std::move(work), -SO_EINVAL);
+@@ -1044,7 +1048,7 @@
+         if (result == 0) {
+             if (DeferredConnectSocketIsStillValid(work)) {
+                 WiiSocket& socket = g_sockets[work.wiiFd];
+-                socket.peerPort = ntohs(work.peerAddress.sin_port);
++                socket.peerPort = work.requestedPeerPort;
+                 socket.peerAddr = work.peerAddress;
+                 socket.hasPeerAddr = true;
+             } else {

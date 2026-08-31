@@ -1,15 +1,20 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if [[ $# -ne 2 ]]; then
-  echo "usage: $0 /absolute/path/to/runtime-build /absolute/path/to/KartPad.app" >&2
+if [[ $# -lt 2 || $# -gt 3 ]]; then
+  echo "usage: $0 /absolute/path/to/runtime-build /absolute/path/to/KartPad.app [WiiCompiled|RetroRewind]" >&2
   exit 64
 fi
 
 repo_root="$(git rev-parse --show-toplevel)"
 runtime_build="$1"
 output_app="$2"
-runtime_binary="${runtime_build}/WiiCompiled"
+runtime_target="${3:-WiiCompiled}"
+case "${runtime_target}" in
+  WiiCompiled|RetroRewind) ;;
+  *) echo "unsupported runtime target: ${runtime_target}" >&2; exit 64 ;;
+esac
+runtime_binary="${runtime_build}/${runtime_target}"
 icon_file="${repo_root}/branding/exports/KartPad.icns"
 
 if [[ "${runtime_build}" != /* || "${output_app}" != /* ]]; then

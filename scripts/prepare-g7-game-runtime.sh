@@ -12,9 +12,16 @@ runtime_ref="${repo_root}/ref/upstream/Wiicompiled/runtime"
 translation_root="$(absolute_from_repo "${1:-private/g8-full-translation}")"
 runtime_source="$(absolute_from_repo "${2:-build/g7-game-runtime-source}")"
 runtime_build="$(absolute_from_repo "${3:-build/g7-game-runtime-build}")"
+product="${4:-base}"
 dawn_archive="${repo_root}/build/dependency-cache/dawn-darwin-arm64-v20260603.191052.tar.gz"
 sse2neon_url="https://raw.githubusercontent.com/DLTcollab/sse2neon/13a42df35dc7fcc94f987568e7274a998bb6cc86/sse2neon.h"
 sse2neon_sha256="44b9fa3dec3a52ea473246e04b9f692a4e5b0ed654299eef7fe7ec3049e223e0"
+
+case "${product}" in
+  base) product_target="WiiCompiled" ;;
+  retro-rewind) product_target="RetroRewind" ;;
+  *) echo "ERROR: product must be base or retro-rewind" >&2; exit 64 ;;
+esac
 
 if [[ "$(uname -s)" != "Darwin" || "$(uname -m)" != "arm64" ]]; then
   echo "ERROR: the G7 game-runtime spike requires arm64 macOS" >&2
@@ -42,7 +49,15 @@ cp -R "${repo_root}/ref/upstream/Wiicompiled/aurora-main" \
 patch --batch -p1 -d "${runtime_source}/aurora-main" < \
   "${repo_root}/patches/aurora-present-telemetry.patch"
 patch -p1 -d "${runtime_source}" < "${repo_root}/patches/wiicompiled-apple-runtime.patch"
+patch -p1 -d "${runtime_source}" < \
+  "${repo_root}/patches/wiicompiled-apple-network-tls.patch"
+patch -p1 -d "${runtime_source}" < \
+  "${repo_root}/patches/wiicompiled-local-wfc-test-route.patch"
+patch -p1 -d "${runtime_source}" < \
+  "${repo_root}/patches/wiicompiled-mii-seed.patch"
 patch -p1 -d "${runtime_source}" < "${repo_root}/patches/wiicompiled-macos-shell.patch"
+patch -p1 -d "${runtime_source}" < \
+  "${repo_root}/patches/wiicompiled-retro-apple-product.patch"
 patch --batch -p1 -d "${runtime_source}" < \
   "${repo_root}/patches/wiicompiled-present-telemetry.patch"
 
@@ -58,10 +73,14 @@ fi
 # Mach-O C symbols have a leading underscore. The translator's assembly blob
 # labels are emitted in ELF/COFF spelling, so publish both spellings without
 # changing the bytes or the generated C++ graph.
-blob_asm="${translation_root}/data_sections_init_blobs.S"
-if [[ -f "${blob_asm}" ]] && ! rg -q '^\.globl _kData_' "${blob_asm}"; then
-  perl -0pi -e 's/^\.globl (kData_[^\n]+)\n\1:/\.globl $1\n.globl _$1\n$1:\n_$1:/mg' "${blob_asm}"
-fi
+for blob_asm in \
+    "${translation_root}/data_sections_init_blobs.S" \
+    "${translation_root}/../mod/cpp/mod_data_patches_blobs.S"; do
+  if [[ -f "${blob_asm}" ]] && rg -q '^\.globl k' "${blob_asm}" &&
+     ! rg -q '^\.globl _k' "${blob_asm}"; then
+    perl -0pi -e 's/^\.globl (k[^\n]+)\n\1:/\.globl $1\n.globl _$1\n$1:\n_$1:/mg' "${blob_asm}"
+  fi
+done
 
 generated_link="${repo_root}/build/generated"
 if [[ -e "${generated_link}" && ! -L "${generated_link}" ]]; then
@@ -92,6 +111,6 @@ cmake -S "${runtime_source}" -B "${runtime_build}" -G Ninja \
   -DMKW_KARTPAD_RUNTIME_INCLUDE="${repo_root}/runtime/include" \
   -DMKW_KARTPAD_REPO_ROOT="${repo_root}" \
   -DMKW_TRANSLATED_COMPILE_JOBS=2
-cmake --build "${runtime_build}" --target WiiCompiled --parallel 4
+cmake --build "${runtime_build}" --target "${product_target}" --parallel 4
 
-echo "Built translated Mario Kart Wii runtime: ${runtime_build}/WiiCompiled"
+echo "Built translated Mario Kart Wii runtime: ${runtime_build}/${product_target}"

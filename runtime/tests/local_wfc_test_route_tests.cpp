@@ -1,0 +1,74 @@
+#include "kartpad/network/local_wfc_test_route.h"
+
+#include <cstdlib>
+#include <iostream>
+#include <optional>
+#include <string>
+
+namespace {
+
+class EnvironmentGuard {
+public:
+    explicit EnvironmentGuard(const char* name) : name_(name) {
+        if (const char* value = std::getenv(name)) {
+            original_ = value;
+        }
+    }
+
+    ~EnvironmentGuard() {
+        if (original_) {
+            setenv(name_.c_str(), original_->c_str(), 1);
+        } else {
+            unsetenv(name_.c_str());
+        }
+    }
+
+private:
+    std::string name_;
+    std::optional<std::string> original_;
+};
+
+bool Check(bool condition, const char* message) {
+    if (!condition) {
+        std::cerr << "FAIL: " << message << '\n';
+    }
+    return condition;
+}
+
+}  // namespace
+
+int main() {
+    using namespace KartPad::Network;
+    EnvironmentGuard hostGuard(kLocalWfcHostEnvironment);
+    EnvironmentGuard portGuard(kLocalWfcHttpPortEnvironment);
+    unsetenv(kLocalWfcHostEnvironment);
+    unsetenv(kLocalWfcHttpPortEnvironment);
+
+    bool ok = true;
+    ok &= Check(RouteLocalWfcHost(true, "nas.example.net") == "nas.example.net",
+                "host is unchanged without an explicit test route");
+    ok &= Check(RouteLocalWfcPort(true, 443) == 443,
+                "port is unchanged without an explicit test route");
+
+    setenv(kLocalWfcHostEnvironment, "127.0.0.1", 1);
+    setenv(kLocalWfcHttpPortEnvironment, "18080", 1);
+    ok &= Check(RouteLocalWfcHost(false, "nas.example.net") == "nas.example.net",
+                "vanilla product ignores local RWFC routing");
+    ok &= Check(RouteLocalWfcHost(true, "nas.example.net") == "127.0.0.1",
+                "Retro Rewind product routes DNS to the explicit local host");
+    ok &= Check(RouteLocalWfcPort(true, 80) == 18080,
+                "local HTTP route maps port 80");
+    ok &= Check(RouteLocalWfcPort(true, 443) == 18080,
+                "local plaintext-WFC route maps logical port 443");
+    ok &= Check(RouteLocalWfcPort(true, 29900) == 29900,
+                "GameSpy ports remain unchanged");
+
+    setenv(kLocalWfcHttpPortEnvironment, "0", 1);
+    ok &= Check(RouteLocalWfcPort(true, 80) == 80, "zero port is rejected");
+    setenv(kLocalWfcHttpPortEnvironment, "65536", 1);
+    ok &= Check(RouteLocalWfcPort(true, 80) == 80, "oversized port is rejected");
+    setenv(kLocalWfcHttpPortEnvironment, "18080x", 1);
+    ok &= Check(RouteLocalWfcPort(true, 80) == 80, "partial port parse is rejected");
+
+    return ok ? 0 : 1;
+}

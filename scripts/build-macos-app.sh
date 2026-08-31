@@ -6,9 +6,16 @@ translation="${1:-${repo_root}/private/self-build/translation}"
 runtime_source="${2:-${repo_root}/build/self-build-macos-source}"
 runtime_build="${3:-${repo_root}/build/self-build-macos-build}"
 app="${4:-${repo_root}/build/KartPad-self-built.app}"
+product="${5:-base}"
+case "${product}" in
+  base) product_target="WiiCompiled" ;;
+  retro-rewind) product_target="RetroRewind" ;;
+  *) echo "ERROR: product must be base or retro-rewind" >&2; exit 64 ;;
+esac
 
 "${repo_root}/scripts/prepare-g7-game-runtime.sh" \
-  "${translation}" "${runtime_source}" "${runtime_build}"
-"${repo_root}/scripts/package-macos-runtime.sh" "${runtime_build}" "${app}"
+  "${translation}" "${runtime_source}" "${runtime_build}" "${product}"
+"${repo_root}/scripts/package-macos-runtime.sh" \
+  "${runtime_build}" "${app}" "${product_target}"
 "${repo_root}/scripts/audit-macos-package.sh" "${app}"
 echo "Built and audited local KartPad app: ${app}"

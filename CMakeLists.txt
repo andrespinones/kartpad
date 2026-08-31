@@ -317,6 +317,37 @@ if(BUILD_TESTING)
     endforeach()
     add_test(NAME kartpad.subsystems.apple-smoke COMMAND kartpad_apple_subsystem_smoke)
 
+    add_executable(kartpad_apple_secure_transport_tests
+      runtime/tests/apple_secure_transport_tests.cpp)
+    target_include_directories(kartpad_apple_secure_transport_tests PRIVATE runtime/include)
+    target_compile_features(kartpad_apple_secure_transport_tests PRIVATE cxx_std_20)
+    target_compile_options(kartpad_apple_secure_transport_tests PRIVATE
+      -Wall -Wextra -Wpedantic -Werror
+      -Wno-deprecated-declarations)
+    find_library(SECURITY_FRAMEWORK Security REQUIRED)
+    target_link_libraries(kartpad_apple_secure_transport_tests PRIVATE
+      "${SECURITY_FRAMEWORK}")
+    add_test(NAME kartpad.network.apple-secure-transport
+      COMMAND kartpad_apple_secure_transport_tests)
+
+    add_executable(kartpad_local_wfc_test_route_tests
+      runtime/tests/local_wfc_test_route_tests.cpp)
+    target_include_directories(kartpad_local_wfc_test_route_tests PRIVATE runtime/include)
+    target_compile_features(kartpad_local_wfc_test_route_tests PRIVATE cxx_std_20)
+    target_compile_options(kartpad_local_wfc_test_route_tests PRIVATE
+      -Wall -Wextra -Wpedantic -Werror)
+    add_test(NAME kartpad.network.local-wfc-test-route
+      COMMAND kartpad_local_wfc_test_route_tests)
+
+    add_executable(kartpad_seed_mii_database_tests
+      runtime/tests/seed_mii_database_tests.cpp)
+    target_include_directories(kartpad_seed_mii_database_tests PRIVATE runtime/include)
+    target_compile_features(kartpad_seed_mii_database_tests PRIVATE cxx_std_20)
+    target_compile_options(kartpad_seed_mii_database_tests PRIVATE
+      -Wall -Wextra -Wpedantic -Werror)
+    add_test(NAME kartpad.mii.seed-database
+      COMMAND kartpad_seed_mii_database_tests)
+
     add_executable(kartpad_mobile_classic_input_tests
       runtime/tests/mobile_classic_input_tests.mm
       apple/mobile/KartPadClassicInput.mm)

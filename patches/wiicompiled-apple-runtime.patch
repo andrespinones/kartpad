@@ -62,7 +62,7 @@ diff -ruN --exclude=.git --exclude=third_party --exclude=build a/CMakeLists.txt 
 +    if(CMAKE_SYSTEM_NAME STREQUAL "iOS" AND
 +       MKW_APPLE_SYSROOT_LOWER MATCHES "iphonesimulator")
 +        set(AURORA_DAWN_PACKAGE_URL_HASH
-+            "SHA256=c9272faca14a307e4545ea83cb66ab2f65e87fa33a0a687bf5c702666271bc03"
++            "SHA256=feb5c4e07da90c47d2f279bf83c43bc67db01dac1138cb9af8ea9b5b50c67fbf"
 +            CACHE STRING "" FORCE)
 +    elseif(CMAKE_SYSTEM_NAME STREQUAL "iOS")
 +        set(AURORA_DAWN_PACKAGE_URL_HASH
@@ -196,12 +196,13 @@ diff -ruN --exclude=.git --exclude=third_party --exclude=build a/cmake/PublicPro
  target_compile_features(mkw_cpu_baseline PRIVATE cxx_std_17)
  set_target_properties(mkw_cpu_baseline PROPERTIES UNITY_BUILD OFF)
  target_compile_options(mkw_cpu_baseline PRIVATE -w)
-@@ -205,10 +206,11 @@
+@@ -205,10 +206,12 @@
      endif()
 
      target_link_libraries(${target} PRIVATE
 -        dbghelp user32 winmm ws2_32 iphlpapi secur32 crypt32 windowsapp setupapi winusb)
-+        "-framework Foundation" "-framework CoreAudio" "-framework AudioToolbox")
++        "-framework Foundation" "-framework CoreAudio" "-framework AudioToolbox"
++        "-framework Security")
 
 -    set_target_properties(${target} PROPERTIES WIN32_EXECUTABLE TRUE)
 -    foreach(runtime_dll libc++.dll libunwind.dll)
@@ -211,7 +212,7 @@ diff -ruN --exclude=.git --exclude=third_party --exclude=build a/cmake/PublicPro
          execute_process(
              COMMAND "${CMAKE_CXX_COMPILER}" "--print-file-name=${runtime_dll}"
              OUTPUT_VARIABLE runtime_dll_path
-@@ -223,7 +225,8 @@
+@@ -223,7 +226,8 @@
          add_custom_command(TARGET ${target} POST_BUILD
              COMMAND ${CMAKE_COMMAND} -E copy_if_different
                  "${runtime_dll_path}" $<TARGET_FILE_DIR:${target}>)
@@ -221,7 +222,7 @@ diff -ruN --exclude=.git --exclude=third_party --exclude=build a/cmake/PublicPro
 
      set(MKW_WII_BOOTSTRAP_SOURCE_DIR "${MKW_RUNTIME_SOURCE_DIR}/assets/wii")
      if(NOT EXISTS "${MKW_WII_BOOTSTRAP_SOURCE_DIR}/shared2/wc24")
-@@ -287,6 +290,6 @@
+@@ -287,6 +291,6 @@
      mkw_retro_rewind_functions WiiCompiled RetroRewind)
  foreach(target IN LISTS MKW_ALL_BUILD_TARGETS)
      if(TARGET ${target})

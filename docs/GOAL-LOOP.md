@@ -2,7 +2,7 @@
 
 **Operating loop for the autonomous KartPad build.** The requirements and acceptance criteria live in `ref/PRD.md`; this document defines how to execute them. Written 28 August 2026.
 
-Read `ref/PRD.md` completely before entering this loop.
+Read `docs/PRD.md` completely before entering this loop.
 
 ---
 

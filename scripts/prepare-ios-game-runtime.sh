@@ -12,14 +12,21 @@ absolute_from_repo() {
 translation_root="$(absolute_from_repo "${1:-private/g8-full-translation}")"
 runtime_source="$(absolute_from_repo "${2:-build/g14-ios-game-runtime-source}")"
 runtime_build="$(absolute_from_repo "${3:-build/g14-ios-game-runtime-build}")"
+product="${4:-base}"
 runtime_ref="${repo_root}/ref/upstream/Wiicompiled/runtime"
 dawn_archive="${repo_root}/build/dependency-cache/dawn-ios-simulator-arm64-v20260603.191052.tar.gz"
-dawn_sha256="c9272faca14a307e4545ea83cb66ab2f65e87fa33a0a687bf5c702666271bc03"
+dawn_sha256="feb5c4e07da90c47d2f279bf83c43bc67db01dac1138cb9af8ea9b5b50c67fbf"
 discio_source="${KARTPAD_DISCIO_SOURCE_DIR:-${repo_root}/build/dolphin-ios-discio-iphonesimulator-source}"
 discio_build="${KARTPAD_DISCIO_BUILD_DIR:-${repo_root}/build/dolphin-ios-discio-iphonesimulator-build}"
 sse2neon_url="https://raw.githubusercontent.com/DLTcollab/sse2neon/13a42df35dc7fcc94f987568e7274a998bb6cc86/sse2neon.h"
 sse2neon_sha256="44b9fa3dec3a52ea473246e04b9f692a4e5b0ed654299eef7fe7ec3049e223e0"
 prepare_only="${KARTPAD_PREPARE_ONLY:-0}"
+
+case "${product}" in
+  base) product_target="WiiCompiled" ;;
+  retro-rewind) product_target="RetroRewind" ;;
+  *) echo "ERROR: product must be base or retro-rewind" >&2; exit 64 ;;
+esac
 
 if [[ "${prepare_only}" != "0" && "${prepare_only}" != "1" ]]; then
   echo "ERROR: KARTPAD_PREPARE_ONLY must be 0 or 1" >&2
@@ -71,6 +78,12 @@ patch --batch -p1 -d "${runtime_source}/aurora-main" < \
   "${repo_root}/patches/aurora-ios-simulator-single-pipeline-worker.patch"
 patch --batch -p1 -d "${runtime_source}" < "${repo_root}/patches/wiicompiled-apple-runtime.patch"
 patch --batch -p1 -d "${runtime_source}" < \
+  "${repo_root}/patches/wiicompiled-apple-network-tls.patch"
+patch --batch -p1 -d "${runtime_source}" < \
+  "${repo_root}/patches/wiicompiled-local-wfc-test-route.patch"
+patch --batch -p1 -d "${runtime_source}" < \
+  "${repo_root}/patches/wiicompiled-mii-seed.patch"
+patch --batch -p1 -d "${runtime_source}" < \
   "${repo_root}/patches/wiicompiled-ios-arm64-fibers.patch"
 patch --batch -p1 -d "${runtime_source}" < \
   "${repo_root}/patches/wiicompiled-present-telemetry.patch"
@@ -81,6 +94,8 @@ patch --batch -p1 -d "${runtime_source}" < "${repo_root}/patches/wiicompiled-ios
 patch --batch -p1 -d "${runtime_source}" < "${repo_root}/patches/wiicompiled-ios-physical-controllers.patch"
 patch --batch -p1 -d "${runtime_source}" < "${repo_root}/patches/wiicompiled-ios-motion-steering.patch"
 patch --batch -p1 -d "${runtime_source}" < "${repo_root}/patches/wiicompiled-ios-discio-import.patch"
+patch --batch -p1 -d "${runtime_source}" < \
+  "${repo_root}/patches/wiicompiled-retro-apple-product.patch"
 
 mkdir -p "${runtime_source}/third_party/sse2neon"
 curl --fail --location --silent --show-error \
@@ -98,10 +113,14 @@ fi
 
 # Mach-O C symbols have a leading underscore. Publish both spellings for the
 # translator's assembly blobs without changing their contents.
-blob_asm="${translation_root}/data_sections_init_blobs.S"
-if [[ -f "${blob_asm}" ]] && ! rg -q '^\.globl _kData_' "${blob_asm}"; then
-  perl -0pi -e 's/^\.globl (kData_[^\n]+)\n\1:/\.globl $1\n.globl _$1\n$1:\n_$1:/mg' "${blob_asm}"
-fi
+for blob_asm in \
+    "${translation_root}/data_sections_init_blobs.S" \
+    "${translation_root}/../mod/cpp/mod_data_patches_blobs.S"; do
+  if [[ -f "${blob_asm}" ]] && rg -q '^\.globl k' "${blob_asm}" &&
+     ! rg -q '^\.globl _k' "${blob_asm}"; then
+    perl -0pi -e 's/^\.globl (k[^\n]+)\n\1:/\.globl $1\n.globl _$1\n$1:\n_$1:/mg' "${blob_asm}"
+  fi
+done
 
 generated_link="${repo_root}/build/generated"
 if [[ -e "${generated_link}" && ! -L "${generated_link}" ]]; then
@@ -137,7 +156,7 @@ cmake -S "${runtime_source}" -B "${runtime_build}" -G Ninja \
   -DMKW_KARTPAD_DISCIO_SOURCE_DIR="${discio_source}" \
   -DMKW_KARTPAD_DISCIO_BUILD_DIR="${discio_build}" \
   -DMKW_TRANSLATED_COMPILE_JOBS=2
-cmake --build "${runtime_build}" --target WiiCompiled --parallel 2
+cmake --build "${runtime_build}" --target "${product_target}" --parallel 2
 
 binary="${runtime_build}/KartPad.app/KartPad"
 if [[ ! -x "${binary}" ]]; then
