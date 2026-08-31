@@ -10,11 +10,31 @@
   <img alt="Metal renderer" src="https://img.shields.io/badge/renderer-Metal-5E5CE6">
   <img alt="Ahead-of-time static recompilation" src="https://img.shields.io/badge/PowerPC-static%20recompilation-FF9F0A">
   <img alt="macOS development target" src="https://img.shields.io/badge/macOS%20target-14%2B-0A84FF">
-  <img alt="iPhone and iPad device acceptance ready" src="https://img.shields.io/badge/iPhone%20%2F%20iPad-device%20acceptance%20ready-30D158">
+  <img alt="iPhone and iPad physical builds accepted" src="https://img.shields.io/badge/iPhone%20%2F%20iPad-physical%20builds%20accepted-30D158">
   <img alt="Game data not included" src="https://img.shields.io/badge/game%20data-not%20included-FF453A">
 </p>
 
 ![KartPad running a race on DK Summit on iPad](docs/images/kartpad-dk-summit-ipad.png)
+
+> [!IMPORTANT]
+> KartPad is still in development. A local unsigned IPA has been built, and
+> locally signed builds have been installed and accepted on physical iPhone
+> and iPad hardware. The current public GitHub release provides source code
+> rather than a downloadable IPA. Online play and Retro Rewind content are not
+> available yet.
+
+## What is available now?
+
+| Question | Answer |
+|---|---|
+| Is this Dolphin or streaming? | No. WiiCompiled translates the game's PowerPC code ahead of time, then KartPad compiles it for ARM64 and presents it through Metal. |
+| Does an IPA exist? | Yes. A local unsigned IPA has been built, and locally signed builds have been accepted on physical iPhone and iPad hardware. It is not currently attached to the public GitHub release, so users must build and locally sign their own development app on an Apple Silicon Mac. |
+| Does it include Mario Kart Wii? | No. You must provide your own legally obtained supported PAL `RMCP01` revision 0 WBFS/ISO. |
+| Does it support Retro Rewind? | Not yet. The current build runs the original retail content, including its 32 tracks. Retro Rewind's extra tracks, characters, and other content are planned as an optional mode selected from the three-dot menu. |
+| Does online play work? | Not yet. Retro WFC login, matchmaking, and online racing are active work and are targeted for a near-term update. This networking work does not add Retro Rewind content and is not Wiimmfi support. |
+| Do touch, tilt, and controllers work? | Yes. They are implemented in the development IPA, and the app has been physically accepted on both iPhone and iPad. Feature tuning can continue independently of that device acceptance. |
+| Are Android and Apple TV supported? | Not currently. Apple TV is a possible target once the current build is stable. Android may be investigated later. |
+| How much storage does it need? | The app is about 80 MiB and the extracted game data is about 2.5 GiB. Keeping the WBFS/ISO on the device requires additional space, and building from source needs substantially more free storage. |
 
 KartPad packages a native Apple ARM64 app around a
 [WiiCompiled](https://github.com/sonicdcer/WiiCompiled)-generated Mario Kart Wii
@@ -38,9 +58,10 @@ signing material.
 | Audio | Non-silent host playback, pause/resume, live output-device migration, and a two-hour representative continuity run pass their instrumented subcases; subjective listening and the eight-hour soak remain open |
 | Performance | Warm, simple scenes can report 60 FPS; first-use shader compilation and some tracks can fall far below real time. Stable frame pacing is **not yet accepted** |
 | Packaging | The original icon and exact branded 80 MiB package pass audit, installed-storage, configured gameplay, save-preservation, and normal-close checks; the native first-run/settings/data-management shell remains open |
-| iPhone/iPad | The full 29,065-function arm64 retail app boots, reaches live races, imports a private supported WBFS directly, preserves saves, and resumes in Simulator; the complete unsigned device build is ready for iPad-then-iPhone acceptance with native controller handoff |
-| Online multiplayer | Implementation is nearing completion, but remains unsupported pending end-to-end testing |
-| Distribution | Public source release with no game data or publicly distributed playable binary |
+| iPhone/iPad | The full 29,065-function ARM64 retail app has been packaged as an unsigned IPA; locally signed builds have been installed and physically accepted on both iPhone and iPad, reaching live races, importing a supported private WBFS, and preserving saves |
+| Game content | Original retail Mario Kart Wii content only today; Retro Rewind content is planned as a future optional mode in the three-dot menu |
+| Online multiplayer | Not working yet; Retro WFC login, matchmaking, and racing are active work targeted for a near-term update |
+| Distribution | A local unsigned IPA exists and corresponding locally signed builds have passed physical-device acceptance; the current public release provides source code and no game data, but does not offer the IPA as a download |
 
 The evidence ledger, exact open rows, and known risks live in
 [`docs/STATUS.md`](docs/STATUS.md). The 67-row release matrix is in
@@ -275,10 +296,11 @@ The full retail graph boots on iPhone 17 Pro and iPad Pro 13-inch Simulator,
 reaches title/menu/live Luigi Circuit, survives background/foreground, and
 preserves exact save hashes across relaunch. The original icon catalog, privacy
 manifest, opaque fitted-output bands, package boundary, and full 29,065-function
-unsigned physical-device build pass. Simulator motion sensors are unavailable by design;
-physical motion feel, complete touch/motion races, physical controller takeover
-and restoration, and physical-device performance/audio are the next hands-on
-acceptance gates.
+unsigned physical-device build pass. Locally signed builds from that IPA have
+also been installed and accepted on physical iPhone and iPad hardware.
+Simulator motion sensors are unavailable by design; additional motion tuning,
+long-run performance, and audio characterization remain active work rather
+than blockers to the completed device acceptance.
 
 ## First launch on iPhone or iPad
 
@@ -350,6 +372,40 @@ Useful starting points:
 
 ## Frequently asked questions
 
+### Can I download an IPA or playable app?
+
+A local unsigned IPA exists, and locally signed builds have been installed and
+accepted on physical iPhone and iPad hardware. The IPA is not currently
+attached to the public GitHub release. For now, building the mobile development
+app requires an Apple Silicon Mac, Xcode, local signing, and your own supported
+disc image.
+
+### Does online multiplayer work?
+
+Not yet. KartPad is actively adding the Retro WFC networking path, but
+end-to-end login, matchmaking, rooms, and online races are not working or
+accepted yet. This is targeted for a near-term update. Retro WFC is not
+Wiimmfi, and adding its networking payload does not add Retro Rewind content.
+
+### Does KartPad support Retro Rewind?
+
+Not yet. The current app runs the original retail Mario Kart Wii content. If
+you do not see Retro Rewind's additional tracks and characters, that is
+expected. Retro Rewind content is planned as an optional mode selected from
+KartPad's three-dot menu, but that mode is not available today.
+
+### Are Android or Apple TV supported?
+
+Not currently. The supported targets are Apple Silicon Mac, iPhone, and iPad.
+Apple TV is a possible next target once the current build is stable. Android
+may be investigated later.
+
+### How much storage does KartPad use?
+
+The current app package is about 80 MiB. Extracted game data uses about 2.5
+GiB. Keeping the original WBFS/ISO in Files needs additional space, and the
+full source build workspace is much larger than the installed app.
+
 ### Does this repository include Mario Kart Wii?
 
 No. You must supply your own legally obtained supported disc image. Do not
@@ -360,6 +416,13 @@ download links.
 
 No. KartPad is a game-specific static-recompilation integration for one pinned
 Mario Kart Wii profile. It is not a loader for arbitrary Wii software.
+
+### Is KartPad using Dolphin or streaming from a Mac?
+
+No. It does not run the game through Dolphin and does not stream gameplay from
+another computer. WiiCompiled translates the supported game's PowerPC code
+ahead of time. KartPad compiles that translated code for ARM64 and supplies the
+Apple app, Metal presentation, input, audio, storage, and lifecycle layers.
 
 ### Does KartPad use a PowerPC JIT on iPhone or iPad?
 
@@ -382,14 +445,6 @@ render resolution while diagnosing performance; KartPad's actual work is
 tracked through frame-time telemetry, real guest-clock cadence, and CPU/GPU
 profiles rather than an incompatible switch.
 
-### Can I download a playable app?
-
-No public playable artifact is distributed. The repository currently provides
-development source and a local, audited macOS self-build path. A legal release
-also needs reproducible fresh-clone provisioning, final license/notice review,
-signing, notarization, update infrastructure, and the remaining performance
-and physical-device gates.
-
 ### Do saves survive an app update or game-data replacement?
 
 The tested in-place paths keep saves separate from game data, and reimport or
@@ -399,11 +454,13 @@ container, so back up before crossing those boundaries.
 
 ### Is everything finished?
 
-No. Native macOS gameplay is broad and the Simulator mobile build runs real
+No. Native macOS gameplay is broad and the accepted mobile IPA runs real
 races, but sustained performance, a complete three- and four-player result
-path, the eight-hour soak, native WBFS import UI, fresh-clone provisioning,
-online play, complete touch/motion races, physical-device acceptance, and the
-full release matrix remain open.
+path, the eight-hour soak, fresh-clone provisioning, online play, complete
+touch/motion race coverage, Retro Rewind content, and the full release matrix
+remain open. General physical-device acceptance is complete on both iPhone and
+iPad, while narrower performance, audio, motion, and controller refinements can
+continue.
 
 ## Project map
 
