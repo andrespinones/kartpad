@@ -4,6 +4,8 @@ set -euo pipefail
 repo_root="$(git rev-parse --show-toplevel)"
 cd "$repo_root"
 
+./scripts/verify-patch-hunks.py patches/*.patch
+
 check_reference() {
   local reference_path="$1"
   local expected_commit="$2"

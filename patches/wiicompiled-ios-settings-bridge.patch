@@ -207,7 +207,7 @@ index 7338f78..0f51bc1 100644
          VISetFrameBufferScale(resolutionMultiplier);
          // One table for both directions. RuntimeConfigFile::IsSupportedGraphicsApi
          // whitelists exactly these config names, so an unrecognised value has
-@@ -1269,15 +1285,23 @@ int RuntimeMain(int argc, char** argv) {
+@@ -1269,14 +1285,22 @@ int RuntimeMain(int argc, char** argv) {
          UpdateMkwDynamicAspectSurface(auroraInfo.windowSize.native_fb_width,
                                        auroraInfo.windowSize.native_fb_height);
          settings_overlay::InitializeRuntimeSettings();

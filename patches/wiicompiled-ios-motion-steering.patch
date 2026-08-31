@@ -8,7 +8,7 @@
          "${MKW_KARTPAD_SUNPAD_DIR}/SunPadControllerMapping.mm"
          "${MKW_KARTPAD_SUNPAD_DIR}/SunPadGameOverlay.mm"
          "${MKW_KARTPAD_SUNPAD_DIR}/SunPadInputMixer.mm"
-@@ -309,7 +310,7 @@
+@@ -309,6 +310,6 @@
          "-framework UIKit" "-framework CoreGraphics" "-framework QuartzCore"
          "-framework Metal" "-framework GameController"
 -        "-framework UniformTypeIdentifiers")

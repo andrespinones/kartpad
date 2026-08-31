@@ -1466,3 +1466,22 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   fresh full Simulator compilation, and fresh full physical-iOS compilation
   and audit.** Signing, installation, and hands-on hardware acceptance remain
   external.
+
+## 2026-08-30 — Fail-fast patch-stack integrity
+
+- Added `scripts/verify-patch-hunks.py` to `verify-sources.sh`. It validates
+  every unified-diff hunk's declared old/new counts and rejects trailing body
+  lines outside a declared hunk, moving this failure class from late compile
+  time to the initial source gate.
+- The first run found the already corrected KPAD undercount and count defects
+  in six older patches. Corrected only their hunk metadata; all 174
+  hunks across 13 patches now pass. A fresh disposable runtime accepted the
+  complete Aurora/mobile patch chain, and its KPAD and Aurora presentation
+  sources are byte-identical to the successful clean build source. The FPSCR
+  translator patch reapplied and its Release CLI rebuilt with zero warnings or
+  errors.
+- Removed only reproducible untracked `.o`, `.d`, generated-header, and local
+  tool outputs from the pinned `wiimms-iso-tools` reference checkout; no
+  tracked source or private input changed. Full pin/input verification and the
+  repository safety audit then passed. Classification: **Pass for fail-fast
+  patch metadata, clean pinned sources, and patch-chain reproduction.**

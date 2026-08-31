@@ -53,7 +53,7 @@ diff --git a/src/main.cpp b/src/main.cpp
 diff --git a/include/runtime_config.h b/include/runtime_config.h
 --- a/include/runtime_config.h
 +++ b/include/runtime_config.h
-@@ -471,4 +471,7 @@ inline const RuntimeUserConfig& Get() {
+@@ -471,3 +471,6 @@ inline const RuntimeUserConfig& Get() {
      static RuntimeUserConfig config = LoadConfigFile();
      return config;
  }

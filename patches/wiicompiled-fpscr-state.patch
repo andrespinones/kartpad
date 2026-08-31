@@ -346,20 +346,20 @@ index c523a8c..4a0b35e 100644
 diff --git a/translator/src/Translator.Core/Analysis/GuestHelperEffectCatalog.cs b/translator/src/Translator.Core/Analysis/GuestHelperEffectCatalog.cs
 --- a/translator/src/Translator.Core/Analysis/GuestHelperEffectCatalog.cs
 +++ b/translator/src/Translator.Core/Analysis/GuestHelperEffectCatalog.cs
-@@ -18,6 +18,8 @@ public sealed record GuestHelperEffect(
+@@ -18,4 +18,6 @@ public sealed record GuestHelperEffect(
      bool WritesCtr = false,
      bool ReadsLr = false,
      bool WritesLr = false,
 +    bool ReadsFpscr = false,
 +    bool WritesFpscr = false,
      GuestCallBoundaryFlags BoundaryFlags = GuestCallBoundaryFlags.None);
-@@ -33,6 +35,8 @@ public static class GuestHelperEffectCatalog
+@@ -33,3 +35,5 @@ public static class GuestHelperEffectCatalog
      private static readonly GuestHelperEffect NoEffect = new();
      private static readonly GuestHelperEffect CarryUpdate = new(ReadsXer: true, WritesXer: true);
      private static readonly GuestHelperEffect CarryRead = new(ReadsXer: true);
 +    private static readonly GuestHelperEffect FpscrRead = new(ReadsFpscr: true);
 +    private static readonly GuestHelperEffect FpscrReadWrite = new(ReadsFpscr: true, WritesFpscr: true);
-@@ -81,17 +85,30 @@ public static class GuestHelperEffectCatalog
+@@ -81,13 +85,19 @@ public static class GuestHelperEffectCatalog
          "memset_zero_32", "PPC_Cntlzw", "PPC_Eciwx", "PPC_Ecowx", "PPC_Lwarx",
          "PPC_LoadHalfwordByteReverse", "PPC_LoadWordByteReverse",
          "PPC_StoreHalfwordByteReverse", "PPC_StoreWordByteReverse", "PPC_Stfiwx",
@@ -387,7 +387,7 @@ diff --git a/translator/src/Translator.Core/Analysis/GuestHelperEffectCatalog.cs
 +        "PPC_PsNmadd", "PPC_PsNmsub", "PPC_PsMadds0", "PPC_PsMadds1", "PPC_PsMuls0", "PPC_PsMuls1",
 +        "PPC_PsRes", "PPC_PsRsqrte", "PPC_PsSum0", "PPC_PsSum1"
 +    };
-@@ -105,9 +122,19 @@ public static class GuestHelperEffectCatalog
+@@ -105,4 +122,12 @@ public static class GuestHelperEffectCatalog
 -    private static readonly string[] FpscrAndGqrHelpers =
 +    private static readonly string[] FpscrReadHelpers =
 +    {
@@ -402,7 +402,7 @@ diff --git a/translator/src/Translator.Core/Analysis/GuestHelperEffectCatalog.cs
 +    {
 +        "PPC_PsqL", "PPC_PsqSt"
      };
-@@ -122,8 +149,11 @@ public static class GuestHelperEffectCatalog
+@@ -122,4 +149,7 @@ public static class GuestHelperEffectCatalog
          var entries = new Dictionary<string, GuestHelperEffect>(StringComparer.OrdinalIgnoreCase);
          foreach (var helper in PureHelpers) entries.Add(helper, NoEffect);
 +        foreach (var helper in FpscrReadHelpers) entries.Add(helper, FpscrRead);
@@ -411,17 +411,17 @@ diff --git a/translator/src/Translator.Core/Analysis/GuestHelperEffectCatalog.cs
 -        foreach (var helper in FpscrAndGqrHelpers) entries.Add(helper, NoEffect);
 +        foreach (var helper in FpscrWriteHelpers) entries.Add(helper, FpscrReadWrite);
 +        foreach (var helper in GqrHelpers) entries.Add(helper, NoEffect);
-@@ -159,7 +189,9 @@ public static class GuestHelperEffectCatalog
+@@ -159,2 +189,3 @@ public static class GuestHelperEffectCatalog
                  ArgumentDependentHelper.MoveConditionFromFpscr =>
 -                    new GuestHelperEffect(CrReadMask: byte.MaxValue, CrWriteMask: FieldMask(call, 0)),
 +                    new GuestHelperEffect(CrReadMask: byte.MaxValue, CrWriteMask: FieldMask(call, 0),
 +                        ReadsFpscr: true, WritesFpscr: true),
-@@ -169,7 +201,9 @@ public static class GuestHelperEffectCatalog
+@@ -169,2 +201,3 @@ public static class GuestHelperEffectCatalog
                  ArgumentDependentHelper.CompareIntoConditionField =>
 -                    new GuestHelperEffect(CrReadMask: byte.MaxValue, CrWriteMask: FieldMask(call, 0)),
 +                    new GuestHelperEffect(CrReadMask: byte.MaxValue, CrWriteMask: FieldMask(call, 0),
 +                        ReadsFpscr: true, WritesFpscr: true),
-@@ -220,5 +254,6 @@ public static class GuestHelperEffectCatalog
+@@ -220,4 +254,5 @@ public static class GuestHelperEffectCatalog
      private static GuestHelperEffect CreateComplete(GuestCallBoundaryFlags extra) =>
          new(uint.MaxValue, uint.MaxValue, uint.MaxValue, uint.MaxValue, byte.MaxValue, byte.MaxValue,
 -            true, true, true, true, true, true, extra | GuestCallBoundaryFlags.RequiresCompleteContext);
@@ -431,7 +431,7 @@ diff --git a/translator/src/Translator.Core/Analysis/GuestHelperEffectCatalog.cs
 diff --git a/translator/src/Translator.Core/Analysis/GuestAbiContractAnalyzer.cs b/translator/src/Translator.Core/Analysis/GuestAbiContractAnalyzer.cs
 --- a/translator/src/Translator.Core/Analysis/GuestAbiContractAnalyzer.cs
 +++ b/translator/src/Translator.Core/Analysis/GuestAbiContractAnalyzer.cs
-@@ -438,11 +438,11 @@ public static class GuestAbiContractAnalyzer
+@@ -438,7 +438,7 @@ public static class GuestAbiContractAnalyzer
      private static RegisterSet HiddenReads(GuestHelperEffect effect) =>
          new(effect.GprReadMask, effect.FprReadMask, effect.CrReadMask,
 -            effect.ReadsXer, effect.ReadsCtr, effect.ReadsLr, false, 0, 0);
@@ -444,7 +444,7 @@ diff --git a/translator/src/Translator.Core/Analysis/GuestAbiContractAnalyzer.cs
 diff --git a/translator/src/Translator.Core/Analysis/GuestStateLivenessAnalyzer.cs b/translator/src/Translator.Core/Analysis/GuestStateLivenessAnalyzer.cs
 --- a/translator/src/Translator.Core/Analysis/GuestStateLivenessAnalyzer.cs
 +++ b/translator/src/Translator.Core/Analysis/GuestStateLivenessAnalyzer.cs
-@@ -292,7 +292,16 @@ public static class GuestStateLivenessAnalyzer
+@@ -292,1 +292,10 @@ public static class GuestStateLivenessAnalyzer
 -            case IrCall value: foreach (var argument in value.Arguments) AddValue(ref result, argument); break;
 +            case IrCall value:
 +                foreach (var argument in value.Arguments) AddValue(ref result, argument);
@@ -456,7 +456,7 @@ diff --git a/translator/src/Translator.Core/Analysis/GuestStateLivenessAnalyzer.
 +                        effect.ReadsXer, effect.ReadsCtr, effect.ReadsLr, effect.ReadsFpscr, 0, 0));
 +                }
 +                break;
-@@ -328,7 +337,16 @@ public static class GuestStateLivenessAnalyzer
+@@ -328,1 +337,10 @@ public static class GuestStateLivenessAnalyzer
 -            case IrCall value: Add(ref result, value.Destination); break;
 +            case IrCall value:
 +                Add(ref result, value.Destination);
@@ -471,7 +471,7 @@ diff --git a/translator/src/Translator.Core/Analysis/GuestStateLivenessAnalyzer.
 diff --git a/translator/tests/Translator.Tests/GuestAbiContractAnalyzerTests.cs b/translator/tests/Translator.Tests/GuestAbiContractAnalyzerTests.cs
 --- a/translator/tests/Translator.Tests/GuestAbiContractAnalyzerTests.cs
 +++ b/translator/tests/Translator.Tests/GuestAbiContractAnalyzerTests.cs
-@@ -5,6 +5,32 @@ namespace Translator.Tests;
+@@ -5,2 +5,27 @@ namespace Translator.Tests;
  public sealed class GuestAbiContractAnalyzerTests
  {
 +    [Fact]
@@ -510,7 +510,7 @@ diff --git a/translator/tests/Translator.Tests/GuestAbiContractAnalyzerTests.cs 
 diff --git a/translator/tests/Translator.Tests/GuestStateLivenessAnalyzerTests.cs b/translator/tests/Translator.Tests/GuestStateLivenessAnalyzerTests.cs
 --- a/translator/tests/Translator.Tests/GuestStateLivenessAnalyzerTests.cs
 +++ b/translator/tests/Translator.Tests/GuestStateLivenessAnalyzerTests.cs
-@@ -6,6 +6,18 @@ namespace Translator.Tests;
+@@ -6,2 +6,14 @@ namespace Translator.Tests;
  public sealed class GuestStateLivenessAnalyzerTests
  {
 +    [Fact]

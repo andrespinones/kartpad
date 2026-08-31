@@ -60,6 +60,18 @@ pinned runtime preserves the complete function.
 - Simulator-only touch/import test hooks remain absent from the device app.
 - No Simulator device or game runtime was launched.
 
+## Patch-stack guard
+
+`scripts/verify-patch-hunks.py` now validates the declared old/new line counts
+for every unified-diff hunk before source pins and disc identity are accepted.
+The initial run detected the KPAD truncation plus count defects in six older
+patches; all tracked headers were corrected without changing patch
+content. The guard now passes 174 hunks across 13 patches. A new disposable
+runtime copy accepted the complete mobile patch sequence, and its KPAD and
+Aurora presentation sources are byte-identical to the sources used by the
+successful clean builds. The FPSCR translator patch also reapplied and its
+Release CLI rebuilt with zero warnings or errors.
+
 No Simulator or game instance ran during this work. This is evidence for full
 physical-iOS source compilation, linking, bundle construction, and package
 audit. It does not establish signing, installation, launch, Metal execution,

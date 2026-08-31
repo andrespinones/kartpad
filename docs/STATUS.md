@@ -102,7 +102,9 @@ experiments, physical-device interaction, and a reproducible legal build path.
   `3e201daca7591a2bcadc3e28a4ad45565ac0813b2138ff57abad7690aaef8c4f`.
   A new source and build directory exposed and corrected an undercounted
   serialized KPAD patch hunk, then rebuilt both the complete Simulator graph
-  and the complete physical-device graph from the corrected patch stack.
+  and the complete physical-device graph from the corrected patch stack. The
+  source verifier now rejects any declared/actual line-count mismatch across
+  all 174 tracked unified-diff hunks before a costly build begins.
   The reproducible `scripts/build-ios-device-game-app.sh` rerun is incremental
   on an existing build directory. This closes fresh-directory and incremental
   full device compilation, not signing,

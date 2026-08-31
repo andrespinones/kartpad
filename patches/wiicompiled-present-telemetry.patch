@@ -32,7 +32,7 @@ diff --git a/src/settings_overlay.cpp b/src/settings_overlay.cpp
      if (!g_showFps) {
          return;
      }
-@@ -737,7 +759,10 @@ void DrawFpsOverlay() {
+@@ -737,6 +759,9 @@ void DrawFpsOverlay() {
              // Present timing includes the additional frames produced by
              // interpolation, so this remains the actual displayed FPS.
              ImGui::Text("FPS: %.1f", presentTiming.framesPerSecond);

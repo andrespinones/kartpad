@@ -2,7 +2,7 @@ diff --git a/lib/aurora.cpp b/lib/aurora.cpp
 index 8cc5e4c..31cbf5d 100644
 --- a/lib/aurora.cpp
 +++ b/lib/aurora.cpp
-@@ -1185,6 +1185,7 @@ void encode_presentation_snapshot(const wgpu::CommandEncoder& encoder,
+@@ -1185,7 +1185,8 @@ void encode_presentation_snapshot(const wgpu::CommandEncoder& encoder,
          wgpu::RenderPassColorAttachment{
              .view = image.texture.view,
              .loadOp = wgpu::LoadOp::Clear,
