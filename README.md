@@ -42,7 +42,7 @@ signing material.
 | Audio | Non-silent host playback, pause/resume, live output-device migration, and a two-hour representative continuity run pass their instrumented subcases; subjective listening and the eight-hour soak remain open |
 | Performance | Warm, simple scenes can report 60 FPS; first-use shader compilation and some tracks can fall far below real time. Stable frame pacing is **not yet accepted** |
 | Packaging | The original icon and exact branded 80 MiB package pass audit, installed-storage, configured gameplay, save-preservation, and normal-close checks; the native first-run/settings/data-management shell remains open |
-| iPhone/iPad | The full 29,065-function arm64 retail app boots, reaches live races, imports private extracted data, preserves saves, and resumes on iPhone and iPad Simulator with the exact SunPad touch/menu source; complete touch races and physical-device acceptance remain open |
+| iPhone/iPad | The full 29,065-function arm64 retail app boots, reaches live races, imports private extracted data, preserves saves, and resumes on iPhone and iPad Simulator; the same exact source graph also builds and audits as a full unsigned physical-iOS app with the exact SunPad touch/menu source |
 | Distribution | Development source only; no game data and no release candidate |
 
 The evidence ledger, exact open rows, and known risks live in
@@ -255,8 +255,8 @@ KartPad's owning layer adds two actions ahead of SunPad's unchanged menu:
 The full retail graph boots on iPhone 17 Pro and iPad Pro 13-inch Simulator,
 reaches title/menu/live Luigi Circuit, survives background/foreground, and
 preserves exact save hashes across relaunch. The original icon catalog, privacy
-manifest, opaque fitted-output bands, package boundary, and unsigned physical
-device compilation pass. Simulator motion sensors are unavailable by design;
+manifest, opaque fitted-output bands, package boundary, and full 29,065-function
+unsigned physical-device build pass. Simulator motion sensors are unavailable by design;
 physical motion feel, complete touch/motion races, physical controller handoff,
 and physical-device performance/audio remain hands-on gates.
 
@@ -389,6 +389,7 @@ full release matrix remain open.
 | [`scripts/prepare-disc.sh`](scripts/prepare-disc.sh) | Validate and privately extract the supported disc profile |
 | [`scripts/translate-base.sh`](scripts/translate-base.sh) | Produce the ignored full ARM64 translation graph |
 | [`scripts/build-ios-game-app.sh`](scripts/build-ios-game-app.sh) | Build the full iPhone/iPad Simulator game app |
+| [`scripts/build-ios-device-game-app.sh`](scripts/build-ios-device-game-app.sh) | Build and audit the full unsigned physical-iPhone/iPad game app |
 | [`scripts/check-ios-device-runtime-host.sh`](scripts/check-ios-device-runtime-host.sh) | Compile the exact UIKit runtime host for physical iOS and reject Simulator-only hooks |
 | [`scripts/audit-macos-package.sh`](scripts/audit-macos-package.sh) | Reject malformed or privacy-unsafe Mac packages |
 | [`scripts/audit-ios-game-app.sh`](scripts/audit-ios-game-app.sh) | Reject private data, unsafe linkage, and incomplete iOS bundles |

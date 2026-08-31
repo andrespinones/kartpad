@@ -1415,3 +1415,26 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   modified-host compilation, conditional probe exclusion, and the independent
   physical-device shell/package boundary.** This is not a full translated
   physical-device link, signed install, or hardware execution claim.
+
+## 2026-08-30 — Full translated physical-iOS application
+
+- Located and verified the already pinned physical-iOS Dawn package at SHA-256
+  `a361fcca75929fa5c766cfcde979c010a6da7d805e5db8e15c75e73fd8260e78`;
+  a representative archive object declares platform `IOS`, minimum 14.0.
+- Configured the current integrated mobile source against `iphoneos` 16.0 and
+  the same private 29,065-function base translation used by the accepted
+  Simulator candidate. The complete Xcode graph compiled Aurora/Metal, SDL
+  UIKit/CoreAudio, the static runtime, the exact SunPad component, KartPad's
+  touch/motion/controller host, and every translated shard, then linked.
+- The 75 MiB unsigned app declares arm64 `IOS` 16.0 and links only Apple system
+  frameworks/libraries. The strict full-game audit passes, including original
+  icon/privacy/runtime resources, required mobile symbols and touch contracts,
+  forbidden private data, and absence of all Simulator-only probes. Executable
+  SHA-256 is
+  `54458302a273c2f93955f3ee9c8558e54456c8578439d50fd3651cb52cf17711`.
+- Added `scripts/build-ios-device-game-app.sh`; its immediate incremental rerun
+  reconfigured, built, audited, and reproduced the same executable hash.
+- No Simulator or game runtime was launched. Classification: **Pass for full
+  translated physical-iOS compilation, link, bundle resolution, audit, and
+  reproducible incremental build.** Signing, installation, and physical-device
+  runtime acceptance remain external and are not claimed.
