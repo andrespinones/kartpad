@@ -1511,3 +1511,29 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   touch-modal held-input clearing and cross-target compilation; lower-row
   editor/reset UI automation remains inconclusive.** Evidence:
   `docs/artifacts/2026-08-30/g15-touch-modal-input-clear/`.
+
+## 2026-08-30 — Touch layout editor and reset
+
+- Reused the exact SunPad settings/editor behavior while keeping its pinned
+  twelve-file snapshot unchanged. A Simulator-only owner-layer probe opens the
+  actual settings panel at its lower scroll position and is excluded from
+  physical builds by compilation plus package audit.
+- The real Move switch's value-change action entered edit mode. It selected A,
+  changed the real per-control slider to `1.25`, persisted
+  `SunPadControlSizeScales = { A = 1.25; }`, exposed Done through
+  accessibility, and exited cleanly when Done was invoked. Runtime evidence
+  reported `move/resize pass (A=1.25)`.
+- A separate bounded run seeded one test A origin, invoked the real Reset This
+  Device Layout button, displayed the native destructive confirmation, and
+  confirmed Reset through accessibility. The position, per-control-size,
+  global-size, and opacity preference keys were all absent afterward. A normal
+  relaunch restored the default A geometry over live retail rendering.
+- The full Simulator app rebuilt/audited at executable SHA-256
+  `cbea21a728182be320d18d14d681248f4433e50f0617ac0c5bb731efecac2a34`.
+  The full physical-iOS app rebuilt/audited at executable SHA-256
+  `cf1d4ccdb20b52d52231b272b1538896ead972fdc18096fcae766d4497416e00`
+  and contains no Simulator test contract. The sole app and Simulator were
+  terminated and shut down. Classification: **Pass for editor entry,
+  selection, resize, persistence, Done, reset confirmation, reset semantics,
+  and default restoration.** Physical finger-drag ergonomics remain hands-on.
+  Evidence: `docs/artifacts/2026-08-30/g15-touch-layout-editor/`.

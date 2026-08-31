@@ -34,6 +34,7 @@
 @property(nonatomic, assign) BOOL kartPadGasHoldSelfTestStarted;
 @property(nonatomic, assign) BOOL kartPadGasInputSelfTestStarted;
 @property(nonatomic, assign) BOOL kartPadModalInputSelfTestStarted;
+@property(nonatomic, assign) BOOL kartPadEditorUITestStarted;
 - (void)resetKartPadControlAppearance;
 @end
 
@@ -44,6 +45,7 @@
 - (void)rPressureChanged:(uint8_t)pressure fullPress:(BOOL)fullPress;
 - (void)clearTouchInput;
 - (void)toggleSettingsPanel;
+- (void)selectControlForEditing:(UIView *)control;
 @end
 
 namespace {
@@ -56,6 +58,34 @@ UIViewController *KartPadVisibleViewController(UIWindow *window) {
     controller = controller.presentedViewController;
   }
   return controller;
+}
+
+UIScrollView *KartPadScrollableSettingsView(UIView *root) {
+  if ([root isKindOfClass:UIScrollView.class]) {
+    UIScrollView *scroll = (UIScrollView *)root;
+    if (scroll.contentSize.height > CGRectGetHeight(scroll.bounds) + 1.0) {
+      return scroll;
+    }
+  }
+  for (UIView *child in root.subviews) {
+    UIScrollView *found = KartPadScrollableSettingsView(child);
+    if (found != nil) return found;
+  }
+  return nil;
+}
+
+UIView *KartPadSubviewWithAccessibilityLabel(UIView *root, NSString *label,
+                                              Class viewClass) {
+  if ([root isKindOfClass:viewClass] &&
+      [root.accessibilityLabel isEqualToString:label]) {
+    return root;
+  }
+  for (UIView *child in root.subviews) {
+    UIView *found = KartPadSubviewWithAccessibilityLabel(child, label,
+                                                          viewClass);
+    if (found != nil) return found;
+  }
+  return nil;
 }
 
 NSString *KartPadSupportRoot() {
@@ -756,6 +786,76 @@ NSError *KartPadPerformGameDataImport(NSURL *url) {
         NSLog(@"[KartPad] touch modal input self-test: %@ (before=%08x after=%08x)",
               passed ? @"pass" : @"FAIL", before.buttons, after.buttons);
         [self toggleSettingsPanel];
+      });
+    }
+    if (!self.kartPadEditorUITestStarted && menuButton != nil &&
+        NSProcessInfo.processInfo.environment[@"KARTPAD_TOUCH_EDITOR_UI_TEST"] != nil) {
+      self.kartPadEditorUITestStarted = YES;
+      NSString *mode =
+          NSProcessInfo.processInfo.environment[@"KARTPAD_TOUCH_EDITOR_UI_TEST"];
+      dispatch_async(dispatch_get_main_queue(), ^{
+        [self toggleSettingsPanel];
+        [self layoutIfNeeded];
+        UIScrollView *scroll = KartPadScrollableSettingsView(self);
+        if (scroll == nil) {
+          menuButton.accessibilityHint =
+              @"Touch editor lower-row test failed: settings scroll view missing.";
+          NSLog(@"[KartPad] touch editor UI test: FAIL (scroll view missing)");
+          return;
+        }
+        const CGFloat bottom = MAX(-scroll.adjustedContentInset.top,
+            scroll.contentSize.height - CGRectGetHeight(scroll.bounds) +
+                scroll.adjustedContentInset.bottom);
+        [scroll setContentOffset:CGPointMake(scroll.contentOffset.x, bottom)
+                       animated:NO];
+        menuButton.accessibilityHint = @"Touch editor lower rows exposed.";
+        NSLog(@"[KartPad] touch editor UI test: lower rows exposed (offset=%.1f)",
+              bottom);
+        if ([mode isEqualToString:@"move"]) {
+          UISwitch *move = (UISwitch *)KartPadSubviewWithAccessibilityLabel(
+              self, @"Move touch controls", UISwitch.class);
+          if (move == nil) {
+            NSLog(@"[KartPad] touch editor UI test: FAIL (move switch missing)");
+            return;
+          }
+          [move setOn:YES animated:NO];
+          [move sendActionsForControlEvents:UIControlEventValueChanged];
+          UIButton *aButton = (UIButton *)KartPadSubviewWithAccessibilityLabel(
+              self, @"A", UIButton.class);
+          if (aButton != nil) [self selectControlForEditing:aButton];
+          UISlider *aSize = (UISlider *)KartPadSubviewWithAccessibilityLabel(
+              self, @"A size", UISlider.class);
+          if (aSize != nil) {
+            aSize.value = 1.25;
+            [aSize sendActionsForControlEvents:UIControlEventValueChanged];
+          }
+          UIButton *done = (UIButton *)KartPadSubviewWithAccessibilityLabel(
+              self, @"Finish moving touch controls", UIButton.class);
+          const BOOL sizePersisted = std::fabs(
+              [[SunPadSettings sharedSettings] sizeScaleForControl:@"A"] -
+              1.25) < 0.001;
+          const BOOL passed = done != nil && !done.hidden && aSize.enabled &&
+                              sizePersisted;
+          menuButton.accessibilityHint = passed
+              ? @"Touch editor selected and resized A."
+              : @"Touch editor move-mode test failed.";
+          NSLog(@"[KartPad] touch editor UI test: move/resize %@ (A=%.2f)",
+                passed ? @"pass" : @"FAIL",
+                [[SunPadSettings sharedSettings] sizeScaleForControl:@"A"]);
+        } else if ([mode isEqualToString:@"reset"]) {
+          [[NSUserDefaults standardUserDefaults]
+              setObject:@{@"A" : NSStringFromCGPoint(CGPointMake(0.5, 0.5))}
+                 forKey:@"SunPadControlOrigins"];
+          [[NSUserDefaults standardUserDefaults] synchronize];
+          UIButton *reset = (UIButton *)KartPadSubviewWithAccessibilityLabel(
+              self, @"Reset This Device Layout", UIButton.class);
+          if (reset == nil) {
+            NSLog(@"[KartPad] touch editor UI test: FAIL (reset button missing)");
+            return;
+          }
+          [reset sendActionsForControlEvents:UIControlEventTouchUpInside];
+          NSLog(@"[KartPad] touch editor UI test: reset confirmation opened");
+        }
       });
     }
 #endif
