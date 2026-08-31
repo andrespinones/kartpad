@@ -1,0 +1,13 @@
+diff --git a/lib/socketpair.c b/lib/socketpair.c
+index 1d1d5a6..dad265d 100644
+--- a/lib/socketpair.c
++++ b/lib/socketpair.c
+@@ -50,7 +50,7 @@ int Curl_eventfd(curl_socket_t socks[2], bool nonblocking)
+ 
+ int Curl_pipe(curl_socket_t socks[2], bool nonblocking)
+ {
+-#ifdef HAVE_PIPE2
++#if defined(HAVE_PIPE2) && !defined(__APPLE__)
+   int flags = nonblocking ? O_NONBLOCK | O_CLOEXEC : O_CLOEXEC;
+   if(pipe2(socks, flags))
+     return -1;

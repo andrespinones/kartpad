@@ -1537,3 +1537,27 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   selection, resize, persistence, Done, reset confirmation, reset semantics,
   and default restoration.** Physical finger-drag ergonomics remain hands-on.
   Evidence: `docs/artifacts/2026-08-30/g15-touch-layout-editor/`.
+
+## 2026-08-30 — Native iOS WBFS DiscIO feasibility
+
+- Compiled pinned Dolphin DiscIO for arm64 iOS Simulator after replacing the
+  unavailable desktop-only filesystem watcher, USB adapter, AppKit/IOKit, and
+  Quartz paths with bounded iOS behavior. Disabled curl's false-positive
+  `pipe2` path for the Apple SDK. The immutable reference checkout was restored
+  clean after serializing every change into verified patches.
+- Ran a minimal native probe against an APFS clone of the supplied read-only
+  WBFS on exactly one iPhone 17 Pro Simulator. It identified `RMCP01` revision
+  0, enumerated 2,095 filesystem entries, exported the disc system data, and
+  reproduced `main.dol` SHA-256
+  `80d18895b39c63bd80f457398bfcbb91b7d16ac116a41a88967e954080155b05`.
+- Repeated the test from the clean pinned build rather than relying on the
+  SunPad reference binary. Its executable SHA-256 is
+  `acac0a73fa04085fe9d9f8eac80ab13183d7d25999f1489511173b96e6e10984`.
+  The Simulator trap shut down the sole device and its temporary 2.6 GB clone
+  disappeared with the Simulator staging directory; zero devices remain
+  booted.
+- Added a fresh-source build script, probe source, and content-private evidence.
+  Classification: **Pass for native WBFS open/identity/filesystem/system-export
+  feasibility.** Full file-tree extraction and atomic integration into the
+  existing KartPad mobile import flow remain open. Evidence:
+  `docs/artifacts/2026-08-30/g15-ios-wbfs-discio/`.

@@ -1,0 +1,344 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 8f62d7f..fc082bd 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -23,6 +23,19 @@ set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
+ 
+ project(dolphin-emu)
+ 
++if(DEFINED KARTPAD_DISCIO_PROBE_SOURCE)
++  set(KARTPAD_DISCIO_PROBE_SOURCE "${KARTPAD_DISCIO_PROBE_SOURCE}" CACHE FILEPATH "")
++endif()
++
++if(DEFINED KARTPAD_DISCIO_PROBE_SOURCE)
++  add_executable(kartpad-discio-probe
++    "${KARTPAD_DISCIO_PROBE_SOURCE}"
++    "${CMAKE_CURRENT_SOURCE_DIR}/Source/UnitTests/StubHost.cpp"
++  )
++  target_link_libraries(kartpad-discio-probe PRIVATE discio uicommon "-framework Foundation")
++  set_target_properties(kartpad-discio-probe PROPERTIES CXX_STANDARD 23)
++endif()
++
+ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/CMake)
+ 
+ # Support functions
+@@ -641,7 +654,7 @@ if(ENABLE_VULKAN)
+   endif()
+ endif()
+ 
+-if(NOT (WIN32 AND _M_ARM_64))
++if(NOT (WIN32 AND _M_ARM_64) AND NOT IOS)
+   # OpenGL is available on all platforms except windows-arm64
+   add_definitions(-DHAS_OPENGL)
+ endif()
+@@ -690,12 +703,12 @@ if (APPLE OR WIN32)
+   include_directories(Externals/ed25519)
+ endif()
+ 
+-if(ENABLE_CUBEB)
++if(ENABLE_CUBEB AND NOT IOS)
+   dolphin_find_optional_system_library(CUBEB Externals/cubeb)
+   add_definitions(-DHAVE_CUBEB)
+ endif()
+ 
+-if(NOT ANDROID)
++if(NOT ANDROID AND NOT IOS)
+   dolphin_find_optional_system_library(LibUSB Externals/libusb)
+   add_definitions(-D__LIBUSB__)
+ endif()
+@@ -716,7 +729,7 @@ dolphin_find_optional_system_library(MBEDTLS Externals/mbedtls 2.28)
+ 
+ dolphin_find_optional_system_library(CURL Externals/curl)
+ 
+-if(NOT ANDROID)
++if(NOT ANDROID AND NOT IOS)
+   dolphin_find_optional_system_library(HIDAPI Externals/hidapi)
+ endif()
+ 
+diff --git a/Source/Core/Common/CMakeLists.txt b/Source/Core/Common/CMakeLists.txt
+index 97d8ad8..4fde03b 100644
+--- a/Source/Core/Common/CMakeLists.txt
++++ b/Source/Core/Common/CMakeLists.txt
+@@ -67,7 +67,8 @@ add_library(common
+   FatFsUtil.h
+   FileSearch.cpp
+   FileSearch.h
+-  FilesystemWatcher.cpp
++  $<$<NOT:$<STREQUAL:${CMAKE_SYSTEM_NAME},iOS>>:FilesystemWatcher.cpp>
++  $<$<STREQUAL:${CMAKE_SYSTEM_NAME},iOS>:FilesystemWatcher_iOS.cpp>
+   FilesystemWatcher.h
+   FileUtil.cpp
+   FileUtil.h
+@@ -317,7 +318,7 @@ if(WIN32)
+     WindowsDevice.h
+     WindowsRegistry.cpp
+   )
+-elseif(APPLE)
++elseif(APPLE AND NOT IOS)
+   target_sources(common PRIVATE
+     GL/GLInterface/AGL.h
+     GL/GLInterface/AGL.mm
+diff --git a/Source/Core/Common/FilesystemWatcher.h b/Source/Core/Common/FilesystemWatcher.h
+index ad1c822..c339d7e 100644
+--- a/Source/Core/Common/FilesystemWatcher.h
++++ b/Source/Core/Common/FilesystemWatcher.h
+@@ -8,6 +8,11 @@
+ #include <string>
+ #include <string_view>
+ 
++#if defined(__APPLE__)
++#include <TargetConditionals.h>
++#endif
++
++#if !defined(TARGET_OS_IPHONE) || !TARGET_OS_IPHONE
+ namespace wtr
+ {
+ inline namespace watcher
+@@ -15,6 +20,7 @@ inline namespace watcher
+ class watch;
+ }
+ }  // namespace wtr
++#endif
+ 
+ namespace Common
+ {
+@@ -42,6 +48,8 @@ private:
+   // A file or folder was deleted in one of the watched paths
+   virtual void PathDeleted(std::string_view path) {}
+ 
++#if !defined(TARGET_OS_IPHONE) || !TARGET_OS_IPHONE
+   std::map<std::string, std::unique_ptr<wtr::watch>> m_watched_paths;
++#endif
+ };
+ }  // namespace Common
+diff --git a/Source/Core/Common/FilesystemWatcher_iOS.cpp b/Source/Core/Common/FilesystemWatcher_iOS.cpp
+new file mode 100644
+index 0000000..496a67c
+--- /dev/null
++++ b/Source/Core/Common/FilesystemWatcher_iOS.cpp
+@@ -0,0 +1,12 @@
++// Copyright 2026 KartPad contributors
++// SPDX-License-Identifier: GPL-2.0-or-later
++
++#include "Common/FilesystemWatcher.h"
++
++namespace Common
++{
++FilesystemWatcher::FilesystemWatcher() = default;
++FilesystemWatcher::~FilesystemWatcher() = default;
++void FilesystemWatcher::Watch(const std::string& path) { (void)path; }
++void FilesystemWatcher::Unwatch(const std::string& path) { (void)path; }
++}  // namespace Common
+diff --git a/Source/Core/Common/MemoryUtil.cpp b/Source/Core/Common/MemoryUtil.cpp
+index 0d66890..6bd19ea 100644
+--- a/Source/Core/Common/MemoryUtil.cpp
++++ b/Source/Core/Common/MemoryUtil.cpp
+@@ -16,7 +16,7 @@
+ #else
+ #include <stdio.h>
+ #include <sys/mman.h>
+-#if defined(_M_ARM_64) && defined(__APPLE__)
++#if defined(_M_ARM_64) && defined(__APPLE__) && !defined(__IPHONE_OS_VERSION_MIN_REQUIRED)
+ #include <pthread.h>
+ #endif
+ #if defined __APPLE__ || defined __FreeBSD__ || defined __OpenBSD__ || defined __NetBSD__
+@@ -93,7 +93,7 @@ static int& JITPageWriteNestCounter()
+ // Allows a thread to write to executable memory, but not execute the data.
+ void JITPageWriteEnableExecuteDisable()
+ {
+-#if defined(_M_ARM_64) && defined(__APPLE__)
++#if defined(_M_ARM_64) && defined(__APPLE__) && !defined(__IPHONE_OS_VERSION_MIN_REQUIRED)
+   if (JITPageWriteNestCounter() == 0)
+   {
+     pthread_jit_write_protect_np(0);
+@@ -112,7 +112,7 @@ void JITPageWriteDisableExecuteEnable()
+   if (JITPageWriteNestCounter() < 0)
+     PanicAlertFmt("JITPageWriteNestCounter() underflowed");
+ 
+-#if defined(_M_ARM_64) && defined(__APPLE__)
++#if defined(_M_ARM_64) && defined(__APPLE__) && !defined(__IPHONE_OS_VERSION_MIN_REQUIRED)
+   if (JITPageWriteNestCounter() == 0)
+   {
+     pthread_jit_write_protect_np(1);
+diff --git a/Source/Core/InputCommon/CMakeLists.txt b/Source/Core/InputCommon/CMakeLists.txt
+index 5cc6b66..e56deb8 100644
+--- a/Source/Core/InputCommon/CMakeLists.txt
++++ b/Source/Core/InputCommon/CMakeLists.txt
+@@ -1,7 +1,8 @@
+ add_library(inputcommon
+   DynamicInputTextureManager.cpp
+   DynamicInputTextureManager.h
+-  GCAdapter.cpp
++  $<$<NOT:$<STREQUAL:${CMAKE_SYSTEM_NAME},iOS>>:GCAdapter.cpp>
++  $<$<STREQUAL:${CMAKE_SYSTEM_NAME},iOS>:GCAdapter_iOS.cpp>
+   GCAdapter.h
+   ImageOperations.cpp
+   ImageOperations.h
+@@ -108,7 +109,7 @@ if(WIN32)
+     ControllerInterface/ForceFeedback/ForceFeedbackDevice.cpp
+     ControllerInterface/ForceFeedback/ForceFeedbackDevice.h
+   )
+-elseif(APPLE)
++elseif(APPLE AND NOT IOS)
+   target_sources(inputcommon PRIVATE
+     ControllerInterface/Quartz/Quartz.h
+     ControllerInterface/Quartz/Quartz.mm
+@@ -144,7 +145,7 @@ elseif(ANDROID)
+   )
+ endif()
+ 
+-if(NOT ANDROID)
++if(NOT ANDROID AND NOT IOS)
+   target_link_libraries(inputcommon PUBLIC LibUSB::LibUSB)
+ endif()
+ 
+diff --git a/Source/Core/InputCommon/ControllerInterface/ControllerInterface.h b/Source/Core/InputCommon/ControllerInterface/ControllerInterface.h
+index 8f7f4ba..0968e92 100644
+--- a/Source/Core/InputCommon/ControllerInterface/ControllerInterface.h
++++ b/Source/Core/InputCommon/ControllerInterface/ControllerInterface.h
+@@ -8,6 +8,10 @@
+ #include <memory>
+ #include <mutex>
+ 
++#if defined(__APPLE__)
++#include <TargetConditionals.h>
++#endif
++
+ #include "Common/HookableEvent.h"
+ #include "Common/Matrix.h"
+ #include "Common/WindowSystemInfo.h"
+@@ -22,7 +26,7 @@
+ #ifdef HAVE_X11
+ #define CIFACE_USE_XLIB
+ #endif
+-#if defined(__APPLE__)
++#if defined(__APPLE__) && !TARGET_OS_IPHONE
+ #define CIFACE_USE_OSX
+ #endif
+ #if defined(HAVE_LIBEVDEV) && defined(HAVE_LIBUDEV)
+diff --git a/Source/Core/InputCommon/GCAdapter_iOS.cpp b/Source/Core/InputCommon/GCAdapter_iOS.cpp
+new file mode 100644
+index 0000000..e1b53fc
+--- /dev/null
++++ b/Source/Core/InputCommon/GCAdapter_iOS.cpp
+@@ -0,0 +1,39 @@
++// Copyright 2026 KartPad contributors
++// SPDX-License-Identifier: GPL-2.0-or-later
++
++#include "InputCommon/GCAdapter.h"
++
++#include <functional>
++
++#include "Core/HW/SI/SI_DeviceGCController.h"
++
++namespace GCAdapter
++{
++void Init() {}
++void ResetRumble() {}
++void Shutdown() {}
++void SetAdapterCallback(std::function<void(void)> func) { (void)func; }
++GCPadStatus Input(int chan)
++{
++  (void)chan;
++  return {};
++}
++void Output(int chan, u8 rumble_command)
++{
++  (void)chan;
++  (void)rumble_command;
++}
++bool IsDetected(const char** error_message)
++{
++  if (error_message)
++    *error_message = "USB GameCube adapter is not supported on iOS";
++  return false;
++}
++bool DeviceConnected(int chan)
++{
++  (void)chan;
++  return false;
++}
++void ResetDeviceType(int chan) { (void)chan; }
++double GetCurrentPollRate() { return 0.0; }
++}  // namespace GCAdapter
+diff --git a/Source/Core/UICommon/UICommon.cpp b/Source/Core/UICommon/UICommon.cpp
+index 51e0798..3e5834d 100644
+--- a/Source/Core/UICommon/UICommon.cpp
++++ b/Source/Core/UICommon/UICommon.cpp
+@@ -53,7 +53,11 @@
+ #include "UICommon/DBusUtils.h"
+ #endif
+ 
+-#ifdef __APPLE__
++#if defined(__APPLE__)
++#include <TargetConditionals.h>
++#endif
++
++#if defined(__APPLE__) && TARGET_OS_OSX
+ #include <IOKit/pwr_mgt/IOPMLib.h>
+ #endif
+ 
+@@ -513,7 +517,7 @@ void InhibitScreenSaver(bool inhibit)
+                           (inhibit ? (ES_DISPLAY_REQUIRED | ES_SYSTEM_REQUIRED) : 0));
+ #endif
+ 
+-#ifdef __APPLE__
++#if defined(__APPLE__) && TARGET_OS_OSX
+   static IOPMAssertionID s_power_assertion = kIOPMNullAssertionID;
+   if (inhibit)
+   {
+diff --git a/Source/Core/VideoBackends/Metal/MTLGfx.mm b/Source/Core/VideoBackends/Metal/MTLGfx.mm
+index 4b744fe..6bb554b 100644
+--- a/Source/Core/VideoBackends/Metal/MTLGfx.mm
++++ b/Source/Core/VideoBackends/Metal/MTLGfx.mm
+@@ -21,7 +21,9 @@
+ Metal::Gfx::Gfx(MRCOwned<CAMetalLayer*> layer) : m_layer(std::move(layer))
+ {
+   UpdateActiveConfig();
++#if TARGET_OS_OSX
+   [m_layer setDisplaySyncEnabled:g_ActiveConfig.bVSyncActive];
++#endif
+ 
+   SetupSurface();
+   g_state_tracker->FlushEncoders();
+@@ -288,8 +290,10 @@ void Metal::Gfx::OnConfigChanged(u32 bits)
+ {
+   AbstractGfx::OnConfigChanged(bits);
+ 
++#if TARGET_OS_OSX
+   if (bits & CONFIG_CHANGE_BIT_VSYNC)
+     [m_layer setDisplaySyncEnabled:g_ActiveConfig.bVSyncActive];
++#endif
+ 
+   if (bits & CONFIG_CHANGE_BIT_ANISOTROPY)
+   {
+diff --git a/Source/Core/VideoBackends/Metal/MTLUtil.h b/Source/Core/VideoBackends/Metal/MTLUtil.h
+index 1752c82..63b4d05 100644
+--- a/Source/Core/VideoBackends/Metal/MTLUtil.h
++++ b/Source/Core/VideoBackends/Metal/MTLUtil.h
+@@ -3,7 +3,7 @@
+ 
+ #pragma once
+ 
+-#include <AppKit/NSScreen.h>
++#include <TargetConditionals.h>
+ #include <Metal/Metal.h>
+ 
+ #include <vector>
+diff --git a/Source/Core/VideoBackends/Metal/MTLUtil.mm b/Source/Core/VideoBackends/Metal/MTLUtil.mm
+index 9298c5b..4b076be 100644
+--- a/Source/Core/VideoBackends/Metal/MTLUtil.mm
++++ b/Source/Core/VideoBackends/Metal/MTLUtil.mm
+@@ -78,8 +78,12 @@ void Metal::Util::PopulateBackendInfo(BackendInfo* backend_info)
+   backend_info->bSupportsPartialMultisampleResolve = false;
+   backend_info->bSupportsDynamicVertexLoader = true;
+   backend_info->bSupportsVSLinePointExpand = true;
++#if TARGET_OS_OSX
+   backend_info->bSupportsHDROutput =
+       1.0 < [[NSScreen deepestScreen] maximumPotentialExtendedDynamicRangeColorComponentValue];
++#else
++  backend_info->bSupportsHDROutput = false;
++#endif
+ }
+ 
+ void Metal::Util::PopulateBackendInfoAdapters(BackendInfo* backend_info,
