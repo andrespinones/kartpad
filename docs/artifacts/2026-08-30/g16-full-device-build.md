@@ -33,6 +33,33 @@ object.
 - Simulator-only import/touch probes absent: pass.
 - Immediate incremental reproduction: same executable hash.
 
+## Fresh-directory reproduction
+
+A later clean source preparation found that the serialized full-file KPAD hunk
+declared 765 output lines while actually containing 767. Traditional `patch`
+accepted the hunk but omitted the final `return true;` and closing brace. The
+tracked header now declares all 767 lines; applying it to a new copy of the
+pinned runtime preserves the complete function.
+
+- Fresh Simulator source/build directories: pass after correcting the tracked
+  hunk and resuming the rejected build.
+- Original failure boundary: runtime unity compilation, step 757/853.
+- Corrected Simulator link/audit: pass; executable SHA-256
+  `db5be50d55916fd9bd9ed8be7dbee7fb7885edc21380687d8dc4cf9bef563cf1`.
+- Independent fresh physical-device Xcode directory: configure, compile, link,
+  and strict `IOS` audit pass.
+- Fresh physical executable SHA-256:
+  `3e201daca7591a2bcadc3e28a4ad45565ac0813b2138ff57abad7690aaef8c4f`.
+- Immediate incremental rerun: pass with the same physical executable hash.
+- `Assets.car` SHA-256 remains
+  `d25540efa70a7c9f6ef8d12849a6469ea8e7ff2c5cbe9477c9e7513c640b2434`.
+- `PrivacyInfo.xcprivacy` SHA-256 remains
+  `343dbc92a22d95a896d5bb894f439d655ac8e15d0fcc7fe72500bd5fcaba1740`.
+- Exact twelve-file SunPad snapshot remains byte-identical at
+  `e43f0ea6b797e5110787171957c9dc3c6213269c`.
+- Simulator-only touch/import test hooks remain absent from the device app.
+- No Simulator device or game runtime was launched.
+
 No Simulator or game instance ran during this work. This is evidence for full
 physical-iOS source compilation, linking, bundle construction, and package
 audit. It does not establish signing, installation, launch, Metal execution,

@@ -99,9 +99,13 @@ experiments, physical-device interaction, and a reproducible legal build path.
   Dawn archive as a complete unsigned arm64 `IOS` 16.0 app. The 75 MiB bundle
   passes the strict full-game package/private-data/system-dependency audit at
   executable SHA-256
-  `54458302a273c2f93955f3ee9c8558e54456c8578439d50fd3651cb52cf17711`.
+  `3e201daca7591a2bcadc3e28a4ad45565ac0813b2138ff57abad7690aaef8c4f`.
+  A new source and build directory exposed and corrected an undercounted
+  serialized KPAD patch hunk, then rebuilt both the complete Simulator graph
+  and the complete physical-device graph from the corrected patch stack.
   The reproducible `scripts/build-ios-device-game-app.sh` rerun is incremental
-  and returns the same hash. This closes full device compilation, not signing,
+  on an existing build directory. This closes fresh-directory and incremental
+  full device compilation, not signing,
   installation, execution, performance, thermal, audio, or touch-feel rows.
   Evidence: `docs/artifacts/2026-08-30/g16-full-device-build.md`.
 

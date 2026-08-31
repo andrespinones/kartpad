@@ -1132,7 +1132,7 @@ diff -ruN --exclude=.git --exclude=third_party --exclude=build a/src/fiber_manag
 diff -ruN --exclude=.git --exclude=third_party --exclude=build a/src/hle/input/kpad.cpp b/src/hle/input/kpad.cpp
 --- a/src/hle/input/kpad.cpp	2026-08-28 14:10:57
 +++ b/src/hle/input/kpad.cpp	2026-08-29 04:48:55
-@@ -1,23 +1,765 @@
+@@ -1,23 +1,767 @@
  #include "hle_stubs.h"
 +#include "memory.h"
 

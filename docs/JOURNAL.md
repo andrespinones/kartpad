@@ -1438,3 +1438,31 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   translated physical-iOS compilation, link, bundle resolution, audit, and
   reproducible incremental build.** Signing, installation, and physical-device
   runtime acceptance remain external and are not claimed.
+
+## 2026-08-30 — Clean mobile source and physical-device reproduction
+
+- Started from new mobile source, Simulator-build, and physical-device Xcode
+  directories. The first compile stopped honestly at step 757/853: the
+  serialized full-file KPAD patch declared 765 output lines but contained 767,
+  so traditional `patch` silently omitted the fixture function's final return
+  and brace and the following unity source was parsed inside its linkage block.
+- Corrected the tracked hunk header to 767 lines, independently applied it to a
+  new pinned-runtime copy, and verified the generated KPAD source ends with the
+  complete function. The resumed clean Simulator graph compiled and linked all
+  29,065 translated functions and passed the full package audit at executable
+  SHA-256
+  `db5be50d55916fd9bd9ed8be7dbee7fb7885edc21380687d8dc4cf9bef563cf1`.
+- From that corrected clean source, configured a separate `iphoneos` Xcode
+  directory against the pinned physical Dawn archive. The 29,065-function
+  graph compiled, linked, and passed the strict `IOS` audit at executable
+  SHA-256
+  `3e201daca7591a2bcadc3e28a4ad45565ac0813b2138ff57abad7690aaef8c4f`.
+  An immediate incremental script rerun reproduced the same executable hash.
+  The compiled icon catalog remains `d25540efa70a7c9f6ef8d12849a6469ea8e7ff2c5cbe9477c9e7513c640b2434`
+  and the privacy manifest remains
+  `343dbc92a22d95a896d5bb894f439d655ac8e15d0fcc7fe72500bd5fcaba1740`.
+- No Simulator device or game runtime was launched; zero devices remain
+  booted. Classification: **Pass for corrected patch-stack reproduction,
+  fresh full Simulator compilation, and fresh full physical-iOS compilation
+  and audit.** Signing, installation, and hands-on hardware acceptance remain
+  external.
