@@ -146,12 +146,11 @@ BOOL KartPadURLIsSupportedDiscImage(NSURL *url) {
 }
 
 NSArray<UTType *> *KartPadGameDataContentTypes() {
-  UTType *wbfs = [UTType typeWithFilenameExtension:@"wbfs"];
-  UTType *iso = [UTType typeWithFilenameExtension:@"iso"];
-  NSMutableArray<UTType *> *types = [NSMutableArray arrayWithObject:UTTypeFolder];
-  if (wbfs != nil) [types addObject:wbfs];
-  if (iso != nil) [types addObject:iso];
-  return types;
+  // File providers can publish .iso and .wbfs files with their own UTIs, which
+  // do not necessarily match a dynamic type synthesized from the extension.
+  // Accept generic files and directories here, then rely on KartPad's existing
+  // extension, disc-header, revision, and extracted-tree validation.
+  return @[UTTypeItem];
 }
 
 NSString *KartPadValidateExtractedRoot(NSString *root, NSError **error) {
