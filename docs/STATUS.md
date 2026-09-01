@@ -16,8 +16,9 @@ The exact dual-mode Simulator candidate also reaches production Retro WFC NAS
 authentication. It then receives `61070` because the public GameSpy
 gameplay-login endpoint times out. Retro Rewind's official documentation lists
 the service as in testing/maintenance mode, and its status page has no live
-room data. Production online acceptance is waiting on Retro WFC recovery; this
-external outage does not invalidate the accepted isolated-server flow.
+room data. Production online acceptance is waiting on Retro WFC recovery. That
+external outage does not block the accepted Retro Rewind installation, launch,
+or offline-gameplay support in the current KartPad build.
 
 The same source produced a fresh signed KartPad `0.3.0` physical-iOS
 candidate. It was installed over the existing app on the attached iPad without
@@ -32,14 +33,17 @@ size exceeded` in `KartPadSHA256ForLargeFile`. The verifier had placed a 1 MiB
 streaming buffer on a dispatch worker's smaller stack. Current source moves that
 buffer to heap storage, makes download and install percentages separate, checks
 Retro Rewind's official version feed before launch, and fails closed when a
-newer pack requires a new ahead-of-time KartPad build. Physical build 7 is now
-installed in place and its full-width dual-mode chooser is visually accepted on
-the iPad. A fresh hands-on retest downloaded the official 6.12.4 pack, completed
-verification and installation without a crash, launched Retro Rewind, and
-reached a playable single-player match. This closes physical pack installation,
-Retro Rewind launch, and initial offline-gameplay acceptance. Production Retro
-WFC matchmaking and online gameplay remain unaccepted while the service is in
-maintenance and reports no room data.
+newer pack requires a new ahead-of-time KartPad build. Physical build 7
+established the hardware acceptance gate: its full-width dual-mode chooser was
+visually accepted on the iPad, then a fresh hands-on run downloaded the official
+6.12.4 pack, completed verification and installation without a crash, launched
+Retro Rewind, and reached a playable single-player match. Build 8 is installed
+in place without removing KartPad's data and carries the final iPad
+multiplayer-guidance polish, which is validated in the exact iPad Simulator
+candidate. This closes physical pack installation, Retro Rewind launch, and
+initial offline-gameplay acceptance. Production Retro WFC matchmaking and
+online gameplay remain unaccepted while the external service is in maintenance,
+but they are not a blocker for this build.
 
 ## Goal ledger
 

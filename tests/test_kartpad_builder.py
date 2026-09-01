@@ -111,6 +111,14 @@ class ProfileTests(unittest.TestCase):
         self.assertIn("CGRectGetWidth(self.view.bounds)", source)
         self.assertNotIn("multiplier:0.72", source)
 
+    def test_multiplayer_guidance_keeps_a_visible_back_button_on_ipad(self) -> None:
+        source = (REPO / "apple/ios/KartPadRuntimeOverlayHost.mm").read_text()
+        method = source[source.index("- (void)showMultiplayerAccess") :]
+        method = method[: method.index("- (void)uninstall")]
+        self.assertIn("preferredStyle:UIAlertControllerStyleAlert", method)
+        self.assertIn('actionWithTitle:@"Back"', method)
+        self.assertNotIn("popoverPresentationController", method)
+
 
 class RetroRewindTests(unittest.TestCase):
     def make_archive(self, root: Path, unsafe: bool = False) -> tuple[Path, dict]:

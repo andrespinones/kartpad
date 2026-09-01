@@ -35,8 +35,8 @@
 | Is an IPA included in the GitHub release? | **Yes.** Preview 2 includes an audited unsigned ARM64 IPA for iPhone and iPad. Re-sign it locally, then import your own supported game image on first launch. |
 | Can the source create an IPA? | Yes. The Personal IPA Builder can also translate a supported user-owned game executable and create a separate private unsigned IPA on an Apple Silicon Mac. |
 | Does it include Mario Kart Wii? | No. You must provide your own legally obtained supported PAL `RMCP01` revision 0 WBFS/ISO. |
-| Does it support Retro Rewind? | The current source has a dual-mode launcher for original Mario Kart Wii or a separately installed, hash-verified Retro Rewind 6.12.4 pack. This is a development candidate, not part of Preview 2, and production online acceptance remains open. |
-| Does online play work? | The development build passes login, matchmaking, a two-player race, results, ratings, and lobby return against a compatible isolated WFC server. As of 1 September 2026, Retro WFC is in maintenance and its gameplay-login endpoint is unavailable, so production and physical-device online acceptance are waiting on service recovery. |
+| Does it support Retro Rewind? | Yes in the current development build. Its dual-mode launcher installs a separate, hash-verified Retro Rewind 6.12.4 pack. Physical iPad acceptance covers download, installation, launch, and a playable single-player match. This is not part of Preview 2. |
+| Does online play work? | The online-capable build passes login, matchmaking, a two-player race, results, ratings, and lobby return against a compatible isolated WFC server. As of 1 September 2026, the public Retro WFC service is in maintenance, so live public online play is temporarily unavailable. That external outage does not block Retro Rewind installation or offline play. |
 | Do touch, tilt, and controllers work? | Yes. They are implemented in the development IPA, and the app has been physically accepted on both iPhone and iPad. Feature tuning can continue independently of that device acceptance. |
 | Are Android and Apple TV supported? | Not currently. Apple TV is a possible target once the current build is stable. Android may be investigated later. |
 | How much storage does it need? | The app is about 80 MiB and the extracted game data is about 2.5 GiB. Keeping the WBFS/ISO on the device requires additional space, and building from source needs substantially more free storage. |
@@ -68,7 +68,7 @@ retail game data.
 | Packaging | The K-circuit iPhone/iPad icon and branded package pass structural audit; installed-storage, configured gameplay, save-preservation, and normal-close evidence applies to the previously accepted app candidate, while the native first-run/settings/data-management shell remains open |
 | iPhone/iPad | The full 29,065-function ARM64 retail app has been packaged as an unsigned IPA; locally signed builds have been installed and physically accepted on both iPhone and iPad, reaching live races, importing a supported private WBFS, and preserving saves |
 | Game content | Preview 2 is original-only. Current source adds a version-locked dual-mode Original / Retro Rewind 6.12.4 development flow without bundling either game's private data. |
-| Online multiplayer | Local Mac-to-iPad-Simulator login, matchmaking, room, race, native results, ratings, and lobby return pass; Retro WFC is currently in maintenance, so public-service and physical-device online acceptance are waiting on service recovery |
+| Online multiplayer | Local Mac-to-iPad-Simulator login, matchmaking, room, race, native results, ratings, and lobby return pass; the public Retro WFC service is currently unavailable during maintenance, which does not block the accepted Retro Rewind install and offline-play flow |
 | Distribution | Preview 2 provides source plus a free unsigned community-preview IPA containing translated game logic. It contains no disc image, extracted game assets, saves, signing identity, or provisioning profile |
 
 The evidence ledger, exact open rows, and known risks live in
@@ -451,8 +451,10 @@ with an Original / Retro Rewind chooser and installs a separately downloaded,
 hash-verified Retro Rewind 6.12.4 pack. KartPad does not bundle Mario Kart Wii
 or Retro Rewind content. Physical iPad build 7 completes the pack download,
 verification, installation, Retro Rewind launch, and initial single-player
-gameplay. Production Retro WFC matchmaking and racing cannot be accepted until
-the current service outage ends. Before Retro Rewind starts, KartPad checks the official version feed. If
+gameplay. Build 8 adds the final iPad multiplayer-guidance polish and installs
+in place without removing app data. Production Retro WFC matchmaking and racing
+remain temporarily unavailable during the external service outage, but this
+does not block the current build. Before Retro Rewind starts, KartPad checks the official version feed. If
 Retro Rewind advances beyond the version compiled into the app, KartPad asks
 for a compatible KartPad update instead of launching an outdated online pack.
 

@@ -19,10 +19,12 @@ game data, translated code, or saves.
 
 ## Production Retro WFC service boundary on 1 September 2026
 
-Production acceptance is waiting on Retro WFC service recovery. The official
-Retro Rewind documentation says Retro WFC is in testing/maintenance mode after
-sustained DDoS and cyber attacks, and the official status page currently shows
-no live room data.
+Production online acceptance is waiting on Retro WFC service recovery. This is
+an external-service limitation, not a blocker for KartPad's accepted Retro
+Rewind installation, launch, or offline gameplay. The official Retro Rewind
+documentation says Retro WFC is in testing/maintenance mode after sustained
+DDoS and cyber attacks, and the official status page currently shows no live
+room data.
 
 The exact KartPad development candidate reaches the production Retro WFC flow,
 receives a successful NAS authentication response, and advances to GameSpy
@@ -40,10 +42,13 @@ The current `0.3.0` dual-mode candidate has also been signed locally, installed
 over the existing KartPad app on a physical iPad without uninstalling it, and
 launched to the Original / Retro Rewind chooser. On build 7, a fresh hands-on
 run downloaded, verified, and installed the official 6.12.4 pack without a
-crash, launched Retro Rewind, and reached a playable single-player match. This
-closes the physical pack-install, launch, and initial offline-gameplay gates.
-The production connection sequence above remains the authoritative online
-boundary until Retro WFC recovers.
+crash, launched Retro Rewind, and reached a playable single-player match. Build
+8 was then installed in place without removing KartPad's data and carries the
+final iPad multiplayer-guidance polish, validated in the exact iPad Simulator
+candidate. This closes the physical pack-install, launch, and initial
+offline-gameplay gates. The production connection sequence above remains the
+authoritative online boundary until Retro WFC recovers, but it does not hold
+this build open.
 
 Retro Rewind online compatibility is version-locked. KartPad reads the official
 `RetroRewindVersion.txt` feed before starting that mode. When the official

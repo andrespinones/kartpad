@@ -1869,7 +1869,7 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
   UIAlertController *sheet =
       [UIAlertController alertControllerWithTitle:@"Multiplayer"
                                           message:message
-                                   preferredStyle:UIAlertControllerStyleActionSheet];
+                                   preferredStyle:UIAlertControllerStyleAlert];
   if (!gKartPadRetroRewindSelected) {
     __weak KartPadRuntimeOverlayHost *weakSelf = self;
     [sheet addAction:[UIAlertAction actionWithTitle:@"Switch to Retro Rewind"
@@ -1890,10 +1890,6 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
   [sheet addAction:[UIAlertAction actionWithTitle:@"Back"
                                             style:UIAlertActionStyleCancel
                                           handler:nil]];
-  UIPopoverPresentationController *popover = sheet.popoverPresentationController;
-  popover.sourceView = _overlay;
-  popover.sourceRect = CGRectMake(CGRectGetMidX(_overlay.bounds),
-                                  CGRectGetMidY(_overlay.bounds), 1.0, 1.0);
   [controller presentViewController:sheet animated:YES completion:nil];
 }
 
