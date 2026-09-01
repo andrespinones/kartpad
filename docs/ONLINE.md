@@ -38,9 +38,12 @@ race, results, and reconnect when both the
 
 The current `0.3.0` dual-mode candidate has also been signed locally, installed
 over the existing KartPad app on a physical iPad without uninstalling it, and
-launched to the Original / Retro Rewind chooser. This closes the hardware
-build/install/launch gate only. The production connection sequence above is the
-authoritative online boundary until Retro WFC recovers.
+launched to the Original / Retro Rewind chooser. On build 7, a fresh hands-on
+run downloaded, verified, and installed the official 6.12.4 pack without a
+crash, launched Retro Rewind, and reached a playable single-player match. This
+closes the physical pack-install, launch, and initial offline-gameplay gates.
+The production connection sequence above remains the authoritative online
+boundary until Retro WFC recovers.
 
 Retro Rewind online compatibility is version-locked. KartPad reads the official
 `RetroRewindVersion.txt` feed before starting that mode. When the official

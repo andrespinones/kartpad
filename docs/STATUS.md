@@ -34,9 +34,12 @@ buffer to heap storage, makes download and install percentages separate, checks
 Retro Rewind's official version feed before launch, and fails closed when a
 newer pack requires a new ahead-of-time KartPad build. Physical build 7 is now
 installed in place and its full-width dual-mode chooser is visually accepted on
-the iPad. The chooser reports that 6.12.4 is not installed, confirming the two
-failed attempts did not leave a valid pack; a fresh physical download/install
-retest remains open.
+the iPad. A fresh hands-on retest downloaded the official 6.12.4 pack, completed
+verification and installation without a crash, launched Retro Rewind, and
+reached a playable single-player match. This closes physical pack installation,
+Retro Rewind launch, and initial offline-gameplay acceptance. Production Retro
+WFC matchmaking and online gameplay remain unaccepted while the service is in
+maintenance and reports no room data.
 
 ## Goal ledger
 

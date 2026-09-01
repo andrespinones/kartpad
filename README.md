@@ -449,9 +449,10 @@ and racing will be retested when Retro WFC is available again.
 Preview 2 does not. The current source has a development candidate that opens
 with an Original / Retro Rewind chooser and installs a separately downloaded,
 hash-verified Retro Rewind 6.12.4 pack. KartPad does not bundle Mario Kart Wii
-or Retro Rewind content. The candidate boots both modes, but production Retro
-WFC matchmaking and racing cannot be accepted until the current service outage
-ends. Before Retro Rewind starts, KartPad checks the official version feed. If
+or Retro Rewind content. Physical iPad build 7 completes the pack download,
+verification, installation, Retro Rewind launch, and initial single-player
+gameplay. Production Retro WFC matchmaking and racing cannot be accepted until
+the current service outage ends. Before Retro Rewind starts, KartPad checks the official version feed. If
 Retro Rewind advances beyond the version compiled into the app, KartPad asks
 for a compatible KartPad update instead of launching an outdated online pack.
 
