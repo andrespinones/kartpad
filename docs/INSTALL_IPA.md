@@ -41,4 +41,4 @@ signing identities.
 
 The Personal IPA Builder remains available for developers and future verified
 container or executable profiles. A locally generated personalized IPA is a
-separate, unaudited artifact and is not the public release candidate.
+separate, unaudited artifact and is not the published release artifact.

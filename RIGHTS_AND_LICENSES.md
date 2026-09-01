@@ -5,7 +5,7 @@ with or endorsed by Nintendo. Mario Kart Wii, its executable code, game data,
 characters, names, and other copyrighted material remain the property of their
 respective owners.
 
-## v0.2.0-preview.2 community-release boundary
+## v0.3.0-preview.1 community-release boundary
 
 The maintainer authorized publication of the KartPad integration source and a
 free, unsigned iPhone/iPad community-preview IPA on 1 September 2026. The IPA
@@ -14,6 +14,11 @@ the supported game executable. It does not contain a disc image, extracted
 courses, textures, audio, saves, Apple signing identity, or provisioning
 profile. Users must provide their own legally obtained supported PAL `RMCP01`
 revision 0 game image after installation.
+
+The 0.3.0 preview adds ahead-of-time Retro Rewind integration and an optional
+official-pack installer. The downloadable IPA does not contain the Retro Rewind
+asset pack; KartPad downloads and verifies the matching official pack only when
+the user selects that mode.
 
 This release decision does not establish or grant rights in Nintendo material,
 the translated game logic, WiiCompiled inputs, or third-party projects. It

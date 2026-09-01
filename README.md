@@ -73,7 +73,7 @@ until that external service returns. Original and Retro Rewind offline play are
 not blocked by the outage.
 
 KartPad packages a native Apple ARM64 app around a
-[WiiCompiled](https://github.com/sonicdcer/WiiCompiled)-generated Mario Kart Wii
+[WiiCompiled](https://github.com/patchzyy/Wiicompiled)-generated Mario Kart Wii
 module and its Aurora/Dawn compatibility runtime. PowerPC game code runs as
 ahead-of-time translated arm64 code, Dawn presents through Metal, and a narrow
 Apple host layer supplies audio, input, storage, timing, and lifecycle behavior.
@@ -532,14 +532,13 @@ That work can stall guest progress and pressure the audio queue. Cache
 coverage, bounded compilation, and sustained frame pacing are active release
 gates; a displayed 60 FPS counter in one scene is not treated as acceptance.
 
-### Do the inherited experimental modes speed up KartPad?
+### Why are the inherited experimental modes absent?
 
-No. Those visually retained SunPad menu rows target Sunshine-specific runtime
-features: a 90% emulated CPU clock and a GMSE01 60 FPS patch. KartPad explains
-that they are unavailable and does not persist either preference. Use 1x
-render resolution while diagnosing performance; KartPad's actual work is
-tracked through frame-time telemetry, real guest-clock cadence, and CPU/GPU
-profiles rather than an incompatible switch.
+They targeted Sunshine-specific features: a 90% emulated CPU clock and a
+GMSE01 60 FPS patch. Neither changes KartPad's ahead-of-time Mario Kart Wii
+runtime, so the misleading no-op rows were removed. Use 1x render resolution
+while diagnosing performance; KartPad's actual work is tracked through
+frame-time telemetry, real guest-clock cadence, and CPU/GPU profiles.
 
 ### Do saves survive an app update or game-data replacement?
 
@@ -553,8 +552,8 @@ container, so back up before crossing those boundaries.
 No. Native macOS gameplay is broad and the accepted mobile IPA runs real
 races, but sustained performance, a complete three- and four-player result
 path, the eight-hour soak, fresh-clone provisioning, production online
-acceptance, complete touch/motion race coverage, packaging the dual-mode Retro
-Rewind candidate for a release, and the full release matrix remain open.
+acceptance after Retro WFC returns, complete touch/motion race coverage, and
+the full engineering-completion matrix remain open.
 General physical-device acceptance is complete on both iPhone and iPad, while
 narrower performance, audio, motion, and controller refinements can continue.
 

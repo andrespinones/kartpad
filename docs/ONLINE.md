@@ -8,10 +8,10 @@ apply ratings, and return to the shared lobby.
 
 That evidence does not yet establish public Retro WFC service compatibility,
 Wiimmfi compatibility, Wii interoperability, or physical-device online
-acceptance. `v0.3.0-preview.1` packages the current online-capable dual-mode
-graph, but the public IPA remains an unaccepted candidate for external-service
-and physical-device online play; the local harness result does not establish
-either claim.
+acceptance. `v0.3.0-preview.1` is the public online-capable dual-mode build, but
+it is not accepted for live public Retro WFC or physical-device online play
+while the external service is unavailable. The local harness result does not
+establish either claim.
 
 No account, credential, public-service authorization, or production-service
 compatibility is currently claimed. This loop uses the pinned authorized local
@@ -27,7 +27,7 @@ documentation says Retro WFC is in testing/maintenance mode after sustained
 DDoS and cyber attacks, and the official status page currently shows no live
 room data.
 
-The exact KartPad development candidate reaches the production Retro WFC flow,
+The exact released KartPad 0.3.0 build reaches the production Retro WFC flow,
 receives a successful NAS authentication response, and advances to GameSpy
 profile login. The public gameplay-login endpoint then does not accept a TCP
 connection, and the game reports `61070`. The same endpoint also times out from
@@ -39,7 +39,7 @@ race, results, and reconnect when both the
 [official service notice](https://mkwiiki.org/wiki/Retro_Rewind) and
 [Retro WFC status page](https://status.rwfc.net/) show recovery.
 
-The current `0.3.0` dual-mode candidate has also been signed locally, installed
+The released `0.3.0` dual-mode build has also been signed locally, installed
 over the existing KartPad app on a physical iPad without uninstalling it, and
 launched to the Original / Retro Rewind chooser. On build 7, a fresh hands-on
 run downloaded, verified, and installed the official 6.12.4 pack without a

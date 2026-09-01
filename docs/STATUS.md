@@ -4,6 +4,12 @@ Updated: 2026-09-01
 
 ## Current goal
 
+**The Retro Rewind preview is published.** `v0.3.0-preview.1` points to source
+commit `142a56f326fb62a5caa615315fd2ec3e6d8800d0`. Its unsigned 0.3.0 build-8
+IPA, checksum, embedded release notes, provenance, licenses, privacy boundary,
+and freshly downloaded hosted artifact all pass. The hosted IPA SHA-256 is
+`66c873ea48c966f9c1eba850da2d8d0368696909b6b6416bed05c2a4b0d4de5e`.
+
 **Local Apple-to-Apple online flow passes.** Native macOS and the exact iPad
 Simulator completed login, matchmaking, room formation, Luigi Circuit race
 traffic, the retail online finish/results path, rating updates, and return to
@@ -12,7 +18,7 @@ each direction per client and consumed the complete 5,001-frame fixture. The
 test-only finish trigger is documented in `docs/ONLINE.md`; public-service,
 physical-device online, impairment, and external-client rows remain open.
 
-The exact dual-mode Simulator candidate also reaches production Retro WFC NAS
+The exact released dual-mode build also reaches production Retro WFC NAS
 authentication. It then receives `61070` because the public GameSpy
 gameplay-login endpoint times out. Retro Rewind's official documentation lists
 the service as in testing/maintenance mode, and its status page has no live
@@ -20,8 +26,8 @@ room data. Production online acceptance is waiting on Retro WFC recovery. That
 external outage does not block the accepted Retro Rewind installation, launch,
 or offline-gameplay support in the current KartPad build.
 
-The same source produced a fresh signed KartPad `0.3.0` physical-iOS
-candidate. It was installed over the existing app on the attached iPad without
+The same source produced a fresh signed KartPad `0.3.0` physical-iOS build. It
+was installed over the existing app on the attached iPad without
 an uninstall, launched successfully, and visibly reached the Original / Retro
 Rewind chooser. That is physical build, install, launch, and chooser evidence;
 it is not production Retro WFC matchmaking or gameplay evidence. The latter
@@ -64,9 +70,10 @@ but they are not a blocker for this build.
 
 ## Finish-line order
 
-The project is no longer blocked on proving that the game can run. The shortest
-credible path to a release is to close the remaining evidence and product gaps
-in dependency order:
+The project is no longer blocked on proving that the game can run or on
+packaging a public Retro Rewind preview. The shortest credible path to full
+engineering completion is to close the remaining evidence gaps in dependency
+order:
 
 1. **Close G10 honestly:** finish representative Grand Prix progression,
    complete three- and four-player race/standings cycles, and perform the
@@ -76,21 +83,18 @@ in dependency order:
    telemetry, establish reversible cold/warm fixtures, then attack the ranked
    bottleneck. Shader-cache guesses without p99/worst evidence are not a plan.
 3. **Separate automation from hands-on gates:** run long stress, save, package,
-   cache, diagnostics, and Simulator work autonomously; keep only touch feel,
-   motion feel, subjective audio, physical thermals, and public-service access
-   on the human prerequisite list.
-4. **Finish the application boundary:** automate clean-clone source
-   provisioning, bring WBFS validation/extraction into the native first-run
-   experience with resumable progress, and complete license/notarization/update
-   infrastructure without ever bundling private data.
-5. **Promote to hardware now:** Simulator proves integration, not physical
-   touch, audio, thermal, memory, sustained performance, or controller feel.
-   Run the documented iPad pass first, close it, then run modern iPhone using
-   the same content-safe telemetry contract.
-6. **Finish online through the local harness first:** complete protocol state,
-   impairment, reconnect, and full local race/results evidence before any
-   normal authorized external-service session.
-7. **Cut one exact candidate:** rerun the full 67-row matrix, package/privacy/
+   cache, diagnostics, and Simulator work autonomously; reserve subjective
+   touch, motion, audio, thermal, and live-service checks for hardware.
+4. **Close targeted hardware rows:** general iPad/iPhone execution and Retro
+   Rewind installation pass. Continue sustained performance, thermals, motion,
+   controller feel, and broader touch-race coverage against exact builds.
+5. **Finish the application boundary:** automate clean-checkout provisioning
+   and complete updater/notarization infrastructure without bundling private
+   data. Native WBFS import and update-in-place preservation already pass.
+6. **Retest public online when available:** the complete local Apple-to-Apple
+   WFC flow passes. Resume production NAS, GameSpy, matchmaking, race, results,
+   and reconnect only after Retro WFC service recovery.
+7. **Cut one full candidate:** rerun the full 67-row matrix, package/privacy/
    license audits, source self-build, and zero-P0/P1 review against the same
    immutable commit and artifact hashes.
 
@@ -148,12 +152,12 @@ experiments, physical-device interaction, and a reproducible legal build path.
 
 ## Active risks and blockers
 
-- The newest audited Simulator menu-contract candidate has executable SHA-256
-  `0459d6948e856547dcbe77f7b1839ff7882a8cf73cb0c3052c5c53ff99e98d90`.
-  SunPad's Sunshine-specific 90%-clock and GMSE01 60 FPS rows retain their
-  exact visible titles/icons but now explain that KartPad cannot apply those
-  mechanisms and do not persist no-op preferences. This supersedes the prior
-  `bdb805b9...` wrapper binary without changing its translated game core.
+- The 0.3.0 menu removes the inherited Sunshine-specific 90%-clock and GMSE01
+  60 FPS no-op rows, replaces remaining product-facing SunPad wording with
+  KartPad, keeps Report a Problem visible, fixes the transient blank ellipsis,
+  and presents Multiplayer guidance with a visible Back action on iPad. The
+  pinned upstream component remains byte-identical; these adaptations live in
+  KartPad's owning layer.
 
 - The current touch-control candidate keeps the pinned twelve-file SunPad
   snapshot byte-identical while adapting two behaviors in KartPad's owning
@@ -184,11 +188,13 @@ experiments, physical-device interaction, and a reproducible legal build path.
   the same process, accepted touch input, and reached the title again after a
   warm relaunch. The app links the narrow import graph rather than Dolphin's
   execution core; the package audit rejects JIT/cached-interpreter symbols.
-  Physical extraction speed, interruption behavior under real device pressure,
-  and thermals remain hardware acceptance. Evidence:
+  A supported physical import has completed. Injected interruption under real
+  device pressure and detailed import thermals remain narrower hardware gates.
+  Evidence:
   `docs/artifacts/2026-08-30/g15-native-wbfs-import/`.
 - No human-only prerequisite currently blocks G0 or the independent parts of G1.
-- Physical-device, public-service, account, and hands-on acceptance rows remain future external prerequisites and are not claimed.
+- Public Retro WFC, external-client interoperability, account, and remaining
+  hands-on performance/audio/motion rows remain open and are not claimed.
 - WiiCompiled's bundled `MAP.txt` may be used as an ignored local reference, but independent provenance for republishing it is not established; do not copy it into public KartPad sources/artifacts.
 - The exact 2008 Classic ABI is live and the game recognizes it. A/accelerate, analog steering, D-pad, and B/reverse are proven. Three-player gameplay switches to the retail 30 FPS cadence documented by the Dolphin oracle; a complete live-input three-player race remains open.
 - Two content-private three-player automation attempts rendered all expected panes and exited normally but failed to complete because the synthetic driver left the course at both the accepted `0.35` and rejected `0.18` steering levels. The `0.18` experiment was reverted; these attempts are not runtime-defect or standings evidence.
@@ -216,4 +222,32 @@ experiments, physical-device interaction, and a reproducible legal build path.
 
 ## UI reference commitment
 
-The local `ref/sunpad` checkout remains the direct implementation reference for the mobile touch interface and persistent three-dot menu. Its pinned twelve-file snapshot, now including controller slots and mapping, is byte-identical and runs above the full 29,065-function retail Metal app. A KartPad-owned layer adds `Multiplayer…` and `Motion Steering…` around the unchanged menu source, reports connected controllers and stable Player 1–4 assignment, opens controller setup guidance, and exposes default-off calibrated CoreMotion steering without changing the exact touch mixer. The runtime reads SunPad's persisted aspect, resolution, FPS, and controller mapping preferences; the latest current-core regression proves that all three non-restart display controls refresh visibly in-process. Touch Control Settings now clears the complete touch contribution on both open and close; an end-to-end probe observed Classic A change from held `0x00000010` to released `0x00000000` through the real modal path. The lower settings rows now pass deterministic UI-action coverage: Move enters edit mode, selecting A exposes its per-control slider, a `1.25` resize persists through Done, the native reset confirmation appears, and Reset removes position/size preferences and restores the default overlay on relaunch. The full app boots sequentially on iPhone 17 Pro and iPad Pro 13-inch (M5), survives reinstall/container migration with a relative game-data root, reaches title/menu and live Luigi Circuit on both, enters the iPhone retail two-player controller-registration screen, and backgrounds/resumes. Both device classes preserve exact save hashes across terminate/relaunch and return through their persisted licenses. Original 4:3 and bounded 16:9 now clear their complete presentation snapshots to opaque black; a combined supplied-before/rebuilt-after regression proves the fitted viewport no longer leaks striped/checker edge pixels. The exact Game Data submenu opens the system picker or scans KartPad's Files-visible folder; the final candidate directly extracts a supported WBFS or copies an extracted tree, validates, stages, swaps, restores the original copy under an injected swap failure, and automatically repairs a stranded rollback. A true no-data WBFS launch gates emulator startup, imports through native UI, and reaches gameplay without relaunching. Removal is scheduled while the guest remains live, can be undone, and deletes only private game data before the next emulator start. Dynamic fill remains experimental because it exposes the game's overscan/scratch area. Complete touch-driven races, physical finger-drag ergonomics, hands-on physical-controller races/feel, physical motion calibration/race acceptance, physical-device execution, and hands-on touch/audio acceptance remain open. Evidence: `docs/artifacts/2026-08-30/g14-simulator-shell/`, `docs/artifacts/2026-08-30/g14-full-runtime-link.md`, `docs/artifacts/2026-08-30/g14-full-game-app.md`, `docs/artifacts/2026-08-30/g14-full-game-simulator/`, `docs/artifacts/2026-08-30/g14-controller-multiplayer/`, `docs/artifacts/2026-08-30/g14-opaque-letterbox/`, `docs/artifacts/2026-08-30/g14-game-data-import/`, `docs/artifacts/2026-08-30/g14-ipad-current-race-profile.md`, `docs/artifacts/2026-08-30/g15-native-wbfs-import/`, `docs/artifacts/2026-08-30/g15-motion-steering/`, `docs/artifacts/2026-08-30/g15-touch-modal-input-clear/`, and `docs/artifacts/2026-08-30/g15-touch-layout-editor/`.
+The local `ref/sunpad` checkout remains the direct implementation reference for
+the mobile touch interface and persistent three-dot menu. Its pinned twelve-file
+snapshot, including controller slots and mapping, remains byte-identical. A
+KartPad-owned layer adds product-specific Multiplayer, motion, reporting, game
+data, and display behavior without modifying that snapshot.
+
+The current runtime applies aspect ratio, render resolution, FPS visibility,
+touch-layout editing, reset behavior, held-input clearing, and four stable
+controller slots in process. Original 4:3 and bounded 16:9 clear to opaque
+black. The Game Data & Saves flow validates, stages, swaps, rolls back, and
+removes private data without touching saves. Dynamic fill remains experimental
+because it can expose the game's overscan or scratch area.
+
+The app boots, races, backgrounds, resumes, and preserves saves on accepted
+iPhone and iPad builds. Broader touch-driven race coverage, physical finger-drag
+ergonomics, additional controller and motion calibration, sustained performance
+and thermals, and subjective touch/audio acceptance remain open. Evidence:
+`docs/artifacts/2026-08-30/g14-simulator-shell/`,
+`docs/artifacts/2026-08-30/g14-full-runtime-link.md`,
+`docs/artifacts/2026-08-30/g14-full-game-app.md`,
+`docs/artifacts/2026-08-30/g14-full-game-simulator/`,
+`docs/artifacts/2026-08-30/g14-controller-multiplayer/`,
+`docs/artifacts/2026-08-30/g14-opaque-letterbox/`,
+`docs/artifacts/2026-08-30/g14-game-data-import/`,
+`docs/artifacts/2026-08-30/g14-ipad-current-race-profile.md`,
+`docs/artifacts/2026-08-30/g15-native-wbfs-import/`,
+`docs/artifacts/2026-08-30/g15-motion-steering/`,
+`docs/artifacts/2026-08-30/g15-touch-modal-input-clear/`, and
+`docs/artifacts/2026-08-30/g15-touch-layout-editor/`.

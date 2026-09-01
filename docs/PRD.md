@@ -2,8 +2,8 @@
 
 **Status:** Approved for autonomous execution. Written 28 August 2026.
 **Audience:** An autonomous engineering agent with full control of an Apple Silicon macOS development machine.
-**Companion document:** `ref/GOAL-LOOP.md`. Read both files before changing code or downloading dependencies.
-**Working product name:** **KartPad** (`kartpad`). The name is provisional, but use it consistently until a deliberate rename is recorded.
+**Companion document:** `docs/GOAL-LOOP.md`. Read both files before changing code or downloading dependencies.
+**Product name:** **KartPad** (`kartpad`). Use it consistently unless a deliberate rename is recorded.
 
 ---
 
@@ -107,6 +107,11 @@ The default release model is:
 
 A public prebuilt `.app` or `.ipa` is a separate legal and provenance gate. Do not describe one as releasable merely because a package audit finds no ISO file.
 
+**Current preview decision:** the maintainer separately authorized the free
+unsigned `v0.3.0-preview.1` community IPA under the narrow, unresolved-rights
+boundary in `RIGHTS_AND_LICENSES.md`. That decision does not mark the full PRD
+matrix complete or authorize broader, paid, or official-store distribution.
+
 ---
 
 ## 4. Non-goals and prohibited shortcuts
@@ -123,7 +128,9 @@ The following are not acceptable substitutes for this project:
 - replacing unsupported online behavior with local-only multiplayer and claiming online completion;
 - bypassing account creation, terms, anti-cheat, bans, version checks, certificate validation, or service security controls;
 - load-testing a public community service with automated clients;
-- distributing Nintendo-owned data, extracted assets, translated game code, or private server keys;
+- distributing Nintendo-owned data, extracted assets, translated game code, or
+  private server keys without the explicit maintainer release decision and
+  documented boundary required by Section 3.2;
 - modifying the original supplied ISO in place;
 - silently changing the supported game revision;
 - marking a row complete from source inspection, configuration, process launch, or a screenshot that does not show the claimed behavior.
@@ -364,7 +371,7 @@ These rules apply to every phase:
 
 Read, in order:
 
-1. `ref/PRD.md` and `ref/GOAL-LOOP.md`.
+1. `docs/PRD.md` and `docs/GOAL-LOOP.md`.
 2. WiiCompiled `README.md`, `CONTRIBUTING.md`, `LICENSE`, `THIRD-PARTY-NOTICES.md`.
 3. Translator README, project configs, manifests, generated-shard format, and translator tests.
 4. Runtime CMake graph, `PublicProducts.cmake`, `main.cpp`, memory files, fiber manager, PPC/FPU helpers, audio backend, controller code, networking/HLE, product profiles, logging, and crash handling.
@@ -1416,7 +1423,7 @@ A risk is not a reason to abandon the goal. It is a requirement for a concrete e
 
 The autonomous agent's first sequence is:
 
-1. Read `ref/PRD.md` and `ref/GOAL-LOOP.md` completely.
+1. Read `docs/PRD.md` and `docs/GOAL-LOOP.md` completely.
 2. Create `docs/JOURNAL.md`, `docs/STATUS.md`, `docs/RESEARCH.md`, and `docs/PORTABILITY.md` if absent.
 3. Inventory the repository and preserve any existing work.
 4. Find, identify, hash, and make read-only the supplied disc image.
@@ -1433,4 +1440,4 @@ The autonomous agent's first sequence is:
 15. Advance through the macOS bring-up ladder one evidenced rung at a time.
 16. Do not begin iOS/iPadOS shell work until the mobile prerequisite gates in Section 24 are satisfied.
 
-After each step, follow `ref/GOAL-LOOP.md`. Continue until the full mandatory matrix is green or a documented human-only external prerequisite is the sole remaining blocker.
+After each step, follow `docs/GOAL-LOOP.md`. Continue until the full mandatory matrix is green or a documented human-only external prerequisite is the sole remaining blocker.
