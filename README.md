@@ -17,20 +17,21 @@
 ![KartPad running a race on DK Summit on iPad](docs/images/kartpad-dk-summit-ipad.png)
 
 > [!IMPORTANT]
-> KartPad is still in development. A local unsigned IPA has been built, and
-> locally signed builds have been installed and accepted on physical iPhone
-> and iPad hardware. The public Personal IPA Builder preview creates an
-> unsigned IPA locally from a supported user-owned disc image. It does not
-> publish a playable IPA or any game code. Online multiplayer now passes the
-> local Mac-to-iPad-Simulator development flow; public-service and physical-device
-> online acceptance remain pending. Retro Rewind content is not available yet.
+> **No downloadable IPA is included in the GitHub release. The release is
+> source code.** Its Personal IPA Builder runs on an Apple Silicon Mac and
+> creates a private unsigned IPA locally from a supported user-owned disc
+> image. Do not redistribute that personalized IPA. Online multiplayer now
+> passes the local Mac-to-iPad-Simulator development flow; public-service and
+> physical-device online acceptance remain pending. Retro Rewind content is
+> not available yet.
 
 ## What is available now?
 
 | Question | Answer |
 |---|---|
 | Is this Dolphin or streaming? | No. WiiCompiled translates the game's PowerPC code ahead of time, then KartPad compiles it for ARM64 and presents it through Metal. |
-| Does an IPA exist? | Yes. The public Personal IPA Builder creates a private unsigned IPA locally, and locally signed builds have been accepted on physical iPhone and iPad hardware. A universal playable IPA cannot be published because static recompilation translates the user's game executable before Apple signing. |
+| Is an IPA included in the GitHub release? | **No.** The release contains source code and the Personal IPA Builder, not a downloadable playable app. |
+| Can the source create an IPA? | Yes. On an Apple Silicon Mac, the Builder translates a supported user-owned game executable and creates a private unsigned IPA for local signing. That personalized IPA must not be redistributed. |
 | Does it include Mario Kart Wii? | No. You must provide your own legally obtained supported PAL `RMCP01` revision 0 WBFS/ISO. |
 | Does it support Retro Rewind? | Not yet. The current build runs the original retail content, including its 32 tracks. Retro Rewind's extra tracks, characters, and other content are planned as an optional mode selected from the three-dot menu. |
 | Does online play work? | The development build passes login, matchmaking, a two-player race, results, ratings, and lobby return against a compatible isolated WFC server. Public Retro WFC service, Wiimmfi, physical-device online, and external-client compatibility are not yet accepted. |
@@ -59,11 +60,11 @@ signing material.
 | Input | Keyboard plus four independent Classic-controller slots; two-player full-race evidence passes |
 | Audio | Non-silent host playback, pause/resume, live output-device migration, and a two-hour representative continuity run pass their instrumented subcases; subjective listening and the eight-hour soak remain open |
 | Performance | Warm, simple scenes can report 60 FPS; first-use shader compilation and some tracks can fall far below real time. Stable frame pacing is **not yet accepted** |
-| Packaging | The original icon and exact branded 80 MiB package pass audit, installed-storage, configured gameplay, save-preservation, and normal-close checks; the native first-run/settings/data-management shell remains open |
+| Packaging | The K-circuit iPhone/iPad icon and branded package pass structural audit; installed-storage, configured gameplay, save-preservation, and normal-close evidence applies to the previously accepted app candidate, while the native first-run/settings/data-management shell remains open |
 | iPhone/iPad | The full 29,065-function ARM64 retail app has been packaged as an unsigned IPA; locally signed builds have been installed and physically accepted on both iPhone and iPad, reaching live races, importing a supported private WBFS, and preserving saves |
 | Game content | Original retail Mario Kart Wii content only today; Retro Rewind content is planned as a future optional mode in the three-dot menu |
 | Online multiplayer | Local Mac-to-iPad-Simulator login, matchmaking, room, race, native results, ratings, and lobby return pass; public-service and physical-device online acceptance remain open |
-| Distribution | The public Personal IPA Builder creates a private unsigned IPA locally from a supported user-owned image; no playable IPA, game data, or translated game code is distributed |
+| Distribution | GitHub provides source code only. The Personal IPA Builder creates a private unsigned IPA locally from a supported user-owned image; no downloadable playable IPA, game data, or translated game code is distributed |
 
 The evidence ledger, exact open rows, and known risks live in
 [`docs/STATUS.md`](docs/STATUS.md). The 67-row release matrix is in
@@ -124,8 +125,8 @@ distributed.
 
 ### Build a personal unsigned IPA
 
-KartPad's public Builder performs static recompilation on the user's Apple
-Silicon Mac before signing:
+The GitHub release is source code, not an IPA. KartPad's public Builder performs
+static recompilation on the user's Apple Silicon Mac before signing:
 
 ```sh
 ./scripts/build-user-ipa.sh bootstrap
@@ -397,11 +398,13 @@ Useful starting points:
 
 ### Can I download an IPA or playable app?
 
-There is no universal playable IPA download. KartPad uses static
-recompilation, so the public Personal IPA Builder translates a supported
-user-owned disc image on the user's Apple Silicon Mac and packages a private
-unsigned IPA before local signing. Locally signed builds from this process have
-been accepted on physical iPhone and iPad hardware.
+No. The GitHub release contains source code and the Personal IPA Builder; it
+does not contain a downloadable IPA or playable app. KartPad uses static
+recompilation, so the Builder must translate a supported user-owned disc image
+on the user's Apple Silicon Mac before it can package a private unsigned IPA
+for local signing. That personalized IPA must not be redistributed. Locally
+signed builds from this process have been accepted on physical iPhone and iPad
+hardware.
 
 ### Does online multiplayer work?
 
