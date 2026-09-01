@@ -29,6 +29,8 @@ test "$(plutil -extract MinimumOSVersion raw "${plist}")" = "16.0"
 test "$(plutil -extract UIApplicationSceneManifest.UISceneConfigurations.UIWindowSceneSessionRoleApplication.0.UISceneDelegateClassName raw "${plist}")" = "SDLUIKitSceneDelegate"
 test "$(plutil -extract CFBundleIcons.CFBundlePrimaryIcon.CFBundleIconName raw "${plist}")" = "AppIcon"
 test "$(plutil -extract CFBundleIcons~ipad.CFBundlePrimaryIcon.CFBundleIconName raw "${plist}")" = "AppIcon"
+test "$(plutil -extract UIFileSharingEnabled raw "${plist}")" = "true"
+test "$(plutil -extract LSSupportsOpeningDocumentsInPlace raw "${plist}")" = "true"
 
 if [[ "$(file -b "${binary}")" != *"Mach-O 64-bit executable arm64"* ]]; then
   echo "KartPad game runtime is not arm64 Mach-O" >&2
@@ -88,7 +90,7 @@ for motion_contract in \
 done
 
 for touch_contract in \
-  'Acceleration held' \
+  'Acceleration locked' \
   'Drift, hop, brake, or reverse.'; do
   if ! rg -a -F -q "${touch_contract}" "${binary}"; then
     echo "game app is missing the KartPad touch-control contract: ${touch_contract}" >&2

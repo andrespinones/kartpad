@@ -34,6 +34,7 @@
 @property(nonatomic, strong) UIColor *kartPadGasRestColor;
 @property(nonatomic, assign) NSUInteger kartPadGasHoldGeneration;
 @property(nonatomic, assign) BOOL kartPadGasPressed;
+@property(nonatomic, assign) BOOL kartPadGasLocked;
 @property(nonatomic, assign) BOOL kartPadGasHoldSelfTestStarted;
 @property(nonatomic, assign) BOOL kartPadGasInputSelfTestStarted;
 @property(nonatomic, assign) BOOL kartPadModalInputSelfTestStarted;
@@ -47,6 +48,7 @@
 @interface SunPadGameOverlay (KartPadControlHooks)
 - (void)rPressureChanged:(uint8_t)pressure fullPress:(BOOL)fullPress;
 - (void)clearTouchInput;
+- (void)buttonDown:(UIButton *)button;
 - (void)toggleSettingsPanel;
 - (void)selectControlForEditing:(UIView *)control;
 - (void)reportProblem;
@@ -102,6 +104,18 @@ UIView *KartPadSubviewWithAccessibilityLabel(UIView *root, NSString *label,
 NSString *KartPadSupportRoot() {
   return [[NSHomeDirectory() stringByAppendingPathComponent:
       @"Library/Application Support"] stringByAppendingPathComponent:@"KartPad"];
+}
+
+NSURL *KartPadDocumentsRoot(NSError **error) {
+  NSURL *documents = [NSFileManager.defaultManager
+      URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask].firstObject;
+  if (documents == nil) return nil;
+  if (![NSFileManager.defaultManager createDirectoryAtURL:documents
+                              withIntermediateDirectories:YES attributes:nil
+                                                   error:error]) {
+    return nil;
+  }
+  return documents;
 }
 
 NSString *KartPadRemovalMarkerPath() {
@@ -1170,6 +1184,14 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
 }
 
 - (BOOL)run {
+  // Create the Files-visible app directory before first-launch UI is shown.
+  // UIFileSharingEnabled and LSSupportsOpeningDocumentsInPlace expose this
+  // Documents directory as On My iPhone/iPad -> KartPad.
+  NSError *documentsError = nil;
+  if (KartPadDocumentsRoot(&documentsError) == nil) {
+    NSLog(@"[KartPad] could not prepare Files directory: %@",
+          documentsError.localizedDescription);
+  }
   NSError *removalError = KartPadApplyScheduledGameDataRemoval();
   if (removalError != nil) {
     NSLog(@"[KartPad] scheduled game-data removal failed: %@",
@@ -1258,6 +1280,14 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
   [super toggleSettingsPanel];
 }
 
+- (void)setTouchControlsHidden:(BOOL)hidden animated:(BOOL)animated {
+  if (hidden) {
+    [self clearTouchInput];
+    [self resetKartPadControlAppearance];
+  }
+  [super setTouchControlsHidden:hidden animated:animated];
+}
+
 - (void)layoutSubviews {
   [super layoutSubviews];
   UIButton *menuButton = nil;
@@ -1293,7 +1323,7 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
     self.kartPadGasButton = gasButton;
     self.kartPadGasRestColor = gasButton.backgroundColor;
     gasButton.accessibilityHint =
-        @"Hold for one second to confirm continuous acceleration.";
+        @"Hold for one second to lock acceleration. Tap again to unlock.";
     [gasButton addTarget:self action:@selector(kartPadGasDown:)
          forControlEvents:UIControlEventTouchDown];
     [gasButton addTarget:self action:@selector(kartPadGasUp:)
@@ -1305,11 +1335,11 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
         NSProcessInfo.processInfo.environment[@"KARTPAD_TOUCH_HOLD_SELF_TEST"] != nil) {
       self.kartPadGasHoldSelfTestStarted = YES;
       dispatch_async(dispatch_get_main_queue(), ^{
-        [self kartPadGasDown:gasButton];
+        [gasButton sendActionsForControlEvents:UIControlEventTouchDown];
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW,
                                      (int64_t)(30.0 * NSEC_PER_SEC)),
                        dispatch_get_main_queue(), ^{
-          [self kartPadGasUp:gasButton];
+          [gasButton sendActionsForControlEvents:UIControlEventTouchUpInside];
         });
       });
     }
@@ -1336,18 +1366,29 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
           dispatch_after(dispatch_time(DISPATCH_TIME_NOW,
                                        (int64_t)(0.1 * NSEC_PER_SEC)),
                          dispatch_get_main_queue(), ^{
-            const SunPadInputState released =
+            const SunPadInputState locked =
                 [[SunPadInputMixer sharedMixer] consumeMergedState];
-            const KartPadClassicInputState releasedClassic =
-                kartpad::mobile::AdaptSunPadInput(released);
-            const BOOL releasePassed =
-                (releasedClassic.buttons & kartpad::mobile::kClassicButtonA) == 0;
-            gasButton.accessibilityHint = releasePassed
-                ? @"Acceleration releases when your finger lifts. Input self-test passed."
-                : @"Acceleration release input test failed.";
-            NSLog(@"[KartPad] touch A release self-test: %@ (classic=%08x)",
-                  releasePassed ? @"release pass" : @"release FAIL",
-                  releasedClassic.buttons);
+            const KartPadClassicInputState lockedClassic =
+                kartpad::mobile::AdaptSunPadInput(locked);
+            const BOOL lockPassed =
+                (lockedClassic.buttons & kartpad::mobile::kClassicButtonA) != 0;
+            [gasButton sendActionsForControlEvents:UIControlEventTouchDown];
+            [gasButton sendActionsForControlEvents:UIControlEventTouchUpInside];
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW,
+                                         (int64_t)(0.1 * NSEC_PER_SEC)),
+                           dispatch_get_main_queue(), ^{
+              const KartPadClassicInputState unlockedClassic =
+                  kartpad::mobile::AdaptSunPadInput(
+                      [[SunPadInputMixer sharedMixer] consumeMergedState]);
+              const BOOL unlockPassed =
+                  (unlockedClassic.buttons & kartpad::mobile::kClassicButtonA) == 0;
+              gasButton.accessibilityHint = lockPassed && unlockPassed
+                  ? @"Hold-to-lock and tap-to-unlock input self-test passed."
+                  : @"Acceleration lock input self-test failed.";
+              NSLog(@"[KartPad] touch A lock self-test: %@ (locked=%08x unlocked=%08x)",
+                    lockPassed && unlockPassed ? @"pass" : @"FAIL",
+                    lockedClassic.buttons, unlockedClassic.buttons);
+            });
           });
         });
       });
@@ -1693,6 +1734,17 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
 - (void)kartPadGasDown:(UIButton *)button {
   self.kartPadGasPressed = YES;
   const NSUInteger generation = ++self.kartPadGasHoldGeneration;
+  if (self.kartPadGasLocked) {
+    // The next ordinary tap releases a previously locked accelerator. The
+    // inherited touch-up action clears A after this touch ends.
+    self.kartPadGasLocked = NO;
+    button.backgroundColor = self.kartPadGasRestColor;
+    button.layer.borderColor =
+        [UIColor colorWithWhite:1.0 alpha:0.36].CGColor;
+    button.layer.shadowOpacity = 0.0;
+    button.accessibilityValue = @"Unlocking acceleration";
+    return;
+  }
   __weak KartPadGameOverlay *weakSelf = self;
   __weak UIButton *weakButton = button;
   dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)NSEC_PER_SEC),
@@ -1704,8 +1756,7 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
         strongSelf.kartPadGasHoldGeneration != generation) {
       return;
     }
-    // SunPad already keeps A asserted from touch-down through touch-up. The
-    // delayed treatment makes that sustained acceleration state unmistakable.
+    strongSelf.kartPadGasLocked = YES;
     strongButton.backgroundColor =
         [UIColor colorWithRed:0.06 green:0.78 blue:0.92 alpha:0.98];
     strongButton.layer.borderColor = UIColor.whiteColor.CGColor;
@@ -1714,7 +1765,7 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
     strongButton.layer.shadowOpacity = 0.9;
     strongButton.layer.shadowRadius = 9.0;
     strongButton.layer.shadowOffset = CGSizeZero;
-    strongButton.accessibilityValue = @"Acceleration held";
+    strongButton.accessibilityValue = @"Acceleration locked";
     UIImpactFeedbackGenerator *feedback = [[UIImpactFeedbackGenerator alloc]
         initWithStyle:UIImpactFeedbackStyleLight];
     [feedback impactOccurred];
@@ -1724,6 +1775,23 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
 - (void)kartPadGasUp:(UIButton *)button {
   self.kartPadGasPressed = NO;
   ++self.kartPadGasHoldGeneration;
+  if (self.kartPadGasLocked) {
+    // SunPad's existing touch-up action clears A. Reassert it after all targets
+    // for this UIKit event finish so the lock survives the finger lifting.
+    __weak KartPadGameOverlay *weakSelf = self;
+    __weak UIButton *weakButton = button;
+    dispatch_async(dispatch_get_main_queue(), ^{
+      KartPadGameOverlay *strongSelf = weakSelf;
+      UIButton *strongButton = weakButton;
+      if (strongSelf == nil || strongButton == nil ||
+          !strongSelf.kartPadGasLocked) {
+        return;
+      }
+      [super buttonDown:strongButton];
+      strongButton.transform = CGAffineTransformIdentity;
+    });
+    return;
+  }
   button.backgroundColor = self.kartPadGasRestColor;
   button.layer.borderColor =
       [UIColor colorWithWhite:1.0 alpha:0.36].CGColor;
@@ -1733,6 +1801,7 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
 
 - (void)resetKartPadControlAppearance {
   self.kartPadGasPressed = NO;
+  self.kartPadGasLocked = NO;
   ++self.kartPadGasHoldGeneration;
   if (self.kartPadGasButton != nil) {
     self.kartPadGasButton.backgroundColor = self.kartPadGasRestColor;
