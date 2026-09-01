@@ -4,11 +4,16 @@ Updated: 2026-09-01
 
 ## Current goal
 
-**The Retro Rewind preview is published.** `v0.3.0-preview.1` points to source
-commit `142a56f326fb62a5caa615315fd2ec3e6d8800d0`. Its unsigned 0.3.0 build-8
-IPA, checksum, embedded release notes, provenance, licenses, privacy boundary,
-and freshly downloaded hosted artifact all pass. The hosted IPA SHA-256 is
-`66c873ea48c966f9c1eba850da2d8d0368696909b6b6416bed05c2a4b0d4de5e`.
+**The import and touch-lock hotfix is published.** `v0.3.0-preview.2` points to
+source commit `9240b44cf37ff474bfc527a5f430c05c226f685d`. Its unsigned 0.3.0
+build-9 IPA, checksum, embedded release notes, provenance, licenses, privacy
+boundary, and freshly downloaded hosted artifact all pass. The hosted IPA
+SHA-256 is
+`18c9549656aef815e57552d63e1cfec79bcd69cd9de622e4b5a1e026404c6f36`.
+The build declares open-in-place document access, prepares the Files-visible
+KartPad directory, and implements hold-to-lock/tap-to-unlock A input with
+lifecycle clearing. Both GitHub issues remain open for reporter confirmation
+on their exact devices; build and audit proof are not that confirmation.
 
 **Local Apple-to-Apple online flow passes.** Native macOS and the exact iPad
 Simulator completed login, matchmaking, room formation, Luigi Circuit race

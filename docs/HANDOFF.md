@@ -2,11 +2,18 @@
 
 ## Current state
 
-KartPad `v0.3.0-preview.1` is published from
-`142a56f326fb62a5caa615315fd2ec3e6d8800d0`. The hosted unsigned iPhone/iPad
-IPA is app 0.3.0 build 8 and has SHA-256
-`66c873ea48c966f9c1eba850da2d8d0368696909b6b6416bed05c2a4b0d4de5e`.
+KartPad `v0.3.0-preview.2` is published from
+`9240b44cf37ff474bfc527a5f430c05c226f685d`. The hosted unsigned iPhone/iPad
+IPA is app 0.3.0 build 9 and has SHA-256
+`18c9549656aef815e57552d63e1cfec79bcd69cd9de622e4b5a1e026404c6f36`.
 The hosted artifact matches the local audited candidate byte-for-byte.
+
+Preview 2 adds the missing iOS open-in-place declaration, prepares the
+Files-visible KartPad directory before first launch, and makes A's one-second
+hold a real lock that releases on the next tap. The full device build, app
+audit, deterministic packaging, hosted checksum, and fresh hosted re-audit
+pass. Issues #1 and #2 remain open for reporter confirmation on their exact
+iPads and file providers.
 
 The preview offers Original Mario Kart Wii or optional Retro Rewind 6.12.4.
 A physical iPad completed the official pack download, verification,
