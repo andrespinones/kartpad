@@ -4,16 +4,16 @@ Updated: 2026-09-01
 
 ## Current goal
 
-**The import and touch-lock hotfix is published.** `v0.3.0-preview.2` points to
-source commit `9240b44cf37ff474bfc527a5f430c05c226f685d`. Its unsigned 0.3.0
-build-9 IPA, checksum, embedded release notes, provenance, licenses, privacy
-boundary, and freshly downloaded hosted artifact all pass. The hosted IPA
+**The provider-compatible import hotfix is published.** `v0.3.0-preview.3`
+points to source commit `452af2dde3d19508a5e6ced6c03deb0e24b8b509`. Its unsigned
+0.3.0 build-10 IPA, checksum, embedded release notes, provenance, licenses,
+privacy boundary, and freshly downloaded hosted artifact all pass. The hosted IPA
 SHA-256 is
-`18c9549656aef815e57552d63e1cfec79bcd69cd9de622e4b5a1e026404c6f36`.
-The build declares open-in-place document access, prepares the Files-visible
-KartPad directory, and implements hold-to-lock/tap-to-unlock A input with
-lifecycle clearing. Both GitHub issues remain open for reporter confirmation
-on their exact devices; build and audit proof are not that confirmation.
+`e839c115a97867949b16fa1c4a2a3472dce4eb3da6c69fff6f40c3eca2abbdcf`.
+The build asks iOS Files providers for a local picker copy, removes only that
+temporary copy after import, and scans app-folder disc extensions before
+provider package/directory metadata. Issue #1 remains open for confirmation on
+the reporter's exact iPad; build and audit proof are not that confirmation.
 
 **Local Apple-to-Apple online flow passes.** Native macOS and the exact iPad
 Simulator completed login, matchmaking, room formation, Luigi Circuit race

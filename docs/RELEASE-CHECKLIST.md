@@ -18,9 +18,9 @@ limitations when its exact artifact passes every preview gate below.
 - [x] Dereferenced release tag and hosted artifact provenance match the audited
       source commit
 
-Published artifact: `v0.3.0-preview.2`, app 0.3.0 build 9, source
-`9240b44cf37ff474bfc527a5f430c05c226f685d`, IPA SHA-256
-`18c9549656aef815e57552d63e1cfec79bcd69cd9de622e4b5a1e026404c6f36`.
+Published artifact: `v0.3.0-preview.3`, app 0.3.0 build 10, source
+`452af2dde3d19508a5e6ced6c03deb0e24b8b509`, IPA SHA-256
+`e839c115a97867949b16fa1c4a2a3472dce4eb3da6c69fff6f40c3eca2abbdcf`.
 
 ## Full engineering-completion gates still open
 
