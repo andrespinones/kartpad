@@ -207,11 +207,39 @@ BOOL KartPadURLIsSupportedDiscImage(NSURL *url) {
 }
 
 NSArray<UTType *> *KartPadGameDataContentTypes() {
-  // File providers can publish .iso and .wbfs files with their own UTIs, which
-  // do not necessarily match a dynamic type synthesized from the extension.
-  // Accept generic files and directories here, then rely on KartPad's existing
+  // File providers disagree about ISO/WBFS identifiers. Include both broad
+  // bases and the system disk-image/folder types, then rely on KartPad's
   // extension, disc-header, revision, and extracted-tree validation.
-  return @[UTTypeItem];
+  return @[UTTypeItem, UTTypeData, UTTypeDiskImage, UTTypeFolder];
+}
+
+NSArray<NSURL *> *KartPadGameDataRootsInDocuments(NSError **error) {
+  NSURL *documents = KartPadDocumentsRoot(error);
+  if (documents == nil) return @[];
+  NSArray<NSURL *> *entries = [NSFileManager.defaultManager
+      contentsOfDirectoryAtURL:documents
+    includingPropertiesForKeys:@[NSURLIsDirectoryKey]
+                       options:NSDirectoryEnumerationSkipsHiddenFiles error:error];
+  if (entries == nil) return @[];
+  NSMutableArray<NSURL *> *roots = [NSMutableArray array];
+  for (NSURL *entry in entries) {
+    // Check the user-visible extension first. Some Files providers report disc
+    // images as packages/directories even though their bytes are readable as a
+    // normal file. The extractor remains the authority after selection.
+    if (KartPadURLIsSupportedDiscImage(entry)) {
+      [roots addObject:entry];
+      continue;
+    }
+    NSNumber *directory = nil;
+    [entry getResourceValue:&directory forKey:NSURLIsDirectoryKey error:nil];
+    if (directory.boolValue && KartPadResolvedExtractedRoot(entry) != nil) {
+      [roots addObject:entry];
+    }
+  }
+  [roots sortUsingComparator:^NSComparisonResult(NSURL *left, NSURL *right) {
+    return [left.lastPathComponent localizedStandardCompare:right.lastPathComponent];
+  }];
+  return roots;
 }
 
 NSString *KartPadValidateExtractedRoot(NSString *root, NSError **error) {
@@ -655,6 +683,7 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
 @property(nonatomic, assign) BOOL succeeded;
 @property(nonatomic, assign) BOOL selectedRetroRewind;
 @property(nonatomic, assign) BOOL choosingRetroArchive;
+@property(nonatomic, assign) BOOL choosingGameDataCopy;
 @property(nonatomic, assign) BOOL receivedRetroDownload;
 @property(nonatomic, assign) BOOL retroVersionChecked;
 @property(nonatomic, assign) NSInteger lastRetroDownloadPercent;
@@ -678,24 +707,12 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
 }
 
 - (NSArray<NSURL *> *)documentsRoots {
-  NSURL *documents = [NSFileManager.defaultManager
-      URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask].firstObject;
-  NSArray<NSURL *> *entries = documents == nil ? @[] :
-      [NSFileManager.defaultManager contentsOfDirectoryAtURL:documents
-          includingPropertiesForKeys:@[NSURLIsDirectoryKey]
-                             options:NSDirectoryEnumerationSkipsHiddenFiles error:nil];
-  NSMutableArray<NSURL *> *roots = [NSMutableArray array];
-  for (NSURL *entry in entries) {
-    NSNumber *directory = nil;
-    [entry getResourceValue:&directory forKey:NSURLIsDirectoryKey error:nil];
-    if ((directory.boolValue && KartPadResolvedExtractedRoot(entry) != nil) ||
-        (!directory.boolValue && KartPadURLIsSupportedDiscImage(entry))) {
-      [roots addObject:entry];
-    }
+  NSError *error = nil;
+  NSArray<NSURL *> *roots = KartPadGameDataRootsInDocuments(&error);
+  if (error != nil) {
+    NSLog(@"[KartPad] could not inspect Files directory: %@",
+          error.localizedDescription);
   }
-  [roots sortUsingComparator:^NSComparisonResult(NSURL *left, NSURL *right) {
-    return [left.lastPathComponent localizedStandardCompare:right.lastPathComponent];
-  }];
   return roots;
 }
 
@@ -885,6 +902,7 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
 
 - (void)chooseRetroRewindArchive {
   self.choosingRetroArchive = YES;
+  self.choosingGameDataCopy = NO;
   UTType *zip = [UTType typeWithFilenameExtension:@"zip"];
   UIDocumentPickerViewController *picker =
       [[UIDocumentPickerViewController alloc]
@@ -1036,7 +1054,7 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
   }];
 }
 
-- (void)startImport:(NSURL *)url {
+- (void)startImport:(NSURL *)url deleteAfterwards:(BOOL)deleteAfterwards {
   UIAlertController *progress =
       [UIAlertController alertControllerWithTitle:@"Importing Game Data"
                                           message:@"Validating your selected game data…"
@@ -1049,6 +1067,9 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
           progress.message = [NSString stringWithFormat:@"%@\n%.0f%%", status,
                                                        fraction * 100.0];
         });
+    if (deleteAfterwards) {
+      [NSFileManager.defaultManager removeItemAtURL:url error:nil];
+    }
     dispatch_async(dispatch_get_main_queue(), ^{
       KartPadFirstLaunchHost *strongSelf = weakSelf;
       if (strongSelf == nil) {
@@ -1077,7 +1098,7 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
     return;
   }
   if (roots.count == 1) {
-    [self startImport:roots.firstObject];
+    [self startImport:roots.firstObject deleteAfterwards:NO];
     return;
   }
   UIAlertController *choices =
@@ -1091,7 +1112,9 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
       (void)action;
       dispatch_after(dispatch_time(DISPATCH_TIME_NOW,
                                    (int64_t)(0.35 * NSEC_PER_SEC)),
-                     dispatch_get_main_queue(), ^{ [self startImport:root]; });
+                     dispatch_get_main_queue(), ^{
+      [self startImport:root deleteAfterwards:NO];
+    });
     }]];
   }
   [choices addAction:[UIAlertAction actionWithTitle:@"Cancel"
@@ -1107,6 +1130,7 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
 
 - (void)showOptions {
   self.choosingRetroArchive = NO;
+  self.choosingGameDataCopy = NO;
   UIAlertController *options =
       [UIAlertController alertControllerWithTitle:@"Game Data Required"
           message:@"KartPad does not include Mario Kart Wii. Import your own RMCP01 WBFS, ISO, or extracted DATA folder to continue."
@@ -1118,9 +1142,10 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW,
                                  (int64_t)(0.35 * NSEC_PER_SEC)),
                    dispatch_get_main_queue(), ^{
+      self.choosingGameDataCopy = YES;
       UIDocumentPickerViewController *picker =
           [[UIDocumentPickerViewController alloc]
-              initForOpeningContentTypes:KartPadGameDataContentTypes() asCopy:NO];
+              initForOpeningContentTypes:KartPadGameDataContentTypes() asCopy:YES];
       picker.delegate = self;
       picker.allowsMultipleSelection = NO;
       [self.root presentViewController:picker animated:YES completion:nil];
@@ -1152,7 +1177,9 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
         self.choosingRetroArchive = NO;
         [self installRetroRewindArchive:url deletingAfterwards:NO];
       } else {
-        [self startImport:url];
+        const BOOL deleteAfterwards = self.choosingGameDataCopy;
+        self.choosingGameDataCopy = NO;
+        [self startImport:url deleteAfterwards:deleteAfterwards];
       }
     });
   } else {
@@ -1163,6 +1190,7 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
         self.choosingRetroArchive = NO;
         [self showRetroRewindOptions];
       } else {
+        self.choosingGameDataCopy = NO;
         [self showOptions];
       }
     });
@@ -1178,6 +1206,7 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
       self.choosingRetroArchive = NO;
       [self showRetroRewindOptions];
     } else {
+      self.choosingGameDataCopy = NO;
       [self showOptions];
     }
   });
@@ -2017,38 +2046,24 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
   }
   UIDocumentPickerViewController *picker =
       [[UIDocumentPickerViewController alloc]
-          initForOpeningContentTypes:KartPadGameDataContentTypes() asCopy:NO];
+          initForOpeningContentTypes:KartPadGameDataContentTypes() asCopy:YES];
   picker.delegate = self;
   picker.allowsMultipleSelection = NO;
   [controller presentViewController:picker animated:YES completion:nil];
 }
 
 - (NSArray<NSURL *> *)extractedRootsInDocumentsDirectory {
-  NSURL *documents = [NSFileManager.defaultManager
-      URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask].firstObject;
-  if (documents == nil) {
-    return @[];
+  NSError *error = nil;
+  NSArray<NSURL *> *roots = KartPadGameDataRootsInDocuments(&error);
+  if (error != nil) {
+    NSLog(@"[KartPad] could not inspect Files directory: %@",
+          error.localizedDescription);
   }
-  NSArray<NSURL *> *entries = [NSFileManager.defaultManager
-      contentsOfDirectoryAtURL:documents
-    includingPropertiesForKeys:@[NSURLIsDirectoryKey]
-                       options:NSDirectoryEnumerationSkipsHiddenFiles error:nil];
-  NSMutableArray<NSURL *> *roots = [NSMutableArray array];
-  for (NSURL *entry in entries) {
-    NSNumber *directory = nil;
-    [entry getResourceValue:&directory forKey:NSURLIsDirectoryKey error:nil];
-    if ((directory.boolValue && KartPadResolvedExtractedRoot(entry) != nil) ||
-        (!directory.boolValue && KartPadURLIsSupportedDiscImage(entry))) {
-      [roots addObject:entry];
-    }
-  }
-  [roots sortUsingComparator:^NSComparisonResult(NSURL *left, NSURL *right) {
-    return [left.lastPathComponent localizedStandardCompare:right.lastPathComponent];
-  }];
   return roots;
 }
 
-- (void)importExtractedGameDataFromURL:(NSURL *)url {
+- (void)importExtractedGameDataFromURL:(NSURL *)url
+                     deleteAfterwards:(BOOL)deleteAfterwards {
   UIViewController *controller = KartPadVisibleViewController(_window);
   if (controller == nil) {
     return;
@@ -2070,6 +2085,9 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
                 [NSString stringWithFormat:@"%@\n%.0f%%", status, fraction * 100.0];
           }
         });
+    if (deleteAfterwards) {
+      [NSFileManager.defaultManager removeItemAtURL:url error:nil];
+    }
 
     dispatch_async(dispatch_get_main_queue(), ^{
       KartPadRuntimeOverlayHost *strongSelf = weakSelf;
@@ -2095,7 +2113,7 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
   (void)controller;
   NSURL *url = urls.firstObject;
   if (url != nil) {
-    [self importExtractedGameDataFromURL:url];
+    [self importExtractedGameDataFromURL:url deleteAfterwards:YES];
   }
 }
 
@@ -2108,7 +2126,7 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
   (void)overlay;
   NSArray<NSURL *> *roots = [self extractedRootsInDocumentsDirectory];
   if (roots.count == 1) {
-    [self importExtractedGameDataFromURL:roots.firstObject];
+    [self importExtractedGameDataFromURL:roots.firstObject deleteAfterwards:NO];
     return;
   }
   UIViewController *controller = KartPadVisibleViewController(_window);
@@ -2128,7 +2146,7 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
                                               style:UIAlertActionStyleDefault
                                             handler:^(UIAlertAction *action) {
       (void)action;
-      [weakSelf importExtractedGameDataFromURL:root];
+      [weakSelf importExtractedGameDataFromURL:root deleteAfterwards:NO];
     }]];
   }
   [alert addAction:[UIAlertAction actionWithTitle:@"Cancel"

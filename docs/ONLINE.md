@@ -8,7 +8,7 @@ apply ratings, and return to the shared lobby.
 
 That evidence does not yet establish public Retro WFC service compatibility,
 Wiimmfi compatibility, Wii interoperability, or physical-device online
-acceptance. `v0.3.0-preview.2` is the public online-capable dual-mode build, but
+acceptance. `v0.3.0-preview.3` is the public online-capable dual-mode build, but
 it is not accepted for live public Retro WFC or physical-device online play
 while the external service is unavailable. The local harness result does not
 establish either claim.
