@@ -20,7 +20,10 @@ class IOSGameDataPickerContractTests(unittest.TestCase):
         self.assertIsNotNone(match)
         body = match.group(1)
 
-        self.assertIn("return @[UTTypeItem];", body)
+        self.assertIn(
+            "return @[UTTypeItem, UTTypeData, UTTypeDiskImage, UTTypeFolder];",
+            body,
+        )
         self.assertNotIn("typeWithFilenameExtension", body)
         self.assertEqual(
             source.count(
@@ -28,6 +31,26 @@ class IOSGameDataPickerContractTests(unittest.TestCase):
             ),
             2,
         )
+        self.assertEqual(source.count("asCopy:YES"), 2)
+        self.assertIn("choosingGameDataCopy", source)
+        self.assertIn("deleteAfterwards:deleteAfterwards", source)
+
+    def test_documents_scan_checks_disc_extension_before_directory_metadata(self) -> None:
+        source = (REPO / "apple/ios/KartPadRuntimeOverlayHost.mm").read_text()
+        match = re.search(
+            r"NSArray<NSURL \*> \*KartPadGameDataRootsInDocuments\(NSError \*\*error\)"
+            r" \{(.*?)\n\}",
+            source,
+            re.DOTALL,
+        )
+        self.assertIsNotNone(match)
+        body = match.group(1)
+        self.assertLess(
+            body.index("KartPadURLIsSupportedDiscImage(entry)"),
+            body.index("getResourceValue:&directory"),
+        )
+        self.assertNotIn("!directory.boolValue", body)
+        self.assertEqual(source.count("KartPadGameDataRootsInDocuments(&error)"), 2)
 
     def test_open_in_place_and_files_folder_contracts_are_declared(self) -> None:
         for name in ("Info.plist", "RuntimeInfo.plist"):

@@ -11,9 +11,9 @@ import zipfile
 from pathlib import Path, PurePosixPath
 
 
-RELEASE_TAG = "v0.3.0-preview.2"
+RELEASE_TAG = "v0.3.0-preview.3"
 APP_VERSION = "0.3.0"
-APP_BUILD = "9"
+APP_BUILD = "10"
 FORBIDDEN_SUFFIXES = {
     ".iso", ".gcm", ".gcz", ".ciso", ".wbfs", ".wia", ".rvz",
     ".gci", ".sav", ".log", ".mobileprovision", ".p12", ".p8",
