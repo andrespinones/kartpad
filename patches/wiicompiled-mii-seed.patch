@@ -98,10 +98,7 @@ diff --git a/src/hle/storage/nand_internal.h b/src/hle/storage/nand_internal.h
 diff --git a/src/hle/storage/nand_isfs.cpp b/src/hle/storage/nand_isfs.cpp
 --- a/src/hle/storage/nand_isfs.cpp
 +++ b/src/hle/storage/nand_isfs.cpp
-@@ -331,10 +331,10 @@ int32_t IOS_HLE_Open(const char* path, uint32_t mode) {
-     // It's a NAND file path
-     std::string hostPath = TranslateNandPath(path);
-
+@@ -334,4 +334,4 @@ int32_t IOS_HLE_Open(const char* path, uint32_t mode) {
 -    // Seed FaceLib resources before the existence check so every open mode can
 -    // still find them on a fresh managed NAND.
 -    if (!PathExists(hostPath) && IsFaceLibResourcePath(path)) {
@@ -110,6 +107,3 @@ diff --git a/src/hle/storage/nand_isfs.cpp b/src/hle/storage/nand_isfs.cpp
 +    // check so every open mode can still find them on a fresh managed NAND.
 +    if (!PathExists(hostPath) && IsFaceLibSeedPath(path)) {
 +        SeedFaceLibFile(path, hostPath);
-     }
-
-     // Determine file mode. IOS never creates files on open - creation happens

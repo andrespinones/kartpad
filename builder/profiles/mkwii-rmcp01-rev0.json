@@ -51,6 +51,10 @@
     "functionMap": "ref/upstream/Wiicompiled/projects/mkwii/MAP.txt",
     "injectors": [
       {"function": "func_8051FC84.cpp", "script": "scripts/inject-g10-rkg-fixture-hook.py"},
+      {"function": "func_8083DFA8.cpp", "script": "scripts/inject-online-rkg-selection-hooks.py"},
+      {"function": "func_80846C1C.cpp", "script": "scripts/inject-online-rkg-selection-hooks.py"},
+      {"function": "func_8084E388.cpp", "script": "scripts/inject-online-rkg-selection-hooks.py"},
+      {"function": "func_80643F48.cpp", "script": "scripts/inject-online-rkg-selection-hooks.py"},
       {"function": "func_805A1A8C.cpp", "script": "scripts/inject-g10-camera-lifecycle-guard.py"}
     ],
     "expectedGeneratedFunctions": 29637,

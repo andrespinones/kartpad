@@ -21,9 +21,9 @@
 > locally signed builds have been installed and accepted on physical iPhone
 > and iPad hardware. The public Personal IPA Builder preview creates an
 > unsigned IPA locally from a supported user-owned disc image. It does not
-> publish a playable IPA or any game code. Online multiplayer is almost done
-> but remains pending end-to-end testing; Retro Rewind content is not available
-> yet.
+> publish a playable IPA or any game code. Online multiplayer now passes the
+> local Mac-to-iPad-Simulator development flow; public-service and physical-device
+> online acceptance remain pending. Retro Rewind content is not available yet.
 
 ## What is available now?
 
@@ -33,7 +33,7 @@
 | Does an IPA exist? | Yes. The public Personal IPA Builder creates a private unsigned IPA locally, and locally signed builds have been accepted on physical iPhone and iPad hardware. A universal playable IPA cannot be published because static recompilation translates the user's game executable before Apple signing. |
 | Does it include Mario Kart Wii? | No. You must provide your own legally obtained supported PAL `RMCP01` revision 0 WBFS/ISO. |
 | Does it support Retro Rewind? | Not yet. The current build runs the original retail content, including its 32 tracks. Retro Rewind's extra tracks, characters, and other content are planned as an optional mode selected from the three-dot menu. |
-| Does online play work? | Not yet. Retro WFC login, matchmaking, and online racing are almost done but pending end-to-end testing. This networking work does not add Retro Rewind content and is not Wiimmfi support. |
+| Does online play work? | The development build passes login, matchmaking, a two-player race, results, ratings, and lobby return against a compatible isolated WFC server. Public Retro WFC service, Wiimmfi, physical-device online, and external-client compatibility are not yet accepted. |
 | Do touch, tilt, and controllers work? | Yes. They are implemented in the development IPA, and the app has been physically accepted on both iPhone and iPad. Feature tuning can continue independently of that device acceptance. |
 | Are Android and Apple TV supported? | Not currently. Apple TV is a possible target once the current build is stable. Android may be investigated later. |
 | How much storage does it need? | The app is about 80 MiB and the extracted game data is about 2.5 GiB. Keeping the WBFS/ISO on the device requires additional space, and building from source needs substantially more free storage. |
@@ -62,7 +62,7 @@ signing material.
 | Packaging | The original icon and exact branded 80 MiB package pass audit, installed-storage, configured gameplay, save-preservation, and normal-close checks; the native first-run/settings/data-management shell remains open |
 | iPhone/iPad | The full 29,065-function ARM64 retail app has been packaged as an unsigned IPA; locally signed builds have been installed and physically accepted on both iPhone and iPad, reaching live races, importing a supported private WBFS, and preserving saves |
 | Game content | Original retail Mario Kart Wii content only today; Retro Rewind content is planned as a future optional mode in the three-dot menu |
-| Online multiplayer | Almost done, but Retro WFC login, matchmaking, rooms, and racing remain pending end-to-end testing |
+| Online multiplayer | Local Mac-to-iPad-Simulator login, matchmaking, room, race, native results, ratings, and lobby return pass; public-service and physical-device online acceptance remain open |
 | Distribution | The public Personal IPA Builder creates a private unsigned IPA locally from a supported user-owned image; no playable IPA, game data, or translated game code is distributed |
 
 The evidence ledger, exact open rows, and known risks live in
@@ -405,10 +405,12 @@ been accepted on physical iPhone and iPad hardware.
 
 ### Does online multiplayer work?
 
-Not yet. The Retro WFC networking path is almost done, but end-to-end login,
-matchmaking, rooms, and online races remain pending testing and are not yet
-accepted. Retro WFC is not Wiimmfi, and adding its networking payload does not
-add Retro Rewind content.
+The development build now passes end-to-end login, matchmaking, room formation,
+course voting, a two-player race, native results/ratings, and lobby return
+between macOS and an iPad Simulator against a compatible isolated WFC server.
+Public Retro WFC service compatibility, Wiimmfi, physical-device online play,
+and external-client interoperability are still unaccepted. Adding the network
+payload does not add Retro Rewind content.
 
 ### Does KartPad support Retro Rewind?
 

@@ -1,21 +1,52 @@
 # KartPad online ledger and execution loop
 
-Online multiplayer is mandatory, but it is not supported by the current Apple
-build. The pinned WiiCompiled source contains a host-socket HLE and a distinct
-Retro Rewind product. The current generated graph is base-only, and the pinned
-non-Windows SSL path returns failure for handshake, read, and write.
+Online multiplayer is implemented and passes the local Apple-to-Apple
+development checkpoint. A native macOS client and the exact iPad Simulator
+client can log in to a compatible isolated WFC service, match, form a room,
+vote, exchange live race packets, finish through the retail online result path,
+apply ratings, and return to the shared lobby.
+
+That evidence does not yet establish public Retro WFC service compatibility,
+Wiimmfi compatibility, Wii interoperability, or physical-device online
+acceptance. The public Personal IPA Builder preview also remains a separate
+candidate from the private online development product.
 
 No account, credential, public-service authorization, or production-service
 compatibility is currently claimed. This loop uses the pinned authorized local
 server first and never commits credentials, payloads, private keys, captures,
 game data, translated code, or saves.
 
-## Active goal loop
+## Local checkpoint completed on 1 September 2026
+
+- Clients: native arm64 macOS plus `iPad Pro 13-inch (M5)` Simulator.
+- Service: isolated, pinned WiiLink-compatible WFC backend on loopback.
+- Identity: separate local profiles, friend codes, QR2 sessions, ports, and
+  storage roots.
+- Flow: login, matchmaking, two-player room, forced Luigi/Mach Bike metadata,
+  unanimous Luigi Circuit vote, race start, bidirectional race packets, native
+  finish/results, rating update, and return to `Racers / OK`.
+- Runtime evidence: both clients held 60 FPS during the automated run; macOS
+  logged player 1 and Simulator logged player 0 entering the native finish path
+  at fixture frame 1,800. Both then consumed the complete 5,001-frame fixture.
+  macOS closed with 3,596 sends and 3,606 receives; Simulator closed with 3,621
+  sends and 3,577 receives.
+- Harness boundary: the input fixture is a Time Trial ghost and cannot finish
+  naturally from different online VS grid poses. The test-only environment
+  therefore invokes `RaceinfoPlayer::UpdateRealLocal` after a sustained packet
+  window. Production builds do not set that environment variable. This proves
+  the real result/rating/lobby protocol path, not human steering skill.
+- Safety: both original save files were restored after the run and matched
+  their pre-test SHA-256 digests exactly.
+
+No crash, missing translated target, controller-interruption modal, network
+disconnect, or save mismatch occurred in the accepted run.
+
+## Remaining goal loop
 
 Work from the first incomplete goal. Every implementation step must have an
 immediate local test and evidence before advancing.
 
-1. **O1 — Apple transport:** implement and contract-test BSD socket, DNS, TLS,
+1. **O1 — Apple transport — local pass:** implement and contract-test BSD socket, DNS, TLS,
    plaintext Retro-WFC routing, timeout, error, and cleanup behavior on macOS
    and the iOS Simulator.
 2. **O2 — Online product:** add a fail-closed private workflow that consumes an
@@ -25,18 +56,18 @@ immediate local test and evidence before advancing.
 3. **O3 — Local server:** build the pinned WFC server and payload, provision a
    disposable local PostgreSQL database, disable only the documented local
    version gate, and expose deterministic start/stop/health commands.
-4. **O4 — Single-client state machine:** prove DNS, payload/bootstrap, TLS or
+4. **O4 — Single-client state machine — local pass:** prove DNS, payload/bootstrap, TLS or
    documented plaintext transition, profile/authentication, server login, and
    clean logout from one macOS client.
-5. **O5 — Local race:** run two isolated macOS clients through matchmaking,
+5. **O5 — Local race — superseded by cross-Apple pass:** run two isolated macOS clients through matchmaking,
    room formation, voting, race start, live race state, results, and cleanup.
-6. **O6 — Simulator client:** repeat the single-client flow on one iPad
+6. **O6 — Simulator client — local pass:** repeat the single-client flow on one iPad
    Simulator, including termination, relaunch, and network failure handling.
-7. **O7 — Apple-to-Apple race:** complete the local race/results flow between
+7. **O7 — Apple-to-Apple race — local pass:** complete the local race/results flow between
    macOS and the Simulator with separate client identities and storage roots.
 8. **O8 — Resilience:** run local latency, jitter, loss, disconnect, server
    outage, reconnect, and resource-leak fixtures; never stress a public server.
-9. **O9 — Claim gate:** only after the exact candidate passes the documented
+9. **O9 — Claim gate — local claim only:** only after the exact candidate passes the documented
    local matrix and any normal authorized external-service prerequisites may
    KartPad say online multiplayer is supported. Physical-device acceptance
    remains separate and is excluded from the present machine-only loop.
@@ -49,11 +80,13 @@ client, compare encoded state/timing/error mapping/cleanup, record sanitized
 evidence, and continue. Two identical failures require a changed hypothesis or
 instrumentation before a third attempt.
 
-## Baseline on 31 August 2026
+## Baseline on 1 September 2026
 
-- Stable Apple runtime/menu work is on `main` at `7bb1ab4`.
 - Base translation: 29,065 shared base functions.
-- Retro Rewind translation: zero functions; target disabled.
-- Native socket/DNS loopback smoke: passed previously.
-- Apple SSL/TLS backend: incomplete.
-- Local WFC server and Retro-WFC payload: pinned but not yet built locally.
+- The private online graph and isolated WFC payload build and run locally.
+- BSD socket, DNS, local HTTP routing, UDP peer negotiation, race traffic, and
+  cleanup pass on macOS and iPad Simulator.
+- Local login, matchmaking, room, voting, race, results, ratings, and lobby
+  return pass end to end.
+- External service, impairment, reconnect, physical-device online, and
+  cross-client interoperability rows remain open.

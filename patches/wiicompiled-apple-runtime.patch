@@ -2291,3 +2291,456 @@ diff -ruN --exclude=.git --exclude=third_party --exclude=build a/src/settings_ov
 -    ImGui::TextUnformatted("WiiCompiled");
 +    ImGui::TextUnformatted("KartPad");
      ImGui::Separator();
+--- a/src/hle/input/kpad.cpp	2026-09-01 09:01:53
++++ b/src/hle/input/kpad.cpp	2026-09-01 09:01:53
+@@ -19,6 +19,8 @@
+ #include <string>
+ #include <vector>
+ 
++extern "C" int g_gxFrameCount;
++
+ namespace {
+ 
+ // Exact sizes and offsets from Mario Kart's own byte-matching Revolution SDK
+@@ -26,7 +28,7 @@
+ constexpr uint32_t kKpadStatusSize = 0x84;
+ constexpr uint32_t kKpadUnifiedStatusSize = 0x38;
+ constexpr uint64_t kSyntheticHoldNs = 500'000'000;
+-constexpr uint64_t kSyntheticMenuHoldNs = 80'000'000;
++constexpr uint64_t kSyntheticMenuHoldNs = 20'000'000;
+ constexpr uint64_t kSyntheticStickHoldNs = 250'000'000;
+ constexpr uint8_t kWpadExtensionClassic = 0x02;
+ constexpr uint8_t kWpadFormatClassic = 0x06;
+@@ -62,8 +64,27 @@
+ std::array<std::atomic<uint32_t>, 4> g_pendingClassicPresses{};
+ std::array<std::atomic<bool>, 4> g_keyboardConnected{};
+ std::atomic<bool> g_fixtureArmRequested{false};
++std::atomic<bool> g_preciseMenuPulseRequested{false};
+ std::array<std::atomic<uint64_t>, SDL_SCANCODE_COUNT> g_syntheticExpiryNs{};
+ 
++bool PreciseMenuPulseEnabled()
++{
++    static const bool enabled = [] {
++        const char* value = std::getenv("KARTPAD_PRECISE_MENU_PULSE_V2");
++        return value != nullptr && std::strcmp(value, "1") == 0;
++    }();
++    return enabled || g_preciseMenuPulseRequested.load(std::memory_order_acquire);
++}
++
++bool FullSyntheticStickEnabled()
++{
++    static const bool enabled = [] {
++        const char* value = std::getenv("KARTPAD_FULL_SYNTHETIC_STICK_V2");
++        return value != nullptr && std::strcmp(value, "1") == 0;
++    }();
++    return enabled;
++}
++
+ struct GhostSample {
+     uint8_t face = 0;
+     uint8_t direction = 0x77;
+@@ -72,6 +93,17 @@
+ 
+ class RkgInputFixture {
+ public:
++    bool EnsureLoaded()
++    {
++        Load();
++        return m_ready;
++    }
++
++    uint8_t VehicleId() const { return m_vehicleId; }
++    uint8_t CharacterId() const { return m_characterId; }
++    uint8_t CourseId() const { return m_courseId; }
++    bool DriftIsAuto() const { return m_driftIsAuto; }
++
+     bool Arm(bool resume = false)
+     {
+         Load();
+@@ -81,6 +113,9 @@
+         m_frame = resume ? std::min(m_resumeFrame, m_face.size()) : 0;
+         m_current = {};
+         m_started = false;
++        m_postStreamFrames = 0;
++        m_finishDispatched = false;
++        m_lastPresentationFrame = -1;
+         m_active = true;
+         std::fprintf(stderr,
+                      "[input-fixture] armed RKG course=%u frames=%zu/%zu/%zu\n",
+@@ -97,16 +132,49 @@
+         m_current.direction =
+             m_frame < m_direction.size() ? m_direction[m_frame] : 0x77;
+         m_current.trick = m_frame < m_trick.size() ? m_trick[m_frame] : 0;
+-        ++m_frame;
+-        if (m_frame == m_face.size()) {
+-            std::fprintf(stderr, "[input-fixture] face stream complete at frame=%zu\n",
+-                         m_frame);
++        if (m_frame < m_face.size()) {
++            ++m_frame;
++            if (m_frame == m_face.size()) {
++                std::fprintf(stderr,
++                             "[input-fixture] face stream complete at frame=%zu\n",
++                             m_frame);
++            }
++        } else {
++            ++m_postStreamFrames;
+         }
+         return m_current;
+     }
+ 
++    GhostSample NextOncePerPresentationFrame()
++    {
++        if (m_lastPresentationFrame == g_gxFrameCount) {
++            return m_current;
++        }
++        m_lastPresentationFrame = g_gxFrameCount;
++        return Next();
++    }
++
+     const GhostSample& Current() const { return m_current; }
+     bool Active() const { return m_active; }
++    bool ConsumeFinishRequest()
++    {
++        if (m_finishDispatched) return false;
++        const char* forceFinish = std::getenv("KARTPAD_RKG_FORCE_FINISH_V2");
++        if (forceFinish == nullptr || std::strcmp(forceFinish, "1") != 0) {
++            return false;
++        }
++        const char* finishFrameValue =
++            std::getenv("KARTPAD_RKG_FORCE_FINISH_FRAME_V2");
++        const size_t finishFrame = finishFrameValue == nullptr ? 0 :
++            static_cast<size_t>(std::strtoull(finishFrameValue, nullptr, 10));
++        if (finishFrame != 0 ? m_frame < finishFrame : m_postStreamFrames < 300) {
++            return false;
++        }
++        m_finishDispatched = true;
++        return true;
++    }
++    size_t Frame() const { return m_frame; }
++    size_t PostStreamFrames() const { return m_postStreamFrames; }
+     bool AutoArmAtCountdown(uint32_t stage)
+     {
+         const char* autoStart = std::getenv("KARTPAD_RKG_AUTOSTART_V2");
+@@ -243,7 +311,12 @@
+                 throw std::runtime_error("invalid RKG header");
+             }
+             const uint32_t race = ReadBe32(file, 4);
++            const uint32_t identity = ReadBe32(file, 8);
++            const uint16_t flags = ReadBe16(file, 0x0c);
+             m_courseId = static_cast<uint8_t>((race >> 2) & 0x3f);
++            m_vehicleId = static_cast<uint8_t>(identity >> 26);
++            m_characterId = static_cast<uint8_t>((identity >> 20) & 0x3f);
++            m_driftIsAuto = (flags & 0x0002) != 0;
+             const size_t inputSize = ReadBe16(file, 0x0e);
+             std::vector<uint8_t> inputs;
+             if (file[0x8c] == 'Y' && file[0x8d] == 'a' && file[0x8e] == 'z') {
+@@ -275,8 +348,10 @@
+             ExpandTrickStream(inputs, trickOffset, trickCount, m_trick);
+             m_ready = true;
+             std::fprintf(stderr,
+-                         "[input-fixture] loaded configured RKG course=%u sequences=%zu/%zu/%zu\n",
+-                         m_courseId, faceCount, directionCount, trickCount);
++                         "[input-fixture] loaded configured RKG course=%u vehicle=%u character=%u drift=%s sequences=%zu/%zu/%zu\n",
++                         m_courseId, m_vehicleId, m_characterId,
++                         m_driftIsAuto ? "automatic" : "manual",
++                         faceCount, directionCount, trickCount);
+         } catch (const std::exception& error) {
+             std::fprintf(stderr, "[input-fixture] rejected configured RKG: %s\n",
+                          error.what());
+@@ -288,8 +363,14 @@
+     bool m_active = false;
+     bool m_started = false;
+     uint8_t m_courseId = 0;
++    uint8_t m_vehicleId = 0;
++    uint8_t m_characterId = 0;
++    bool m_driftIsAuto = false;
+     size_t m_frame = 0;
+     size_t m_resumeFrame = 0;
++    size_t m_postStreamFrames = 0;
++    bool m_finishDispatched = false;
++    int m_lastPresentationFrame = -1;
+     GhostSample m_current{};
+     std::vector<uint8_t> m_face;
+     std::vector<uint8_t> m_direction;
+@@ -302,6 +383,15 @@
+     return fixture;
+ }
+ 
++bool ForceFixtureMetadataEnabled()
++{
++    static const bool enabled = [] {
++        const char* value = std::getenv("KARTPAD_RKG_FORCE_METADATA_V2");
++        return value != nullptr && std::strcmp(value, "1") == 0;
++    }();
++    return enabled && Fixture().EnsureLoaded();
++}
++
+ uint32_t ButtonForScancode(uint32_t chan, SDL_Scancode code)
+ {
+     if (chan == 1) {
+@@ -401,6 +491,13 @@
+ bool SDLCALL WatchKeyboardEvent(void*, SDL_Event* event)
+ {
+     if (event->type == SDL_EVENT_KEY_DOWN && !event->key.repeat) {
++        if (event->key.scancode == SDL_SCANCODE_F6) {
++            const bool enabled = !g_preciseMenuPulseRequested.load(std::memory_order_acquire);
++            g_preciseMenuPulseRequested.store(enabled, std::memory_order_release);
++            std::fprintf(stderr, "[input] precise menu pulse %s\n",
++                         enabled ? "enabled" : "disabled");
++            return true;
++        }
+         if (event->key.scancode == SDL_SCANCODE_E) {
+             g_fixtureArmRequested.store(true, std::memory_order_release);
+         }
+@@ -454,10 +551,11 @@
+                 event->key.scancode == SDL_SCANCODE_V ||
+                 event->key.scancode == SDL_SCANCODE_B ||
+                 event->key.scancode == SDL_SCANCODE_N;
+-            g_syntheticExpiryNs[scancode].store(
+-                SDL_GetTicksNS() + (menuKey ? kSyntheticMenuHoldNs :
+-                    stickKey ? kSyntheticStickHoldNs : kSyntheticHoldNs),
+-                std::memory_order_release);
++            const uint64_t holdNs = menuKey && PreciseMenuPulseEnabled() ? 0 :
++                menuKey ? kSyntheticMenuHoldNs :
++                stickKey ? kSyntheticStickHoldNs : kSyntheticHoldNs;
++            g_syntheticExpiryNs[scancode].store(SDL_GetTicksNS() + holdNs,
++                                                std::memory_order_release);
+         }
+     }
+     return true;
+@@ -484,7 +582,7 @@
+     const auto scancode = static_cast<size_t>(code);
+     const bool syntheticallyDown = scancode < g_syntheticExpiryNs.size() &&
+         g_syntheticExpiryNs[scancode].load(std::memory_order_acquire) > SDL_GetTicksNS();
+-    return syntheticallyDown ? 0.35f : 0.0f;
++    return syntheticallyDown ? (FullSyntheticStickEnabled() ? 1.0f : 0.35f) : 0.0f;
+ }
+ 
+ uint32_t ReadKeyboardButtons(uint32_t chan)
+@@ -535,8 +633,10 @@
+ {
+     uint32_t buttons = 0;
+     if ((sample.face & 0x01) != 0) buttons |= kClassicButtonA;
+-    if ((sample.face & 0x02) != 0) buttons |= kClassicButtonR;
++    if ((sample.face & 0x02) != 0) buttons |= kClassicButtonB;
+     if ((sample.face & 0x04) != 0) buttons |= kClassicButtonL;
++    if ((sample.face & 0x08) != 0) buttons |= kClassicButtonR;
++    if ((sample.face & 0x20) != 0) buttons |= kClassicButtonX;
+     switch (sample.trick) {
+     case 1: buttons |= kClassicButtonUp; break;
+     case 2: buttons |= kClassicButtonDown; break;
+@@ -577,7 +677,74 @@
+ }
+ 
+ } // namespace
++
++extern "C" void KPad_RkgFixture_ForceRaceMetadata(uint32_t racedata)
++{
++    if (racedata == 0 || !ForceFixtureMetadataEnabled()) return;
++    try {
++        // Course choice is not exposed by the online character/vehicle
++        // callbacks. Keep the three Racedata scenarios aligned, but never
++        // rewrite online player records after the network has constructed
++        // their resources.
++        for (const uint32_t courseOffset : {2920u, 5976u, 9032u}) {
++            Memory::Write32(racedata + courseOffset, Fixture().CourseId());
++        }
++        static bool logged = false;
++        if (!logged) {
++            std::fprintf(stderr,
++                         "[input-fixture] forced race metadata course=%u vehicle=%u character=%u drift=%s\n",
++                         Fixture().CourseId(), Fixture().VehicleId(),
++                         Fixture().CharacterId(),
++                         Fixture().DriftIsAuto() ? "automatic" : "manual");
++            logged = true;
++        }
++    } catch (const Memory::AccessViolation&) {
++        std::fprintf(stderr, "[input-fixture] unable to force race metadata\n");
++    }
++}
+ 
++extern "C" uint32_t KPad_RkgFixture_ForceCharacterId(uint32_t requested)
++{
++    if (!ForceFixtureMetadataEnabled()) return requested;
++    static bool logged = false;
++    if (!logged) {
++        std::fprintf(stderr, "[input-fixture] selection forced character=%u\n",
++                     Fixture().CharacterId());
++        logged = true;
++    }
++    return Fixture().CharacterId();
++}
++
++extern "C" uint32_t KPad_RkgFixture_ForceVehicleId(uint32_t requested)
++{
++    if (!ForceFixtureMetadataEnabled()) return requested;
++    static bool logged = false;
++    if (!logged) {
++        std::fprintf(stderr, "[input-fixture] selection forced vehicle=%u\n",
++                     Fixture().VehicleId());
++        logged = true;
++    }
++    return Fixture().VehicleId();
++}
++
++extern "C" uint32_t KPad_RkgFixture_ForceCourseId(uint32_t requested)
++{
++    if (!ForceFixtureMetadataEnabled()) return requested;
++    static bool logged = false;
++    if (!logged) {
++        std::fprintf(stderr, "[input-fixture] vote forced course=%u\n",
++                     Fixture().CourseId());
++        logged = true;
++    }
++    return Fixture().CourseId();
++}
++
++extern "C" uint32_t KPad_RkgFixture_ForceDriftButtonId(uint32_t requested)
++{
++    if (!ForceFixtureMetadataEnabled()) return requested;
++    return Fixture().DriftIsAuto() ? 1u : 2u;
++}
++
+ extern "C" bool KPAD_IsKeyboardChannelConnected(uint32_t chan)
+ {
+     return chan < g_keyboardConnected.size() &&
+@@ -596,6 +763,14 @@
+     }
+     EnsureKeyboardWatch();
+ 
++    if (chan == 0 && ForceFixtureMetadataEnabled()) {
++        try {
++            KPad_RkgFixture_ForceRaceMetadata(Memory::Read32(0x809bd70c));
++        } catch (const Memory::AccessViolation&) {
++            // Racedata is not constructed during the earliest boot reads.
++        }
++    }
++
+     const bool connected = chan == 0 || g_keyboardConnected[chan].load(std::memory_order_acquire);
+     if (!connected) return 0;
+     const uint32_t pending = g_pendingPresses[chan].exchange(0, std::memory_order_acq_rel);
+@@ -657,19 +832,24 @@
+         return 0;
+     }
+     EnsureKeyboardWatch();
++    const uint32_t pending = g_pendingPresses[chan].exchange(0, std::memory_order_acq_rel);
++    const uint32_t pendingClassic =
++        g_pendingClassicPresses[chan].exchange(0, std::memory_order_acq_rel);
++    const bool fixtureActive = Fixture().Active();
+     try {
+         auto* status = Memory::GetPointer(statusPtr, kKpadUnifiedStatusSize);
+         std::memset(status, 0, kKpadUnifiedStatusSize);
+         Memory::Write16(statusPtr + 0x00,
+-                        static_cast<uint16_t>(Fixture().Active() ? 0 :
+-                                              ReadKeyboardButtons(chan)));
++                        static_cast<uint16_t>(fixtureActive ? 0 :
++                                              (ReadKeyboardButtons(chan) | pending)));
+         Memory::Write8(statusPtr + 0x28, kWpadExtensionClassic);
+         const auto& ghost = Fixture().Current();
+-        const uint32_t classicButtons = Fixture().Active() ?
+-            ClassicButtonsForGhost(ghost) : ReadClassicButtons(chan);
++        const uint32_t classicButtons = fixtureActive ?
++            ClassicButtonsForGhost(ghost) :
++            (ReadClassicButtons(chan) | pendingClassic);
+         Memory::Write16(statusPtr + 0x2A,
+                         static_cast<uint16_t>(classicButtons));
+-        const auto stick = Fixture().Active() ? ClassicStickForGhost(ghost) :
++        const auto stick = fixtureActive ? ClassicStickForGhost(ghost) :
+                                                 ReadClassicLeftStick(chan);
+         const auto stickX = static_cast<int16_t>(stick[0] * 511.0f);
+         const auto stickY = static_cast<int16_t>(stick[1] * 511.0f);
+@@ -704,9 +884,26 @@
+ 
+     const uint32_t controller = ctx->gpr[3];
+     try {
+-        if (controller == 0 || Memory::Read32(controller + 0x8d4) != 0) {
++        if (controller == 0) {
+             return false;
+         }
++        if (ForceFixtureMetadataEnabled()) {
++            Memory::Write8(controller + 0x51,
++                           Fixture().DriftIsAuto() ? 1 : 0);
++        }
++        // The fixture replaces calcInner for the whole race tick. Mirror the
++        // successful Classic Controller bookkeeping that the retail function
++        // would normally refresh after WPADProbe/KPADRead. In particular,
++        // +0x50 is the live-controller flag; letting it go stale eventually
++        // opens the retail "controller interrupted" modal.
++        Memory::Write8(controller + 0x50, 1);
++        Memory::Write32(controller + 0x8d0, 1);
++        Memory::Write32(controller + 0x8d8, 2);
++        Memory::Write32(controller + 0x8dc, 2);
++        Memory::Write16(controller + 0x8f8, 0);
++        Memory::Write16(controller + 0x8fc, 0);
++        Memory::Write16(controller + 0x8fe, 0);
++        Memory::Write32(controller + 0x900, 2);
+     } catch (const Memory::AccessViolation&) {
+         Fixture().Disarm();
+         return false;
+@@ -720,8 +917,12 @@
+ 
+     GhostSample sample;
+     try {
+-        sample = Fixture().BeginIfRaceActive(stage) ? Fixture().Next() :
+-                                                     Fixture().Current();
++        const char* singleStep = std::getenv("KARTPAD_RKG_SINGLE_STEP_V2");
++        const bool oncePerPresentation = singleStep != nullptr &&
++                                         std::strcmp(singleStep, "1") == 0;
++        sample = Fixture().BeginIfRaceActive(stage) ?
++            (oncePerPresentation ? Fixture().NextOncePerPresentationFrame() :
++                                   Fixture().Next()) : Fixture().Current();
+     } catch (const Memory::AccessViolation&) {
+         Fixture().Disarm();
+         return false;
+@@ -760,6 +961,51 @@
+         Memory::Write8(raceState + 0x13, sample.trick);
+         Memory::Write8(raceState + 0x14,
+                        static_cast<uint8_t>(Memory::Read8(raceState + 0x14) | 0x80));
++
++        // A time-trial RKG cannot physically finish an online VS race because
++        // the multiplayer starting grid uses a different pose. The opt-in
++        // endurance harness normally lets both real peers exchange the full
++        // 5001-frame trace plus five seconds of packets, then asks the retail
++        // RaceinfoPlayer path to finish the local racer. A separate explicit
++        // frame threshold supports shorter protocol acceptance runs before an
++        // open-loop trace diverges from the VS starting grid. This exercises the
++        // native results and return-to-lobby protocol without shipping any
++        // gameplay behavior: the hook is unreachable unless the explicit
++        // KARTPAD_RKG_FORCE_FINISH_V2 test environment variable is set.
++        if (stage == 2) {
++            const uint32_t raceinfo = Memory::Read32(0x809bd730);
++            const uint32_t racedata = Memory::Read32(0x809bd728);
++            const uint32_t players = raceinfo == 0 ? 0 : Memory::Read32(raceinfo + 0x0c);
++            const uint32_t playerCount = racedata == 0 ? 0 : Memory::Read8(racedata + 0x24);
++            uint32_t localPlayer = 0;
++            uint32_t localPlayerId = 0xffffffffu;
++            if (players != 0 && playerCount > 0 && playerCount <= 12) {
++                for (uint32_t id = 0; id < playerCount; ++id) {
++                    const uint32_t player = Memory::Read32(players + id * 4);
++                    const uint32_t holder = player == 0 ? 0 : Memory::Read32(player + 0x48);
++                    const uint32_t activeController = holder == 0 ? 0 : Memory::Read32(holder + 0x04);
++                    if (activeController == controller) {
++                        localPlayer = player;
++                        localPlayerId = id;
++                        break;
++                    }
++                }
++            }
++            if (localPlayer != 0 &&
++                (Memory::Read32(localPlayer + 0x38) & 0x02u) == 0 &&
++                Fixture().ConsumeFinishRequest()) {
++                const CpuContext saved = *ctx;
++                ctx->gpr[3] = localPlayer;
++                ctx->gpr[4] = 2;  // normal online race completion status
++                ctx->gpr[5] = 1;  // use the normal no-cameras online path
++                InvokeDirectCpu<0x805342E8u>(ctx);
++                *ctx = saved;
++                std::fprintf(stderr,
++                             "[input-fixture] forced native finish player=%u frame=%zu post-stream=%zu\n",
++                             localPlayerId, Fixture().Frame(),
++                             Fixture().PostStreamFrames());
++            }
++        }
+     } catch (const Memory::AccessViolation&) {
+         Fixture().Disarm();
+     }

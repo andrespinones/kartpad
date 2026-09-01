@@ -1,16 +1,16 @@
 # KartPad status
 
-Updated: 2026-08-30
+Updated: 2026-09-01
 
 ## Current goal
 
-**Ready for sequential physical iPad and iPhone acceptance.** The complete
-mobile runtime, direct native WBFS first launch, exact SunPad touch/menu source,
-native controller-slot integration, app icon, package boundary, and unsigned
-physical-SDK build are closed before hardware. At the user's direction the goal
-loop stops here: sign/install locally, accept iPad first, close it, then accept
-iPhone. Physical performance, thermals, audio/motion feel, and controller
-takeover/restoration remain explicitly unclaimed until that pass.
+**Local Apple-to-Apple online flow passes.** Native macOS and the exact iPad
+Simulator completed login, matchmaking, room formation, Luigi Circuit race
+traffic, the retail online finish/results path, rating updates, and return to
+the shared lobby. The accepted run exchanged more than 3,500 UDP packets in
+each direction per client and consumed the complete 5,001-frame fixture. The
+test-only finish trigger is documented in `docs/ONLINE.md`; public-service,
+physical-device online, impairment, and external-client rows remain open.
 
 ## Goal ledger
 

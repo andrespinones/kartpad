@@ -93,6 +93,7 @@ a public release. Never publish a generated translation directory, app bundle,
 personal IPA, extracted game tree, save, signing certificate, or provisioning
 profile.
 
-Online multiplayer is almost complete but still pending end-to-end testing.
-That work is independent of Builder compatibility and is not claimed as
-working in this preview.
+The private development product passes a local Mac-to-iPad-Simulator online
+race/results flow. Public-service, physical-device online, and external-client
+acceptance remain separate from Builder compatibility and are not claimed for
+this preview.

@@ -18,6 +18,10 @@ shards="${output}/build_shards"
   --output-metadata "${metadata}"
 "${repo_root}/scripts/inject-g10-rkg-fixture-hook.py" \
   "${functions}/func_8051FC84.cpp"
+for selection_function in 8083DFA8 80846C1C 8084E388 80643F48; do
+  "${repo_root}/scripts/inject-online-rkg-selection-hooks.py" \
+    "${functions}/func_${selection_function}.cpp"
+done
 "${repo_root}/scripts/inject-g10-camera-lifecycle-guard.py" \
   "${functions}/func_805A1A8C.cpp"
 "${dotnet_bin}" "${translator_dll}" generate-data-init --project "${manifest}"

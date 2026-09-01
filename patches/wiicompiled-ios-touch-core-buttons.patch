@@ -1,11 +1,24 @@
-diff --git a/src/hle/input/kpad.cpp b/src/hle/input/kpad.cpp
-index 4d6f893..152461f 100644
---- a/src/hle/input/kpad.cpp
-+++ b/src/hle/input/kpad.cpp
-@@ -403,6 +403,20 @@ uint32_t ClassicButtonForScancode(uint32_t chan, SDL_Scancode code)
+diff -ruN a/src/hle/input/kpad.cpp b/src/hle/input/kpad.cpp
+--- a/src/hle/input/kpad.cpp	2026-09-01 08:57:09
++++ b/src/hle/input/kpad.cpp	2026-09-01 08:57:09
+@@ -6,6 +6,13 @@
+ #include <SDL3/SDL_scancode.h>
+ #include <SDL3/SDL_timer.h>
+ 
++#if defined(__APPLE__)
++#include <TargetConditionals.h>
++#endif
++#if defined(__APPLE__) && TARGET_OS_IOS
++#include "kartpad_mobile_runtime_host.h"
++#endif
++
+ #include <array>
+ #include <algorithm>
+ #include <atomic>
+@@ -488,6 +495,20 @@
      }
  }
-
+ 
 +uint32_t CoreButtonsForClassic(uint32_t classic)
 +{
 +    uint32_t core = 0;
@@ -23,45 +36,119 @@ index 4d6f893..152461f 100644
  bool SDLCALL WatchKeyboardEvent(void*, SDL_Event* event)
  {
      if (event->type == SDL_EVENT_KEY_DOWN && !event->key.repeat) {
-@@ -617,7 +631,7 @@ extern "C" int32_t KPAD__Read_HLE(uint32_t chan, uint32_t statusPtr, uint32_t co
+@@ -763,15 +784,16 @@
+     }
+     EnsureKeyboardWatch();
+ 
+-    if (chan == 0 && ForceFixtureMetadataEnabled()) {
+-        try {
+-            KPad_RkgFixture_ForceRaceMetadata(Memory::Read32(0x809bd70c));
+-        } catch (const Memory::AccessViolation&) {
+-            // Racedata is not constructed during the earliest boot reads.
+-        }
+-    }
+-
+-    const bool connected = chan == 0 || g_keyboardConnected[chan].load(std::memory_order_acquire);
++#if defined(__APPLE__) && TARGET_OS_IOS
++    KartPadMobileClassicInputSnapshot mobileInput{};
++    const bool mobileConnected =
++        KartPadMobileReadClassicInputForPlayer(chan, &mobileInput) &&
++        mobileInput.connected;
++#else
++    const bool mobileConnected = false;
++#endif
++    const bool connected = chan == 0 || mobileConnected ||
++        g_keyboardConnected[chan].load(std::memory_order_acquire);
+     if (!connected) return 0;
+     const uint32_t pending = g_pendingPresses[chan].exchange(0, std::memory_order_acq_rel);
+     const uint32_t pendingClassic = g_pendingClassicPresses[chan].exchange(0, std::memory_order_acq_rel);
+@@ -787,12 +809,19 @@
      // tick. KPAD sampling must only expose its current state; consuming here
      // ties ghost cadence to host presentation and drifts when the two differ.
      const GhostSample ghost = fixtureActive ? Fixture().Current() : GhostSample{};
 -    const uint32_t hold = !fixtureActive ?
 +    uint32_t hold = !fixtureActive ?
          (ReadKeyboardButtons(chan) | pending) : 0;
-     uint32_t classicHold = fixtureActive ? ClassicButtonsForGhost(ghost) :
+-    const uint32_t classicHold = fixtureActive ? ClassicButtonsForGhost(ghost) :
++    uint32_t classicHold = fixtureActive ? ClassicButtonsForGhost(ghost) :
          (ReadClassicButtons(chan) | pendingClassic);
-@@ -628,6 +642,7 @@ extern "C" int32_t KPAD__Read_HLE(uint32_t chan, uint32_t statusPtr, uint32_t co
-     if (!fixtureActive && chan == 0 &&
-         KartPadMobileReadClassicInput(&mobileInput) && mobileInput.connected) {
-         classicHold |= mobileInput.buttons;
+-    const auto stick = fixtureActive ? ClassicStickForGhost(ghost) :
+-                                       ReadClassicLeftStick(chan);
++    auto stick = fixtureActive ? ClassicStickForGhost(ghost) :
++                                 ReadClassicLeftStick(chan);
++#if defined(__APPLE__) && TARGET_OS_IOS
++    if (!fixtureActive && mobileConnected) {
++        classicHold |= mobileInput.buttons;
 +        hold |= CoreButtonsForClassic(mobileInput.buttons);
-         stick = {mobileInput.leftStickX, mobileInput.leftStickY};
++        stick = {mobileInput.leftStickX, mobileInput.leftStickY};
++    }
++#endif
+     const uint32_t previous = g_previousButtons[chan];
+     const uint32_t previousClassic = g_previousClassicButtons[chan];
+     const uint32_t trigger = (fixtureActive ? 0 : pending) | (hold & ~previous);
+@@ -827,11 +856,30 @@
+         std::fprintf(stderr, "[input] KPADGetUnifiedWpadStatus active: chan=%u count=%u\n", chan, count);
+         logged = true;
      }
- #endif
-@@ -673,9 +688,8 @@ extern "C" int32_t KPAD__GetUnifiedWpadStatus_HLE(uint32_t chan, uint32_t status
+-    if (chan >= g_previousButtons.size() || statusPtr == 0 || count == 0 ||
+-        (chan != 0 && !g_keyboardConnected[chan].load(std::memory_order_acquire))) {
++    if (chan >= g_previousButtons.size() || statusPtr == 0 || count == 0) {
+         return 0;
+     }
+     EnsureKeyboardWatch();
++
++    if (chan == 0 && ForceFixtureMetadataEnabled()) {
++        try {
++            KPad_RkgFixture_ForceRaceMetadata(Memory::Read32(0x809bd70c));
++        } catch (const Memory::AccessViolation&) {
++            // Racedata is not constructed during the earliest boot reads.
++        }
++    }
++#if defined(__APPLE__) && TARGET_OS_IOS
++    KartPadMobileClassicInputSnapshot mobileInput{};
++    const bool mobileConnected =
++        KartPadMobileReadClassicInputForPlayer(chan, &mobileInput) &&
++        mobileInput.connected;
++#else
++    const bool mobileConnected = false;
++#endif
++    if (chan != 0 && !mobileConnected &&
++        !g_keyboardConnected[chan].load(std::memory_order_acquire)) {
++        return 0;
++    }
+     const uint32_t pending = g_pendingPresses[chan].exchange(0, std::memory_order_acq_rel);
+     const uint32_t pendingClassic =
+         g_pendingClassicPresses[chan].exchange(0, std::memory_order_acq_rel);
+@@ -839,18 +887,26 @@
      try {
          auto* status = Memory::GetPointer(statusPtr, kKpadUnifiedStatusSize);
          std::memset(status, 0, kKpadUnifiedStatusSize);
 -        Memory::Write16(statusPtr + 0x00,
--                        static_cast<uint16_t>(Fixture().Active() ? 0 :
--                                              ReadKeyboardButtons(chan)));
-+        uint32_t coreButtons = Fixture().Active() ? 0 :
-+                                                   ReadKeyboardButtons(chan);
+-                        static_cast<uint16_t>(fixtureActive ? 0 :
+-                                              (ReadKeyboardButtons(chan) | pending)));
++        uint32_t coreButtons = fixtureActive ? 0 :
++            (ReadKeyboardButtons(chan) | pending);
          Memory::Write8(statusPtr + 0x28, kWpadExtensionClassic);
          const auto& ghost = Fixture().Current();
-         uint32_t classicButtons = Fixture().Active() ?
-@@ -687,9 +701,12 @@ extern "C" int32_t KPAD__GetUnifiedWpadStatus_HLE(uint32_t chan, uint32_t status
-         if (!Fixture().Active() && chan == 0 &&
-             KartPadMobileReadClassicInput(&mobileInput) && mobileInput.connected) {
-             classicButtons |= mobileInput.buttons;
+-        const uint32_t classicButtons = fixtureActive ?
++        uint32_t classicButtons = fixtureActive ?
+             ClassicButtonsForGhost(ghost) :
+             (ReadClassicButtons(chan) | pendingClassic);
++        auto stick = fixtureActive ? ClassicStickForGhost(ghost) :
++                                          ReadClassicLeftStick(chan);
++#if defined(__APPLE__) && TARGET_OS_IOS
++        if (!fixtureActive && mobileConnected) {
++            classicButtons |= mobileInput.buttons;
 +            coreButtons |= CoreButtonsForClassic(mobileInput.buttons);
-             stick = {mobileInput.leftStickX, mobileInput.leftStickY};
-         }
- #endif
++            stick = {mobileInput.leftStickX, mobileInput.leftStickY};
++        }
++#endif
 +        Memory::Write16(statusPtr + 0x00,
 +                        static_cast<uint16_t>(coreButtons));
          Memory::Write16(statusPtr + 0x2A,
                          static_cast<uint16_t>(classicButtons));
+-        const auto stick = fixtureActive ? ClassicStickForGhost(ghost) :
+-                                                ReadClassicLeftStick(chan);
          const auto stickX = static_cast<int16_t>(stick[0] * 511.0f);
+         const auto stickY = static_cast<int16_t>(stick[1] * 511.0f);
+         Memory::Write16(statusPtr + 0x2C, static_cast<uint16_t>(stickX));
