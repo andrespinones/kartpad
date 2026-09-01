@@ -44,6 +44,25 @@ if [[ ! -f "${discio_source}/Source/Core/DiscIO/DiscExtractor.h" ||
   exit 66
 fi
 
+generated_link="$(dirname "${runtime_source}")/generated"
+if [[ -e "${generated_link}" && ! -L "${generated_link}" ]]; then
+  echo "ERROR: generated path exists and is not a symlink: ${generated_link}" >&2
+  exit 73
+fi
+previous_generated_target=""
+if [[ -L "${generated_link}" ]]; then
+  previous_generated_target="$(readlink "${generated_link}")"
+fi
+restore_generated_link() {
+  if [[ -n "${previous_generated_target}" ]]; then
+    ln -sfn "${previous_generated_target}" "${generated_link}"
+  elif [[ -L "${generated_link}" ]]; then
+    rm "${generated_link}"
+  fi
+}
+trap restore_generated_link EXIT
+ln -sfn "${translation_root}" "${generated_link}"
+
 "${repo_root}/scripts/verify-sunpad-overlay-snapshot.sh"
 plutil -lint "${repo_root}/apple/ios/RuntimeInfo.plist" \
   "${repo_root}/apple/ios/PrivacyInfo.xcprivacy" >/dev/null
