@@ -105,6 +105,12 @@ class ProfileTests(unittest.TestCase):
             source,
         )
 
+    def test_dual_mode_chooser_keeps_a_width_on_wide_ipads(self) -> None:
+        source = (REPO / "apple/ios/KartPadRuntimeOverlayHost.mm").read_text()
+        self.assertIn("self.contentWidthConstraint.constant", source)
+        self.assertIn("CGRectGetWidth(self.view.bounds)", source)
+        self.assertNotIn("multiplier:0.72", source)
+
 
 class RetroRewindTests(unittest.TestCase):
     def make_archive(self, root: Path, unsafe: bool = False) -> tuple[Path, dict]:

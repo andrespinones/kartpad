@@ -496,6 +496,7 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
 @interface KartPadFirstLaunchViewController : UIViewController
 @property(nonatomic, copy) void (^modeSelected)(BOOL retroRewind);
 @property(nonatomic, strong) CAGradientLayer *backgroundGradient;
+@property(nonatomic, strong) NSLayoutConstraint *contentWidthConstraint;
 @end
 
 @implementation KartPadFirstLaunchViewController
@@ -602,26 +603,24 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
   stack.spacing = 12.0;
   [stack setCustomSpacing:24.0 afterView:message];
   [self.view addSubview:stack];
-  NSLayoutConstraint *preferredWidth = [stack.widthAnchor
-      constraintEqualToAnchor:self.view.safeAreaLayoutGuide.widthAnchor
-                     multiplier:0.72];
-  preferredWidth.priority = UILayoutPriorityDefaultHigh;
+  self.contentWidthConstraint =
+      [stack.widthAnchor constraintEqualToConstant:320.0];
   [NSLayoutConstraint activateConstraints:@[
     [stack.centerXAnchor constraintEqualToAnchor:self.view.centerXAnchor],
     [stack.centerYAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.centerYAnchor
                                         constant:-18.0],
-    [stack.leadingAnchor constraintGreaterThanOrEqualToAnchor:
-        self.view.safeAreaLayoutGuide.leadingAnchor constant:32.0],
-    [stack.trailingAnchor constraintLessThanOrEqualToAnchor:
-        self.view.safeAreaLayoutGuide.trailingAnchor constant:-32.0],
-    [choices.widthAnchor constraintLessThanOrEqualToConstant:760.0],
-    preferredWidth,
+    self.contentWidthConstraint,
   ]];
 }
 
 - (void)viewDidLayoutSubviews {
   [super viewDidLayoutSubviews];
   self.backgroundGradient.frame = self.view.bounds;
+  const UIEdgeInsets insets = self.view.safeAreaInsets;
+  const CGFloat availableWidth = CGRectGetWidth(self.view.bounds) -
+      insets.left - insets.right - 64.0;
+  self.contentWidthConstraint.constant =
+      MIN(760.0, MAX(320.0, availableWidth));
 }
 
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations {

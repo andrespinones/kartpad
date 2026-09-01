@@ -29,11 +29,14 @@ remains queued behind service recovery.
 Two physical-iPad attempts to download the official 6.12.4 full pack then
 failed identically after transfer: both device crash reports show `Thread stack
 size exceeded` in `KartPadSHA256ForLargeFile`. The verifier had placed a 1 MiB
-streaming buffer on a dispatch worker's smaller stack. Build 4 moves that buffer
-to heap storage and is installed in place for retest. Current source also makes
-download and install percentages separate, checks Retro Rewind's official
-version feed before launch, and fails closed when a newer pack requires a new
-ahead-of-time KartPad build.
+streaming buffer on a dispatch worker's smaller stack. Current source moves that
+buffer to heap storage, makes download and install percentages separate, checks
+Retro Rewind's official version feed before launch, and fails closed when a
+newer pack requires a new ahead-of-time KartPad build. Physical build 7 is now
+installed in place and its full-width dual-mode chooser is visually accepted on
+the iPad. The chooser reports that 6.12.4 is not installed, confirming the two
+failed attempts did not leave a valid pack; a fresh physical download/install
+retest remains open.
 
 ## Goal ledger
 
