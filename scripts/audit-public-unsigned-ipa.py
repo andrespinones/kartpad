@@ -32,6 +32,9 @@ REQUIRED_ENTRIES = {
     "ThirdPartyLicenses/SDL3-Zlib.txt",
     "ThirdPartyLicenses/WiiCompiled-GPL-3.0.txt",
 }
+ALLOWED_EMBEDDED_USER_PATH_PREFIXES = (
+    b"/Users/runner/work/dawn-build/dawn-build/",
+)
 
 
 def fail(message: str) -> None:
@@ -125,8 +128,14 @@ def main() -> int:
             ).returncode == 0:
                 fail("app is unexpectedly signed")
             binary = (app / "KartPad").read_bytes()
-            if re.search(rb"/Users/|/Volumes/|github_pat_|gh[pousr]_|AKIA[0-9A-Z]{16}", binary):
+            if re.search(rb"/Volumes/|github_pat_|gh[pousr]_|AKIA[0-9A-Z]{16}", binary):
                 fail("app executable exposes a private path or likely credential")
+            for match in re.finditer(rb"/Users/", binary):
+                if not any(
+                    binary.startswith(prefix, match.start())
+                    for prefix in ALLOWED_EMBEDDED_USER_PATH_PREFIXES
+                ):
+                    fail("app executable exposes a private user path")
             if hashlib.sha256(binary).hexdigest() != provenance.get("executableSHA256"):
                 fail("executable hash does not match provenance")
 
