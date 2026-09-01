@@ -2,6 +2,19 @@
 
 ## Current state
 
+The current working tree is the Preview 4 release candidate, app 0.3.0 build
+11. It adds experimental cross-platform Mii import/management and experimental
+macOS-only direct Wii Remote/Nunchuk pairing. The format, storage, staging,
+backup, UI, build, package, entitlement, and cancel-path contracts pass; real
+exported Mii rendering and physical Wii hardware remain reporter acceptance
+gates. Continue the release record in `docs/releases/NEXT.md`.
+
+The immediately preceding signed iPad candidate was installed in place and
+preserved the complete 5,745-file, 4.8-GB KartPad Application Support/NAND tree
+byte-for-byte. Hands-on testing accepted Retro Rewind, ordinary controller
+input, the repaired and reorganized three-dot menu, exit/reopen lifecycle,
+Original Mario Kart Wii, and the existing license.
+
 KartPad `v0.3.0-preview.3` is published from
 `452af2dde3d19508a5e6ced6c03deb0e24b8b509`. The hosted unsigned iPhone/iPad
 IPA is app 0.3.0 build 10 and has SHA-256
@@ -24,13 +37,15 @@ not block offline Retro Rewind support.
 
 ## Next executable work
 
-1. Continue representative performance and frame-pacing work without changing
+1. Finish Preview 4 source, device, deterministic-package, hosted-download,
+   and tag/main verification, then request Issue #5 reporter testing.
+2. Continue representative performance and frame-pacing work without changing
    the accepted 0.3.0 release baseline.
-2. Complete the remaining three- and four-player, touch, motion, controller,
+3. Complete the remaining three- and four-player, touch, motion, controller,
    audio, thermal, lifecycle, and long-soak rows in `docs/PRD.md`.
-3. When Retro WFC returns, retest production login, matchmaking, a complete
+4. When Retro WFC returns, retest production login, matchmaking, a complete
    race, results, reconnect, and physical-device online play.
-4. Follow `docs/UPSTREAM_UPDATES.md` whenever WiiCompiled or Retro Rewind
+5. Follow `docs/UPSTREAM_UPDATES.md` whenever WiiCompiled or Retro Rewind
    advances; never accept an unpinned pack or `Code.pul`.
 
 ## Operating constraints

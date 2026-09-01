@@ -21,7 +21,7 @@ index 131c5b9..13a3e2e 100644
      target_compile_features(${target} PRIVATE cxx_std_20)
      mkw_apply_common_compile_options(${target})
      # The dispatch-table and registration shards compile inside the product target itself and
-@@ -268,6 +269,68 @@ if(TARGET mkw_base_sensitive)
+@@ -268,6 +269,71 @@ if(TARGET mkw_base_sensitive)
      target_sources(WiiCompiled PRIVATE $<TARGET_OBJECTS:mkw_base_sensitive>)
  endif()
 
@@ -30,11 +30,13 @@ index 131c5b9..13a3e2e 100644
 +if(CMAKE_SYSTEM_NAME STREQUAL "iOS" AND MKW_KARTPAD_REPO_ROOT)
 +    set(MKW_KARTPAD_IOS_DIR "${MKW_KARTPAD_REPO_ROOT}/apple/ios")
 +    set(MKW_KARTPAD_MOBILE_DIR "${MKW_KARTPAD_REPO_ROOT}/apple/mobile")
++    set(MKW_KARTPAD_SHARED_DIR "${MKW_KARTPAD_REPO_ROOT}/apple/shared")
 +    set(MKW_KARTPAD_SUNPAD_DIR "${MKW_KARTPAD_REPO_ROOT}/apple/third_party/sunpad")
 +    set(MKW_KARTPAD_ICON_CATALOG "${MKW_KARTPAD_IOS_DIR}/Assets.xcassets")
 +    set(MKW_KARTPAD_PRIVACY_MANIFEST "${MKW_KARTPAD_IOS_DIR}/PrivacyInfo.xcprivacy")
 +    set(MKW_KARTPAD_MOBILE_SOURCES
 +        "${MKW_KARTPAD_IOS_DIR}/KartPadRuntimeOverlayHost.mm"
++        "${MKW_KARTPAD_SHARED_DIR}/KartPadMiiManager.mm"
 +        "${MKW_KARTPAD_MOBILE_DIR}/KartPadClassicInput.mm"
 +        "${MKW_KARTPAD_SUNPAD_DIR}/SunPadGameOverlay.mm"
 +        "${MKW_KARTPAD_SUNPAD_DIR}/SunPadInputMixer.mm"
@@ -56,6 +58,7 @@ index 131c5b9..13a3e2e 100644
 +    target_include_directories(WiiCompiled PRIVATE
 +        "${MKW_KARTPAD_IOS_DIR}"
 +        "${MKW_KARTPAD_MOBILE_DIR}"
++        "${MKW_KARTPAD_SHARED_DIR}"
 +        "${MKW_KARTPAD_SUNPAD_DIR}"
 +        "${MKW_KARTPAD_REPO_ROOT}/runtime/include")
 +    set_source_files_properties(${MKW_KARTPAD_MOBILE_SOURCES}

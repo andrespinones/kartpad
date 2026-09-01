@@ -44,6 +44,8 @@ inline void WriteBigEndian32(std::span<uint8_t> bytes, std::size_t offset,
 inline void WriteMiiName(std::span<uint8_t> block, std::size_t offset,
                          std::string_view ascii) {
     constexpr std::size_t kMaximumCharacters = 10;
+    std::fill(block.begin() + offset,
+              block.begin() + offset + kMaximumCharacters * 2, 0);
     for (std::size_t index = 0;
          index < ascii.size() && index < kMaximumCharacters; ++index) {
         block[offset + index * 2] = 0;

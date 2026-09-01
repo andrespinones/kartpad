@@ -7,6 +7,21 @@ hardware-regression procedure for future builds. The public repository and IPA
 contain no disc image, extracted game assets, saves, signing identity, or
 provisioning profile.
 
+## 2026-09-02 Preview 4 candidate
+
+The in-place iPad build-10 run accepted the revised menu and dual-mode
+lifecycle. Retro Rewind launched, a physical controller connected and navigated
+correctly, and the three-dot control retained its ellipsis/circular appearance
+through use. After exiting and reopening KartPad, Original Mario Kart Wii
+launched and the existing license remained selectable. This is physical
+acceptance of that working-tree candidate, not a published-IPA claim. Folder
+auto-detection still requires the external reporter's signed-container retest.
+The later experimental-feature candidate was installed over the same bundle
+without uninstalling; the complete 5,745-file, 4.8-GB Application Support/NAND
+tree matched byte-for-byte before and after, and KartPad launched and remained
+running. Actual `.mii` rendering and Wii Remote/Nunchuk hardware behavior remain
+external acceptance gates.
+
 ## Before testing
 
 - Use the current `main` checkout and your own supported PAL `RMCP01`, revision
@@ -28,9 +43,10 @@ provisioning profile.
 3. **Touch:** steer, accelerate, brake/reverse, drift, use an item, pause, and
    navigate menus. Hold A for one second: it must turn cyan, remain asserted,
    and release immediately on finger-up. Confirm compact R matches L.
-4. **Three-dot menu:** open and close every KartPad row, including
-   Multiplayer, Motion Steering, Game Data & Saves, touch layout editing,
-   diagnostics, display, and controls. No held input may survive a modal.
+4. **Three-dot menu:** open and dismiss the root menu by tapping outside and by
+   choosing an action. Confirm the ellipsis never blanks and no square replaces
+   the circular border. Open Controls, Display, Multiplayer, Game Data & Saves,
+   Show FPS Counter, and Report a Problem. No held input may survive a modal.
 5. **Controller handoff:** while touch controls are visible, connect or wake the
    first controller. It must take Player 1, clear touch state, and hide touch
    controls by default. Drive and navigate with it. Disconnect or sleep it;
@@ -49,6 +65,14 @@ provisioning profile.
    install the matching official pack when needed, launch it, and reach a
    playable single-player match. When Retro WFC is available, test live online
    separately rather than treating the external outage as an install failure.
+10. **Experimental Mii import:** open Game Data & Saves → Manage Miis, import a
+    standard 74-byte `.mii`, restart, and select it through License Settings →
+    Change Mii. Confirm the expected name and appearance; then remove only the
+    imported entry and confirm the existing license remains intact.
+
+Direct Wii Remote/Nunchuk pairing is a separate macOS-only acceptance pass.
+Record the remote revision, macOS version, pairing result, Nunchuk inputs,
+disconnect/reconnect behavior, and bounded **Save Diagnostics Report…** output.
 
 Run iPad and iPhone sequentially. Record the exact device class, OS version,
 commit, executable hash, controller model, and any failure's bounded diagnostics

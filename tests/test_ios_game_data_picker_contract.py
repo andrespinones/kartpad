@@ -31,7 +31,9 @@ class IOSGameDataPickerContractTests(unittest.TestCase):
             ),
             2,
         )
-        self.assertEqual(source.count("asCopy:YES"), 2)
+        # Two game-data pickers plus the separate experimental .mii importer
+        # all request private copies from potentially remote file providers.
+        self.assertGreaterEqual(source.count("asCopy:YES"), 3)
         self.assertIn("choosingGameDataCopy", source)
         self.assertIn("deleteAfterwards:deleteAfterwards", source)
 
@@ -63,6 +65,15 @@ class IOSGameDataPickerContractTests(unittest.TestCase):
 
         source = (REPO / "apple/ios/KartPadRuntimeOverlayHost.mm").read_text()
         self.assertIn("KartPadDocumentsRoot(&documentsError)", source)
+
+    def test_empty_folder_scan_explains_container_identity_and_falls_back(self) -> None:
+        source = (REPO / "apple/ios/KartPadRuntimeOverlayHost.mm").read_text()
+        self.assertIn("KartPadDocumentsFolderScanDetail", source)
+        self.assertIn("NSBundle.mainBundle.bundleIdentifier", source)
+        self.assertIn("If a signer changes the bundle identifier", source)
+        self.assertGreaterEqual(source.count('actionWithTitle:@"Choose from Files…"'), 2)
+        self.assertGreaterEqual(source.count('actionWithTitle:@"Try Again"'), 2)
+        self.assertEqual(source.count("KartPadGameDataRootsInDocuments(&error)"), 2)
 
 
 if __name__ == "__main__":

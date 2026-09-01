@@ -89,6 +89,18 @@ for motion_contract in \
   fi
 done
 
+for experimental_feature_contract in \
+  'Manage Miis (Experimental)' \
+  'dev.kartpad.manage-miis' \
+  'PendingRFL_DB.dat' \
+  'Experimental Wii Remote + Nunchuk' \
+  'Direct Wii Remote pairing is currently available only in the macOS build.'; do
+  if ! rg -a -F -q "${experimental_feature_contract}" "${binary}"; then
+    echo "game app is missing an experimental feature contract: ${experimental_feature_contract}" >&2
+    exit 69
+  fi
+done
+
 for touch_contract in \
   'Acceleration locked' \
   'Drift, hop, brake, or reverse.'; do

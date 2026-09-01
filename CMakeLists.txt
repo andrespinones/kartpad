@@ -237,6 +237,7 @@ if(MKW_BUILD_IOS_SIMULATOR OR MKW_BUILD_IOS_DEVICE)
   add_executable(KartPad MACOSX_BUNDLE
     "${KARTPAD_IOS_DIR}/KartPadAppDelegate.mm"
     "${KARTPAD_IOS_DIR}/KartPadShellViewController.mm"
+    "${CMAKE_CURRENT_SOURCE_DIR}/apple/shared/KartPadMiiManager.mm"
     "${CMAKE_CURRENT_SOURCE_DIR}/apple/mobile/KartPadCoreBridge.mm"
     "${CMAKE_CURRENT_SOURCE_DIR}/apple/mobile/KartPadClassicInput.mm"
     "${CMAKE_CURRENT_SOURCE_DIR}/apple/mobile/KartPadMotionSteering.mm"
@@ -249,7 +250,9 @@ if(MKW_BUILD_IOS_SIMULATOR OR MKW_BUILD_IOS_DEVICE)
   target_include_directories(KartPad PRIVATE
     "${KARTPAD_IOS_DIR}"
     "${CMAKE_CURRENT_SOURCE_DIR}/apple/mobile"
+    "${CMAKE_CURRENT_SOURCE_DIR}/apple/shared"
     "${KARTPAD_SUNPAD_DIR}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/runtime/include"
     "${CMAKE_CURRENT_SOURCE_DIR}/runtime/translation_shim")
   target_link_libraries(KartPad PRIVATE
     kartpad_host kartpad_scheduler kartpad_g7_translated)
@@ -281,6 +284,12 @@ if(MKW_BUILD_IOS_SIMULATOR OR MKW_BUILD_IOS_DEVICE)
 endif()
 
 if(BUILD_TESTING)
+  add_executable(kartpad_mii_database_tests runtime/tests/mii_database_tests.cpp)
+  target_include_directories(kartpad_mii_database_tests PRIVATE
+    "${CMAKE_CURRENT_SOURCE_DIR}/runtime/include")
+  target_compile_features(kartpad_mii_database_tests PRIVATE cxx_std_20)
+  add_test(NAME kartpad_mii_database_tests COMMAND kartpad_mii_database_tests)
+
   add_executable(kartpad_host_contract_tests runtime/tests/host_contract_tests.cpp)
   target_link_libraries(kartpad_host_contract_tests PRIVATE kartpad_host)
   target_compile_features(kartpad_host_contract_tests PRIVATE cxx_std_20)

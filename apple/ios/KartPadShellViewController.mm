@@ -1,6 +1,7 @@
 #import "KartPadShellViewController.h"
 
 #import "KartPadCoreBridge.h"
+#import "KartPadMenuButton.h"
 #import "SunPadGameOverlay.h"
 #import "SunPadInputMixer.h"
 
@@ -60,6 +61,12 @@
     [self.view addSubview:_overlay];
 }
 
+- (void)viewDidLayoutSubviews {
+    [super viewDidLayoutSubviews];
+    KartPadConfigureMenuButton(KartPadFindMenuButton(_overlay));
+    [self.view bringSubviewToFront:_overlay];
+}
+
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations {
     return UIInterfaceOrientationMaskLandscape;
 }
@@ -81,8 +88,20 @@
 }
 
 - (void)resumeAfterForeground {
+    if (_overlay.superview != self.view) {
+        [_overlay removeFromSuperview];
+        _overlay.frame = self.view.bounds;
+        [self.view addSubview:_overlay];
+    }
+    _overlay.hidden = NO;
+    _overlay.alpha = 1.0;
+    [self.view bringSubviewToFront:_overlay];
     [_overlay refreshControllerVisibility];
     [_overlay applySettings];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self.view bringSubviewToFront:self->_overlay];
+        [self->_overlay setNeedsLayout];
+    });
 }
 
 - (void)showIntegrationAlert:(NSString *)title {

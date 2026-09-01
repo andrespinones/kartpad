@@ -2,9 +2,11 @@
 
 #import "KartPadClassicInput.h"
 #import "KartPadDiscExtractor.h"
+#import "KartPadMenuButton.h"
 #import "KartPadMotionSteering.h"
 #import "KartPadPhysicalControllers.h"
 #import "KartPadRetroRewindInstaller.h"
+#import "KartPadMiiManager.h"
 #import "SunPadDiagnostics.h"
 #import "SunPadGameOverlay.h"
 #import "SunPadInputMixer.h"
@@ -25,11 +27,14 @@
                                                  UIDocumentPickerDelegate>
 - (instancetype)initWithSDLWindow:(SDL_Window *)window;
 - (void)uninstall;
+- (void)reattachOverlayIfNeeded;
 @end
 
 @interface KartPadGameOverlay : SunPadGameOverlay
 @property(nonatomic, copy) void (^multiplayerRequested)(void);
 @property(nonatomic, copy) void (^motionSteeringRequested)(void);
+@property(nonatomic, copy) void (^miiManagerRequested)(void);
+@property(nonatomic, copy) void (^wiimoteRequested)(void);
 @property(nonatomic, weak) UIButton *kartPadGasButton;
 @property(nonatomic, strong) UIColor *kartPadGasRestColor;
 @property(nonatomic, assign) NSUInteger kartPadGasHoldGeneration;
@@ -116,6 +121,23 @@ NSURL *KartPadDocumentsRoot(NSError **error) {
     return nil;
   }
   return documents;
+}
+
+NSString *KartPadDocumentsFolderScanDetail(NSError *error) {
+  NSString *device = UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad
+      ? @"iPad" : @"iPhone";
+  NSString *bundleIdentifier = NSBundle.mainBundle.bundleIdentifier;
+  if (bundleIdentifier.length == 0) bundleIdentifier = @"unknown";
+  NSString *reason = error == nil
+      ? @"No compatible WBFS, ISO, or extracted DATA folder was found."
+      : [NSString stringWithFormat:@"KartPad could not read this folder: %@",
+                                   error.localizedDescription];
+  return [NSString stringWithFormat:
+      @"%@\n\nKartPad can scan only this signed app's own On My %@ folder. "
+       "If a signer changes the bundle identifier or its protection suffix, "
+       "iOS creates a different folder. Move the game into the newly installed "
+       "KartPad folder or choose it directly from Files.\n\nSigned app ID: %@",
+      reason, device, bundleIdentifier];
 }
 
 NSString *KartPadRemovalMarkerPath() {
@@ -689,6 +711,7 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
 @property(nonatomic, assign) NSInteger lastRetroDownloadPercent;
 - (BOOL)run;
 - (void)showOptions;
+- (void)presentGameDataPicker;
 - (void)showRetroRewindOptions;
 - (void)checkRetroRewindVersionAndContinue;
 - (void)showRetroVersionCheckFailure:(NSString *)detail;
@@ -704,16 +727,6 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
     }
   }
   return nil;
-}
-
-- (NSArray<NSURL *> *)documentsRoots {
-  NSError *error = nil;
-  NSArray<NSURL *> *roots = KartPadGameDataRootsInDocuments(&error);
-  if (error != nil) {
-    NSLog(@"[KartPad] could not inspect Files directory: %@",
-          error.localizedDescription);
-  }
-  return roots;
 }
 
 - (void)showMessage:(NSString *)title
@@ -1090,11 +1103,38 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
 }
 
 - (void)chooseDocumentsRoot {
-  NSArray<NSURL *> *roots = [self documentsRoots];
+  NSError *error = nil;
+  NSArray<NSURL *> *roots = KartPadGameDataRootsInDocuments(&error);
   if (roots.count == 0) {
-    [self showMessage:@"KartPad Folder"
-               detail:@"No WBFS, ISO, or extracted DATA folder was found. In Files, place one directly in On My iPhone or iPad → KartPad, then try again."
-           completion:^{ [self showOptions]; }];
+    UIAlertController *alert = [UIAlertController
+        alertControllerWithTitle:@"KartPad Folder"
+                         message:KartPadDocumentsFolderScanDetail(error)
+                  preferredStyle:UIAlertControllerStyleAlert];
+    [alert addAction:[UIAlertAction actionWithTitle:@"Choose from Files…"
+                                                style:UIAlertActionStyleDefault
+                                              handler:^(UIAlertAction *action) {
+      (void)action;
+      dispatch_after(dispatch_time(DISPATCH_TIME_NOW,
+                                   (int64_t)(0.35 * NSEC_PER_SEC)),
+                     dispatch_get_main_queue(), ^{ [self presentGameDataPicker]; });
+    }]];
+    [alert addAction:[UIAlertAction actionWithTitle:@"Try Again"
+                                                style:UIAlertActionStyleDefault
+                                              handler:^(UIAlertAction *action) {
+      (void)action;
+      dispatch_after(dispatch_time(DISPATCH_TIME_NOW,
+                                   (int64_t)(0.35 * NSEC_PER_SEC)),
+                     dispatch_get_main_queue(), ^{ [self chooseDocumentsRoot]; });
+    }]];
+    [alert addAction:[UIAlertAction actionWithTitle:@"Back"
+                                                style:UIAlertActionStyleCancel
+                                              handler:^(UIAlertAction *action) {
+      (void)action;
+      dispatch_after(dispatch_time(DISPATCH_TIME_NOW,
+                                   (int64_t)(0.35 * NSEC_PER_SEC)),
+                     dispatch_get_main_queue(), ^{ [self showOptions]; });
+    }]];
+    [self.root presentViewController:alert animated:YES completion:nil];
     return;
   }
   if (roots.count == 1) {
@@ -1128,6 +1168,16 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
   [self.root presentViewController:choices animated:YES completion:nil];
 }
 
+- (void)presentGameDataPicker {
+  self.choosingGameDataCopy = YES;
+  UIDocumentPickerViewController *picker =
+      [[UIDocumentPickerViewController alloc]
+          initForOpeningContentTypes:KartPadGameDataContentTypes() asCopy:YES];
+  picker.delegate = self;
+  picker.allowsMultipleSelection = NO;
+  [self.root presentViewController:picker animated:YES completion:nil];
+}
+
 - (void)showOptions {
   self.choosingRetroArchive = NO;
   self.choosingGameDataCopy = NO;
@@ -1142,13 +1192,7 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW,
                                  (int64_t)(0.35 * NSEC_PER_SEC)),
                    dispatch_get_main_queue(), ^{
-      self.choosingGameDataCopy = YES;
-      UIDocumentPickerViewController *picker =
-          [[UIDocumentPickerViewController alloc]
-              initForOpeningContentTypes:KartPadGameDataContentTypes() asCopy:YES];
-      picker.delegate = self;
-      picker.allowsMultipleSelection = NO;
-      [self.root presentViewController:picker animated:YES completion:nil];
+      [self presentGameDataPicker];
     });
   }]];
   [options addAction:[UIAlertAction actionWithTitle:@"Import from KartPad Folder"
@@ -1331,6 +1375,8 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
     if ([button.accessibilityLabel isEqualToString:@"R"]) rightShoulder = button;
     if ([button.accessibilityLabel isEqualToString:@"A"]) gasButton = button;
   }
+
+  KartPadConfigureMenuButton(menuButton);
 
   // Mario Kart's Classic R input is a normal digital shoulder button. Match
   // L exactly and suppress SunPad's Sunshine-specific pressure-fill artwork.
@@ -1522,16 +1568,6 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
     return;
   }
 
-  // A primary-menu button enters the selected state while its menu is being
-  // dismissed. The inherited overlay did not provide an image for that state,
-  // which made the ellipsis flash blank when the user tapped outside the menu.
-  UIImage *menuImage = [menuButton imageForState:UIControlStateNormal];
-  if (menuImage != nil) {
-    [menuButton setImage:menuImage forState:UIControlStateSelected];
-    [menuButton setImage:menuImage
-                forState:UIControlStateSelected | UIControlStateHighlighted];
-  }
-
   __weak KartPadGameOverlay *weakSelf = self;
   UIAction *multiplayer =
       [UIAction actionWithTitle:@"Multiplayer…"
@@ -1553,11 +1589,38 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
                             weakSelf.motionSteeringRequested();
                           }
                         }];
+  UIAction *experimentalWiimote =
+      [UIAction actionWithTitle:@"Experimental Wii Remote + Nunchuk…"
+                          image:[UIImage systemImageNamed:@"antenna.radiowaves.left.and.right"]
+                     identifier:@"dev.kartpad.experimental-wiimote"
+                        handler:^(__kindof UIAction *action) {
+                          (void)action;
+                          if (weakSelf.wiimoteRequested != nil) {
+                            weakSelf.wiimoteRequested();
+                          }
+                        }];
+  UIAction *fpsCounter = nil;
+  UIAction *controllerMapping = nil;
+  UIAction *touchControlSettings = nil;
   UIAction *reportProblem = nil;
-  NSMutableArray<UIMenuElement *> *mainItems = [NSMutableArray array];
+  UIMenu *aspectRatio = nil;
+  UIMenu *renderResolution = nil;
+  UIMenu *gameData = nil;
   for (UIMenuElement *element in sourceMenu.children) {
     if ([element isKindOfClass:UIAction.class]) {
       UIAction *action = (UIAction *)element;
+      if ([action.title isEqualToString:@"Show FPS Counter"]) {
+        fpsCounter = action;
+        continue;
+      }
+      if ([action.title isEqualToString:@"Controller Button Mapping…"]) {
+        controllerMapping = action;
+        continue;
+      }
+      if ([action.title isEqualToString:@"Touch Control Settings…"]) {
+        touchControlSettings = action;
+        continue;
+      }
       if ([action.title isEqualToString:@"Report a Problem…"]) {
         reportProblem = action;
         continue;
@@ -1571,6 +1634,16 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
       }
     }
 
+    if ([element isKindOfClass:UIMenu.class] &&
+        [element.title isEqualToString:@"Render Resolution"]) {
+      renderResolution = (UIMenu *)element;
+      continue;
+    }
+    if ([element isKindOfClass:UIMenu.class] &&
+        [element.title isEqualToString:@"Aspect Ratio"]) {
+      aspectRatio = (UIMenu *)element;
+      continue;
+    }
     if ([element isKindOfClass:UIMenu.class] &&
         [element.title isEqualToString:@"Game Data & Saves"]) {
       UIMenu *dataMenu = (UIMenu *)element;
@@ -1595,20 +1668,55 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
           [dataItems addObject:dataElement];
         }
       }
-      [mainItems addObject:[UIMenu menuWithTitle:dataMenu.title
-                                           image:dataMenu.image
-                                      identifier:dataMenu.identifier
-                                         options:dataMenu.options
-                                        children:dataItems]];
+      UIAction *miiManager =
+          [UIAction actionWithTitle:@"Manage Miis…"
+                              image:[UIImage systemImageNamed:@"person.crop.circle.badge.plus"]
+                         identifier:@"dev.kartpad.manage-miis"
+                            handler:^(__kindof UIAction *action) {
+        (void)action;
+        if (weakSelf.miiManagerRequested != nil) {
+          weakSelf.miiManagerRequested();
+        }
+      }];
+      [dataItems addObject:miiManager];
+      gameData = [UIMenu menuWithTitle:dataMenu.title
+                                 image:dataMenu.image
+                            identifier:dataMenu.identifier
+                               options:dataMenu.options
+                              children:dataItems];
       continue;
     }
-    [mainItems addObject:element];
   }
 
-  NSMutableArray<UIMenuElement *> *children =
-      [NSMutableArray arrayWithObjects:multiplayer, motionSteering, nil];
+  NSMutableArray<UIMenuElement *> *controlItems = [NSMutableArray array];
+  if (controllerMapping != nil) [controlItems addObject:controllerMapping];
+  if (touchControlSettings != nil) [controlItems addObject:touchControlSettings];
+  [controlItems addObject:motionSteering];
+  [controlItems addObject:experimentalWiimote];
+  UIMenu *controls =
+      [UIMenu menuWithTitle:@"Controls"
+                      image:[UIImage systemImageNamed:@"gamecontroller"]
+                 identifier:@"dev.kartpad.controls"
+                    options:0
+                   children:controlItems];
+
+  NSMutableArray<UIMenuElement *> *displayItems = [NSMutableArray array];
+  if (aspectRatio != nil) [displayItems addObject:aspectRatio];
+  if (renderResolution != nil) [displayItems addObject:renderResolution];
+  UIMenu *display =
+      [UIMenu menuWithTitle:@"Display"
+                      image:[UIImage systemImageNamed:@"display"]
+                 identifier:@"dev.kartpad.display"
+                    options:0
+                   children:displayItems];
+
+  NSMutableArray<UIMenuElement *> *children = [NSMutableArray array];
+  [children addObject:multiplayer];
+  if (fpsCounter != nil) [children addObject:fpsCounter];
+  [children addObject:controls];
+  [children addObject:display];
+  if (gameData != nil) [children addObject:gameData];
   if (reportProblem != nil) [children addObject:reportProblem];
-  [children addObjectsFromArray:mainItems];
   menuButton.menu = [UIMenu menuWithTitle:@"KartPad"
                                     image:sourceMenu.image
                                identifier:@"dev.kartpad.menu"
@@ -1845,8 +1953,10 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
 
 @implementation KartPadRuntimeOverlayHost {
   __weak UIWindow *_window;
+  SDL_Window *_sdlWindow;
   SunPadGameOverlay *_overlay;
   UIAlertController *_gameDataProgressAlert;
+  BOOL _choosingMiiImport;
 }
 
 - (instancetype)initWithSDLWindow:(SDL_Window *)window {
@@ -1855,6 +1965,7 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
     return nil;
   }
 
+  _sdlWindow = window;
   SDL_PropertiesID properties = SDL_GetWindowProperties(window);
   UIWindow *uiWindow = (__bridge UIWindow *)SDL_GetPointerProperty(
       properties, SDL_PROP_WINDOW_UIKIT_WINDOW_POINTER, nullptr);
@@ -1873,6 +1984,12 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
   };
   overlay.motionSteeringRequested = ^{
     [weakSelf showMotionSteering];
+  };
+  overlay.miiManagerRequested = ^{
+    [weakSelf showMiiManager];
+  };
+  overlay.wiimoteRequested = ^{
+    [weakSelf showExperimentalWiimoteInfo];
   };
   _overlay = overlay;
   _overlay.autoresizingMask = UIViewAutoresizingFlexibleWidth |
@@ -1896,6 +2013,29 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
   SunPadDiagnosticsStart();
   NSLog(@"[KartPad] exact SunPad runtime overlay installed");
   return self;
+}
+
+- (void)reattachOverlayIfNeeded {
+  if (_overlay == nil || _sdlWindow == nullptr) return;
+  SDL_PropertiesID properties = SDL_GetWindowProperties(_sdlWindow);
+  UIWindow *window = (__bridge UIWindow *)SDL_GetPointerProperty(
+      properties, SDL_PROP_WINDOW_UIKIT_WINDOW_POINTER, nullptr);
+  UIView *container = window.rootViewController.view;
+  if (window == nil || container == nil) {
+    NSLog(@"[KartPad] SDL UIKit window is unavailable during overlay recovery");
+    return;
+  }
+  _window = window;
+  if (_overlay.superview != container) {
+    [_overlay removeFromSuperview];
+    _overlay.frame = container.bounds;
+    [container addSubview:_overlay];
+    NSLog(@"[KartPad] touch overlay reattached after UIKit surface change");
+  }
+  _overlay.hidden = NO;
+  _overlay.alpha = 1.0;
+  [container bringSubviewToFront:_overlay];
+  [_overlay setNeedsLayout];
 }
 
 - (void)showMotionSteering {
@@ -2017,8 +2157,13 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
   (void)notification;
   [[KartPadPhysicalControllers sharedControllers] reconcileControllers];
   [[KartPadMotionSteering sharedSteering] start];
+  [self reattachOverlayIfNeeded];
   [_overlay refreshControllerVisibility];
   [_overlay applySettings];
+  __weak KartPadRuntimeOverlayHost *weakSelf = self;
+  dispatch_async(dispatch_get_main_queue(), ^{
+    [weakSelf reattachOverlayIfNeeded];
+  });
 }
 
 - (void)showIntegrationAlert:(NSString *)title message:(NSString *)message {
@@ -2038,6 +2183,131 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
   [controller presentViewController:alert animated:YES completion:nil];
 }
 
+- (void)showExperimentalWiimoteInfo {
+  [self showIntegrationAlert:@"Experimental Wii Remote + Nunchuk"
+                     message:@"Direct Wii Remote pairing is currently available only in the macOS build. KartPad for iPhone and iPad keeps this option visible so the control layout remains consistent, but iOS does not expose the Bluetooth HID pairing path required by an original Wii Remote. No DolphinBar is required on macOS."];
+}
+
+- (void)presentMiiImportPicker {
+  [[SunPadInputMixer sharedMixer] clearInputFromTouch:YES];
+  UIViewController *controller = KartPadVisibleViewController(_window);
+  if (controller == nil) return;
+  _choosingMiiImport = YES;
+  UIDocumentPickerViewController *picker =
+      [[UIDocumentPickerViewController alloc]
+          initForOpeningContentTypes:@[UTTypeData, UTTypeItem] asCopy:YES];
+  picker.delegate = self;
+  picker.allowsMultipleSelection = NO;
+  [controller presentViewController:picker animated:YES completion:nil];
+}
+
+- (void)showMiiCreationHelp {
+  [self showIntegrationAlert:@"Create a Mii"
+                     message:@"KartPad does not include the Wii Menu or Mii Channel, so it cannot create a new Mii yet. Create or export a standard 74-byte .mii file with a compatible tool, then choose Import Mii… here. After restarting KartPad, use Mario Kart Wii's License Settings → Change Mii screen to select it."];
+}
+
+- (void)showMiiRemovalChoices {
+  NSError *error = nil;
+  NSArray<NSDictionary<NSString *, id> *> *records = KartPadMiiRecords(&error);
+  if (error != nil) {
+    [self showIntegrationAlert:@"Miis Could Not Be Read"
+                       message:error.localizedDescription];
+    return;
+  }
+  UIViewController *controller = KartPadVisibleViewController(_window);
+  if (controller == nil) return;
+  UIAlertController *choices = [UIAlertController
+      alertControllerWithTitle:@"Remove a Mii"
+                       message:@"Removal is staged safely and takes effect the next time KartPad launches. At least one Mii is always retained."
+                preferredStyle:UIAlertControllerStyleActionSheet];
+  __weak KartPadRuntimeOverlayHost *weakSelf = self;
+  for (NSDictionary<NSString *, id> *record in records) {
+    NSString *title = record[@"name"];
+    NSUInteger slot = [record[@"slot"] unsignedIntegerValue];
+    [choices addAction:[UIAlertAction actionWithTitle:title
+                                                style:UIAlertActionStyleDestructive
+                                              handler:^(UIAlertAction *action) {
+      (void)action;
+      NSError *removeError = nil;
+      if (!KartPadStageMiiRemoval(slot, &removeError)) {
+        [weakSelf showIntegrationAlert:@"Mii Could Not Be Removed"
+                               message:removeError.localizedDescription];
+        return;
+      }
+      [weakSelf showIntegrationAlert:@"Mii Removal Scheduled"
+                             message:@"Close and reopen KartPad to apply the change. A backup of the current Mii database will be kept automatically."];
+    }]];
+  }
+  [choices addAction:[UIAlertAction actionWithTitle:@"Cancel"
+                                              style:UIAlertActionStyleCancel
+                                            handler:nil]];
+  choices.popoverPresentationController.sourceView = _overlay;
+  choices.popoverPresentationController.sourceRect = CGRectMake(
+      CGRectGetMidX(_overlay.bounds), CGRectGetMidY(_overlay.bounds), 1.0, 1.0);
+  [controller presentViewController:choices animated:YES completion:nil];
+}
+
+- (void)showMiiManager {
+  [[SunPadInputMixer sharedMixer] clearInputFromTouch:YES];
+  NSError *error = nil;
+  NSArray<NSDictionary<NSString *, id> *> *records = KartPadMiiRecords(&error);
+  if (error != nil) {
+    [self showIntegrationAlert:@"Miis Could Not Be Read"
+                       message:error.localizedDescription];
+    return;
+  }
+  NSMutableArray<NSString *> *names = [NSMutableArray array];
+  for (NSDictionary<NSString *, id> *record in records) {
+    [names addObject:record[@"name"]];
+  }
+  NSString *summary = names.count == 0 ? @"No Miis found."
+      : [names componentsJoinedByString:@", "];
+  NSString *pending = KartPadHasPendingMiiChanges()
+      ? @"\n\nPending changes will be applied on the next launch." : @"";
+  NSString *message = [NSString stringWithFormat:
+      @"%lu Mii%@ available: %@%@",
+      (unsigned long)records.count, records.count == 1 ? @"" : @"s",
+      summary, pending];
+  UIViewController *controller = KartPadVisibleViewController(_window);
+  if (controller == nil) return;
+  UIAlertController *manager = [UIAlertController
+      alertControllerWithTitle:@"Manage Miis (Experimental)"
+                       message:message
+                preferredStyle:UIAlertControllerStyleActionSheet];
+  __weak KartPadRuntimeOverlayHost *weakSelf = self;
+  [manager addAction:[UIAlertAction actionWithTitle:@"Import Mii…"
+                                              style:UIAlertActionStyleDefault
+                                            handler:^(UIAlertAction *action) {
+    (void)action;
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW,
+                                 (int64_t)(0.35 * NSEC_PER_SEC)),
+                   dispatch_get_main_queue(), ^{ [weakSelf presentMiiImportPicker]; });
+  }]];
+  [manager addAction:[UIAlertAction actionWithTitle:@"Remove a Mii…"
+                                              style:UIAlertActionStyleDefault
+                                            handler:^(UIAlertAction *action) {
+    (void)action;
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW,
+                                 (int64_t)(0.35 * NSEC_PER_SEC)),
+                   dispatch_get_main_queue(), ^{ [weakSelf showMiiRemovalChoices]; });
+  }]];
+  [manager addAction:[UIAlertAction actionWithTitle:@"Create a Mii…"
+                                              style:UIAlertActionStyleDefault
+                                            handler:^(UIAlertAction *action) {
+    (void)action;
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW,
+                                 (int64_t)(0.35 * NSEC_PER_SEC)),
+                   dispatch_get_main_queue(), ^{ [weakSelf showMiiCreationHelp]; });
+  }]];
+  [manager addAction:[UIAlertAction actionWithTitle:@"Done"
+                                              style:UIAlertActionStyleCancel
+                                            handler:nil]];
+  manager.popoverPresentationController.sourceView = _overlay;
+  manager.popoverPresentationController.sourceRect = CGRectMake(
+      CGRectGetMidX(_overlay.bounds), CGRectGetMidY(_overlay.bounds), 1.0, 1.0);
+  [controller presentViewController:manager animated:YES completion:nil];
+}
+
 - (void)presentGameDataFolderPicker {
   [[SunPadInputMixer sharedMixer] clearInputFromTouch:YES];
   UIViewController *controller = KartPadVisibleViewController(_window);
@@ -2050,16 +2320,6 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
   picker.delegate = self;
   picker.allowsMultipleSelection = NO;
   [controller presentViewController:picker animated:YES completion:nil];
-}
-
-- (NSArray<NSURL *> *)extractedRootsInDocumentsDirectory {
-  NSError *error = nil;
-  NSArray<NSURL *> *roots = KartPadGameDataRootsInDocuments(&error);
-  if (error != nil) {
-    NSLog(@"[KartPad] could not inspect Files directory: %@",
-          error.localizedDescription);
-  }
-  return roots;
 }
 
 - (void)importExtractedGameDataFromURL:(NSURL *)url
@@ -2112,9 +2372,36 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
     didPickDocumentsAtURLs:(NSArray<NSURL *> *)urls {
   (void)controller;
   NSURL *url = urls.firstObject;
+  if (_choosingMiiImport) {
+    _choosingMiiImport = NO;
+    if (url == nil) return;
+    NSError *readError = nil;
+    NSData *data = [NSData dataWithContentsOfURL:url options:0 error:&readError];
+    NSString *name = nil;
+    NSError *importError = nil;
+    BOOL imported = data != nil &&
+        KartPadStageMiiImport(data, &name, &importError);
+    [NSFileManager.defaultManager removeItemAtURL:url error:nil];
+    if (!imported) {
+      NSError *shownError = readError ?: importError;
+      [self showIntegrationAlert:@"Mii Import Failed"
+                         message:shownError.localizedDescription ?: @"The selected file could not be imported."];
+      return;
+    }
+    [self showIntegrationAlert:@"Mii Import Scheduled"
+                       message:[NSString stringWithFormat:
+        @"%@ will be added the next time KartPad launches. A backup of the current Mii database will be kept automatically.",
+        name.length > 0 ? name : @"The selected Mii"]];
+    return;
+  }
   if (url != nil) {
     [self importExtractedGameDataFromURL:url deleteAfterwards:YES];
   }
+}
+
+- (void)documentPickerWasCancelled:(UIDocumentPickerViewController *)controller {
+  (void)controller;
+  _choosingMiiImport = NO;
 }
 
 - (void)gameOverlayRequestsGameDataChange:(SunPadGameOverlay *)overlay {
@@ -2124,7 +2411,8 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
 
 - (void)gameOverlayRequestsGameDataFolderImport:(SunPadGameOverlay *)overlay {
   (void)overlay;
-  NSArray<NSURL *> *roots = [self extractedRootsInDocumentsDirectory];
+  NSError *error = nil;
+  NSArray<NSURL *> *roots = KartPadGameDataRootsInDocuments(&error);
   if (roots.count == 1) {
     [self importExtractedGameDataFromURL:roots.firstObject deleteAfterwards:NO];
     return;
@@ -2134,8 +2422,8 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
     return;
   }
   NSString *message = roots.count == 0
-      ? @"No WBFS, ISO, or extracted DATA folder was found. In Files, place one directly in On My iPhone → KartPad, then try again."
-      : @"Choose a Mario Kart Wii WBFS, ISO, or extracted DATA folder from On My iPhone → KartPad.";
+      ? KartPadDocumentsFolderScanDetail(error)
+      : @"Choose a Mario Kart Wii WBFS, ISO, or extracted DATA folder from this signed app's KartPad folder.";
   UIAlertController *alert =
       [UIAlertController alertControllerWithTitle:@"KartPad Folder"
                                           message:message
@@ -2147,6 +2435,28 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
                                             handler:^(UIAlertAction *action) {
       (void)action;
       [weakSelf importExtractedGameDataFromURL:root deleteAfterwards:NO];
+    }]];
+  }
+  if (roots.count == 0) {
+    [alert addAction:[UIAlertAction actionWithTitle:@"Choose from Files…"
+                                                style:UIAlertActionStyleDefault
+                                              handler:^(UIAlertAction *action) {
+      (void)action;
+      dispatch_after(dispatch_time(DISPATCH_TIME_NOW,
+                                   (int64_t)(0.35 * NSEC_PER_SEC)),
+                     dispatch_get_main_queue(), ^{
+        [weakSelf presentGameDataFolderPicker];
+      });
+    }]];
+    [alert addAction:[UIAlertAction actionWithTitle:@"Try Again"
+                                                style:UIAlertActionStyleDefault
+                                              handler:^(UIAlertAction *action) {
+      (void)action;
+      dispatch_after(dispatch_time(DISPATCH_TIME_NOW,
+                                   (int64_t)(0.35 * NSEC_PER_SEC)),
+                     dispatch_get_main_queue(), ^{
+        [weakSelf gameOverlayRequestsGameDataFolderImport:nil];
+      });
     }]];
   }
   [alert addAction:[UIAlertAction actionWithTitle:@"Cancel"
@@ -2230,6 +2540,11 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
 @end
 
 extern "C" bool KartPadMobileEnsureGameDataAvailable() {
+  NSError *miiError = nil;
+  if (!KartPadApplyPendingMiiDatabase(&miiError)) {
+    NSLog(@"[KartPad] pending Mii changes were not applied: %@",
+          miiError.localizedDescription);
+  }
   if (!NSThread.isMainThread) {
     __block BOOL available = NO;
     dispatch_sync(dispatch_get_main_queue(), ^{

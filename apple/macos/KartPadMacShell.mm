@@ -1,4 +1,6 @@
 #import "KartPadMacShell.h"
+#import "KartPadMiiManager.h"
+#import "KartPadWiimotePairing.h"
 
 #import <AppKit/AppKit.h>
 #import <CommonCrypto/CommonDigest.h>
@@ -391,6 +393,13 @@ static NSString *DiagnosticsReport() {
 
 @implementation KartPadMacShellController
 
+- (void)showSimpleAlert:(NSString *)title message:(NSString *)message {
+  NSAlert *alert = [NSAlert new];
+  alert.messageText = title;
+  alert.informativeText = message ?: @"";
+  [alert runModal];
+}
+
 - (void)quitKartPad:(id)sender {
   for (NSWindow *window in NSApp.windows) {
     if (![window isKindOfClass:NSPanel.class] && window.isVisible) {
@@ -423,6 +432,121 @@ static NSString *DiagnosticsReport() {
   alert.informativeText =
       @"KartPad validated the RMCP01 data. Quit and reopen KartPad to use it.";
   [alert runModal];
+}
+
+- (void)showMiiManager:(id)sender {
+  (void)sender;
+  while (true) {
+    NSError *error = nil;
+    NSArray<NSDictionary<NSString *, id> *> *records = KartPadMiiRecords(&error);
+    if (error != nil) {
+      [self showSimpleAlert:@"Miis Could Not Be Read"
+                    message:error.localizedDescription];
+      return;
+    }
+    NSMutableArray<NSString *> *names = [NSMutableArray array];
+    for (NSDictionary<NSString *, id> *record in records) {
+      [names addObject:record[@"name"]];
+    }
+    NSString *summary = names.count == 0 ? @"No Miis found."
+        : [names componentsJoinedByString:@", "];
+    NSString *pending = KartPadHasPendingMiiChanges()
+        ? @"\n\nPending changes will be applied on the next launch." : @"";
+    NSAlert *manager = [NSAlert new];
+    manager.messageText = @"Manage Miis (Experimental)";
+    manager.informativeText = [NSString stringWithFormat:
+        @"%lu Mii%@ available: %@%@",
+        (unsigned long)records.count, records.count == 1 ? @"" : @"s",
+        summary, pending];
+    [manager addButtonWithTitle:@"Import Mii…"];
+    [manager addButtonWithTitle:@"Remove a Mii…"];
+    [manager addButtonWithTitle:@"Create a Mii…"];
+    [manager addButtonWithTitle:@"Done"];
+    NSModalResponse response = [manager runModal];
+    if (response == NSAlertFirstButtonReturn) {
+      NSOpenPanel *panel = NSOpenPanel.openPanel;
+      panel.title = @"Import Mii";
+      panel.message = @"Choose a standard 74-byte .mii file.";
+      panel.prompt = @"Import";
+      panel.canChooseFiles = YES;
+      panel.canChooseDirectories = NO;
+      panel.allowsMultipleSelection = NO;
+      UTType *miiType = [UTType typeWithFilenameExtension:@"mii"
+                                        conformingToType:UTTypeData];
+      panel.allowedContentTypes = miiType != nil ? @[miiType] : @[UTTypeData];
+      if ([panel runModal] != NSModalResponseOK || panel.URL == nil) continue;
+      NSData *data = [NSData dataWithContentsOfURL:panel.URL options:0 error:&error];
+      NSString *name = nil;
+      if (data == nil || !KartPadStageMiiImport(data, &name, &error)) {
+        [self showSimpleAlert:@"Mii Import Failed"
+                      message:error.localizedDescription ?: @"The selected file could not be imported."];
+        continue;
+      }
+      [self showSimpleAlert:@"Mii Import Scheduled"
+                    message:[NSString stringWithFormat:
+          @"%@ will be added the next time KartPad launches. The current database will be backed up automatically.",
+          name.length > 0 ? name : @"The selected Mii"]];
+      continue;
+    }
+    if (response == NSAlertSecondButtonReturn) {
+      if (records.count == 0) continue;
+      NSPopUpButton *choices = [[NSPopUpButton alloc]
+          initWithFrame:NSMakeRect(0, 0, 300, 26) pullsDown:NO];
+      for (NSDictionary<NSString *, id> *record in records) {
+        [choices addItemWithTitle:record[@"name"]];
+      }
+      NSAlert *remove = [NSAlert new];
+      remove.messageText = @"Remove a Mii?";
+      remove.informativeText = @"The removal will be applied on the next launch. KartPad always retains at least one Mii.";
+      remove.accessoryView = choices;
+      [remove addButtonWithTitle:@"Remove"];
+      [remove addButtonWithTitle:@"Cancel"];
+      if ([remove runModal] != NSAlertFirstButtonReturn) continue;
+      NSUInteger index = choices.indexOfSelectedItem;
+      if (index >= records.count) continue;
+      NSUInteger slot = [records[index][@"slot"] unsignedIntegerValue];
+      if (!KartPadStageMiiRemoval(slot, &error)) {
+        [self showSimpleAlert:@"Mii Could Not Be Removed"
+                      message:error.localizedDescription];
+        continue;
+      }
+      [self showSimpleAlert:@"Mii Removal Scheduled"
+                    message:@"Close and reopen KartPad to apply the change. The current database will be backed up automatically."];
+      continue;
+    }
+    if (response == NSAlertThirdButtonReturn) {
+      [self showSimpleAlert:@"Create a Mii"
+                    message:@"KartPad does not include the Wii Menu or Mii Channel, so it cannot create a new Mii yet. Create or export a standard 74-byte .mii file with a compatible tool, then import it here. After restarting, choose it from Mario Kart Wii's License Settings → Change Mii screen."];
+      continue;
+    }
+    return;
+  }
+}
+
+- (void)toggleExperimentalWiimote:(NSMenuItem *)sender {
+  NSUserDefaults *defaults = NSUserDefaults.standardUserDefaults;
+  const BOOL enabled = ![defaults boolForKey:KartPadExperimentalWiimoteDefaultsKey];
+  if (enabled) {
+    NSAlert *warning = [NSAlert new];
+    warning.messageText = @"Enable Experimental Wii Remote Support?";
+    warning.informativeText =
+        @"This direct Bluetooth path is intended for original Wii Remote and Wii Remote Plus hardware with a Nunchuk. It uses a private macOS pairing interface, may change across macOS updates, and can conflict with DolphinBar controller mode.";
+    [warning addButtonWithTitle:@"Enable and Pair"];
+    [warning addButtonWithTitle:@"Cancel"];
+    if ([warning runModal] != NSAlertFirstButtonReturn) return;
+  }
+  [defaults setBool:enabled forKey:KartPadExperimentalWiimoteDefaultsKey];
+  sender.state = enabled ? NSControlStateValueOn : NSControlStateValueOff;
+  KartPadApplyExperimentalWiimotePreference();
+  if (enabled) KartPadShowWiimotePairing();
+}
+
+- (void)pairWiimote:(id)sender {
+  (void)sender;
+  [NSUserDefaults.standardUserDefaults setBool:YES
+      forKey:KartPadExperimentalWiimoteDefaultsKey];
+  KartPadApplyExperimentalWiimotePreference();
+  KartPadShowWiimotePairing();
 }
 
 - (void)showControllerSettings:(id)sender {
@@ -896,27 +1020,52 @@ static void InstallMenu() {
   cache.target = Controller();
   [appMenu insertItem:cache atIndex:insertIndex++];
 
+  NSMenuItem *gameDataAndSaves = [[NSMenuItem alloc]
+      initWithTitle:@"Game Data & Saves" action:nil keyEquivalent:@""];
+  NSMenu *gameDataMenu = [[NSMenu alloc] initWithTitle:@"Game Data & Saves"];
   NSMenuItem *gameData = [[NSMenuItem alloc]
-      initWithTitle:@"Choose Game Data…"
-             action:@selector(chooseGameData:)
+      initWithTitle:@"Choose Game Data…" action:@selector(chooseGameData:)
       keyEquivalent:@""];
   gameData.target = Controller();
-  [appMenu insertItem:gameData atIndex:insertIndex++];
+  [gameDataMenu addItem:gameData];
+  NSMenuItem *miis = [[NSMenuItem alloc]
+      initWithTitle:@"Manage Miis…" action:@selector(showMiiManager:)
+      keyEquivalent:@""];
+  miis.target = Controller();
+  [gameDataMenu addItem:miis];
+  gameDataAndSaves.submenu = gameDataMenu;
+  [appMenu insertItem:gameDataAndSaves atIndex:insertIndex++];
 
+  NSMenuItem *controlsMenuItem = [[NSMenuItem alloc]
+      initWithTitle:@"Controls" action:nil keyEquivalent:@""];
+  NSMenu *controlsMenu = [[NSMenu alloc] initWithTitle:@"Controls"];
   NSMenuItem *controllerSettings = [[NSMenuItem alloc]
       initWithTitle:@"Controller Settings…"
-             action:@selector(showControllerSettings:)
-      keyEquivalent:@""];
+             action:@selector(showControllerSettings:) keyEquivalent:@""];
   controllerSettings.target = Controller();
-  [appMenu insertItem:controllerSettings atIndex:insertIndex++];
-
+  [controlsMenu addItem:controllerSettings];
   NSMenuItem *controls = [[NSMenuItem alloc]
-      initWithTitle:@"Controls…"
-             action:@selector(showControls:)
+      initWithTitle:@"Control Reference…" action:@selector(showControls:)
       keyEquivalent:@"/"];
   controls.keyEquivalentModifierMask = NSEventModifierFlagCommand;
   controls.target = Controller();
-  [appMenu insertItem:controls atIndex:insertIndex++];
+  [controlsMenu addItem:controls];
+  [controlsMenu addItem:NSMenuItem.separatorItem];
+  NSMenuItem *experimentalWiimote = [[NSMenuItem alloc]
+      initWithTitle:@"Experimental Wii Remote + Nunchuk"
+             action:@selector(toggleExperimentalWiimote:) keyEquivalent:@""];
+  experimentalWiimote.target = Controller();
+  experimentalWiimote.state = [NSUserDefaults.standardUserDefaults
+      boolForKey:KartPadExperimentalWiimoteDefaultsKey]
+      ? NSControlStateValueOn : NSControlStateValueOff;
+  [controlsMenu addItem:experimentalWiimote];
+  NSMenuItem *pairWiimote = [[NSMenuItem alloc]
+      initWithTitle:@"Pair Wii Remote…" action:@selector(pairWiimote:)
+      keyEquivalent:@""];
+  pairWiimote.target = Controller();
+  [controlsMenu addItem:pairWiimote];
+  controlsMenuItem.submenu = controlsMenu;
+  [appMenu insertItem:controlsMenuItem atIndex:insertIndex++];
 
   NSString *diagnosticsTitle =
       [@"Save Diagnostics Report" stringByAppendingString:@"…"];
@@ -937,6 +1086,12 @@ void KartPadMacShellInstall(void) {
 
 bool KartPadMacShellPrepareGameData(void) {
   @autoreleasepool {
+    NSError *miiError = nil;
+    if (!KartPadApplyPendingMiiDatabase(&miiError)) {
+      NSLog(@"[KartPad] pending Mii changes were not applied: %@",
+            miiError.localizedDescription);
+    }
+    KartPadApplyExperimentalWiimotePreference();
     BeginSession();
     RuntimeConfigFile::EnsureConfigFile();
 

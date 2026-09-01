@@ -1,8 +1,27 @@
 # KartPad status
 
-Updated: 2026-09-01
+Updated: 2026-09-02
 
 ## Current goal
+
+**Preview 4 is the current release candidate.** It declares app 0.3.0 build 11
+and adds experimental Mii import/management on Mac, iPhone, and iPad plus an
+experimental macOS-only direct Wii Remote/Nunchuk pairing path and controller
+preset. The Mii database, CRC, duplicate, capacity, staging, backup, and
+integration contracts pass. The Wii transport compiles, links, packages with
+the required Bluetooth entitlement, and restores normal SDL state when its
+pairing panel closes. A real exported Mii and physical Wii hardware remain
+external acceptance gates and are not claimed from source or build proof.
+
+The preceding in-place iPad candidate preserved the complete 5,745-file,
+4.8-GB KartPad Application Support/NAND tree byte-for-byte, launched, and
+remained running. Earlier hands-on testing accepted Retro Rewind, ordinary
+controller input, the stable three-dot button and reorganized menu,
+exit/reopen lifecycle, Original Mario Kart Wii, and the existing license.
+Folder-scan diagnostics and a direct Files fallback are built and
+contract-tested but still require the Issue #1 reporter's Feather-signed
+environment. The release rollup is in
+[`docs/releases/NEXT.md`](releases/NEXT.md).
 
 **The provider-compatible import hotfix is published.** `v0.3.0-preview.3`
 points to source commit `452af2dde3d19508a5e6ced6c03deb0e24b8b509`. Its unsigned

@@ -21,6 +21,8 @@ icon_name="$(plutil -extract CFBundleIconFile raw "${plist}")"
 executable="${contents}/MacOS/${executable_name}"
 
 test "${bundle_identifier}" = "dev.kartpad.app"
+test "$(plutil -extract NSBluetoothAlwaysUsageDescription raw "${plist}")" = \
+  "KartPad uses Bluetooth to pair and connect an experimental Wii Remote and Nunchuk."
 test -x "${executable}"
 test -f "${contents}/Resources/${icon_name%.icns}.icns"
 test -f "${contents}/MacOS/dsp_coef.bin"
@@ -89,6 +91,9 @@ executable_strings="$(strings "${executable}")"
 for shell_contract in \
   "KartPad Settings" \
   "KartPad Controls" \
+  "Manage Miis (Experimental)" \
+  "Experimental Wii Remote + Nunchuk" \
+  "Wii Remote + Nunchuk (Experimental)" \
   "Use item" \
   "Left Shift (Classic L)" \
   "Select / minus" \
@@ -120,6 +125,8 @@ for shell_contract in \
 done
 
 codesign --verify --deep --strict --verbose=2 "${app}"
+codesign -d --entitlements - "${app}" 2>/dev/null | \
+  rg -A2 -F '[Key] com.apple.security.device.bluetooth' | rg -q '\[Bool\] true'
 app_hash="$(find "${app}" -type f -print0 | sort -z | xargs -0 shasum -a 256 | shasum -a 256 | awk '{print $1}')"
 echo "macOS package audit passed: ${app}"
 echo "Bundle content hash: ${app_hash}"

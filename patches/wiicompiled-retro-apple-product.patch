@@ -1,16 +1,19 @@
 diff --git a/cmake/PublicProducts.cmake b/cmake/PublicProducts.cmake
 --- a/cmake/PublicProducts.cmake
 +++ b/cmake/PublicProducts.cmake
-@@ -276,6 +276,55 @@ if(MKW_HAVE_RETRO_REWIND)
+@@ -276,6 +276,59 @@ if(MKW_HAVE_RETRO_REWIND)
      if(MKW_RETRO_BLOB_OBJECTS)
          target_sources(RetroRewind PRIVATE ${MKW_RETRO_BLOB_OBJECTS})
      endif()
 +    if(APPLE AND NOT CMAKE_SYSTEM_NAME STREQUAL "iOS" AND
 +       DEFINED MKW_KARTPAD_MACOS_SHELL AND MKW_KARTPAD_MACOS_SHELL)
-+        target_sources(RetroRewind PRIVATE "${MKW_KARTPAD_MACOS_SHELL}")
-+        target_include_directories(RetroRewind PRIVATE "${MKW_KARTPAD_MACOS_DIR}")
++        target_sources(RetroRewind PRIVATE ${MKW_KARTPAD_MACOS_SOURCES})
++        target_include_directories(RetroRewind PRIVATE
++            "${MKW_KARTPAD_MACOS_DIR}" "${MKW_KARTPAD_REPO_ROOT}/apple/shared"
++            "${MKW_KARTPAD_REPO_ROOT}/runtime/include")
 +        target_link_libraries(RetroRewind PRIVATE
-+            "-framework AppKit" "-framework UniformTypeIdentifiers")
++            "-framework AppKit" "-framework UniformTypeIdentifiers"
++            "-framework IOBluetooth" "-framework IOKit")
 +    endif()
 +    if(CMAKE_SYSTEM_NAME STREQUAL "iOS" AND
 +       DEFINED MKW_KARTPAD_MOBILE_SOURCES AND MKW_KARTPAD_MOBILE_SOURCES)
@@ -23,6 +26,7 @@ diff --git a/cmake/PublicProducts.cmake b/cmake/PublicProducts.cmake
 +        target_include_directories(RetroRewind PRIVATE
 +            "${MKW_KARTPAD_IOS_DIR}"
 +            "${MKW_KARTPAD_MOBILE_DIR}"
++            "${MKW_KARTPAD_SHARED_DIR}"
 +            "${MKW_KARTPAD_SUNPAD_DIR}"
 +            "${MKW_KARTPAD_REPO_ROOT}/runtime/include"
 +            "${MKW_KARTPAD_DISCIO_SOURCE_DIR}/Source/Core"

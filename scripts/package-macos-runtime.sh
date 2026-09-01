@@ -79,6 +79,8 @@ plutil -insert CFBundleVersion -string "${KARTPAD_BUILD_NUMBER:-3}" "${plist}"
 plutil -insert LSApplicationCategoryType -string public.app-category.games "${plist}"
 plutil -insert LSMinimumSystemVersion -string 14.0 "${plist}"
 plutil -insert NSHighResolutionCapable -bool true "${plist}"
+plutil -insert NSBluetoothAlwaysUsageDescription -string \
+  "KartPad uses Bluetooth to pair and connect an experimental Wii Remote and Nunchuk." "${plist}"
 plutil -insert NSPrincipalClass -string NSApplication "${plist}"
 
 # Bundle every non-system dylib and rewrite absolute paths. Release builds are
@@ -165,8 +167,11 @@ if find "${staged_app}" \( -name portable.txt -o -name UserData -o -name Config.
   exit 70
 fi
 
-codesign --force --deep --sign - "${staged_app}"
+codesign --force --deep --sign - \
+  --entitlements "${repo_root}/apple/macos/KartPad.entitlements" "${staged_app}"
 codesign --verify --deep --strict --verbose=2 "${staged_app}"
+codesign -d --entitlements - "${staged_app}" 2>/dev/null | \
+  rg -A2 -F '[Key] com.apple.security.device.bluetooth' | rg -q '\[Bool\] true'
 plutil -lint "${plist}"
 mv "${staged_app}" "${output_app}"
 
