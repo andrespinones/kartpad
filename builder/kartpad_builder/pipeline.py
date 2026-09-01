@@ -262,7 +262,7 @@ def build(
     audit_app(app, (str(repo), str(Path.home()), str(workspace)))
     provenance = {
         "schemaVersion": 1,
-        "builderVersion": "0.2.0-preview.1",
+        "builderVersion": "0.2.0-preview.2",
         "pipelineVersion": PIPELINE_VERSION,
         "profileId": profile.id,
         "profileSHA256": profile.profile_sha256,

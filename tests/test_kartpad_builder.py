@@ -93,6 +93,37 @@ class PackagingTests(unittest.TestCase):
                 mode = archive.getinfo("Payload/KartPad.app/KartPad").external_attr >> 16
                 self.assertTrue(mode & stat.S_IXUSR)
 
+    def test_additional_public_release_entries_are_deterministic(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            app = self.make_app(root)
+            notice = root / "RIGHTS_AND_LICENSES.md"
+            notice.write_text("community preview\n")
+            first = root / "first.ipa"
+            second = root / "second.ipa"
+            provenance = {"schemaVersion": 1, "releaseTag": "v0.2.0-preview.2"}
+            entries = {"RIGHTS_AND_LICENSES.md": notice}
+            first_hash = package_unsigned_ipa(app, first, provenance, entries)
+            second_hash = package_unsigned_ipa(app, second, provenance, entries)
+            self.assertEqual(first_hash, second_hash)
+            self.assertEqual(first.read_bytes(), second.read_bytes())
+            with zipfile.ZipFile(first) as archive:
+                self.assertEqual(archive.read("RIGHTS_AND_LICENSES.md"), b"community preview\n")
+
+    def test_unsafe_additional_entry_is_rejected(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            app = self.make_app(root)
+            notice = root / "notice"
+            notice.write_text("test\n")
+            with self.assertRaisesRegex(PackageError, "invalid additional"):
+                package_unsigned_ipa(
+                    app,
+                    root / "bad.ipa",
+                    {"schemaVersion": 1},
+                    {"../notice": notice},
+                )
+
     def test_forbidden_game_image_is_rejected(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             app = self.make_app(Path(temp))

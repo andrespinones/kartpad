@@ -17,21 +17,22 @@
 ![KartPad running a race on DK Summit on iPad](docs/images/kartpad-dk-summit-ipad.png)
 
 > [!IMPORTANT]
-> **No downloadable IPA is included in the GitHub release. The release is
-> source code.** Its Personal IPA Builder runs on an Apple Silicon Mac and
-> creates a private unsigned IPA locally from a supported user-owned disc
-> image. Do not redistribute that personalized IPA. Online multiplayer now
-> passes the local Mac-to-iPad-Simulator development flow; public-service and
-> physical-device online acceptance remain pending. Retro Rewind content is
-> not available yet.
+> **The latest release includes KartPad's first downloadable unsigned IPA for
+> iPhone and iPad.** It must be re-signed before installation and still requires
+> your own legally obtained supported game image on first launch. The IPA
+> includes ahead-of-time translated game logic but no disc image, extracted
+> courses, textures, audio, saves, signing identity, or provisioning profile.
+> Online multiplayer passes the local Mac-to-iPad-Simulator development flow;
+> public-service and physical-device online acceptance remain pending. Retro
+> Rewind content is not available yet.
 
 ## What is available now?
 
 | Question | Answer |
 |---|---|
 | Is this Dolphin or streaming? | No. WiiCompiled translates the game's PowerPC code ahead of time, then KartPad compiles it for ARM64 and presents it through Metal. |
-| Is an IPA included in the GitHub release? | **No.** The release contains source code and the Personal IPA Builder, not a downloadable playable app. |
-| Can the source create an IPA? | Yes. On an Apple Silicon Mac, the Builder translates a supported user-owned game executable and creates a private unsigned IPA for local signing. That personalized IPA must not be redistributed. |
+| Is an IPA included in the GitHub release? | **Yes.** Preview 2 includes an audited unsigned ARM64 IPA for iPhone and iPad. Re-sign it locally, then import your own supported game image on first launch. |
+| Can the source create an IPA? | Yes. The Personal IPA Builder can also translate a supported user-owned game executable and create a separate private unsigned IPA on an Apple Silicon Mac. |
 | Does it include Mario Kart Wii? | No. You must provide your own legally obtained supported PAL `RMCP01` revision 0 WBFS/ISO. |
 | Does it support Retro Rewind? | Not yet. The current build runs the original retail content, including its 32 tracks. Retro Rewind's extra tracks, characters, and other content are planned as an optional mode selected from the three-dot menu. |
 | Does online play work? | The development build passes login, matchmaking, a two-player race, results, ratings, and lobby return against a compatible isolated WFC server. Public Retro WFC service, Wiimmfi, physical-device online, and external-client compatibility are not yet accepted. |
@@ -46,9 +47,12 @@ ahead-of-time translated arm64 code, Dawn presents through Metal, and a narrow
 Apple host layer supplies audio, input, storage, timing, and lifecycle behavior.
 
 This repository contains KartPad's Apple integration, reproducible patches,
-tests, documentation, and original artwork. It does **not** contain Mario Kart
-Wii, a disc image, extracted Nintendo assets, generated game code, saves, or
-signing material.
+tests, documentation, and original artwork. The source tree does **not** contain
+Mario Kart Wii, a disc image, extracted Nintendo assets, generated game code,
+saves, or signing material. The separately downloadable Preview 2 IPA contains
+the compiled ahead-of-time translation described in
+[`RIGHTS_AND_LICENSES.md`](RIGHTS_AND_LICENSES.md), but none of the remaining
+retail game data.
 
 ## Current status
 
@@ -64,7 +68,7 @@ signing material.
 | iPhone/iPad | The full 29,065-function ARM64 retail app has been packaged as an unsigned IPA; locally signed builds have been installed and physically accepted on both iPhone and iPad, reaching live races, importing a supported private WBFS, and preserving saves |
 | Game content | Original retail Mario Kart Wii content only today; Retro Rewind content is planned as a future optional mode in the three-dot menu |
 | Online multiplayer | Local Mac-to-iPad-Simulator login, matchmaking, room, race, native results, ratings, and lobby return pass; public-service and physical-device online acceptance remain open |
-| Distribution | GitHub provides source code only. The Personal IPA Builder creates a private unsigned IPA locally from a supported user-owned image; no downloadable playable IPA, game data, or translated game code is distributed |
+| Distribution | Preview 2 provides source plus a free unsigned community-preview IPA containing translated game logic. It contains no disc image, extracted game assets, saves, signing identity, or provisioning profile |
 
 The evidence ledger, exact open rows, and known risks live in
 [`docs/STATUS.md`](docs/STATUS.md). The 67-row release matrix is in
@@ -121,12 +125,22 @@ their filename extension is recognized. The expected digest is recorded in
 the build scripts for identification; no disc content is tracked or
 distributed.
 
-## Build from source
+## Install or build
+
+### Download the unsigned iPhone/iPad IPA
+
+Download `KartPad-v0.2.0-preview.2-unsigned.ipa` and `SHA256SUMS` from the
+[latest release](https://github.com/chrissotraidis/kartpad/releases/tag/v0.2.0-preview.2).
+Verify the checksum, re-sign the IPA with AltStore Classic plus AltServer or
+another compatible personal-signing workflow, and select your own supported
+PAL `RMCP01` revision 0 image on first launch. See
+[`docs/INSTALL_IPA.md`](docs/INSTALL_IPA.md) for the complete boundary and
+update-preservation guidance.
 
 ### Build a personal unsigned IPA
 
-The GitHub release is source code, not an IPA. KartPad's public Builder performs
-static recompilation on the user's Apple Silicon Mac before signing:
+KartPad's public Builder can instead perform static recompilation on the user's
+Apple Silicon Mac before signing:
 
 ```sh
 ./scripts/build-user-ipa.sh bootstrap
@@ -398,13 +412,14 @@ Useful starting points:
 
 ### Can I download an IPA or playable app?
 
-No. The GitHub release contains source code and the Personal IPA Builder; it
-does not contain a downloadable IPA or playable app. KartPad uses static
-recompilation, so the Builder must translate a supported user-owned disc image
-on the user's Apple Silicon Mac before it can package a private unsigned IPA
-for local signing. That personalized IPA must not be redistributed. Locally
-signed builds from this process have been accepted on physical iPhone and iPad
-hardware.
+Yes. Preview 2 provides an unsigned iPhone/iPad IPA that must be re-signed
+before installation. It contains KartPad's compiled ARM64 translation but no
+disc image or extracted game assets, so you must select your own legally
+obtained supported image on first launch. The Personal IPA Builder remains
+available as a separate local workflow. Follow
+[`docs/INSTALL_IPA.md`](docs/INSTALL_IPA.md), and read
+[`RIGHTS_AND_LICENSES.md`](RIGHTS_AND_LICENSES.md) for the community-release
+boundary.
 
 ### Does online multiplayer work?
 
@@ -494,7 +509,11 @@ continue.
 
 | Path | Purpose |
 |---|---|
+| [`docs/INSTALL_IPA.md`](docs/INSTALL_IPA.md) | Download, checksum, re-signing, first-launch import, and update guidance for the public unsigned IPA |
+| [`RIGHTS_AND_LICENSES.md`](RIGHTS_AND_LICENSES.md) | Free community-preview authorization and unresolved translated-code rights boundary |
 | [`scripts/build-user-ipa.sh`](scripts/build-user-ipa.sh) | Identify a supported image and build a private unsigned IPA with the profile-driven Builder |
+| [`scripts/package-public-unsigned-ipa.py`](scripts/package-public-unsigned-ipa.py) | Deterministically package the exact audited public community-preview IPA |
+| [`scripts/audit-public-unsigned-ipa.py`](scripts/audit-public-unsigned-ipa.py) | Reject game data, signing residue, private paths, missing notices, malformed provenance, or an incorrect release build |
 | [`builder/profiles/`](builder/profiles/) | Versioned container, executable, and static-translation compatibility profiles |
 | [`docs/BUILDER.md`](docs/BUILDER.md) | Personal IPA workflow, cache design, compatibility extension, and public-release boundary |
 | [`scripts/self-build-macos.sh`](scripts/self-build-macos.sh) | Verify, extract, translate, build, sign, and audit a local macOS app |

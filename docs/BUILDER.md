@@ -1,9 +1,10 @@
 # KartPad Personal IPA Builder
 
-KartPad uses static recompilation. A playable app therefore has to translate
-the supported game executable on the user's Mac before Apple signing. The
-public Builder automates that local process; it is not an emulator, does not
-download game data, and does not make one universal playable IPA.
+KartPad uses static recompilation. The public Builder translates a supported
+game executable on the user's Mac before Apple signing. It remains useful for
+developers and future verified compatibility profiles even though Preview 2
+also publishes one audited unsigned IPA containing the current supported ARM64
+translation.
 
 ## Current preview
 
@@ -88,10 +89,16 @@ private path prefixes.
 
 ## Release boundary
 
-Only the Builder source, profiles, tests, and documentation may be attached to
-a public release. Never publish a generated translation directory, app bundle,
-personal IPA, extracted game tree, save, signing certificate, or provisioning
-profile.
+The maintainer may publish the exact audited community-preview IPA produced by
+`scripts/package-public-unsigned-ipa.py`. That package has versioned
+provenance, license notices, deterministic ZIP metadata, no private game data,
+and no signing material. Its translated-game-code and unresolved-rights status
+must be stated plainly as documented in `RIGHTS_AND_LICENSES.md`.
+
+Do not publish a generated translation directory, raw app bundle, personalized
+Builder IPA, extracted game tree, save, signing certificate, or provisioning
+profile. A local Builder output is not interchangeable with the exact public
+release candidate.
 
 The private development product passes a local Mac-to-iPad-Simulator online
 race/results flow. Public-service, physical-device online, and external-client

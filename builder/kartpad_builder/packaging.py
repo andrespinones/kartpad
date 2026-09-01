@@ -51,7 +51,12 @@ def audit_app(app: Path, private_prefixes: tuple[str, ...] = ()) -> dict[str, An
     }
 
 
-def package_unsigned_ipa(app: Path, output: Path, provenance: dict[str, Any]) -> str:
+def package_unsigned_ipa(
+    app: Path,
+    output: Path,
+    provenance: dict[str, Any],
+    additional_entries: dict[str, Path] | None = None,
+) -> str:
     audit_app(app)
     output.parent.mkdir(parents=True, exist_ok=True)
     temporary = output.with_name(output.name + ".partial")
@@ -63,6 +68,11 @@ def package_unsigned_ipa(app: Path, output: Path, provenance: dict[str, Any]) ->
         relative = path.relative_to(app).as_posix()
         mode = stat.S_IMODE(path.stat().st_mode)
         entries.append((f"{app_root}/{relative}", path.read_bytes(), mode))
+    for name, path in sorted((additional_entries or {}).items()):
+        parts = Path(name).parts
+        if not name or name.startswith("/") or ".." in parts or not path.is_file():
+            raise PackageError(f"invalid additional package entry: {name}")
+        entries.append((name, path.read_bytes(), stat.S_IMODE(path.stat().st_mode)))
     entries.append(
         (
             "KartPadBuilderProvenance.json",
