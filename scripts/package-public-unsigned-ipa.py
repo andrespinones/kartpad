@@ -8,9 +8,9 @@ import sys
 from pathlib import Path
 
 
-RELEASE_TAG = "v0.2.0-preview.2"
+RELEASE_TAG = "v0.2.0-preview.3"
 APP_VERSION = "0.2.0"
-APP_BUILD = "2"
+APP_BUILD = "3"
 
 
 def fail(message: str) -> None:
@@ -26,7 +26,7 @@ def main() -> int:
         "output",
         type=Path,
         nargs="?",
-        help="Output IPA path (defaults to artifacts/KartPad-v0.2.0-preview.2-unsigned.ipa)",
+        help="Output IPA path (defaults to artifacts/KartPad-v0.2.0-preview.3-unsigned.ipa)",
     )
     args = parser.parse_args()
 
@@ -38,7 +38,7 @@ def main() -> int:
     output = (
         args.output.resolve()
         if args.output
-        else repo / "artifacts/KartPad-v0.2.0-preview.2-unsigned.ipa"
+        else repo / "artifacts/KartPad-v0.2.0-preview.3-unsigned.ipa"
     )
     if subprocess.run(
         ["git", "-C", str(repo), "diff", "--quiet", "HEAD", "--"], check=False

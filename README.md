@@ -129,8 +129,8 @@ distributed.
 
 ### Download the unsigned iPhone/iPad IPA
 
-Download `KartPad-v0.2.0-preview.2-unsigned.ipa` and `SHA256SUMS` from the
-[latest release](https://github.com/chrissotraidis/kartpad/releases/tag/v0.2.0-preview.2).
+Download `KartPad-v0.2.0-preview.3-unsigned.ipa` and `SHA256SUMS` from the
+[latest release](https://github.com/chrissotraidis/kartpad/releases/tag/v0.2.0-preview.3).
 Verify the checksum, re-sign the IPA with AltStore Classic plus AltServer or
 another compatible personal-signing workflow, and select your own supported
 PAL `RMCP01` revision 0 image on first launch. See
