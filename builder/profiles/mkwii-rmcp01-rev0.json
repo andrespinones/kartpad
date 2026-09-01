@@ -2,7 +2,13 @@
   "schemaVersion": 1,
   "id": "mkwii-rmcp01-rev0",
   "displayName": "Mario Kart Wii PAL RMCP01 revision 0",
-  "sourceDependencies": ["WiiCompiled", "SunPad", "Dolphin"],
+  "sourceDependencies": [
+    "WiiCompiled",
+    "Retro Rewind Pulsar",
+    "Retro Rewind WFC patcher",
+    "SunPad",
+    "Dolphin"
+  ],
   "game": {
     "discId": "RMCP01",
     "region": "P",
@@ -58,6 +64,33 @@
       {"function": "func_805A1A8C.cpp", "script": "scripts/inject-g10-camera-lifecycle-guard.py"}
     ],
     "expectedGeneratedFunctions": 29637,
-    "expectedBaseFunctions": 29065
+    "expectedBaseFunctions": 29065,
+    "expectedRetroFunctions": 4186
+  },
+  "retroRewind": {
+    "version": "6.12.4",
+    "versionManifestUrl": "https://update.rwfc.net/RetroRewind/RetroRewindVersion.txt",
+    "root": "RetroRewind6",
+    "archive": {
+      "url": "https://cdn.update.rwfc.net/RetroRewind/zip/6.12.4-full2.zip",
+      "bytes": 1844093118,
+      "sha256": "d2ab1ecfda4c12bb90304897aecd03e2cbfb9a93e353fff928a494aa5d9ec71d",
+      "maximumExpandedBytes": 2200000000
+    },
+    "codePul": {
+      "path": "Binaries/Code.pul",
+      "bytes": 1718176,
+      "sha256": "ea93f9b8bf6d7696a807c1da5be724f1b0ec3eea563c1fdc1adfab10cb6c98e2"
+    },
+    "riivolutionXml": {
+      "path": "xml/RetroRewind6.xml",
+      "bytes": 20949,
+      "sha256": "9493911ddd39df695016e2cb7069df4a5f2b4c3a9eeef4d91ea00438ca7952df"
+    },
+    "payload": {
+      "url": "http://nas.play.rwfc.net/payload?g=RMCPD00",
+      "bytes": 28968,
+      "sha256": "fd8f26d6af26f1a0cfaecd1e472fe744a25d75f5136910533b7c75e3eca2f1d2"
+    }
   }
 }

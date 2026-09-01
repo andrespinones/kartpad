@@ -4,6 +4,7 @@
 #import "KartPadDiscExtractor.h"
 #import "KartPadMotionSteering.h"
 #import "KartPadPhysicalControllers.h"
+#import "KartPadRetroRewindInstaller.h"
 #import "SunPadDiagnostics.h"
 #import "SunPadGameOverlay.h"
 #import "SunPadInputMixer.h"
@@ -12,6 +13,7 @@
 #import <SDL3/SDL_properties.h>
 #import <SDL3/SDL_video.h>
 #import <CommonCrypto/CommonDigest.h>
+#import <QuartzCore/QuartzCore.h>
 #import <TargetConditionals.h>
 #import <UIKit/UIKit.h>
 #import <UniformTypeIdentifiers/UniformTypeIdentifiers.h>
@@ -57,6 +59,9 @@
 namespace {
 
 KartPadRuntimeOverlayHost *gRuntimeOverlayHost = nil;
+BOOL gKartPadRetroRewindSelected = NO;
+NSString *const kKartPadRequestedRuntimeProfileKey =
+    @"KartPadRequestedRuntimeProfile";
 
 UIViewController *KartPadVisibleViewController(UIWindow *window) {
   UIViewController *controller = window.rootViewController;
@@ -102,6 +107,48 @@ NSString *KartPadSupportRoot() {
 NSString *KartPadRemovalMarkerPath() {
   return [KartPadSupportRoot() stringByAppendingPathComponent:
       @"RemoveGameDataOnNextLaunch"];
+}
+
+BOOL KartPadRetroVersionIsValid(NSString *version) {
+  NSArray<NSString *> *parts = [version componentsSeparatedByString:@"."];
+  if (parts.count < 2 || parts.count > 4) return NO;
+  NSCharacterSet *nonDigits = NSCharacterSet.decimalDigitCharacterSet.invertedSet;
+  for (NSString *part in parts) {
+    if (part.length == 0 || [part rangeOfCharacterFromSet:nonDigits].location !=
+                                NSNotFound) {
+      return NO;
+    }
+  }
+  return YES;
+}
+
+NSString *KartPadLatestRetroVersionFromManifest(NSData *data) {
+  if (data.length == 0 || data.length > 512 * 1024) return nil;
+  NSString *text = [[NSString alloc] initWithData:data
+                                         encoding:NSUTF8StringEncoding];
+  if (text == nil) return nil;
+  NSString *latest = nil;
+  NSCharacterSet *whitespace = NSCharacterSet.whitespaceCharacterSet;
+  for (NSString *line in
+       [text componentsSeparatedByCharactersInSet:NSCharacterSet.newlineCharacterSet]) {
+    NSString *trimmed = [line
+        stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet];
+    if (trimmed.length == 0) continue;
+    NSString *version = nil;
+    for (NSString *token in
+         [trimmed componentsSeparatedByCharactersInSet:whitespace]) {
+      if (token.length > 0) {
+        version = token;
+        break;
+      }
+    }
+    if (!KartPadRetroVersionIsValid(version)) return nil;
+    if (latest == nil ||
+        [latest compare:version options:NSNumericSearch] == NSOrderedAscending) {
+      latest = version;
+    }
+  }
+  return latest;
 }
 
 NSString *KartPadSHA256ForFile(NSString *path, NSError **error) {
@@ -201,7 +248,8 @@ NSString *KartPadValidateExtractedRoot(NSString *root, NSError **error) {
   return nil;
 }
 
-BOOL KartPadEnsureRelativeDvdRoot(NSError **error) {
+BOOL KartPadEnsureRelativeRuntimePath(NSString *key, NSString *value,
+                                     NSError **error) {
   NSString *configPath = [KartPadSupportRoot() stringByAppendingPathComponent:@"Config.toml"];
   NSError *readError = nil;
   NSString *config = [NSString stringWithContentsOfFile:configPath
@@ -216,15 +264,18 @@ BOOL KartPadEnsureRelativeDvdRoot(NSError **error) {
     }
     config = @"";
   }
-  NSRegularExpression *dvdLine = [NSRegularExpression
-      regularExpressionWithPattern:@"(?m)^\\s*#?\\s*dvd_root\\s*=.*$"
+  NSString *linePattern = [NSString stringWithFormat:
+      @"(?m)^\\s*#?\\s*%@\\s*=.*$",
+      [NSRegularExpression escapedPatternForString:key]];
+  NSRegularExpression *pathLine = [NSRegularExpression
+      regularExpressionWithPattern:linePattern
                            options:0 error:error];
-  if (dvdLine == nil) {
+  if (pathLine == nil) {
     return NO;
   }
   NSRange whole = NSMakeRange(0, config.length);
-  config = [dvdLine stringByReplacingMatchesInString:config options:0 range:whole
-                                         withTemplate:@""];
+  config = [pathLine stringByReplacingMatchesInString:config options:0 range:whole
+                                          withTemplate:@""];
   NSRegularExpression *paths = [NSRegularExpression
       regularExpressionWithPattern:@"(?m)^\\s*\\[paths\\]\\s*$"
                            options:0 error:error];
@@ -236,13 +287,29 @@ BOOL KartPadEnsureRelativeDvdRoot(NSError **error) {
   if (match != nil) {
     NSUInteger insertion = NSMaxRange(match.range);
     config = [config stringByReplacingCharactersInRange:NSMakeRange(insertion, 0)
-                                              withString:@"\ndvd_root = \"GameData\""];
+                                              withString:[NSString stringWithFormat:
+                                                  @"\n%@ = \"%@\"", key, value]];
   } else {
-    config = [config stringByAppendingString:
-        @"\n\n[paths]\ndvd_root = \"GameData\"\n"];
+    config = [config stringByAppendingFormat:
+        @"\n\n[paths]\n%@ = \"%@\"\n", key, value];
   }
   return [config writeToFile:configPath atomically:YES
                     encoding:NSUTF8StringEncoding error:error];
+}
+
+BOOL KartPadEnsureRelativeDvdRoot(NSError **error) {
+  return KartPadEnsureRelativeRuntimePath(@"dvd_root", @"GameData", error);
+}
+
+BOOL KartPadEnsureRelativeRetroRewindRoot(NSError **error) {
+  return KartPadEnsureRelativeRuntimePath(
+      @"retro_rewind_root", @"RetroRewind/RetroRewind6", error);
+}
+
+BOOL KartPadInstalledRetroRewindIsValid() {
+  if (![KartPadRetroRewindInstaller isInstalled]) return NO;
+  NSError *error = nil;
+  return KartPadEnsureRelativeRetroRewindRoot(&error) && error == nil;
 }
 
 void KartPadRemoveStaleImportDirectories(NSString *supportRoot) {
@@ -427,42 +494,134 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
 }  // namespace
 
 @interface KartPadFirstLaunchViewController : UIViewController
+@property(nonatomic, copy) void (^modeSelected)(BOOL retroRewind);
+@property(nonatomic, strong) CAGradientLayer *backgroundGradient;
 @end
 
 @implementation KartPadFirstLaunchViewController
 
 - (void)viewDidLoad {
   [super viewDidLoad];
-  self.view.backgroundColor = UIColor.systemBackgroundColor;
+  self.view.backgroundColor = UIColor.blackColor;
+  CAGradientLayer *gradient = [CAGradientLayer layer];
+  gradient.colors = @[
+    (__bridge id)[UIColor colorWithRed:0.025 green:0.075 blue:0.15 alpha:1.0].CGColor,
+    (__bridge id)[UIColor colorWithRed:0.10 green:0.055 blue:0.18 alpha:1.0].CGColor,
+    (__bridge id)[UIColor colorWithRed:0.18 green:0.045 blue:0.08 alpha:1.0].CGColor,
+  ];
+  gradient.startPoint = CGPointMake(0.0, 0.0);
+  gradient.endPoint = CGPointMake(1.0, 1.0);
+  [self.view.layer insertSublayer:gradient atIndex:0];
+  self.backgroundGradient = gradient;
+
+  UIImage *markImage = [UIImage systemImageNamed:@"steeringwheel"] ?:
+      [UIImage systemImageNamed:@"flag.checkered"];
+  UIImageView *mark = [[UIImageView alloc] initWithImage:markImage];
+  mark.translatesAutoresizingMaskIntoConstraints = NO;
+  mark.contentMode = UIViewContentModeScaleAspectFit;
+  mark.tintColor = [UIColor colorWithRed:1.0 green:0.42 blue:0.18 alpha:1.0];
+  mark.accessibilityLabel = @"KartPad";
+  [NSLayoutConstraint activateConstraints:@[
+    [mark.widthAnchor constraintEqualToConstant:48.0],
+    [mark.heightAnchor constraintEqualToConstant:48.0],
+  ]];
 
   UILabel *title = [[UILabel alloc] init];
   title.translatesAutoresizingMaskIntoConstraints = NO;
   title.text = @"KartPad";
   title.font = [UIFont systemFontOfSize:34.0 weight:UIFontWeightBold];
   title.textAlignment = NSTextAlignmentCenter;
+  title.textColor = UIColor.whiteColor;
+
+  UILabel *tagline = [[UILabel alloc] init];
+  tagline.translatesAutoresizingMaskIntoConstraints = NO;
+  tagline.text = @"Choose your way to race";
+  tagline.font = [UIFont systemFontOfSize:20.0 weight:UIFontWeightSemibold];
+  tagline.textColor = [UIColor colorWithWhite:1.0 alpha:0.88];
+  tagline.textAlignment = NSTextAlignmentCenter;
 
   UILabel *message = [[UILabel alloc] init];
   message.translatesAutoresizingMaskIntoConstraints = NO;
   message.text = @"Your own RMCP01 disc image or extracted game data is required before play.";
   message.font = [UIFont preferredFontForTextStyle:UIFontTextStyleBody];
-  message.textColor = UIColor.secondaryLabelColor;
+  message.textColor = [UIColor colorWithWhite:1.0 alpha:0.62];
   message.textAlignment = NSTextAlignmentCenter;
   message.numberOfLines = 0;
 
-  UIStackView *stack = [[UIStackView alloc] initWithArrangedSubviews:@[title, message]];
+  UIButtonConfiguration *originalConfiguration =
+      [UIButtonConfiguration filledButtonConfiguration];
+  originalConfiguration.title = @"Mario Kart Wii";
+  originalConfiguration.subtitle = @"Original game";
+  originalConfiguration.image = [UIImage systemImageNamed:@"flag.checkered"];
+  originalConfiguration.imagePadding = 12.0;
+  originalConfiguration.baseBackgroundColor =
+      [UIColor colorWithRed:0.03 green:0.49 blue:1.0 alpha:1.0];
+  originalConfiguration.baseForegroundColor = UIColor.whiteColor;
+  originalConfiguration.cornerStyle = UIButtonConfigurationCornerStyleLarge;
+  originalConfiguration.contentInsets = NSDirectionalEdgeInsetsMake(24, 28, 24, 28);
+  UIButton *original = [UIButton buttonWithConfiguration:originalConfiguration
+                                           primaryAction:[UIAction actionWithHandler:^(__kindof UIAction *action) {
+    (void)action;
+    if (self.modeSelected != nil) self.modeSelected(NO);
+  }]];
+  original.accessibilityIdentifier = @"kartpad.mode.original";
+
+  UIButtonConfiguration *retroConfiguration =
+      [UIButtonConfiguration filledButtonConfiguration];
+  retroConfiguration.title = @"Retro Rewind";
+  NSString *installedVersion = KartPadRetroRewindInstaller.installedVersion;
+  retroConfiguration.subtitle = installedVersion.length > 0
+      ? [NSString stringWithFormat:@"Installed %@ • Extra content + Retro WFC",
+                                   installedVersion]
+      : [NSString stringWithFormat:@"Download %@ • Extra content + Retro WFC",
+                                   KartPadRetroRewindInstaller.requiredVersion];
+  retroConfiguration.image = [UIImage systemImageNamed:@"gobackward"];
+  retroConfiguration.imagePadding = 12.0;
+  retroConfiguration.baseBackgroundColor =
+      [UIColor colorWithRed:0.96 green:0.22 blue:0.39 alpha:1.0];
+  retroConfiguration.baseForegroundColor = UIColor.whiteColor;
+  retroConfiguration.cornerStyle = UIButtonConfigurationCornerStyleLarge;
+  retroConfiguration.contentInsets = NSDirectionalEdgeInsetsMake(24, 28, 24, 28);
+  UIButton *retro = [UIButton buttonWithConfiguration:retroConfiguration
+                                        primaryAction:[UIAction actionWithHandler:^(__kindof UIAction *action) {
+    (void)action;
+    if (self.modeSelected != nil) self.modeSelected(YES);
+  }]];
+  retro.accessibilityIdentifier = @"kartpad.mode.retro-rewind";
+
+  UIStackView *choices = [[UIStackView alloc] initWithArrangedSubviews:@[original, retro]];
+  choices.axis = UILayoutConstraintAxisHorizontal;
+  choices.spacing = 18.0;
+  choices.distribution = UIStackViewDistributionFillEqually;
+
+  UIStackView *stack =
+      [[UIStackView alloc] initWithArrangedSubviews:
+          @[mark, title, tagline, message, choices]];
   stack.translatesAutoresizingMaskIntoConstraints = NO;
   stack.axis = UILayoutConstraintAxisVertical;
   stack.spacing = 12.0;
+  [stack setCustomSpacing:24.0 afterView:message];
   [self.view addSubview:stack];
+  NSLayoutConstraint *preferredWidth = [stack.widthAnchor
+      constraintEqualToAnchor:self.view.safeAreaLayoutGuide.widthAnchor
+                     multiplier:0.72];
+  preferredWidth.priority = UILayoutPriorityDefaultHigh;
   [NSLayoutConstraint activateConstraints:@[
     [stack.centerXAnchor constraintEqualToAnchor:self.view.centerXAnchor],
-    [stack.topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor
-                                    constant:32.0],
+    [stack.centerYAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.centerYAnchor
+                                        constant:-18.0],
     [stack.leadingAnchor constraintGreaterThanOrEqualToAnchor:
         self.view.safeAreaLayoutGuide.leadingAnchor constant:32.0],
     [stack.trailingAnchor constraintLessThanOrEqualToAnchor:
         self.view.safeAreaLayoutGuide.trailingAnchor constant:-32.0],
+    [choices.widthAnchor constraintLessThanOrEqualToConstant:760.0],
+    preferredWidth,
   ]];
+}
+
+- (void)viewDidLayoutSubviews {
+  [super viewDidLayoutSubviews];
+  self.backgroundGradient.frame = self.view.bounds;
 }
 
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations {
@@ -471,13 +630,27 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
 
 @end
 
-@interface KartPadFirstLaunchHost : NSObject <UIDocumentPickerDelegate>
+@interface KartPadFirstLaunchHost : NSObject <UIDocumentPickerDelegate,
+                                               NSURLSessionDownloadDelegate>
 @property(nonatomic, strong) UIWindow *window;
 @property(nonatomic, strong) KartPadFirstLaunchViewController *root;
+@property(nonatomic, strong) NSURLSession *retroDownloadSession;
+@property(nonatomic, strong) NSURLSessionDownloadTask *retroDownloadTask;
+@property(nonatomic, strong) NSURLSessionDataTask *retroVersionTask;
+@property(nonatomic, strong) UIAlertController *retroProgressAlert;
 @property(nonatomic, assign) BOOL finished;
 @property(nonatomic, assign) BOOL succeeded;
+@property(nonatomic, assign) BOOL selectedRetroRewind;
+@property(nonatomic, assign) BOOL choosingRetroArchive;
+@property(nonatomic, assign) BOOL receivedRetroDownload;
+@property(nonatomic, assign) BOOL retroVersionChecked;
+@property(nonatomic, assign) NSInteger lastRetroDownloadPercent;
 - (BOOL)run;
 - (void)showOptions;
+- (void)showRetroRewindOptions;
+- (void)checkRetroRewindVersionAndContinue;
+- (void)showRetroVersionCheckFailure:(NSString *)detail;
+- (void)showKartPadUpdateRequiredForRetroVersion:(NSString *)latest;
 @end
 
 @implementation KartPadFirstLaunchHost
@@ -531,6 +704,325 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
   [self.root presentViewController:alert animated:YES completion:nil];
 }
 
+- (void)showRetroVersionCheckFailure:(NSString *)detail {
+  UIAlertController *alert = [UIAlertController
+      alertControllerWithTitle:@"Could Not Check for Updates"
+                       message:detail
+                preferredStyle:UIAlertControllerStyleAlert];
+  [alert addAction:[UIAlertAction actionWithTitle:@"Try Again"
+                                             style:UIAlertActionStyleDefault
+                                           handler:^(UIAlertAction *action) {
+    (void)action;
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW,
+                                 (int64_t)(0.35 * NSEC_PER_SEC)),
+                   dispatch_get_main_queue(), ^{
+      [self checkRetroRewindVersionAndContinue];
+    });
+  }]];
+  if (KartPadInstalledRetroRewindIsValid()) {
+    [alert addAction:[UIAlertAction actionWithTitle:@"Launch Installed Version"
+                                               style:UIAlertActionStyleDefault
+                                             handler:^(UIAlertAction *action) {
+      (void)action;
+      self.retroVersionChecked = YES;
+      [self completeSelectedMode];
+    }]];
+  }
+  [alert addAction:[UIAlertAction actionWithTitle:@"Back"
+                                             style:UIAlertActionStyleCancel
+                                           handler:nil]];
+  [self.root presentViewController:alert animated:YES completion:nil];
+}
+
+- (void)showKartPadUpdateRequiredForRetroVersion:(NSString *)latest {
+  NSString *message = [NSString stringWithFormat:
+      @"Retro Rewind %@ is current, but this KartPad build supports %@. KartPad precompiles Retro Rewind's code, so update KartPad before installing the newer pack or playing online.",
+      latest, KartPadRetroRewindInstaller.requiredVersion];
+  UIAlertController *alert = [UIAlertController
+      alertControllerWithTitle:@"KartPad Update Required"
+                       message:message
+                preferredStyle:UIAlertControllerStyleAlert];
+  [alert addAction:[UIAlertAction actionWithTitle:@"Check KartPad Releases"
+                                             style:UIAlertActionStyleDefault
+                                           handler:^(UIAlertAction *action) {
+    (void)action;
+    NSURL *url = [NSURL URLWithString:
+        @"https://github.com/chrissotraidis/kartpad/releases"];
+    [UIApplication.sharedApplication openURL:url options:@{}
+                            completionHandler:nil];
+  }]];
+  [alert addAction:[UIAlertAction actionWithTitle:@"Back"
+                                             style:UIAlertActionStyleCancel
+                                           handler:nil]];
+  [self.root presentViewController:alert animated:YES completion:nil];
+}
+
+- (void)checkRetroRewindVersionAndContinue {
+  UIAlertController *progress = [UIAlertController
+      alertControllerWithTitle:@"Checking Retro Rewind"
+                       message:@"Checking the official current version…"
+                preferredStyle:UIAlertControllerStyleAlert];
+  [self.root presentViewController:progress animated:YES completion:nil];
+
+  NSMutableURLRequest *request = [NSMutableURLRequest
+      requestWithURL:KartPadRetroRewindInstaller.officialVersionManifestURL
+         cachePolicy:NSURLRequestReloadIgnoringLocalCacheData
+     timeoutInterval:15.0];
+  __weak KartPadFirstLaunchHost *weakSelf = self;
+  NSURLSessionConfiguration *configuration =
+      NSURLSessionConfiguration.ephemeralSessionConfiguration;
+  NSURLSession *session = [NSURLSession sessionWithConfiguration:configuration];
+  self.retroVersionTask = [session
+      dataTaskWithRequest:request
+        completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+    [session finishTasksAndInvalidate];
+    NSHTTPURLResponse *http = [response isKindOfClass:NSHTTPURLResponse.class]
+        ? (NSHTTPURLResponse *)response : nil;
+    NSString *latest = error == nil && http.statusCode == 200
+        ? KartPadLatestRetroVersionFromManifest(data) : nil;
+    dispatch_async(dispatch_get_main_queue(), ^{
+      KartPadFirstLaunchHost *strongSelf = weakSelf;
+      if (strongSelf == nil) return;
+      strongSelf.retroVersionTask = nil;
+      [progress dismissViewControllerAnimated:YES completion:^{
+        if (latest == nil) {
+          NSString *detail = error.localizedDescription ?:
+              @"The official Retro Rewind version feed returned an invalid response. Online play requires the current release.";
+          [strongSelf showRetroVersionCheckFailure:detail];
+          return;
+        }
+        NSString *supported = KartPadRetroRewindInstaller.requiredVersion;
+        if ([supported compare:latest options:NSNumericSearch] ==
+            NSOrderedAscending) {
+          [strongSelf showKartPadUpdateRequiredForRetroVersion:latest];
+          return;
+        }
+        strongSelf.retroVersionChecked = YES;
+        [strongSelf completeSelectedMode];
+      }];
+    });
+  }];
+  [self.retroVersionTask resume];
+}
+
+- (void)completeSelectedMode {
+  if (!KartPadInstalledGameDataIsValid()) {
+    [self showOptions];
+    return;
+  }
+  if (self.selectedRetroRewind && !self.retroVersionChecked) {
+    [self checkRetroRewindVersionAndContinue];
+    return;
+  }
+  if (self.selectedRetroRewind && !KartPadInstalledRetroRewindIsValid()) {
+    [self showRetroRewindOptions];
+    return;
+  }
+  gKartPadRetroRewindSelected = self.selectedRetroRewind;
+  self.succeeded = YES;
+  self.finished = YES;
+}
+
+- (void)installRetroRewindArchive:(NSURL *)archiveURL
+               deletingAfterwards:(BOOL)deleteAfterwards {
+  UIAlertController *progress = self.retroProgressAlert;
+  if (progress == nil) {
+    progress = [UIAlertController
+        alertControllerWithTitle:@"Installing Retro Rewind"
+                         message:@"Verifying the selected ZIP…"
+                  preferredStyle:UIAlertControllerStyleAlert];
+    self.retroProgressAlert = progress;
+    [self.root presentViewController:progress animated:YES completion:nil];
+  }
+  __weak KartPadFirstLaunchHost *weakSelf = self;
+  dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
+    NSError *installError = nil;
+    BOOL installed = [KartPadRetroRewindInstaller
+        installArchiveAtURL:archiveURL
+                   progress:^(NSString *status, double fraction) {
+      dispatch_async(dispatch_get_main_queue(), ^{
+        KartPadFirstLaunchHost *strongSelf = weakSelf;
+        if (strongSelf.retroProgressAlert != nil) {
+          strongSelf.retroProgressAlert.message = [NSString stringWithFormat:
+              @"%@\n%.0f%%", status, fraction * 100.0];
+        }
+      });
+    }
+                      error:&installError];
+    if (deleteAfterwards) {
+      [NSFileManager.defaultManager removeItemAtURL:archiveURL error:nil];
+    }
+    dispatch_async(dispatch_get_main_queue(), ^{
+      KartPadFirstLaunchHost *strongSelf = weakSelf;
+      if (strongSelf == nil) return;
+      [strongSelf.retroProgressAlert dismissViewControllerAnimated:YES completion:^{
+        strongSelf.retroProgressAlert = nil;
+        if (!installed) {
+          [strongSelf showMessage:@"Retro Rewind Install Failed"
+                           detail:installError.localizedDescription completion:^{
+            [strongSelf showRetroRewindOptions];
+          }];
+          return;
+        }
+        [strongSelf completeSelectedMode];
+      }];
+    });
+  });
+}
+
+- (void)chooseRetroRewindArchive {
+  self.choosingRetroArchive = YES;
+  UTType *zip = [UTType typeWithFilenameExtension:@"zip"];
+  UIDocumentPickerViewController *picker =
+      [[UIDocumentPickerViewController alloc]
+          initForOpeningContentTypes:zip == nil ? @[UTTypeArchive] : @[zip]
+                            asCopy:NO];
+  picker.delegate = self;
+  picker.allowsMultipleSelection = NO;
+  [self.root presentViewController:picker animated:YES completion:nil];
+}
+
+- (void)startOfficialRetroRewindDownload {
+  self.receivedRetroDownload = NO;
+  self.lastRetroDownloadPercent = -1;
+  UIAlertController *progress = [UIAlertController
+      alertControllerWithTitle:[NSString stringWithFormat:
+          @"Downloading Retro Rewind %@",
+          KartPadRetroRewindInstaller.requiredVersion]
+                       message:@"Starting the official full download…"
+                preferredStyle:UIAlertControllerStyleAlert];
+  self.retroProgressAlert = progress;
+  __weak KartPadFirstLaunchHost *weakSelf = self;
+  [progress addAction:[UIAlertAction actionWithTitle:@"Cancel"
+                                               style:UIAlertActionStyleCancel
+                                             handler:^(UIAlertAction *action) {
+    (void)action;
+    KartPadFirstLaunchHost *strongSelf = weakSelf;
+    [strongSelf.retroDownloadTask cancel];
+    strongSelf.retroProgressAlert = nil;
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW,
+                                 (int64_t)(0.35 * NSEC_PER_SEC)),
+                   dispatch_get_main_queue(), ^{
+      [strongSelf showRetroRewindOptions];
+    });
+  }]];
+  [self.root presentViewController:progress animated:YES completion:nil];
+  NSURLSessionConfiguration *configuration =
+      NSURLSessionConfiguration.defaultSessionConfiguration;
+  configuration.allowsCellularAccess = YES;
+  self.retroDownloadSession =
+      [NSURLSession sessionWithConfiguration:configuration delegate:self
+                               delegateQueue:NSOperationQueue.mainQueue];
+  self.retroDownloadTask = [self.retroDownloadSession
+      downloadTaskWithURL:KartPadRetroRewindInstaller.officialArchiveURL];
+  [self.retroDownloadTask resume];
+}
+
+- (void)showRetroRewindOptions {
+  const double gib = (double)KartPadRetroRewindInstaller.officialArchiveBytes /
+                     (1024.0 * 1024.0 * 1024.0);
+  UIAlertController *options = [UIAlertController
+      alertControllerWithTitle:[NSString stringWithFormat:
+          @"Retro Rewind %@ Required",
+          KartPadRetroRewindInstaller.requiredVersion]
+                       message:[NSString stringWithFormat:
+          @"Retro Rewind is optional community content used for its extra tracks, characters, and Retro WFC online play. This KartPad build requires the matching official %.2f GiB full download.",
+          gib]
+                preferredStyle:UIAlertControllerStyleAlert];
+  [options addAction:[UIAlertAction actionWithTitle:@"Download Official Pack"
+                                               style:UIAlertActionStyleDefault
+                                             handler:^(UIAlertAction *action) {
+    (void)action;
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW,
+                                 (int64_t)(0.35 * NSEC_PER_SEC)),
+                   dispatch_get_main_queue(), ^{
+      [self startOfficialRetroRewindDownload];
+    });
+  }]];
+  [options addAction:[UIAlertAction actionWithTitle:@"Choose Full-Download ZIP…"
+                                               style:UIAlertActionStyleDefault
+                                             handler:^(UIAlertAction *action) {
+    (void)action;
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW,
+                                 (int64_t)(0.35 * NSEC_PER_SEC)),
+                   dispatch_get_main_queue(), ^{
+      [self chooseRetroRewindArchive];
+    });
+  }]];
+  [options addAction:[UIAlertAction actionWithTitle:@"Back"
+                                               style:UIAlertActionStyleCancel
+                                             handler:nil]];
+  [self.root presentViewController:options animated:YES completion:nil];
+}
+
+- (void)URLSession:(NSURLSession *)session
+      downloadTask:(NSURLSessionDownloadTask *)downloadTask
+      didWriteData:(int64_t)bytesWritten
+ totalBytesWritten:(int64_t)totalBytesWritten
+ totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite {
+  (void)session;
+  (void)downloadTask;
+  (void)bytesWritten;
+  if (self.retroProgressAlert == nil) return;
+  const int64_t expected = totalBytesExpectedToWrite > 0
+      ? totalBytesExpectedToWrite
+      : (int64_t)KartPadRetroRewindInstaller.officialArchiveBytes;
+  const double fraction = expected > 0
+      ? std::min(1.0, (double)totalBytesWritten / (double)expected) : 0.0;
+  const NSInteger percent = (NSInteger)(100.0 * fraction);
+  if (percent == self.lastRetroDownloadPercent) return;
+  self.lastRetroDownloadPercent = percent;
+  self.retroProgressAlert.message = [NSString stringWithFormat:
+      @"Downloading the official full pack…\n%.0f%%",
+      (double)percent];
+}
+
+- (void)URLSession:(NSURLSession *)session
+      downloadTask:(NSURLSessionDownloadTask *)downloadTask
+ didFinishDownloadingToURL:(NSURL *)location {
+  (void)session;
+  (void)downloadTask;
+  NSString *temporaryName = [NSString stringWithFormat:
+      @"KartPad-RetroRewind-%@-%@.zip",
+      KartPadRetroRewindInstaller.requiredVersion, NSUUID.UUID.UUIDString];
+  NSURL *temporaryURL = [NSURL fileURLWithPath:
+      [NSTemporaryDirectory() stringByAppendingPathComponent:temporaryName]];
+  NSError *moveError = nil;
+  [NSFileManager.defaultManager moveItemAtURL:location toURL:temporaryURL
+                                        error:&moveError];
+  if (moveError != nil) {
+    [self.retroProgressAlert dismissViewControllerAnimated:YES completion:^{
+      self.retroProgressAlert = nil;
+      [self showMessage:@"Retro Rewind Download Failed"
+                 detail:moveError.localizedDescription completion:^{
+        [self showRetroRewindOptions];
+      }];
+    }];
+    return;
+  }
+  self.receivedRetroDownload = YES;
+  self.retroProgressAlert.title = @"Installing Retro Rewind";
+  self.retroProgressAlert.message = @"Verifying the official download…\n0%";
+  [self installRetroRewindArchive:temporaryURL deletingAfterwards:YES];
+}
+
+- (void)URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task
+ didCompleteWithError:(NSError *)error {
+  (void)task;
+  [session finishTasksAndInvalidate];
+  self.retroDownloadTask = nil;
+  self.retroDownloadSession = nil;
+  if (error == nil || self.receivedRetroDownload ||
+      error.code == NSURLErrorCancelled) return;
+  [self.retroProgressAlert dismissViewControllerAnimated:YES completion:^{
+    self.retroProgressAlert = nil;
+    [self showMessage:@"Retro Rewind Download Failed"
+               detail:error.localizedDescription completion:^{
+      [self showRetroRewindOptions];
+    }];
+  }];
+}
+
 - (void)startImport:(NSURL *)url {
   UIAlertController *progress =
       [UIAlertController alertControllerWithTitle:@"Importing Game Data"
@@ -557,8 +1049,7 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
           }];
           return;
         }
-        strongSelf.succeeded = YES;
-        strongSelf.finished = YES;
+        [strongSelf completeSelectedMode];
       }];
     });
   });
@@ -602,6 +1093,7 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
 }
 
 - (void)showOptions {
+  self.choosingRetroArchive = NO;
   UIAlertController *options =
       [UIAlertController alertControllerWithTitle:@"Game Data Required"
           message:@"KartPad does not include Mario Kart Wii. Import your own RMCP01 WBFS, ISO, or extracted DATA folder to continue."
@@ -629,6 +1121,9 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
                                  (int64_t)(0.35 * NSEC_PER_SEC)),
                    dispatch_get_main_queue(), ^{ [self chooseDocumentsRoot]; });
   }]];
+  [options addAction:[UIAlertAction actionWithTitle:@"Back"
+                                               style:UIAlertActionStyleCancel
+                                             handler:nil]];
   [self.root presentViewController:options animated:YES completion:nil];
 }
 
@@ -639,11 +1134,25 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
   if (url != nil) {
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW,
                                  (int64_t)(0.35 * NSEC_PER_SEC)),
-                   dispatch_get_main_queue(), ^{ [self startImport:url]; });
+                   dispatch_get_main_queue(), ^{
+      if (self.choosingRetroArchive) {
+        self.choosingRetroArchive = NO;
+        [self installRetroRewindArchive:url deletingAfterwards:NO];
+      } else {
+        [self startImport:url];
+      }
+    });
   } else {
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW,
                                  (int64_t)(0.35 * NSEC_PER_SEC)),
-                   dispatch_get_main_queue(), ^{ [self showOptions]; });
+                   dispatch_get_main_queue(), ^{
+      if (self.choosingRetroArchive) {
+        self.choosingRetroArchive = NO;
+        [self showRetroRewindOptions];
+      } else {
+        [self showOptions];
+      }
+    });
   }
 }
 
@@ -651,7 +1160,14 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
   (void)controller;
   dispatch_after(dispatch_time(DISPATCH_TIME_NOW,
                                (int64_t)(0.35 * NSEC_PER_SEC)),
-                 dispatch_get_main_queue(), ^{ [self showOptions]; });
+                 dispatch_get_main_queue(), ^{
+    if (self.choosingRetroArchive) {
+      self.choosingRetroArchive = NO;
+      [self showRetroRewindOptions];
+    } else {
+      [self showOptions];
+    }
+  });
 }
 
 - (BOOL)run {
@@ -660,9 +1176,25 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
     NSLog(@"[KartPad] scheduled game-data removal failed: %@",
           removalError.localizedDescription);
   }
-  if (removalError == nil && KartPadInstalledGameDataIsValid()) {
-    return YES;
+  const BOOL gameDataReady = removalError == nil && KartPadInstalledGameDataIsValid();
+#if TARGET_OS_SIMULATOR
+  NSString *testArchive = NSProcessInfo.processInfo.environment[
+      @"KARTPAD_RETRO_REWIND_INSTALL_ARCHIVE"];
+  if (testArchive.length > 0 && ![KartPadRetroRewindInstaller isInstalled]) {
+    NSError *installError = nil;
+    BOOL installed = [KartPadRetroRewindInstaller
+        installArchiveAtURL:[NSURL fileURLWithPath:testArchive]
+                   progress:^(NSString *status, double fraction) {
+      NSLog(@"[KartPad] Simulator Retro Rewind install: %@ %.0f%%",
+            status, fraction * 100.0);
+    }
+                      error:&installError];
+    NSLog(@"[KartPad] Simulator Retro Rewind install %@%@",
+          installed ? @"passed" : @"FAILED",
+          installError == nil ? @"" :
+              [NSString stringWithFormat:@": %@", installError.localizedDescription]);
   }
+#endif
   UIWindowScene *scene = [self availableWindowScene];
   if (scene == nil) {
     NSLog(@"[KartPad] no UIWindowScene is available for first-launch import");
@@ -673,6 +1205,27 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
   self.window.windowLevel = UIWindowLevelAlert + 1.0;
   self.window.rootViewController = self.root;
   [self.window makeKeyAndVisible];
+  __weak KartPadFirstLaunchHost *weakSelf = self;
+  self.root.modeSelected = ^(BOOL retroRewind) {
+    KartPadFirstLaunchHost *strongSelf = weakSelf;
+    if (strongSelf == nil || strongSelf.finished) return;
+    strongSelf.selectedRetroRewind = retroRewind;
+    if (!gameDataReady) {
+      [strongSelf showOptions];
+      return;
+    }
+    [strongSelf completeSelectedMode];
+  };
+  NSString *requestedProfile = [NSUserDefaults.standardUserDefaults
+      stringForKey:kKartPadRequestedRuntimeProfileKey];
+  if ([requestedProfile isEqualToString:@"retro_rewind"]) {
+    [NSUserDefaults.standardUserDefaults
+        removeObjectForKey:kKartPadRequestedRuntimeProfileKey];
+    [NSUserDefaults.standardUserDefaults synchronize];
+    dispatch_async(dispatch_get_main_queue(), ^{
+      if (self.root.modeSelected != nil) self.root.modeSelected(YES);
+    });
+  }
   if (removalError != nil) {
     dispatch_async(dispatch_get_main_queue(), ^{
       [self showMessage:@"Game Data Removal Failed"
@@ -681,13 +1234,6 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
         self.succeeded = NO;
       }];
     });
-  } else if ([self documentsRoots].count == 1) {
-    // A WBFS copied into KartPad's Files-visible folder is an explicit import
-    // choice. Start it directly instead of layering another prompt over the
-    // first-launch explanation.
-    dispatch_async(dispatch_get_main_queue(), ^{ [self chooseDocumentsRoot]; });
-  } else {
-    dispatch_async(dispatch_get_main_queue(), ^{ [self showOptions]; });
   }
   while (!self.finished) {
     @autoreleasepool {
@@ -919,7 +1465,7 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
 
   __weak KartPadGameOverlay *weakSelf = self;
   UIAction *multiplayer =
-      [UIAction actionWithTitle:@"Local Multiplayer…"
+      [UIAction actionWithTitle:@"Multiplayer…"
                           image:[UIImage systemImageNamed:@"person.2.fill"]
                      identifier:@"dev.kartpad.multiplayer"
                         handler:^(__kindof UIAction *action) {
@@ -1318,30 +1864,31 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
   if (controller == nil) {
     return;
   }
-  const NSUInteger controllerCount =
-      [KartPadPhysicalControllers sharedControllers].connectedControllerCount;
-  NSString *message = [NSString stringWithFormat:
-      @"This setup is for local multiplayer. Choose Multiplayer in Mario Kart Wii's Main Menu. Connected extended controllers are assigned automatically to Players 1–4; KartPad touch remains available for Player 1. Online Nintendo WFC, Wiimmfi, and Retro Rewind play are not supported in this iPad build yet. Connected now: %lu.",
-      (unsigned long)controllerCount];
+  NSString *message = gKartPadRetroRewindSelected
+      ? @"Retro Rewind is active. Choose Nintendo WFC in the game for Retro WFC online play."
+      : @"Online multiplayer is available only through Retro Rewind. The original Mario Kart Wii online service is no longer available.";
   UIAlertController *sheet =
-      [UIAlertController alertControllerWithTitle:@"Local Multiplayer"
+      [UIAlertController alertControllerWithTitle:@"Multiplayer"
                                           message:message
                                    preferredStyle:UIAlertControllerStyleActionSheet];
-  __weak KartPadRuntimeOverlayHost *weakSelf = self;
-  [sheet addAction:[UIAlertAction actionWithTitle:@"Controller Setup…"
-                                            style:UIAlertActionStyleDefault
-                                          handler:^(UIAlertAction *action) {
-    (void)action;
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW,
-                                 (int64_t)(0.35 * NSEC_PER_SEC)),
-                   dispatch_get_main_queue(), ^{
-      KartPadRuntimeOverlayHost *strongSelf = weakSelf;
-      if (strongSelf != nil) {
-        [strongSelf gameOverlayRequestsControllerMapping:strongSelf->_overlay];
-      }
-    });
-  }]];
-  [sheet addAction:[UIAlertAction actionWithTitle:@"Continue Playing"
+  if (!gKartPadRetroRewindSelected) {
+    __weak KartPadRuntimeOverlayHost *weakSelf = self;
+    [sheet addAction:[UIAlertAction actionWithTitle:@"Switch to Retro Rewind"
+                                              style:UIAlertActionStyleDefault
+                                            handler:^(UIAlertAction *action) {
+      (void)action;
+      [NSUserDefaults.standardUserDefaults
+          setObject:@"retro_rewind" forKey:kKartPadRequestedRuntimeProfileKey];
+      [NSUserDefaults.standardUserDefaults synchronize];
+      dispatch_after(dispatch_time(DISPATCH_TIME_NOW,
+                                   (int64_t)(0.35 * NSEC_PER_SEC)),
+                     dispatch_get_main_queue(), ^{
+        [weakSelf showIntegrationAlert:@"Retro Rewind Selected"
+                               message:@"Close and reopen KartPad. It will go directly to Retro Rewind setup or launch the installed pack."];
+      });
+    }]];
+  }
+  [sheet addAction:[UIAlertAction actionWithTitle:@"Back"
                                             style:UIAlertActionStyleCancel
                                           handler:nil]];
   UIPopoverPresentationController *popover = sheet.popoverPresentationController;
@@ -1609,6 +2156,10 @@ extern "C" bool KartPadMobileEnsureGameDataAvailable() {
     return available;
   }
   return [[[KartPadFirstLaunchHost alloc] init] run];
+}
+
+extern "C" const char *KartPadMobileSelectedRuntimeProfile() {
+  return gKartPadRetroRewindSelected ? "retro_rewind" : "base";
 }
 
 extern "C" void KartPadMobileRuntimeHostInstall(void *sdlWindow) {

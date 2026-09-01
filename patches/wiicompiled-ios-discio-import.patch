@@ -1,6 +1,6 @@
 --- a/cmake/PublicProducts.cmake
 +++ b/cmake/PublicProducts.cmake
-@@ -271,14 +271,52 @@
+@@ -271,14 +271,53 @@
  
  set(MKW_KARTPAD_REPO_ROOT "" CACHE PATH
      "KartPad repository root used to embed the exact mobile UIKit host")
@@ -50,17 +50,20 @@
          "${MKW_KARTPAD_IOS_DIR}/KartPadRuntimeOverlayHost.mm"
 +        "${MKW_KARTPAD_IOS_DIR}/KartPadDiscExtractor.mm"
 +        "${MKW_KARTPAD_IOS_DIR}/KartPadDiscFormats.cpp"
++        "${MKW_KARTPAD_IOS_DIR}/KartPadRetroRewindInstaller.mm"
          "${MKW_KARTPAD_MOBILE_DIR}/KartPadClassicInput.mm"
          "${MKW_KARTPAD_MOBILE_DIR}/KartPadPhysicalControllers.mm"
          "${MKW_KARTPAD_MOBILE_DIR}/KartPadMotionSteering.mm"
-@@ -304,19 +343,31 @@
+@@ -304,19 +344,33 @@
          "${MKW_KARTPAD_IOS_DIR}"
          "${MKW_KARTPAD_MOBILE_DIR}"
          "${MKW_KARTPAD_SUNPAD_DIR}"
 -        "${MKW_KARTPAD_REPO_ROOT}/runtime/include")
 +        "${MKW_KARTPAD_REPO_ROOT}/runtime/include"
 +        "${MKW_KARTPAD_DISCIO_SOURCE_DIR}/Source/Core"
-+        "${MKW_KARTPAD_DISCIO_SOURCE_DIR}/Externals/fmt/fmt/include")
++        "${MKW_KARTPAD_DISCIO_SOURCE_DIR}/Externals/fmt/fmt/include"
++        "${MKW_KARTPAD_DISCIO_SOURCE_DIR}/Externals/minizip-ng/minizip-ng"
++        "${CMAKE_CURRENT_LIST_DIR}/../third_party/kartpad-profile")
      set_source_files_properties(${MKW_KARTPAD_MOBILE_SOURCES}
          PROPERTIES
              COMPILE_OPTIONS "-fobjc-arc"

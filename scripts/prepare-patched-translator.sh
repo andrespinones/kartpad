@@ -5,11 +5,17 @@ repo=${0:A:h:h}
 upstream="$repo/ref/upstream/Wiicompiled"
 stage="$repo/build/wiicompiled-fpscr"
 patch_file="$repo/patches/wiicompiled-fpscr-state.patch"
+dual_profile_patch="$repo/patches/wiicompiled-dual-profile-translator.patch"
+dual_symbols_patch="$repo/patches/wiicompiled-dual-profile-symbols.patch"
+dual_closure_patch="$repo/patches/wiicompiled-dual-profile-closure.patch"
 
 mkdir -p "$stage"
 rsync -a --delete --exclude .git --exclude bin --exclude obj \
   "$upstream/" "$stage/"
 git apply --recount --unidiff-zero --unsafe-paths --directory="$stage" "$patch_file"
+git apply --recount --unsafe-paths --directory="$stage" "$dual_profile_patch"
+patch --batch -p1 -d "$stage" < "$dual_symbols_patch"
+patch --batch -p1 -d "$stage" < "$dual_closure_patch"
 
 dotnet_bin=/opt/homebrew/opt/dotnet@8/bin/dotnet
 project="$stage/translator/src/Translator.Cli/Translator.Cli.csproj"

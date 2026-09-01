@@ -12,6 +12,12 @@ from pathlib import Path
 from kartpad_builder.packaging import PackageError, audit_app, package_unsigned_ipa
 from kartpad_builder.pipeline import cache_key, dependency_cache_key
 from kartpad_builder.profiles import Profile, ProfileError, load_profiles, select_profile, validate_profile
+from kartpad_builder.release_header import render_retro_rewind_header
+from kartpad_builder.retro_rewind import (
+    extract_archive,
+    validate_pack,
+    validate_rwfc_payload,
+)
 
 
 REPO = Path(__file__).resolve().parents[1]
@@ -60,6 +66,119 @@ class ProfileTests(unittest.TestCase):
             baseline = dependency_cache_key(root, ("first", "second"))
             (root / "second").write_bytes(b"changed")
             self.assertNotEqual(baseline, dependency_cache_key(root, ("first", "second")))
+
+    def test_dual_mode_upstream_contract_is_explicit(self) -> None:
+        profile = load_profiles(PROFILES)[0]
+        dependencies = {
+            dependency["name"]
+            for dependency in json.loads((REPO / "dependencies.lock.json").read_text())["dependencies"]
+        }
+        self.assertTrue(set(profile.data["sourceDependencies"]).issubset(dependencies))
+        self.assertIn("WiiCompiled", profile.data["sourceDependencies"])
+        self.assertIn("Retro Rewind Pulsar", profile.data["sourceDependencies"])
+        self.assertIn("Retro Rewind WFC patcher", profile.data["sourceDependencies"])
+
+    def test_release_header_is_generated_from_the_retro_rewind_pin(self) -> None:
+        profile = load_profiles(PROFILES)[0]
+        retro = profile.data["retroRewind"]
+        header = render_retro_rewind_header(profile.data)
+        self.assertIn(f'#define KARTPAD_RR_VERSION "{retro["version"]}"', header)
+        self.assertIn(
+            f'#define KARTPAD_RR_VERSION_MANIFEST_URL "{retro["versionManifestUrl"]}"',
+            header,
+        )
+        self.assertIn(f'#define KARTPAD_RR_ARCHIVE_URL "{retro["archive"]["url"]}"', header)
+        self.assertIn(retro["archive"]["sha256"], header)
+        self.assertIn(retro["codePul"]["sha256"], header)
+        self.assertIn(retro["riivolutionXml"]["sha256"], header)
+        self.assertIn(
+            f'/zip/{retro["version"]}-',
+            retro["archive"]["url"],
+            "the visible version and immutable archive URL must advance together",
+        )
+
+    def test_device_archive_hashing_uses_heap_storage(self) -> None:
+        source = (REPO / "apple/ios/KartPadRetroRewindInstaller.mm").read_text()
+        self.assertNotIn("uint8_t buffer[1024 * 1024]", source)
+        self.assertIn(
+            "NSMutableData *bufferStorage = [NSMutableData dataWithLength:1024 * 1024]",
+            source,
+        )
+
+
+class RetroRewindTests(unittest.TestCase):
+    def make_archive(self, root: Path, unsafe: bool = False) -> tuple[Path, dict]:
+        archive = root / "retro.zip"
+        code = b"code-pul-fixture"
+        xml = b"<riivolution/>\n"
+        with zipfile.ZipFile(archive, "w") as bundle:
+            bundle.writestr("RetroRewind6/version.txt", "6.12.4\n")
+            bundle.writestr("RetroRewind6/Binaries/Code.pul", code)
+            bundle.writestr("RetroRewind6/xml/RetroRewind6.xml", xml)
+            bundle.writestr("apps/RetroRewind/boot.dol", b"not required by KartPad")
+            bundle.writestr("RetroRewind.wad", b"not required by KartPad")
+            if unsafe:
+                bundle.writestr("../escape", b"unsafe")
+        config = {
+            "version": "6.12.4",
+            "root": "RetroRewind6",
+            "archive": {
+                "url": "https://example.invalid/retro.zip",
+                "bytes": archive.stat().st_size,
+                "sha256": hashlib.sha256(archive.read_bytes()).hexdigest(),
+                "maximumExpandedBytes": 1024 * 1024,
+            },
+            "codePul": {
+                "path": "Binaries/Code.pul",
+                "bytes": len(code),
+                "sha256": hashlib.sha256(code).hexdigest(),
+            },
+            "riivolutionXml": {
+                "path": "xml/RetroRewind6.xml",
+                "bytes": len(xml),
+                "sha256": hashlib.sha256(xml).hexdigest(),
+            },
+            "payload": {
+                "url": "http://example.invalid/payload",
+                "bytes": 1,
+                "sha256": "0" * 64,
+            },
+        }
+        return archive, config
+
+    def test_extracts_only_version_locked_retro_rewind_tree(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            archive, config = self.make_archive(root)
+            destination = root / "RetroRewind6"
+            extract_archive(archive, destination, config)
+            validate_pack(destination, config)
+            self.assertFalse((root / "apps").exists())
+            self.assertFalse((root / "RetroRewind.wad").exists())
+
+    def test_archive_traversal_is_rejected_before_extraction(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            archive, config = self.make_archive(root, unsafe=True)
+            with self.assertRaisesRegex(Exception, "unsafe path"):
+                extract_archive(archive, root / "RetroRewind6", config)
+            self.assertFalse((root.parent / "escape").exists())
+
+    def test_current_production_payload_signature_and_tamper_detection(self) -> None:
+        payload = REPO / "private/builder/retro-rewind-downloads/payload.RMCPD00.bin"
+        if not payload.is_file():
+            self.skipTest("private production payload is not cached")
+        config = load_profiles(PROFILES)[0].data["retroRewind"]["payload"]
+        validate_rwfc_payload(payload, config)
+        with tempfile.TemporaryDirectory() as temp:
+            tampered = Path(temp) / "payload.bin"
+            image = bytearray(payload.read_bytes())
+            image[-1] ^= 1
+            tampered.write_bytes(image)
+            changed = dict(config)
+            changed["sha256"] = hashlib.sha256(image).hexdigest()
+            with self.assertRaisesRegex(Exception, "signature"):
+                validate_rwfc_payload(tampered, changed)
 
 
 class PackagingTests(unittest.TestCase):

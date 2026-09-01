@@ -125,9 +125,17 @@ def validate_profile(data: dict[str, Any], source: str = "profile") -> None:
         "injectors",
         "expectedGeneratedFunctions",
         "expectedBaseFunctions",
+        "expectedRetroFunctions",
     ):
         if key not in translation:
             raise ProfileError(f"{source}.translation: missing {key}")
+    if "retroRewind" in data:
+        from .retro_rewind import validate_config
+
+        try:
+            validate_config(data["retroRewind"], f"{source}.retroRewind")
+        except Exception as exc:
+            raise ProfileError(str(exc)) from exc
 
 
 def load_profiles(directory: Path) -> list[Profile]:

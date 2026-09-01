@@ -10,7 +10,8 @@ product="${5:-base}"
 case "${product}" in
   base) product_target="WiiCompiled" ;;
   retro-rewind) product_target="RetroRewind" ;;
-  *) echo "ERROR: product must be base or retro-rewind" >&2; exit 64 ;;
+  dual) product_target="KartPadDual" ;;
+  *) echo "ERROR: product must be base, retro-rewind, or dual" >&2; exit 64 ;;
 esac
 
 "${repo_root}/scripts/prepare-g7-game-runtime.sh" \

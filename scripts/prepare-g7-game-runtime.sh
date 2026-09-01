@@ -20,7 +20,8 @@ sse2neon_sha256="44b9fa3dec3a52ea473246e04b9f692a4e5b0ed654299eef7fe7ec3049e223e
 case "${product}" in
   base) product_target="WiiCompiled" ;;
   retro-rewind) product_target="RetroRewind" ;;
-  *) echo "ERROR: product must be base or retro-rewind" >&2; exit 64 ;;
+  dual) product_target="KartPadDual" ;;
+  *) echo "ERROR: product must be base, retro-rewind, or dual" >&2; exit 64 ;;
 esac
 
 if [[ "$(uname -s)" != "Darwin" || "$(uname -m)" != "arm64" ]]; then
@@ -48,22 +49,41 @@ cp -R "${repo_root}/ref/upstream/Wiicompiled/aurora-main" \
   "${runtime_source}/aurora-main"
 patch --batch -p1 -d "${runtime_source}/aurora-main" < \
   "${repo_root}/patches/aurora-present-telemetry.patch"
+patch --batch -p1 -d "${runtime_source}/aurora-main" < \
+  "${repo_root}/patches/aurora-gx-resolve-snapshot-copy-src.patch"
 patch -p1 -d "${runtime_source}" < "${repo_root}/patches/wiicompiled-apple-runtime.patch"
 patch -p1 -d "${runtime_source}" < \
   "${repo_root}/patches/wiicompiled-apple-network-tls.patch"
 patch -p1 -d "${runtime_source}" < \
   "${repo_root}/patches/wiicompiled-local-wfc-test-route.patch"
 patch -p1 -d "${runtime_source}" < \
+  "${repo_root}/patches/wiicompiled-blocking-stream-recv-wait.patch"
+patch -p1 -d "${runtime_source}" < \
   "${repo_root}/patches/wiicompiled-mii-seed.patch"
 patch -p1 -d "${runtime_source}" < "${repo_root}/patches/wiicompiled-macos-shell.patch"
 patch -p1 -d "${runtime_source}" < \
   "${repo_root}/patches/wiicompiled-retro-apple-product.patch"
+for dual_patch in \
+    wiicompiled-dual-profile-registry.patch \
+    wiicompiled-dual-profile-mod-loader.patch \
+    wiicompiled-dual-product-selection.patch \
+    wiicompiled-dual-product-target.patch; do
+  patch --batch -p1 -d "${runtime_source}" < "${repo_root}/patches/${dual_patch}"
+done
 patch --batch -p1 -d "${runtime_source}" < \
   "${repo_root}/patches/wiicompiled-present-telemetry.patch"
 
 mkdir -p "${runtime_source}/third_party/sse2neon"
-curl --fail --location --silent --show-error \
-  "${sse2neon_url}" -o "${runtime_source}/third_party/sse2neon/sse2neon.h"
+cached_sse2neon="${repo_root}/build/dependency-cache/sse2neon-${sse2neon_sha256}.h"
+if [[ -f "${cached_sse2neon}" ]] &&
+   [[ "$(shasum -a 256 "${cached_sse2neon}" | awk '{print $1}')" == "${sse2neon_sha256}" ]]; then
+  cp "${cached_sse2neon}" "${runtime_source}/third_party/sse2neon/sse2neon.h"
+else
+  curl --fail --location --silent --show-error \
+    "${sse2neon_url}" -o "${runtime_source}/third_party/sse2neon/sse2neon.h"
+  mkdir -p "$(dirname "${cached_sse2neon}")"
+  cp "${runtime_source}/third_party/sse2neon/sse2neon.h" "${cached_sse2neon}"
+fi
 actual_sse2neon_sha256="$(shasum -a 256 "${runtime_source}/third_party/sse2neon/sse2neon.h" | awk '{print $1}')"
 if [[ "${actual_sse2neon_sha256}" != "${sse2neon_sha256}" ]]; then
   echo "ERROR: sse2neon hash mismatch: ${actual_sse2neon_sha256}" >&2

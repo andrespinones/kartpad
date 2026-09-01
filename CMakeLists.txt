@@ -300,6 +300,15 @@ if(BUILD_TESTING)
   target_compile_options(kartpad_scheduler_tests PRIVATE -Wall -Wextra -Wpedantic -Werror)
   add_test(NAME kartpad.scheduler.portable COMMAND kartpad_scheduler_tests)
 
+  add_executable(kartpad_blocking_stream_wait_tests
+    runtime/tests/blocking_stream_wait_tests.cpp)
+  target_include_directories(kartpad_blocking_stream_wait_tests PRIVATE runtime/include)
+  target_compile_features(kartpad_blocking_stream_wait_tests PRIVATE cxx_std_20)
+  target_compile_options(kartpad_blocking_stream_wait_tests PRIVATE
+    -Wall -Wextra -Wpedantic -Werror)
+  add_test(NAME kartpad.network.blocking-stream-wait
+    COMMAND kartpad_blocking_stream_wait_tests)
+
   if(MKW_BUILD_MACOS)
     add_executable(kartpad_darwin_vm_probe runtime/tests/darwin_vm_probe.cpp)
     target_compile_features(kartpad_darwin_vm_probe PRIVATE cxx_std_20)

@@ -84,4 +84,9 @@ def prepare_dependencies(repo: Path, profile: Profile, install: bool) -> list[st
         if not install:
             raise BuildError("missing pinned physical-iOS Dawn archive; run ./scripts/build-user-ipa.sh bootstrap")
         _download(dawn["iosArm64Url"], dawn["iosArm64Sha256"], dawn_output)
+    if "retroRewind" in profile.data:
+        from .retro_rewind import prepare_inputs
+
+        inputs = prepare_inputs(profile, repo / "private/builder", install)
+        return required + [f"Retro Rewind {inputs.version}", "Retro-WFC production payload"]
     return required

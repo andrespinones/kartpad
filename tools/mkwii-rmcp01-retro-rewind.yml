@@ -48,13 +48,23 @@ profiles:
     enabled: true
     requires_game_id: RMCP01
     requires_dol_sha256: 80d18895b39c63bd80f457398bfcbb91b7d16ac116a41a88967e954080155b05
-    code_pul: ref/upstream/rr-pulsar/PulsarPackCreator/Resources/Code.pul
-    mod_root: ref/upstream/rr-pulsar/PulsarPackCreator/Resources
+    # translate-retro-rewind.sh stages the exact selected Code.pul here before
+    # translating the base. Every translation phase must see the same patch
+    # set or leaf inlining can silently bypass Retro Rewind hooks.
+    code_pul: private/self-build/retro-rewind/input/Binaries/Code.pul
+    mod_root: private/self-build/retro-rewind/input
     region: P
     module_guest_base: 0x81800000
     module_link_base: 0x803992E0
     output: private/self-build/retro-rewind/mod
     enable_retro_wfc: true
+    retro_wfc_legacy_bootstrap_hook: 0x800ED6E8
+    riivolution:
+      xml: xml/RetroRewind6.xml
+      options:
+        - section: Retro Rewind
+          option: Pack
+          choice: 1
     # The build script always overrides this with an explicit local payload or
     # the diagnostic-only --skip-retro-wfc flag. Keeping the manifest offline
     # prevents translation from silently downloading production server data.

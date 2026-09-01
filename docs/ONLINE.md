@@ -17,6 +17,38 @@ compatibility is currently claimed. This loop uses the pinned authorized local
 server first and never commits credentials, payloads, private keys, captures,
 game data, translated code, or saves.
 
+## Production Retro WFC service boundary on 1 September 2026
+
+Production acceptance is waiting on Retro WFC service recovery. The official
+Retro Rewind documentation says Retro WFC is in testing/maintenance mode after
+sustained DDoS and cyber attacks, and the official status page currently shows
+no live room data.
+
+The exact KartPad development candidate reaches the production Retro WFC flow,
+receives a successful NAS authentication response, and advances to GameSpy
+profile login. The public gameplay-login endpoint then does not accept a TCP
+connection, and the game reports `61070`. The same endpoint also times out from
+the macOS host. This is the furthest currently available production gate; it is
+not evidence of production matchmaking or race acceptance.
+
+Retest NAS authentication, GameSpy login, matchmaking, room entry, a complete
+race, results, and reconnect when both the
+[official service notice](https://mkwiiki.org/wiki/Retro_Rewind) and
+[Retro WFC status page](https://status.rwfc.net/) show recovery.
+
+The current `0.3.0` dual-mode candidate has also been signed locally, installed
+over the existing KartPad app on a physical iPad without uninstalling it, and
+launched to the Original / Retro Rewind chooser. This closes the hardware
+build/install/launch gate only. The production connection sequence above is the
+authoritative online boundary until Retro WFC recovers.
+
+Retro Rewind online compatibility is version-locked. KartPad reads the official
+`RetroRewindVersion.txt` feed before starting that mode. When the official
+version is newer than KartPad's pinned translated profile, the app blocks the
+online-capable launch and directs the user to a compatible KartPad update. A
+new asset pack alone cannot update the ahead-of-time translated `Code.pul`
+graph embedded in KartPad.
+
 ## Local checkpoint completed on 1 September 2026
 
 - Clients: native arm64 macOS plus `iPad Pro 13-inch (M5)` Simulator.
@@ -50,7 +82,7 @@ immediate local test and evidence before advancing.
 1. **O1 — Apple transport — local pass:** implement and contract-test BSD socket, DNS, TLS,
    plaintext Retro-WFC routing, timeout, error, and cleanup behavior on macOS
    and the iOS Simulator.
-2. **O2 — Online product:** add a fail-closed private workflow that consumes an
+2. **O2 — Online product — local pass:** add a fail-closed private workflow that consumes an
    explicitly supplied Retro Rewind folder and payload, translates the pinned
    `Code.pul`, emits nonzero Retro Rewind shards, and builds the separate
    `RetroRewind` executable without publishing generated inputs.
@@ -90,4 +122,5 @@ instrumentation before a third attempt.
 - Local login, matchmaking, room, voting, race, results, ratings, and lobby
   return pass end to end.
 - External service, impairment, reconnect, physical-device online, and
-  cross-client interoperability rows remain open.
+  cross-client interoperability rows remain open. Production Retro WFC testing
+  is specifically waiting on the documented service outage to end.

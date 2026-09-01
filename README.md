@@ -23,8 +23,9 @@
 > includes ahead-of-time translated game logic but no disc image, extracted
 > courses, textures, audio, saves, signing identity, or provisioning profile.
 > Online multiplayer passes the local Mac-to-iPad-Simulator development flow;
-> public-service and physical-device online acceptance remain pending. Retro
-> Rewind content is not available yet.
+> public-service and physical-device online acceptance remain pending. The
+> current source now has a version-locked optional Retro Rewind development
+> mode, but Preview 2 does not include that mode.
 
 ## What is available now?
 
@@ -34,8 +35,8 @@
 | Is an IPA included in the GitHub release? | **Yes.** Preview 2 includes an audited unsigned ARM64 IPA for iPhone and iPad. Re-sign it locally, then import your own supported game image on first launch. |
 | Can the source create an IPA? | Yes. The Personal IPA Builder can also translate a supported user-owned game executable and create a separate private unsigned IPA on an Apple Silicon Mac. |
 | Does it include Mario Kart Wii? | No. You must provide your own legally obtained supported PAL `RMCP01` revision 0 WBFS/ISO. |
-| Does it support Retro Rewind? | Not yet. The current build runs the original retail content, including its 32 tracks. Retro Rewind's extra tracks, characters, and other content are planned as an optional mode selected from the three-dot menu. |
-| Does online play work? | The development build passes login, matchmaking, a two-player race, results, ratings, and lobby return against a compatible isolated WFC server. Public Retro WFC service, Wiimmfi, physical-device online, and external-client compatibility are not yet accepted. |
+| Does it support Retro Rewind? | The current source has a dual-mode launcher for original Mario Kart Wii or a separately installed, hash-verified Retro Rewind 6.12.4 pack. This is a development candidate, not part of Preview 2, and production online acceptance remains open. |
+| Does online play work? | The development build passes login, matchmaking, a two-player race, results, ratings, and lobby return against a compatible isolated WFC server. As of 1 September 2026, Retro WFC is in maintenance and its gameplay-login endpoint is unavailable, so production and physical-device online acceptance are waiting on service recovery. |
 | Do touch, tilt, and controllers work? | Yes. They are implemented in the development IPA, and the app has been physically accepted on both iPhone and iPad. Feature tuning can continue independently of that device acceptance. |
 | Are Android and Apple TV supported? | Not currently. Apple TV is a possible target once the current build is stable. Android may be investigated later. |
 | How much storage does it need? | The app is about 80 MiB and the extracted game data is about 2.5 GiB. Keeping the WBFS/ISO on the device requires additional space, and building from source needs substantially more free storage. |
@@ -66,8 +67,8 @@ retail game data.
 | Performance | Warm, simple scenes can report 60 FPS; first-use shader compilation and some tracks can fall far below real time. Stable frame pacing is **not yet accepted** |
 | Packaging | The K-circuit iPhone/iPad icon and branded package pass structural audit; installed-storage, configured gameplay, save-preservation, and normal-close evidence applies to the previously accepted app candidate, while the native first-run/settings/data-management shell remains open |
 | iPhone/iPad | The full 29,065-function ARM64 retail app has been packaged as an unsigned IPA; locally signed builds have been installed and physically accepted on both iPhone and iPad, reaching live races, importing a supported private WBFS, and preserving saves |
-| Game content | Original retail Mario Kart Wii content only today; Retro Rewind content is planned as a future optional mode in the three-dot menu |
-| Online multiplayer | Local Mac-to-iPad-Simulator login, matchmaking, room, race, native results, ratings, and lobby return pass; public-service and physical-device online acceptance remain open |
+| Game content | Preview 2 is original-only. Current source adds a version-locked dual-mode Original / Retro Rewind 6.12.4 development flow without bundling either game's private data. |
+| Online multiplayer | Local Mac-to-iPad-Simulator login, matchmaking, room, race, native results, ratings, and lobby return pass; Retro WFC is currently in maintenance, so public-service and physical-device online acceptance are waiting on service recovery |
 | Distribution | Preview 2 provides source plus a free unsigned community-preview IPA containing translated game logic. It contains no disc image, extracted game assets, saves, signing identity, or provisioning profile |
 
 The evidence ledger, exact open rows, and known risks live in
@@ -154,7 +155,9 @@ user's game executable. Compatibility is profile-driven: additional verified
 WBFS/ISO containers can share a profile only when their extracted executables
 are identical, while different regions or revisions use separate profiles.
 See [`docs/BUILDER.md`](docs/BUILDER.md) for the cache, validation, extension,
-and release contracts.
+and release contracts. Maintainers should also follow
+[`docs/UPSTREAM_UPDATES.md`](docs/UPSTREAM_UPDATES.md) when advancing either
+WiiCompiled or Retro Rewind.
 
 ### Development workflows
 
@@ -430,12 +433,27 @@ Public Retro WFC service compatibility, Wiimmfi, physical-device online play,
 and external-client interoperability are still unaccepted. Adding the network
 payload does not add Retro Rewind content.
 
+As of 1 September 2026, the official Retro Rewind documentation reports that
+Retro WFC is in testing/maintenance mode following sustained attacks. The
+official status page reports no live room data. KartPad's exact development
+candidate reaches production NAS authentication, then receives error `61070`
+when the Retro WFC GameSpy gameplay-login endpoint times out; a direct host
+reachability check to that endpoint times out as well. Production matchmaking
+and racing will be retested when Retro WFC is available again.
+
+- [Retro Rewind service notice](https://mkwiiki.org/wiki/Retro_Rewind)
+- [Retro WFC status](https://status.rwfc.net/)
+
 ### Does KartPad support Retro Rewind?
 
-Not yet. The current app runs the original retail Mario Kart Wii content. If
-you do not see Retro Rewind's additional tracks and characters, that is
-expected. Retro Rewind content is planned as an optional mode selected from
-KartPad's three-dot menu, but that mode is not available today.
+Preview 2 does not. The current source has a development candidate that opens
+with an Original / Retro Rewind chooser and installs a separately downloaded,
+hash-verified Retro Rewind 6.12.4 pack. KartPad does not bundle Mario Kart Wii
+or Retro Rewind content. The candidate boots both modes, but production Retro
+WFC matchmaking and racing cannot be accepted until the current service outage
+ends. Before Retro Rewind starts, KartPad checks the official version feed. If
+Retro Rewind advances beyond the version compiled into the app, KartPad asks
+for a compatible KartPad update instead of launching an outdated online pack.
 
 ### Are Android or Apple TV supported?
 
@@ -499,11 +517,11 @@ container, so back up before crossing those boundaries.
 
 No. Native macOS gameplay is broad and the accepted mobile IPA runs real
 races, but sustained performance, a complete three- and four-player result
-path, the eight-hour soak, fresh-clone provisioning, online play, complete
-touch/motion race coverage, Retro Rewind content, and the full release matrix
-remain open. General physical-device acceptance is complete on both iPhone and
-iPad, while narrower performance, audio, motion, and controller refinements can
-continue.
+path, the eight-hour soak, fresh-clone provisioning, production online
+acceptance, complete touch/motion race coverage, packaging the dual-mode Retro
+Rewind candidate for a release, and the full release matrix remain open.
+General physical-device acceptance is complete on both iPhone and iPad, while
+narrower performance, audio, motion, and controller refinements can continue.
 
 ## Project map
 

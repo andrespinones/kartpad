@@ -12,12 +12,20 @@ absolute_from_repo() {
 runtime_source="$(absolute_from_repo "${1:-build/g14-ios-game-runtime-source}")"
 xcode_build="$(absolute_from_repo "${2:-build/g14-ios-device-game-app-xcode}")"
 translation_root="$(absolute_from_repo "${3:-private/g8-full-translation}")"
+product="${4:-dual}"
 dawn_archive="${repo_root}/build/dependency-cache/dawn-ios-arm64-v20260603.191052.tar.gz"
 dawn_sha256="a361fcca75929fa5c766cfcde979c010a6da7d805e5db8e15c75e73fd8260e78"
 discio_source="${KARTPAD_DISCIO_SOURCE_DIR:-${repo_root}/build/dolphin-ios-discio-iphoneos-source}"
 discio_build="${KARTPAD_DISCIO_BUILD_DIR:-${repo_root}/build/dolphin-ios-discio-iphoneos-build}"
 app="${xcode_build}/Release-iphoneos/KartPad.app"
 path_map_flags="-ffile-prefix-map=${repo_root}=KartPad -fmacro-prefix-map=${repo_root}=KartPad"
+
+case "${product}" in
+  base) product_target="WiiCompiled" ;;
+  retro-rewind) product_target="RetroRewind" ;;
+  dual) product_target="KartPadDual" ;;
+  *) echo "ERROR: product must be base, retro-rewind, or dual" >&2; exit 64 ;;
+esac
 
 if [[ ! -f "${runtime_source}/CMakeLists.txt" ]] ||
    ! rg -q 'MKW_KARTPAD_REPO_ROOT' "${runtime_source}/cmake/PublicProducts.cmake"; then
@@ -91,7 +99,7 @@ cmake -S "${runtime_source}" -B "${xcode_build}" -G Xcode \
   -DMKW_KARTPAD_DISCIO_SOURCE_DIR="${discio_source}" \
   -DMKW_KARTPAD_DISCIO_BUILD_DIR="${discio_build}" \
   -DMKW_TRANSLATED_COMPILE_JOBS=2
-cmake --build "${xcode_build}" --config Release --target WiiCompiled -- \
+cmake --build "${xcode_build}" --config Release --target "${product_target}" -- \
   -sdk iphoneos CODE_SIGNING_ALLOWED=NO
 
 "${repo_root}/scripts/audit-ios-game-app.sh" "${app}" IOS

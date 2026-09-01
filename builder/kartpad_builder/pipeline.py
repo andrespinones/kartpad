@@ -9,15 +9,13 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from .errors import BuildError
 from .packaging import audit_app, package_unsigned_ipa
 from .profiles import Profile, canonical_json, sha256_file
+from .retro_rewind import RetroRewindInputs, prepare_inputs
 
 
 PIPELINE_VERSION = 1
-
-
-class BuildError(RuntimeError):
-    pass
 
 
 def source_fingerprint(repo: Path) -> str:
@@ -57,7 +55,15 @@ def _hex(value: int | str) -> str:
     return value if isinstance(value, str) else f"0x{value:08X}"
 
 
-def write_translator_manifest(profile: Profile, repo: Path, extraction: Path, translation: Path, path: Path) -> None:
+def write_translator_manifest(
+    profile: Profile,
+    repo: Path,
+    extraction: Path,
+    translation: Path,
+    path: Path,
+    retro: RetroRewindInputs,
+    mod_output: Path,
+) -> None:
     config = profile.data["translation"]
     executables = profile.data["extraction"]["executables"]
     dol = executables["dol"]
@@ -105,6 +111,27 @@ output:
   runtime_config: RuntimeConfig.h
   data_initializer: data_sections_init.cpp
   base_manifest: base/base_manifest.json
+
+profiles:
+  retro-rewind:
+    enabled: true
+    requires_game_id: {profile.data['game']['discId']}
+    requires_dol_sha256: {dol['sha256']}
+    code_pul: {retro.code_pul}
+    mod_root: {retro.root}
+    region: {profile.data['game']['region']}
+    module_guest_base: 0x81800000
+    module_link_base: 0x803992E0
+    output: {mod_output}
+    enable_retro_wfc: true
+    retro_wfc_payload: {retro.payload}
+    retro_wfc_legacy_bootstrap_hook: 0x800ED6E8
+    riivolution:
+      xml: xml/RetroRewind6.xml
+      options:
+        - section: Retro Rewind
+          option: Pack
+          choice: 1
 """
     path.write_text(text)
 
@@ -161,35 +188,62 @@ def extract(profile: Profile, image: Path, output: Path) -> None:
             shutil.rmtree(stage)
 
 
-def translate(profile: Profile, repo: Path, extraction: Path, output: Path, jobs: int) -> None:
+def translate(
+    profile: Profile,
+    repo: Path,
+    extraction: Path,
+    output: Path,
+    jobs: int,
+    retro: RetroRewindInputs,
+) -> None:
     shards = output / "build_shards/shards.cmake"
     expected_generated = profile.data["translation"]["expectedGeneratedFunctions"]
     expected_base = profile.data["translation"]["expectedBaseFunctions"]
+    expected_retro = profile.data["translation"]["expectedRetroFunctions"]
     if shards.is_file():
         count = len(list((output / "functions").glob("func_*.cpp")))
-        if count != expected_generated or f"set(MKW_BASE_FUNCTION_COUNT {expected_base})" not in shards.read_text():
+        graph = shards.read_text()
+        if (
+            count != expected_generated
+            or f"set(MKW_BASE_FUNCTION_COUNT {expected_base})" not in graph
+            or f"set(MKW_RETRO_REWIND_FUNCTION_COUNT {expected_retro})" not in graph
+            or "set(MKW_HAVE_RETRO_REWIND_SHARDS ON)" not in graph
+        ):
             raise BuildError("cached translation failed profile validation")
         print(f"Reused validated translation: {output}")
         return
     run([str(repo / "scripts/prepare-patched-translator.sh")])
     output.mkdir(parents=True, exist_ok=True)
+    mod_output = output.parent / "mod"
     manifest = output / "kartpad-builder-profile.yml"
-    write_translator_manifest(profile, repo, extraction, output, manifest)
+    write_translator_manifest(profile, repo, extraction, output, manifest, retro, mod_output)
     translator = repo / "build/wiicompiled-fpscr/translator/src/Translator.Cli/bin/Release/net8.0/Translator.Cli.dll"
     dotnet = shutil.which("dotnet") or "/opt/homebrew/opt/dotnet@8/bin/dotnet"
     config = profile.data["translation"]
     metadata = output / "base_translation_output.json"
     entry = _hex(config["entryPoints"][0])
-    run([dotnet, str(translator), "translate-recursive", entry, "--project", str(manifest), "--threads", str(jobs), "--prune-stale", "--output-metadata", str(metadata)])
+    run([dotnet, str(translator), "translate-recursive", entry, "--project", str(manifest), "--profile", "retro-rewind", "--threads", str(jobs), "--prune-stale", "--output-metadata", str(metadata)])
     for injector in config["injectors"]:
         run([str(repo / injector["script"]), str(output / "functions" / injector["function"])])
-    run([dotnet, str(translator), "generate-data-init", "--project", str(manifest)])
+    base_manifest = output / "base/base_manifest.json"
+    run([dotnet, str(translator), "emit-base-manifest", "--project", str(manifest), "--profile", "retro-rewind", "--out", str(base_manifest.parent), "--functions-dir", str(output / "functions"), "--translation-output-metadata", str(metadata), "--region", profile.data["game"]["region"]])
+    run([dotnet, str(translator), "translate-mod", "--project", str(manifest), "--profile", "retro-rewind", "--base-manifest", str(base_manifest), "--base-translation-output-metadata", str(metadata), "--code-pul", str(retro.code_pul), "--mod-root", str(retro.root), "--mod-name", "Retro Rewind", "--region", profile.data["game"]["region"], "--out", str(mod_output), "--prefer-cached-inputs", "--emit-cpp", "--threads", str(jobs), "--retro-wfc-payload", str(retro.payload)])
+    run([dotnet, str(translator), "generate-data-init", "--project", str(manifest), "--profile", "retro-rewind"])
     blob = output / "data_sections_init_blobs.S"
     if ".globl _kData_" not in blob.read_text():
         run(["perl", "-0pi", "-e", r"s/^\.globl (kData_[^\n]+)\n\1:/.globl $1\n.globl _$1\n$1:\n_$1:/mg", str(blob)])
-    run([dotnet, str(translator), "emit-build-shards", "--project", str(manifest), "--base-metadata", str(metadata), "--base-functions-dir", str(output / "functions"), "--native-source-dir", str(repo / "build/wiicompiled-fpscr/runtime/src"), "--out", str(output / "build_shards")])
+    mod_blob = mod_output / "cpp/mod_data_patches_blobs.S"
+    if mod_blob.is_file() and ".globl _k" not in mod_blob.read_text():
+        run(["perl", "-0pi", "-e", r"s/^\.globl (k[^\n]+)\n\1:/.globl $1\n.globl _$1\n$1:\n_$1:/mg", str(mod_blob)])
+    run([dotnet, str(translator), "emit-build-shards", "--project", str(manifest), "--profile", "retro-rewind", "--base-metadata", str(metadata), "--base-functions-dir", str(output / "functions"), "--native-source-dir", str(repo / "build/wiicompiled-fpscr/runtime/src"), "--resolved-profile", str(mod_output / "resolved_dispatch_profile.json"), "--retro-cpp-dir", str(mod_output / "cpp"), "--out", str(output / "build_shards")])
     count = len(list((output / "functions").glob("func_*.cpp")))
-    if count != expected_generated or f"set(MKW_BASE_FUNCTION_COUNT {expected_base})" not in shards.read_text():
+    graph = shards.read_text()
+    if (
+        count != expected_generated
+        or f"set(MKW_BASE_FUNCTION_COUNT {expected_base})" not in graph
+        or f"set(MKW_RETRO_REWIND_FUNCTION_COUNT {expected_retro})" not in graph
+        or "set(MKW_HAVE_RETRO_REWIND_SHARDS ON)" not in graph
+    ):
         raise BuildError("new translation failed profile validation")
 
 
@@ -218,10 +272,11 @@ def build(
     workspace = profile_root / "builds" / key
     extraction = profile_root / "inputs" / image_sha256 / "disc"
     translation = translation_override or workspace / "translation"
+    retro = prepare_inputs(profile, work_root, install=False)
     if app_override is None:
         extract(profile, image, extraction)
         if translation_override is None:
-            translate(profile, repo, extraction, translation, jobs)
+            translate(profile, repo, extraction, translation, jobs, retro)
         runtime_source = workspace / "ios-runtime-source"
         xcode_build = workspace / "ios-device-xcode"
         discio_key = dependency_cache_key(
@@ -246,7 +301,7 @@ def build(
             env["KARTPAD_DISCIO_SOURCE_DIR"] = str(discio_source)
             env["KARTPAD_DISCIO_BUILD_DIR"] = str(discio_build)
             try:
-                run([str(repo / "scripts/prepare-ios-game-runtime.sh"), str(translation), str(runtime_stage), str(workspace / "runtime-build")], env=env)
+                run([str(repo / "scripts/prepare-ios-game-runtime.sh"), str(translation), str(runtime_stage), str(workspace / "runtime-build"), "dual"], env=env)
                 runtime_stage.rename(runtime_source)
             except Exception:
                 if runtime_stage.exists():
@@ -255,7 +310,7 @@ def build(
         env = os.environ.copy()
         env["KARTPAD_DISCIO_SOURCE_DIR"] = str(discio_source)
         env["KARTPAD_DISCIO_BUILD_DIR"] = str(discio_build)
-        run([str(repo / "scripts/build-ios-device-game-app.sh"), str(runtime_source), str(xcode_build), str(translation)], env=env)
+        run([str(repo / "scripts/build-ios-device-game-app.sh"), str(runtime_source), str(xcode_build), str(translation), "dual"], env=env)
         app = xcode_build / "Release-iphoneos/KartPad.app"
     else:
         app = app_override

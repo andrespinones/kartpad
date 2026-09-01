@@ -12,6 +12,29 @@ each direction per client and consumed the complete 5,001-frame fixture. The
 test-only finish trigger is documented in `docs/ONLINE.md`; public-service,
 physical-device online, impairment, and external-client rows remain open.
 
+The exact dual-mode Simulator candidate also reaches production Retro WFC NAS
+authentication. It then receives `61070` because the public GameSpy
+gameplay-login endpoint times out. Retro Rewind's official documentation lists
+the service as in testing/maintenance mode, and its status page has no live
+room data. Production online acceptance is waiting on Retro WFC recovery; this
+external outage does not invalidate the accepted isolated-server flow.
+
+The same source produced a fresh signed KartPad `0.3.0` physical-iOS
+candidate. It was installed over the existing app on the attached iPad without
+an uninstall, launched successfully, and visibly reached the Original / Retro
+Rewind chooser. That is physical build, install, launch, and chooser evidence;
+it is not production Retro WFC matchmaking or gameplay evidence. The latter
+remains queued behind service recovery.
+
+Two physical-iPad attempts to download the official 6.12.4 full pack then
+failed identically after transfer: both device crash reports show `Thread stack
+size exceeded` in `KartPadSHA256ForLargeFile`. The verifier had placed a 1 MiB
+streaming buffer on a dispatch worker's smaller stack. Build 4 moves that buffer
+to heap storage and is installed in place for retest. Current source also makes
+download and install percentages separate, checks Retro Rewind's official
+version feed before launch, and fails closed when a newer pack requires a new
+ahead-of-time KartPad build.
+
 ## Goal ledger
 
 | Goal | Status | Evidence / next gate |

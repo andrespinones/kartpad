@@ -10,6 +10,7 @@ base_manifest_dir="${output}/base"
 base_manifest="${base_manifest_dir}/mkwii_base_manifest.json"
 mod_output="${repo_root}/private/self-build/retro-rewind/mod"
 shards="${output}/build_shards"
+profile_input="${repo_root}/private/self-build/retro-rewind/input"
 default_retro_root="${repo_root}/ref/upstream/rr-pulsar/PulsarPackCreator/Resources"
 retro_root="${default_retro_root}"
 payload=""
@@ -88,6 +89,22 @@ if [[ -n "${payload}" ]]; then
   }
 fi
 
+# The base translator reads Code.pul from the profile before translate-mod is
+# invoked. Stage the selected file at the profile-owned private path so the
+# base and mod legs are always built around identical patch addresses. A
+# partial copy never becomes visible to the translator.
+mkdir -p "${profile_input}/Binaries"
+staged_code="${profile_input}/Binaries/Code.pul"
+staged_code_partial="${staged_code}.partial.$$"
+trap 'rm -f "${staged_code_partial}"' EXIT
+cp "${code_pul}" "${staged_code_partial}"
+cmp -s "${code_pul}" "${staged_code_partial}" || {
+  echo "ERROR: staged Retro Rewind Code.pul does not match the selected input" >&2
+  exit 74
+}
+mv -f "${staged_code_partial}" "${staged_code}"
+trap - EXIT
+
 "${repo_root}/scripts/prepare-disc.sh"
 "${repo_root}/scripts/prepare-patched-translator.sh"
 mkdir -p "${output}" "${base_manifest_dir}"
@@ -137,6 +154,21 @@ fi
   --native-source-dir "${repo_root}/build/wiicompiled-fpscr/runtime/src" \
   --resolved-profile "${mod_output}/resolved_dispatch_profile.json" \
   --retro-cpp-dir "${mod_output}/cpp" --out "${shards}"
+
+# Mach-O C symbols carry a leading underscore. Publish aliases immediately so
+# an incremental Apple rebuild remains valid after the translator rewrites the
+# assembly blobs; the full runtime-preparation path performs the same guarded
+# normalization for a fresh build.
+if [[ "$(uname -s)" == "Darwin" ]]; then
+  for blob_asm in \
+      "${output}/data_sections_init_blobs.S" \
+      "${mod_output}/cpp/mod_data_patches_blobs.S"; do
+    if [[ -f "${blob_asm}" ]] && rg -q '^\.globl k' "${blob_asm}" &&
+       ! rg -q '^\.globl _k' "${blob_asm}"; then
+      perl -0pi -e 's/^\.globl (k[^\n]+)\n\1:/\.globl $1\n.globl _$1\n$1:\n_$1:/mg' "${blob_asm}"
+    fi
+  done
+fi
 
 [[ -f "${mod_output}/resolved_dispatch_profile.json" ]]
 [[ -f "${shards}/shards.cmake" ]]
