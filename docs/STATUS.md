@@ -4,14 +4,19 @@ Updated: 2026-09-02
 
 ## Current goal
 
-**Preview 4 is the current release candidate.** It declares app 0.3.0 build 11
-and adds experimental Mii import/management on Mac, iPhone, and iPad plus an
-experimental macOS-only direct Wii Remote/Nunchuk pairing path and controller
-preset. The Mii database, CRC, duplicate, capacity, staging, backup, and
-integration contracts pass. The Wii transport compiles, links, packages with
-the required Bluetooth entitlement, and restores normal SDL state when its
-pairing panel closes. A real exported Mii and physical Wii hardware remain
-external acceptance gates and are not claimed from source or build proof.
+**Preview 4 is published.** `v0.3.0-preview.4` points to source commit
+`3e43c002d60378bd4975c4637a8e3a149f2d733e`. Its unsigned app 0.3.0 build 11
+IPA was packaged twice byte-identically; the local and freshly downloaded
+hosted files match byte-for-byte and pass checksum, ZIP, app, privacy,
+provenance, signing-residue, and private-data audits. The hosted IPA SHA-256 is
+`6bd4a3bd6a8582dd193093dda7471cecee2cafd7450f51ea59454329a1529b9e`.
+
+Preview 4 adds experimental Mii import/management on Mac, iPhone, and iPad plus
+an experimental macOS-only direct Wii Remote/Nunchuk pairing path and
+controller preset. The exact merged-main macOS build compiles, links, packages
+with Bluetooth permission, and passes audit. A real exported Mii and physical
+Wii hardware remain external acceptance gates. Issue #5 now contains the
+bounded tester request and remains open for results.
 
 The preceding in-place iPad candidate preserved the complete 5,745-file,
 4.8-GB KartPad Application Support/NAND tree byte-for-byte, launched, and

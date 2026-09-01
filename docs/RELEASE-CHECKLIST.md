@@ -22,19 +22,23 @@ Published artifact: `v0.3.0-preview.3`, app 0.3.0 build 10, source
 `452af2dde3d19508a5e6ced6c03deb0e24b8b509`, IPA SHA-256
 `e839c115a97867949b16fa1c4a2a3472dce4eb3da6c69fff6f40c3eca2abbdcf`.
 
-## 0.3.0 Preview 4 release candidate
+## Published 0.3.0 Preview 4
 
 - [x] Experimental Mii database and Apple integration contracts pass
 - [x] Experimental macOS Wii pairing compiles, links, packages, and carries
       Bluetooth permission
 - [x] Pre-release iPad in-place install preserves the complete KartPad
       Application Support/NAND tree byte-for-byte and remains running
-- [ ] Exact merged-main app 0.3.0 build 11 passes the device-app audit
-- [ ] Two deterministic IPA packages match byte-for-byte
-- [ ] Exact IPA provenance, notices, privacy, and signature-residue audit pass
-- [ ] Hosted IPA and checksum match the local audited artifacts byte-for-byte
-- [ ] Dereferenced `v0.3.0-preview.4` tag matches the artifact source commit
-- [ ] Issue #5 receives the bounded external Mii and Wii hardware test request
+- [x] Exact merged-main app 0.3.0 build 11 passes the device-app audit
+- [x] Two deterministic IPA packages match byte-for-byte
+- [x] Exact IPA provenance, notices, privacy, and signature-residue audit pass
+- [x] Hosted IPA and checksum match the local audited artifacts byte-for-byte
+- [x] Dereferenced `v0.3.0-preview.4` tag matches the artifact source commit
+- [x] Issue #5 receives the bounded external Mii and Wii hardware test request
+
+Published artifact: `v0.3.0-preview.4`, app 0.3.0 build 11, source
+`3e43c002d60378bd4975c4637a8e3a149f2d733e`, IPA SHA-256
+`6bd4a3bd6a8582dd193093dda7471cecee2cafd7450f51ea59454329a1529b9e`.
 
 ## Full engineering-completion gates still open
 

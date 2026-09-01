@@ -49,13 +49,19 @@ material, credentials, or device identifiers.
 
 ## Release gates
 
-- [ ] Commit and push the complete Preview 4 source to `main`.
-- [ ] Rebuild the exact merged source as unsigned app 0.3.0 build 11.
-- [ ] Pass focused contracts, source/safety checks, app audit, and patch checks.
-- [ ] Package twice deterministically and compare the IPA bytes.
-- [ ] Audit the exact IPA and its embedded provenance/notices.
-- [ ] Tag the audited source and publish the IPA plus `SHA256SUMS`.
-- [ ] Download the hosted assets anonymously, compare bytes, verify checksums,
+- [x] Commit and push the complete Preview 4 source to `main`.
+- [x] Rebuild the exact merged source as unsigned app 0.3.0 build 11.
+- [x] Pass focused contracts, source/safety checks, app audit, and patch checks.
+- [x] Package twice deterministically and compare the IPA bytes.
+- [x] Audit the exact IPA and its embedded provenance/notices.
+- [x] Tag the audited source and publish the IPA plus `SHA256SUMS`.
+- [x] Download the hosted assets anonymously, compare bytes, verify checksums,
       and re-audit the downloaded IPA.
-- [ ] Verify remote `main` and the dereferenced tag, then request Issue #5
+- [x] Verify remote `main` and the dereferenced tag, then request Issue #5
       reporter testing.
+
+- Published source: `3e43c002d60378bd4975c4637a8e3a149f2d733e`
+- Hosted IPA SHA-256:
+  `6bd4a3bd6a8582dd193093dda7471cecee2cafd7450f51ea59454329a1529b9e`
+- Issue #5 tester request:
+  `https://github.com/chrissotraidis/kartpad/issues/5#issuecomment-5502139406`
