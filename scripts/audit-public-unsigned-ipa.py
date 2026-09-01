@@ -11,9 +11,9 @@ import zipfile
 from pathlib import Path, PurePosixPath
 
 
-RELEASE_TAG = "v0.2.0-preview.3"
-APP_VERSION = "0.2.0"
-APP_BUILD = "3"
+RELEASE_TAG = "v0.3.0-preview.1"
+APP_VERSION = "0.3.0"
+APP_BUILD = "8"
 FORBIDDEN_SUFFIXES = {
     ".iso", ".gcm", ".gcz", ".ciso", ".wbfs", ".wia", ".rvz",
     ".gci", ".sav", ".log", ".mobileprovision", ".p12", ".p8",
@@ -24,6 +24,7 @@ REQUIRED_ENTRIES = {
     "Payload/KartPad.app/Info.plist",
     "KartPadBuilderProvenance.json",
     "INSTALL_IPA.md",
+    "RELEASE_NOTES.md",
     "LICENSES/GPL-3.0.txt",
     "RIGHTS_AND_LICENSES.md",
     "THIRD_PARTY_NOTICES.md",

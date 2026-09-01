@@ -2,9 +2,9 @@
 
 KartPad uses static recompilation. The public Builder translates a supported
 game executable on the user's Mac before Apple signing. It remains useful for
-developers and future verified compatibility profiles even though Preview 2
-also publishes one audited unsigned IPA containing the current supported ARM64
-translation.
+developers and future verified compatibility profiles even though the latest
+public preview also publishes one audited unsigned IPA containing the current
+supported ARM64 translation.
 
 ## Current preview
 

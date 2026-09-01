@@ -8,9 +8,9 @@ import sys
 from pathlib import Path
 
 
-RELEASE_TAG = "v0.2.0-preview.3"
-APP_VERSION = "0.2.0"
-APP_BUILD = "3"
+RELEASE_TAG = "v0.3.0-preview.1"
+APP_VERSION = "0.3.0"
+APP_BUILD = "8"
 
 
 def fail(message: str) -> None:
@@ -26,7 +26,7 @@ def main() -> int:
         "output",
         type=Path,
         nargs="?",
-        help="Output IPA path (defaults to artifacts/KartPad-v0.2.0-preview.3-unsigned.ipa)",
+        help="Output IPA path (defaults to artifacts/KartPad-v0.3.0-preview.1-unsigned.ipa)",
     )
     args = parser.parse_args()
 
@@ -38,7 +38,7 @@ def main() -> int:
     output = (
         args.output.resolve()
         if args.output
-        else repo / "artifacts/KartPad-v0.2.0-preview.3-unsigned.ipa"
+        else repo / "artifacts/KartPad-v0.3.0-preview.1-unsigned.ipa"
     )
     if subprocess.run(
         ["git", "-C", str(repo), "diff", "--quiet", "HEAD", "--"], check=False
@@ -69,6 +69,7 @@ def main() -> int:
     xcode_build = app.parents[1]
     additional_entries = {
         "INSTALL_IPA.md": repo / "docs/INSTALL_IPA.md",
+        "RELEASE_NOTES.md": repo / "docs/releases/v0.3.0-preview.1.md",
         "LICENSES/GPL-3.0.txt": repo / "LICENSES/GPL-3.0.txt",
         "RIGHTS_AND_LICENSES.md": repo / "RIGHTS_AND_LICENSES.md",
         "THIRD_PARTY_NOTICES.md": repo / "THIRD_PARTY_NOTICES.md",

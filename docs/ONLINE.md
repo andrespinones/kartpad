@@ -8,9 +8,10 @@ apply ratings, and return to the shared lobby.
 
 That evidence does not yet establish public Retro WFC service compatibility,
 Wiimmfi compatibility, Wii interoperability, or physical-device online
-acceptance. Preview 2 packages the current online-capable graph, but the public
-IPA remains an unaccepted candidate for external-service and physical-device
-online play; the local harness result does not establish either claim.
+acceptance. `v0.3.0-preview.1` packages the current online-capable dual-mode
+graph, but the public IPA remains an unaccepted candidate for external-service
+and physical-device online play; the local harness result does not establish
+either claim.
 
 No account, credential, public-service authorization, or production-service
 compatibility is currently claimed. This loop uses the pinned authorized local
