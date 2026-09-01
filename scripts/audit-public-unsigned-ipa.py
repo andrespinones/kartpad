@@ -101,6 +101,11 @@ def main() -> int:
         with tempfile.TemporaryDirectory(prefix="kartpad-public-ipa-audit.") as temp:
             root = Path(temp)
             archive.extractall(root)
+            for info in archive.infolist():
+                mode = (info.external_attr >> 16) & 0o777
+                extracted = root / info.filename
+                if mode and extracted.is_file():
+                    extracted.chmod(mode)
             app = root / "Payload/KartPad.app"
             subprocess.run(
                 [str(repo / "scripts/audit-ios-game-app.sh"), str(app), "IOS"],
