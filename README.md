@@ -22,8 +22,9 @@
 > Rewind build for iPhone and iPad.** It must be re-signed before installation
 > and requires your own legally obtained supported game image. Retro Rewind is
 > optional and installs through KartPad from the official version-locked pack.
-> Preview 4 also adds experimental Mii import/management and an experimental
-> macOS-only direct Wii Remote/Nunchuk path for community testing.
+> Preview 5 makes signed-container imports converge on the working Files picker,
+> keeps the macOS cursor visible, and retains Preview 4's experimental Mii
+> import/management and macOS-only direct Wii Remote/Nunchuk path.
 > The IPA includes ahead-of-time translated game logic but no disc image,
 > extracted game assets, Retro Rewind pack, saves, signing identity, or
 > provisioning profile. The public Retro WFC service is currently in
@@ -34,7 +35,7 @@
 | Question | Answer |
 |---|---|
 | Is this Dolphin or streaming? | No. WiiCompiled translates the game's PowerPC code ahead of time, then KartPad compiles it for ARM64 and presents it through Metal. |
-| Is an IPA included in the GitHub release? | **Yes.** `v0.3.0-preview.4` includes an audited unsigned ARM64 IPA for iPhone and iPad. Re-sign it locally, then import your own supported game image on first launch. |
+| Is an IPA included in the GitHub release? | **Yes.** `v0.3.0-preview.5` includes an audited unsigned ARM64 IPA for iPhone and iPad. Re-sign it locally, then import your own supported game image on first launch. |
 | Can the source create an IPA? | Yes. The Personal IPA Builder can also translate a supported user-owned game executable and create a separate private unsigned IPA on an Apple Silicon Mac. |
 | Does it include Mario Kart Wii? | No. You must provide your own legally obtained supported PAL `RMCP01` revision 0 WBFS/ISO. |
 | Does it support Retro Rewind? | **Yes.** Choose Original Mario Kart Wii or Retro Rewind when KartPad opens. KartPad can download, verify, and install the official Retro Rewind 6.12.4 pack. Physical iPad acceptance covers the complete install, launch, and playable single-player flow. |
@@ -103,7 +104,7 @@ retail game data.
 | iPhone/iPad | The full 29,065-function ARM64 retail app has been packaged as an unsigned IPA; locally signed builds have been installed and physically accepted on both iPhone and iPad, reaching live races, importing a supported private WBFS, and preserving saves |
 | Game content | Version-locked dual-mode Original Mario Kart Wii / Retro Rewind 6.12.4 flow without bundling either game's private data; physical iPad install, launch, and initial single-player gameplay pass |
 | Online multiplayer | Local Mac-to-iPad-Simulator login, matchmaking, room, race, native results, ratings, and lobby return pass; the public Retro WFC service is currently unavailable during maintenance, which does not block the accepted Retro Rewind install and offline-play flow |
-| Distribution | `v0.3.0-preview.4` provides source plus a free unsigned community-preview IPA containing translated game logic. It contains no disc image, extracted game assets, Retro Rewind pack, saves, signing identity, or provisioning profile |
+| Distribution | `v0.3.0-preview.5` provides source plus a free unsigned community-preview IPA containing translated game logic. It contains no disc image, extracted game assets, Retro Rewind pack, saves, signing identity, or provisioning profile |
 
 The evidence ledger, exact open rows, and known risks live in
 [`docs/STATUS.md`](docs/STATUS.md). The 67-row release matrix is in
@@ -162,7 +163,7 @@ distributed.
 
 ## Experimental Miis and Wii Remote controls
 
-Preview 4 adds two opt-in features for community testing. They are deliberately
+Preview 5 retains two opt-in features from Preview 4 for community testing. They are deliberately
 marked **Experimental** until users with real exported Miis and original Wii
 hardware complete the remaining acceptance checks.
 
@@ -198,8 +199,8 @@ provide the required direct Wii Remote HID pairing path.
 
 ### Download the unsigned iPhone/iPad IPA
 
-Download `KartPad-v0.3.0-preview.4-unsigned.ipa` and `SHA256SUMS` from the
-[latest preview](https://github.com/chrissotraidis/kartpad/releases/tag/v0.3.0-preview.4).
+Download `KartPad-v0.3.0-preview.5-unsigned.ipa` and `SHA256SUMS` from the
+[latest preview](https://github.com/chrissotraidis/kartpad/releases/tag/v0.3.0-preview.5).
 Verify the checksum, re-sign the IPA with AltStore Classic plus AltServer or
 another compatible personal-signing workflow, and select your own supported
 PAL `RMCP01` revision 0 image on first launch. See
@@ -487,7 +488,7 @@ Useful starting points:
 
 ### Can I download an IPA or playable app?
 
-Yes. `v0.3.0-preview.4` provides an unsigned iPhone/iPad IPA that must be
+Yes. `v0.3.0-preview.5` provides an unsigned iPhone/iPad IPA that must be
 re-signed before installation. It contains KartPad's compiled ARM64 translation
 but no disc image or extracted game assets, so you must select your own legally
 obtained supported image on first launch. The Personal IPA Builder remains
@@ -533,7 +534,7 @@ for a compatible KartPad update instead of launching an outdated online pack.
 
 ### Can KartPad import or create a custom Mii?
 
-Preview 4 can experimentally import and manage standard 74-byte `.mii` files
+Preview 5 can experimentally import and manage standard 74-byte `.mii` files
 on Mac, iPhone, and iPad. Use **Game Data & Saves → Manage Miis…**, restart
 KartPad, then select the imported Mii through Mario Kart Wii's License Settings.
 KartPad cannot create a new Mii because it does not include the Wii Menu or Mii
@@ -642,7 +643,7 @@ narrower performance, audio, motion, and controller refinements can continue.
 | [`docs/KNOWN-ISSUES.md`](docs/KNOWN-ISSUES.md) | Known limitations and current workarounds |
 | [`docs/IOS-THREE-DOT-MENU-FIX.md`](docs/IOS-THREE-DOT-MENU-FIX.md) | Reusable UIKit menu appearance, lifecycle repair, and validation checklist |
 | [`docs/FUTURE-FEATURES.md`](docs/FUTURE-FEATURES.md) | Researched but deferred product features, beginning with RetroAchievements |
-| [`docs/releases/NEXT.md`](docs/releases/NEXT.md) | Living Preview 4 validation and publication record |
+| [`docs/releases/NEXT.md`](docs/releases/NEXT.md) | Living Preview 5 validation and publication record |
 | `ref/`, `private/`, `build/` | Ignored reference checkouts, private inputs, and local outputs |
 
 ## Research and credits

@@ -55,6 +55,8 @@ patch -p1 -d "${runtime_source}" < "${repo_root}/patches/wiicompiled-apple-runti
 patch -p1 -d "${runtime_source}" < \
   "${repo_root}/patches/wiicompiled-experimental-wiimote-preset.patch"
 patch -p1 -d "${runtime_source}" < \
+  "${repo_root}/patches/wiicompiled-macos-cursor-visibility.patch"
+patch -p1 -d "${runtime_source}" < \
   "${repo_root}/patches/wiicompiled-apple-network-tls.patch"
 patch -p1 -d "${runtime_source}" < \
   "${repo_root}/patches/wiicompiled-local-wfc-test-route.patch"

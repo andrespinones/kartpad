@@ -1,12 +1,12 @@
 # Install the KartPad unsigned IPA
 
-KartPad `v0.3.0-preview.4` is an unsigned ARM64 IPA for iPhone and iPad. It is a
+KartPad `v0.3.0-preview.5` is an unsigned ARM64 IPA for iPhone and iPad. It is a
 free community preview, not an App Store or TestFlight build, and it will not
 install until it is re-signed with your own Apple identity or compatible
 personal sideloading tool.
 
-1. Download `KartPad-v0.3.0-preview.4-unsigned.ipa` and `SHA256SUMS` from the
-   [0.3.0 Preview 4 release](https://github.com/chrissotraidis/kartpad/releases/tag/v0.3.0-preview.4).
+1. Download `KartPad-v0.3.0-preview.5-unsigned.ipa` and `SHA256SUMS` from the
+   [0.3.0 Preview 5 release](https://github.com/chrissotraidis/kartpad/releases/tag/v0.3.0-preview.5).
 2. Verify the IPA with `shasum -a 256 -c SHA256SUMS` on a Mac.
 3. Re-sign and install it with AltStore Classic plus AltServer or another
    compatible IPA-signing workflow. AltStore PAL cannot import arbitrary
@@ -17,11 +17,16 @@ personal sideloading tool.
    optional expanded game. KartPad can download, verify, and install the
    official version-locked Retro Rewind 6.12.4 full pack.
 
-Preview 4 also includes experimental Mii import. Open **Game Data & Saves →
+Preview 5 also includes experimental Mii import. Open **Game Data & Saves →
 Manage Miis…**, import a standard 74-byte `.mii` file, restart KartPad, and
 select it from **License Settings → Change Mii**. KartPad does not create Miis.
 The experimental direct Wii Remote/Nunchuk pairing flow is macOS-only; the IPA
 does not claim direct Wii Remote pairing on iPhone or iPad.
+
+If **Import from This Installation's Folder…** cannot see a game image because
+the signer created a different app container, KartPad opens the normal Files
+picker automatically. Select the visible WBFS/ISO there; the app still validates
+the exact supported game before importing it.
 
 The IPA includes KartPad's ARM64 app and ahead-of-time translated executable
 module. It does not include a Mario Kart Wii disc image, extracted courses,

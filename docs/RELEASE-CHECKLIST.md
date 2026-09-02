@@ -40,6 +40,16 @@ Published artifact: `v0.3.0-preview.4`, app 0.3.0 build 11, source
 `3e43c002d60378bd4975c4637a8e3a149f2d733e`, IPA SHA-256
 `6bd4a3bd6a8582dd193093dda7471cecee2cafd7450f51ea59454329a1529b9e`.
 
+## 0.3.0 Preview 5 candidate
+
+- [ ] Empty signed-container scan falls through directly to the Files picker
+- [ ] macOS source removes cursor auto-hide and restores the pointer for settings
+- [ ] Focused import, menu, Mii/Wii, and cursor contracts pass
+- [ ] Exact app 0.3.0 build 12 passes device build and package audit
+- [ ] Two deterministic IPA packages match byte-for-byte
+- [ ] Hosted IPA/checksum match and the downloaded IPA passes a fresh audit
+- [ ] Issue #1 and Issue #5 receive focused retest instructions
+
 ## Full engineering-completion gates still open
 
 - [ ] Stable representative performance and frame pacing across supported

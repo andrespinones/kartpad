@@ -2,6 +2,11 @@
 
 ## Current state
 
+Preview 5 is being validated as app 0.3.0 build 12. It makes an empty
+signed-container import scan open the normal Files picker immediately and
+removes the native macOS runtime's five-second cursor auto-hide. It is not yet
+published; see `docs/releases/NEXT.md` for the exact remaining gates.
+
 KartPad `v0.3.0-preview.4` is published from
 `3e43c002d60378bd4975c4637a8e3a149f2d733e`. Its unsigned app 0.3.0 build 11
 IPA has SHA-256
@@ -46,9 +51,10 @@ not block offline Retro Rewind support.
 
 ## Next executable work
 
-1. Await Issue #5 testing of a real exported Mii and physical Wii
-   Remote/Nunchuk; fix only reproduced failures with bounded diagnostics.
-2. Await Issue #1's exact Feather-signed Files-container retest.
+1. Complete Preview 5 validation, publish the exact audited artifacts, and ask
+   Issue #1 and Issue #5 reporters to retest their specific paths.
+2. Keep Mii and physical Wii Remote/Nunchuk acceptance open until the Issue #5
+   reporter can reach the settings and returns real hardware results.
 3. Continue representative performance and frame-pacing work without changing
    the accepted 0.3.0 release baseline.
 4. Complete the remaining three- and four-player, touch, motion, controller,
