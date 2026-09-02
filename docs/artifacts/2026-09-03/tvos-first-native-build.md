@@ -4,9 +4,11 @@ Date: 2026-09-03
 
 ## Scope
 
-This is the first independent KartPad tvOS build proof. It starts from KartPad
-`main` at `ad8ef33810aedbf94f8738d246aa3a0619f3b3ea` plus the tracked changes on
-`codex/tvos-retro-rewind`. No code from pull request #7 was incorporated.
+This is the first independent KartPad tvOS build proof. The implementation is
+commit `789283113c1efacfa7e0dd4d83e90503869b58d4` on
+`codex/tvos-retro-rewind`, based on KartPad `main` at
+`ad8ef33810aedbf94f8738d246aa3a0619f3b3ea`. No code from pull request #7 was
+incorporated.
 
 The target links the private, maintainer-generated dual translation graph for
 Original Mario Kart Wii and Retro Rewind. The audited `.app` contains no disc
