@@ -4,6 +4,12 @@ Updated: 2026-09-02
 
 ## Current goal
 
+**Preview 5 is in validation.** Its focused source removes macOS cursor
+auto-hide and makes an empty signed-container folder scan open the working Files
+picker immediately. The candidate is app 0.3.0 build 12. It is not published
+until the exact merged source passes the macOS and iOS build, package,
+provenance, deterministic-byte, and hosted-download gates.
+
 **Preview 4 is published.** `v0.3.0-preview.4` points to source commit
 `3e43c002d60378bd4975c4637a8e3a149f2d733e`. Its unsigned app 0.3.0 build 11
 IPA was packaged twice byte-identically; the local and freshly downloaded
@@ -23,9 +29,9 @@ The preceding in-place iPad candidate preserved the complete 5,745-file,
 remained running. Earlier hands-on testing accepted Retro Rewind, ordinary
 controller input, the stable three-dot button and reorganized menu,
 exit/reopen lifecycle, Original Mario Kart Wii, and the existing license.
-Folder-scan diagnostics and a direct Files fallback are built and
-contract-tested but still require the Issue #1 reporter's Feather-signed
-environment. The release rollup is in
+Folder-scan diagnostics and a direct Files fallback were built and
+contract-tested; Preview 5 removes the intervening failure alert. The exact
+Feather-signed environment remains the final acceptance gate. The release rollup is in
 [`docs/releases/NEXT.md`](releases/NEXT.md).
 
 **The provider-compatible import hotfix is published.** `v0.3.0-preview.3`

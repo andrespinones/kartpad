@@ -116,7 +116,7 @@ if ! rg -a -F -q '[KartPad] exact SunPad runtime overlay installed' "${binary}";
 fi
 for importer_contract in \
   'Game Data Required' \
-  'Import from KartPad Folder' \
+  "Import from This Installation's Folder" \
   'Opening disc image' \
   'Game-file extraction was incomplete' \
   'RemoveGameDataOnNextLaunch' \

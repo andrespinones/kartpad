@@ -1,20 +1,18 @@
-# KartPad v0.3.0-preview.4 release rollup
+# KartPad v0.3.0-preview.5 release rollup
 
 Updated: 2026-09-02
 
-This is the living validation record for Preview 4. Immutable user-facing notes
-are in [`v0.3.0-preview.4.md`](v0.3.0-preview.4.md).
+This is the living validation record for Preview 5. User-facing notes are in
+[`v0.3.0-preview.5.md`](v0.3.0-preview.5.md).
 
 ## Included changes
 
-- Experimental standard 74-byte `.mii` import, listing, staged removal, backup,
-  and next-launch activation on Mac, iPhone, and iPad.
-- Experimental direct Bluetooth pairing for original and Plus Wii Remotes on
-  macOS, with SDL handoff and a Wii Remote/Nunchuk controller preset.
-- Stable three-dot-menu appearance and lifecycle behavior, with clearer
-  Controls and Display submenus.
-- Bounded KartPad-folder import failures with signer/container guidance and a
-  direct **Choose from Files…** fallback.
+- Empty signed-container scans now open the working Files picker immediately;
+  the secondary action is named **Import from This Installation's Folder…**.
+- The native macOS runtime no longer hides the cursor after five idle seconds,
+  and opening its F10/controller settings explicitly restores the pointer.
+- Preview 4's experimental Mii management and macOS-only direct Wii
+  Remote/Nunchuk pairing remain available without broadening their claims.
 
 RetroAchievements remains researched and deferred in
 [`docs/FUTURE-FEATURES.md`](../FUTURE-FEATURES.md).
@@ -39,7 +37,7 @@ cleans up discovery and SDL state when its panel closes.
   Change Mii, and confirm its name and appearance.
 - Pair an original or Plus Wii Remote on macOS, attach a Nunchuk, select the
   experimental preset, and test all race/menu inputs plus disconnect/reconnect.
-- Retest **Import from KartPad Folder** in the Issue #1 reporter's exact
+- Retest **Import from This Installation's Folder…** in the Issue #1 reporter's exact
   Feather-signed container.
 
 Build success is not treated as external Mii, Wii hardware, or Files-provider
@@ -49,19 +47,11 @@ material, credentials, or device identifiers.
 
 ## Release gates
 
-- [x] Commit and push the complete Preview 4 source to `main`.
-- [x] Rebuild the exact merged source as unsigned app 0.3.0 build 11.
-- [x] Pass focused contracts, source/safety checks, app audit, and patch checks.
-- [x] Package twice deterministically and compare the IPA bytes.
-- [x] Audit the exact IPA and its embedded provenance/notices.
-- [x] Tag the audited source and publish the IPA plus `SHA256SUMS`.
-- [x] Download the hosted assets anonymously, compare bytes, verify checksums,
-      and re-audit the downloaded IPA.
-- [x] Verify remote `main` and the dereferenced tag, then request Issue #5
-      reporter testing.
-
-- Published source: `3e43c002d60378bd4975c4637a8e3a149f2d733e`
-- Hosted IPA SHA-256:
-  `6bd4a3bd6a8582dd193093dda7471cecee2cafd7450f51ea59454329a1529b9e`
-- Issue #5 tester request:
-  `https://github.com/chrissotraidis/kartpad/issues/5#issuecomment-5502139406`
+- [ ] Commit and push the complete Preview 5 source to `main`.
+- [ ] Rebuild the exact merged source as unsigned app 0.3.0 build 12.
+- [ ] Pass focused contracts, source/safety checks, app audit, and patch checks.
+- [ ] Package twice deterministically and compare the IPA bytes.
+- [ ] Audit the exact IPA and its embedded provenance/notices.
+- [ ] Tag the audited source and publish the IPA plus `SHA256SUMS`.
+- [ ] Download the hosted assets, compare bytes, verify checksums, and re-audit.
+- [ ] Verify remote `main` and the dereferenced tag, then request reporter tests.

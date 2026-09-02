@@ -1106,35 +1106,8 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
   NSError *error = nil;
   NSArray<NSURL *> *roots = KartPadGameDataRootsInDocuments(&error);
   if (roots.count == 0) {
-    UIAlertController *alert = [UIAlertController
-        alertControllerWithTitle:@"KartPad Folder"
-                         message:KartPadDocumentsFolderScanDetail(error)
-                  preferredStyle:UIAlertControllerStyleAlert];
-    [alert addAction:[UIAlertAction actionWithTitle:@"Choose from Files…"
-                                                style:UIAlertActionStyleDefault
-                                              handler:^(UIAlertAction *action) {
-      (void)action;
-      dispatch_after(dispatch_time(DISPATCH_TIME_NOW,
-                                   (int64_t)(0.35 * NSEC_PER_SEC)),
-                     dispatch_get_main_queue(), ^{ [self presentGameDataPicker]; });
-    }]];
-    [alert addAction:[UIAlertAction actionWithTitle:@"Try Again"
-                                                style:UIAlertActionStyleDefault
-                                              handler:^(UIAlertAction *action) {
-      (void)action;
-      dispatch_after(dispatch_time(DISPATCH_TIME_NOW,
-                                   (int64_t)(0.35 * NSEC_PER_SEC)),
-                     dispatch_get_main_queue(), ^{ [self chooseDocumentsRoot]; });
-    }]];
-    [alert addAction:[UIAlertAction actionWithTitle:@"Back"
-                                                style:UIAlertActionStyleCancel
-                                              handler:^(UIAlertAction *action) {
-      (void)action;
-      dispatch_after(dispatch_time(DISPATCH_TIME_NOW,
-                                   (int64_t)(0.35 * NSEC_PER_SEC)),
-                     dispatch_get_main_queue(), ^{ [self showOptions]; });
-    }]];
-    [self.root presentViewController:alert animated:YES completion:nil];
+    NSLog(@"[KartPad] %@", KartPadDocumentsFolderScanDetail(error));
+    [self presentGameDataPicker];
     return;
   }
   if (roots.count == 1) {
@@ -1195,7 +1168,7 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
       [self presentGameDataPicker];
     });
   }]];
-  [options addAction:[UIAlertAction actionWithTitle:@"Import from KartPad Folder"
+  [options addAction:[UIAlertAction actionWithTitle:@"Import from This Installation's Folder..."
                                                style:UIAlertActionStyleDefault
                                              handler:^(UIAlertAction *action) {
     (void)action;
@@ -1653,7 +1626,7 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
             [dataElement.title isEqualToString:@"Import from SunPad Folder"]) {
           UIAction *sourceAction = (UIAction *)dataElement;
           UIAction *replacement =
-              [UIAction actionWithTitle:@"Import from KartPad Folder"
+              [UIAction actionWithTitle:@"Import from This Installation's Folder..."
                                   image:sourceAction.image
                              identifier:sourceAction.identifier
                                 handler:^(__kindof UIAction *action) {
@@ -2413,6 +2386,11 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
   (void)overlay;
   NSError *error = nil;
   NSArray<NSURL *> *roots = KartPadGameDataRootsInDocuments(&error);
+  if (roots.count == 0) {
+    NSLog(@"[KartPad] %@", KartPadDocumentsFolderScanDetail(error));
+    [self presentGameDataFolderPicker];
+    return;
+  }
   if (roots.count == 1) {
     [self importExtractedGameDataFromURL:roots.firstObject deleteAfterwards:NO];
     return;
@@ -2421,9 +2399,7 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
   if (controller == nil) {
     return;
   }
-  NSString *message = roots.count == 0
-      ? KartPadDocumentsFolderScanDetail(error)
-      : @"Choose a Mario Kart Wii WBFS, ISO, or extracted DATA folder from this signed app's KartPad folder.";
+  NSString *message = @"Choose a Mario Kart Wii WBFS, ISO, or extracted DATA folder from this signed app's KartPad folder.";
   UIAlertController *alert =
       [UIAlertController alertControllerWithTitle:@"KartPad Folder"
                                           message:message
@@ -2435,28 +2411,6 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
                                             handler:^(UIAlertAction *action) {
       (void)action;
       [weakSelf importExtractedGameDataFromURL:root deleteAfterwards:NO];
-    }]];
-  }
-  if (roots.count == 0) {
-    [alert addAction:[UIAlertAction actionWithTitle:@"Choose from Files…"
-                                                style:UIAlertActionStyleDefault
-                                              handler:^(UIAlertAction *action) {
-      (void)action;
-      dispatch_after(dispatch_time(DISPATCH_TIME_NOW,
-                                   (int64_t)(0.35 * NSEC_PER_SEC)),
-                     dispatch_get_main_queue(), ^{
-        [weakSelf presentGameDataFolderPicker];
-      });
-    }]];
-    [alert addAction:[UIAlertAction actionWithTitle:@"Try Again"
-                                                style:UIAlertActionStyleDefault
-                                              handler:^(UIAlertAction *action) {
-      (void)action;
-      dispatch_after(dispatch_time(DISPATCH_TIME_NOW,
-                                   (int64_t)(0.35 * NSEC_PER_SEC)),
-                     dispatch_get_main_queue(), ^{
-        [weakSelf gameOverlayRequestsGameDataFolderImport:nil];
-      });
     }]];
   }
   [alert addAction:[UIAlertAction actionWithTitle:@"Cancel"
