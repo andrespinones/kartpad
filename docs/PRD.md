@@ -112,6 +112,20 @@ unsigned `v0.3.0-preview.5` community IPA under the narrow, unresolved-rights
 boundary in `RIGHTS_AND_LICENSES.md`. That decision does not mark the full PRD
 matrix complete or authorize broader, paid, or official-store distribution.
 
+### 3.3 Native tvOS extension
+
+Native tvOS is now an approved implementation target, with
+[`docs/TVOS.md`](TVOS.md) as its platform-specific contract. tvOS must reuse the
+same ahead-of-time `KartPadDual` base/Retro Rewind graph and may not introduce a
+runtime PPC interpreter or JIT. Its acceptance is separate from iPhone/iPad:
+an Apple TV build must prove controller-only gameplay, purge recovery, save
+backup/restore, Original mode, and Retro Rewind mode on physical hardware.
+
+A successful tvOS compile is not permission to invite external testers. First
+complete one maintainer-run physical acceptance pass, then distribute only the
+exact audited tester candidate with a narrow checklist. Offline Retro Rewind
+acceptance does not establish Retro WFC service compatibility.
+
 ---
 
 ## 4. Non-goals and prohibited shortcuts

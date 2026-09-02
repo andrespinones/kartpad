@@ -1,6 +1,7 @@
 #import "KartPadRetroRewindInstaller.h"
 
 #import <CommonCrypto/CommonDigest.h>
+#import <TargetConditionals.h>
 
 #include "kartpad_retro_rewind_release.h"
 #include "mz.h"
@@ -24,8 +25,14 @@ BOOL KartPadRetroRewindFail(NSError **error, NSInteger code,
 }
 
 NSString *KartPadRetroRewindSupportRoot() {
+#if TARGET_OS_TV
+  return [[NSSearchPathForDirectoriesInDomains(
+      NSCachesDirectory, NSUserDomainMask, YES) firstObject]
+      stringByAppendingPathComponent:@"KartPad"];
+#else
   return [[NSHomeDirectory() stringByAppendingPathComponent:
       @"Library/Application Support"] stringByAppendingPathComponent:@"KartPad"];
+#endif
 }
 
 NSString *KartPadHexDigest(const unsigned char *digest, size_t length) {

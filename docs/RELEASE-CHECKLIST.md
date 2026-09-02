@@ -1,5 +1,16 @@
 # KartPad release checklist
 
+## tvOS experimental candidate
+
+- [ ] Complete the maintainer-run physical Apple TV matrix in
+      [`docs/TVOS.md`](TVOS.md) before inviting external testers.
+- [ ] Prove Original and Retro Rewind gameplay separately with an Extended
+      Gamepad; do not infer Retro WFC acceptance from offline play.
+- [ ] Back up and rehearse restore of Application Support/NAND before asking a
+      tester to risk saved progress.
+- [ ] Re-audit the exact signed tester artifact for private game data, Retro
+      Rewind content, derived game artwork, signing material, and local paths.
+
 The exact 67-row matrix in `docs/PRD.md` remains the authority for full
 engineering completion. A community preview may ship with narrower, explicit
 limitations when its exact artifact passes every preview gate below.

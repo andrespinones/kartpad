@@ -42,7 +42,7 @@
 | Does online play work? | The online-capable build passes login, matchmaking, a two-player race, results, ratings, and lobby return against a compatible isolated WFC server. As of 1 September 2026, the public Retro WFC service is in maintenance, so live public online play is temporarily unavailable. That external outage does not block Retro Rewind installation or offline play. |
 | Do touch, tilt, and controllers work? | Touch, motion steering, and ordinary GameController-compatible pads are implemented, with general physical acceptance on iPhone and iPad. Direct Wii Remote/Nunchuk pairing is a separate experimental, macOS-only path that still needs external hardware testing. |
 | Can I use a custom Mii? | **Experimentally.** On Mac, iPhone, or iPad, open **Game Data & Saves → Manage Miis…** and import a standard 74-byte `.mii` file. Restart KartPad, then select it in **License Settings → Change Mii**. KartPad does not yet create Miis. |
-| Are Android and Apple TV supported? | Not currently. Apple TV is a possible target once the current build is stable. Android may be investigated later. |
+| Are Android and Apple TV supported? | Not in a public release. A native dual-mode tvOS candidate is under active development, but Apple TV support remains experimental until a maintainer-run physical acceptance pass succeeds. Android may be investigated later. |
 | How much storage does it need? | The app is about 80 MiB and extracted Mario Kart Wii data uses about 2.5 GiB. Retro Rewind downloads an additional 1.72 GiB archive and needs temporary installation space. Keeping the WBFS/ISO on the device requires more space. |
 
 ## Original Mario Kart Wii or Retro Rewind
@@ -551,7 +551,8 @@ iPhone or iPad.
 ### Are Android or Apple TV supported?
 
 Not currently. The supported targets are Apple Silicon Mac, iPhone, and iPad.
-Apple TV is a possible next target once the current build is stable. Android
+Apple TV is now an active native-port target; see [the tvOS implementation and
+acceptance plan](docs/TVOS.md). It is not yet a supported public build. Android
 may be investigated later.
 
 ### How much storage does KartPad use?
