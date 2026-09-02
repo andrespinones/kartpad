@@ -40,15 +40,19 @@ Published artifact: `v0.3.0-preview.4`, app 0.3.0 build 11, source
 `3e43c002d60378bd4975c4637a8e3a149f2d733e`, IPA SHA-256
 `6bd4a3bd6a8582dd193093dda7471cecee2cafd7450f51ea59454329a1529b9e`.
 
-## 0.3.0 Preview 5 candidate
+## 0.3.0 Preview 5
 
-- [ ] Empty signed-container scan falls through directly to the Files picker
-- [ ] macOS source removes cursor auto-hide and restores the pointer for settings
-- [ ] Focused import, menu, Mii/Wii, and cursor contracts pass
-- [ ] Exact app 0.3.0 build 12 passes device build and package audit
-- [ ] Two deterministic IPA packages match byte-for-byte
-- [ ] Hosted IPA/checksum match and the downloaded IPA passes a fresh audit
-- [ ] Issue #1 and Issue #5 receive focused retest instructions
+- [x] Empty signed-container scan falls through directly to the Files picker
+- [x] macOS source removes cursor auto-hide and restores the pointer for settings
+- [x] Focused import, menu, Mii/Wii, and cursor contracts pass
+- [x] Exact app 0.3.0 build 12 passes device build and package audit
+- [x] Two deterministic IPA packages match byte-for-byte
+- [x] Hosted IPA/checksum match and the downloaded IPA passes a fresh audit
+- [x] Issue #1 and Issue #5 receive focused retest instructions
+
+Published artifact: `v0.3.0-preview.5`, app 0.3.0 build 12, source
+`8e57ac49c161ff576d6eff198ade2ee9b21f575e`, IPA SHA-256
+`9b7b8c586ddd04b639dda5634e72e88dc91ccefb93762f1afde6e8006d274d14`.
 
 ## Full engineering-completion gates still open
 

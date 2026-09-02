@@ -47,11 +47,19 @@ material, credentials, or device identifiers.
 
 ## Release gates
 
-- [ ] Commit and push the complete Preview 5 source to `main`.
-- [ ] Rebuild the exact merged source as unsigned app 0.3.0 build 12.
-- [ ] Pass focused contracts, source/safety checks, app audit, and patch checks.
-- [ ] Package twice deterministically and compare the IPA bytes.
-- [ ] Audit the exact IPA and its embedded provenance/notices.
-- [ ] Tag the audited source and publish the IPA plus `SHA256SUMS`.
-- [ ] Download the hosted assets, compare bytes, verify checksums, and re-audit.
-- [ ] Verify remote `main` and the dereferenced tag, then request reporter tests.
+- [x] Commit and push the complete Preview 5 source to `main`.
+- [x] Rebuild the exact merged source as unsigned app 0.3.0 build 12.
+- [x] Pass focused contracts, source/safety checks, app audit, and patch checks.
+- [x] Package twice deterministically and compare the IPA bytes.
+- [x] Audit the exact IPA and its embedded provenance/notices.
+- [x] Tag the audited source and publish the IPA plus `SHA256SUMS`.
+- [x] Download the hosted assets, compare bytes, verify checksums, and re-audit.
+- [x] Verify remote `main` and the dereferenced tag, then request reporter tests.
+
+- Published source: `8e57ac49c161ff576d6eff198ade2ee9b21f575e`
+- Hosted IPA SHA-256:
+  `9b7b8c586ddd04b639dda5634e72e88dc91ccefb93762f1afde6e8006d274d14`
+- Issue #1 retest request:
+  `https://github.com/chrissotraidis/kartpad/issues/1#issuecomment-5508572886`
+- Issue #5 retest request:
+  `https://github.com/chrissotraidis/kartpad/issues/5#issuecomment-5508573157`

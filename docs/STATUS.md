@@ -4,11 +4,13 @@ Updated: 2026-09-02
 
 ## Current goal
 
-**Preview 5 is in validation.** Its focused source removes macOS cursor
-auto-hide and makes an empty signed-container folder scan open the working Files
-picker immediately. The candidate is app 0.3.0 build 12. It is not published
-until the exact merged source passes the macOS and iOS build, package,
-provenance, deterministic-byte, and hosted-download gates.
+**Preview 5 is published.** `v0.3.0-preview.5` points to source commit
+`8e57ac49c161ff576d6eff198ade2ee9b21f575e`. Its unsigned app 0.3.0 build 12
+IPA has SHA-256
+`9b7b8c586ddd04b639dda5634e72e88dc91ccefb93762f1afde6e8006d274d14`.
+The exact source passed fresh native macOS and physical-iOS builds. Both local
+packages were byte-identical, and the freshly downloaded hosted IPA and
+checksum matched and passed a new audit. Reporter acceptance remains open.
 
 **Preview 4 is published.** `v0.3.0-preview.4` points to source commit
 `3e43c002d60378bd4975c4637a8e3a149f2d733e`. Its unsigned app 0.3.0 build 11
