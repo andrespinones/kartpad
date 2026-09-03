@@ -36,12 +36,20 @@ gate are in
 
 ## Current goal
 
-**0.4.1 tvOS storage hotfix is in release validation.** It moves tvOS config,
-NAND, saves, runtime logs, and controller diagnostics to purgeable Caches,
-retains cache-first diagnostics with a legacy Application Support fallback,
-and adds a non-atomic config write fallback for the physical error-513 path.
-The iPhone/iPad 0.4.0 release is unchanged. The exact tvOS build, deterministic
-package, hosted comparison, and reporter retest remain open.
+**0.4.1 tvOS storage hotfix is published.** The `v0.4.1` tag dereferences to
+source commit `d0e77d5c9bc48a7f1f6aaedf79fd00d5e616dc0c`. Its tvOS app 0.4.1
+build 4 IPA has SHA-256
+`ca62f6e00e0b5260ddb6b836ae2cda969d3bc5655ba4bd3dac19aa9406249e49`;
+the executable SHA-256 is
+`a9e5c89ba20406897f8925c48b9683a1582bf902a9335a6922c22db1240f7ce3`.
+It moves tvOS config, NAND, saves, runtime logs, and controller diagnostics to
+purgeable Caches, retains cache-first diagnostics with a legacy Application
+Support fallback, and adds a non-atomic config write fallback for the physical
+error-513 path. The exact merged-source build and app audit passed, two packages
+were byte-identical, and a fresh anonymous hosted download matched and passed
+checksum, ZIP, app, privacy, signing-residue, private-data, and provenance
+audits. The iPhone/iPad 0.4.0 release is unchanged. Reporter acceptance on the
+exact signed hotfix artifact remains open.
 
 **0.4.0 is published as KartPad's second stable community release.** The
 `v0.4.0` tag points to source commit

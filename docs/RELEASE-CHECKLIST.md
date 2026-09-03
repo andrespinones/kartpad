@@ -25,10 +25,16 @@ limitations when its exact artifact passes every preview gate below.
 - [x] Keep iOS and macOS Application Support behavior unchanged
 - [x] Add atomic-write fallback and explicit runtime log-directory creation
 - [x] Update cache-first backup and diagnostic collection with legacy log fallback
-- [ ] Build and audit exact merged-source tvOS app 0.4.1 build 4
-- [ ] Package twice byte-identically and pass fresh extraction audits
-- [ ] Publish tag, IPA, checksum, and verify a fresh hosted download
+- [x] Build and audit exact merged-source tvOS app 0.4.1 build 4
+- [x] Package twice byte-identically and pass fresh extraction audits
+- [x] Publish tag, IPA, checksum, and verify a fresh hosted download
 - [ ] Receive reporter acceptance on the exact signed hotfix artifact
+
+Published source: `d0e77d5c9bc48a7f1f6aaedf79fd00d5e616dc0c`.
+tvOS executable SHA-256:
+`a9e5c89ba20406897f8925c48b9683a1582bf902a9335a6922c22db1240f7ce3`.
+tvOS IPA SHA-256:
+`ca62f6e00e0b5260ddb6b836ae2cda969d3bc5655ba4bd3dac19aa9406249e49`.
 
 ## 0.4.0 stable candidate
 
