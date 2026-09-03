@@ -1,12 +1,12 @@
 # Install the KartPad unsigned IPA
 
-KartPad `v0.4.0-preview.1` is an unsigned ARM64 IPA for iPhone and iPad. It is a
+KartPad `v0.4.0-preview.2` is an unsigned ARM64 IPA for iPhone and iPad. It is a
 free community preview, not an App Store or TestFlight build, and it will not
 install until it is re-signed with your own Apple identity or compatible
 personal sideloading tool.
 
-1. Download `KartPad-v0.4.0-preview.1-ios-unsigned.ipa` and `SHA256SUMS` from the
-   [0.4.0 Preview 1 release](https://github.com/chrissotraidis/kartpad/releases/tag/v0.4.0-preview.1).
+1. Download `KartPad-v0.4.0-preview.2-ios-unsigned.ipa` and `SHA256SUMS` from the
+   [0.4.0 Preview 2 release](https://github.com/chrissotraidis/kartpad/releases/tag/v0.4.0-preview.2).
 2. Verify the IPA with `shasum -a 256 -c SHA256SUMS` on a Mac.
 3. Re-sign and install it with AltStore Classic plus AltServer or another
    compatible IPA-signing workflow. AltStore PAL cannot import arbitrary
@@ -15,7 +15,7 @@ personal sideloading tool.
    revision 0 WBFS/ISO through the native importer.
 5. Choose **Mario Kart Wii** for the original game or **Retro Rewind** for the
    optional expanded game. KartPad can download, verify, and install the
-   official version-locked Retro Rewind 6.12.4 full pack.
+   official version-locked Retro Rewind 6.12.5 full pack.
 
 This preview also includes experimental Mii import. Open **Game Data & Saves →
 Manage Miis…**, import a standard 74-byte `.mii` file, restart KartPad, and

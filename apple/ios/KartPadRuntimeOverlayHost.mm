@@ -54,6 +54,7 @@
 - (void)rPressureChanged:(uint8_t)pressure fullPress:(BOOL)fullPress;
 - (void)clearTouchInput;
 - (void)buttonDown:(UIButton *)button;
+- (void)refreshMenuButton;
 - (void)toggleSettingsPanel;
 - (void)selectControlForEditing:(UIView *)control;
 - (void)reportProblem;
@@ -1332,6 +1333,15 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
     [self resetKartPadControlAppearance];
   }
   [super setTouchControlsHidden:hidden animated:animated];
+}
+
+- (void)refreshMenuButton {
+  // SunPad rebuilds its source menu after any inherited setting changes. Run
+  // the KartPad rewrite immediately so that refreshes cannot expose the
+  // Sunshine-specific title or performance switches on either device idiom.
+  [super refreshMenuButton];
+  [self setNeedsLayout];
+  [self layoutIfNeeded];
 }
 
 - (void)layoutSubviews {

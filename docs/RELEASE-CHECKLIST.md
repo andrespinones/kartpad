@@ -19,6 +19,18 @@ The exact 67-row matrix in `docs/PRD.md` remains the authority for full
 engineering completion. A community preview may ship with narrower, explicit
 limitations when its exact artifact passes every preview gate below.
 
+## 0.4.0 Preview 2 candidate
+
+- [x] Official Retro Rewind 6.12.5 archive, code, XML, and upstream source pins
+- [x] Fresh 6.12.5 translation graph passes strict function and patch gates
+- [x] Kamek v2/v3 parser keeps file and command bounds validation
+- [x] Universal iPhone/iPad menu refresh cannot restore the SunPad menu
+- [x] Daily upstream-version check and deterministic profile updater
+- [ ] Exact merged source produces iPhone/iPad build 14 and tvOS build 2
+- [ ] Both IPAs package twice byte-identically and pass fresh extraction audits
+- [ ] Release tag, hosted assets, checksums, and hosted re-audits match locally
+- [ ] Physical testers accept the 6.12.5 flow and the Apple TV matrix
+
 ## 0.4.0 Preview 1 candidate
 
 - [x] Independent native `KartPadDual` tvOS implementation and full arm64 build

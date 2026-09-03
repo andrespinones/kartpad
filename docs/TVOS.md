@@ -3,7 +3,7 @@
 ## Current status
 
 Native tvOS support is available as the experimental public
-`v0.4.0-preview.1` hardware-bring-up build. There is still no accepted Apple TV
+`v0.4.0-preview.2` hardware-bring-up build. There is still no accepted Apple TV
 gameplay result. Until the physical acceptance matrix below passes, the correct
 claim is **public experimental tvOS preview**, not supported Apple TV
 functionality.
@@ -16,7 +16,7 @@ patch is not the implementation source for this branch.
 ## First candidate scope
 
 - Apple TV hardware running tvOS 17 or later.
-- Original Mario Kart Wii and Retro Rewind 6.12.4 through the existing
+- Original Mario Kart Wii and Retro Rewind 6.12.5 through the existing
   `KartPadDual` ahead-of-time translated product.
 - Offline play first. Retro WFC remains a separate network-acceptance gate.
 - One to four Extended Gamepad controllers. The Siri Remote can operate native
