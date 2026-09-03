@@ -2,6 +2,17 @@
 
 Updated: 2026-09-03
 
+## Native Android work
+
+Android implementation is authorized to begin on a separate machine using the
+evidence-gated architecture in [`docs/ANDROID.md`](ANDROID.md) and the
+autonomous execution contract in
+[`docs/ANDROID-GOAL-LOOP.md`](ANDROID-GOAL-LOOP.md). The agent may explicitly
+bootstrap pinned Android/Java tools and official repository dependencies. The
+current target is an ARM64 source-only SDL/JNI/Vulkan fixture before private
+full-game integration. No Android library, APK, installation, frame, gameplay,
+or physical-device result exists yet.
+
 ## Native tvOS work
 
 The maintainer-owned `codex/tvos-retro-rewind` branch contains the first

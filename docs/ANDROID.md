@@ -36,7 +36,8 @@ The first serious Android preview should have this deliberately narrow scope:
 - Android 9 / API 28 minimum initially, subject to the first physical-device
   results and the pinned Dawn package's API 28 build baseline.
 - Compile and target SDK 36 for the intended 2026 distribution environment.
-- Original Mario Kart Wii and Retro Rewind 6.12.4 in the same APK.
+- Original Mario Kart Wii and Retro Rewind 6.12.5 in the same APK, matching
+  KartPad 0.4.0's current dual-profile graph.
 - Offline play first; Retro WFC is an independent acceptance gate.
 - User-provided PAL `RMCP01` revision-0 `.iso` or `.wbfs`, plus the existing
   extracted-folder fallback.
@@ -294,10 +295,10 @@ contract, not merely reproduce the happy-path download.
 
 The selected profile currently pins:
 
-- version `6.12.4`;
-- official archive size `1,844,093,118` bytes;
+- version `6.12.5`;
+- official archive size `1,859,041,899` bytes;
 - archive SHA-256
-  `d2ab1ecfda4c12bb90304897aecd03e2cbfb9a93e353fff928a494aa5d9ec71d`;
+  `d8f7c61636ef76f8a451f4071ec5bbdcfea9d5f2500cfc6c245431f04580f9d9`;
 - maximum expanded size `2,200,000,000` bytes; and
 - exact `Code.pul`, Riivolution XML, and payload sizes/hashes.
 
@@ -321,7 +322,7 @@ only platform downloads, paths, progress, and UI. Shared logic should enforce:
 - retention of the previous complete installation until success; and
 - cleanup/recovery after cancellation, process death, or storage exhaustion.
 
-The 1.84 GB archive makes Android lifecycle behavior important. The public
+The 1.86 GB archive makes Android lifecycle behavior important. The public
 quality implementation should use an app-scoped foreground-capable worker or
 service with visible progress and cancellation, so rotating the device or
 recreating the activity does not restart the transfer. The game must not launch
@@ -363,11 +364,13 @@ large hierarchy of buttons. It must implement:
 - deterministic draw order and anti-aliasing choices;
 - stable pointer-ID-to-control ownership for true multitouch;
 - sticks, A/B/X/Y/Z/Start/L/R, and the grouped D-pad;
-- per-control editing and reset;
+- per-control editing, Hide/Show, and reset;
 - global opacity and size;
 - controller hide/restore behavior;
 - modern C-stick horizontal behavior;
 - the one-second A-button lock, locked color, and haptic feedback;
+- the current untouched-iPhone compact defaults, existing-layout preservation,
+  grouped D-pad editing, and the editor's direct **Back** path;
 - pass-through outside active control regions; and
 - virtual accessibility nodes for each control.
 
@@ -454,38 +457,22 @@ automation so stale hidden state cannot turn a broken initialization path green.
 Launch the emulator in its own window for manual multitouch; embedded emulator
 windows have documented multitouch limitations.
 
-## Current development-Mac inventory
+## Authorized clean-machine bootstrap
 
-As of this assessment, the current Apple Silicon Mac has:
+The implementation machine's starting inventory is intentionally treated as
+unknown. The Android agent is authorized to download and install the Android
+and Java build tools required for this port, including the SDK command-line
+tools, pinned JDK, SDK platforms, Build Tools, NDK, CMake/Ninja support,
+Gradle dependencies, emulator, and the minimum ARM64 system images. It may also
+download hash-pinned source or binary dependencies already authorized by this
+repository. This authorization does not include game data, saves, credentials,
+signing keys, or arbitrary executable game updates.
 
-- Android Studio installed;
-- Android Emulator `36.4.10`;
-- working Hypervisor.framework acceleration;
-- Android SDK platforms 34, 35, and 36;
-- Build Tools through `36.0.0`;
-- Platform Tools / `adb` `37.0.0`;
-- an ARM64 API-34 Google APIs AVD named
-  `Pixel_3a_API_34_extension_level_7_arm64-v8a`;
-- CMake `4.4.2` and Ninja `1.13.2`; and
-- Apple Clang 21.
-
-It does not currently have:
-
-- Android SDK command-line tools exposed through `sdkmanager`;
-- an Android NDK;
-- the dedicated ARM64 16 KiB Android system image;
-- a project-pinned Gradle/JDK environment; or
-- an attached Android device.
-
-The only system Java installation discovered was Temurin JDK 24. Pin a JDK 17
-runtime for an Android Gradle Plugin 8.x build instead of assuming that every
-developer's newest system JDK is compatible.
-
-### Toolchain bootstrap to automate
-
-The repository should eventually provide `scripts/check-android-host.sh` and a
-documented bootstrap command. The check should print versions and fail with an
-actionable message; it should not modify global shell profiles.
+The first implementation milestone must provide `scripts/check-android-host.sh`
+and a documented bootstrap command. Installation is an explicit operation in
+the Android goal loop, not a hidden side effect of a normal build. Prefer
+Android Studio's configured SDK or a user-local SDK root; do not rewrite global
+shell profiles, replace unrelated system toolchains, or assume Homebrew exists.
 
 Pin at least:
 
@@ -501,9 +488,11 @@ Use `local.properties` only for the machine-local SDK path and keep it ignored.
 Build scripts should accept `ANDROID_SDK_ROOT` and discover the NDK through the
 SDK, while rejecting an unpinned version for release builds.
 
-Do not install these tools as a side effect of an ordinary build. Installation
-should be an explicit maintainer bootstrap step; validation should remain
-read-only.
+Do not install these tools as a side effect of an ordinary build. The dedicated
+bootstrap command may install missing pinned components and accept paths through
+arguments or environment variables; the validation command remains read-only.
+If a download requires new legal terms, an account, a CAPTCHA, payment, or
+credentials, stop at that boundary and request the human action once.
 
 ## Working on a different Mac
 
@@ -609,7 +598,7 @@ Deliver:
 - portable archive validation/install core;
 - Android manifest check, resumable/cancellable download, free-space preflight,
   staging, atomic activation, rollback, and recovery;
-- exact 6.12.4 profile selection and no accidental Original fallback;
+- exact 6.12.5 profile selection and no accidental Original fallback;
 - complete offline Retro Rewind race, results, save, relaunch, and mode switch;
   and
 - interruption tests for rotation, process death, network loss, corrupt ZIP,
@@ -780,10 +769,11 @@ Before any tester receives an artifact, verify at minimum:
 
 ## Immediate next action
 
-Implement A0 only. Install and pin the missing JDK/SDK command-line
-tools/NDK/system image, add the minimal Android SDL shell, sanitize and lock the
-Dawn Android dependency, and prove a source-only JNI/Vulkan fixture on the
-existing API-34 AVD plus a new 16 KiB AVD.
+Begin with A0. Follow [`ANDROID-GOAL-LOOP.md`](ANDROID-GOAL-LOOP.md): inventory
+the new machine, install and pin the missing JDK/SDK command-line
+tools/NDK/system images, add the minimal Android SDL shell, sanitize and lock
+the Dawn Android dependency, and prove a source-only JNI/Vulkan fixture on one
+ARM64 phone AVD plus a 16 KiB AVD.
 
 Do not begin the touch-UI port or full private game link until the shell,
 toolchain, page-size, and Dawn configuration gates are reproducible on a clean

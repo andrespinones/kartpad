@@ -92,19 +92,22 @@ not block offline Retro Rewind support.
 
 ## Next executable work
 
-1. Collect the first physical Apple TV report against `v0.4.0` using
+1. Begin Android A0 on the authorized second machine using
+   `docs/ANDROID-GOAL-LOOP.md`: bootstrap pinned tools and prove the source-only
+   ARM64 SDL/JNI/Vulkan fixture before private game integration.
+2. Collect the first physical Apple TV report against `v0.4.0` using
    `docs/TVOS-TESTING.md`.
-2. Await the Issue #1 Feather-signed iPad import retest and the Issue #5 MacBook
+3. Await the Issue #1 Feather-signed iPad import retest and the Issue #5 MacBook
    Air cursor/settings retest requested against Preview 5.
-3. Keep Mii and physical Wii Remote/Nunchuk acceptance open until the Issue #5
+4. Keep Mii and physical Wii Remote/Nunchuk acceptance open until the Issue #5
    reporter can reach the settings and returns real hardware results.
-4. Continue representative performance and frame-pacing work without changing
+5. Continue representative performance and frame-pacing work without changing
    the accepted 0.3.0 release baseline.
-5. Complete the remaining three- and four-player, touch, motion, controller,
+6. Complete the remaining three- and four-player, touch, motion, controller,
    audio, thermal, lifecycle, and long-soak rows in `docs/PRD.md`.
-6. When Retro WFC returns, retest production login, matchmaking, a complete
+7. When Retro WFC returns, retest production login, matchmaking, a complete
    race, results, reconnect, and physical-device online play.
-7. Follow `docs/UPSTREAM_UPDATES.md` whenever WiiCompiled or Retro Rewind
+8. Follow `docs/UPSTREAM_UPDATES.md` whenever WiiCompiled or Retro Rewind
    advances; never accept an unpinned pack or `Code.pul`.
 
 ## Operating constraints
