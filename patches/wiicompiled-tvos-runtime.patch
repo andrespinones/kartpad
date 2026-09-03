@@ -36,7 +36,7 @@
          _DISABLE_STRING_ANNOTATION _DISABLE_VECTOR_ANNOTATION TARGET_PC)
      target_compile_features(${target} PRIVATE cxx_std_20)
      mkw_apply_common_compile_options(${target})
-@@ -390,7 +390,94 @@
+@@ -390,7 +390,96 @@
          XCODE_ATTRIBUTE_SUPPORTS_MACCATALYST NO
          XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1,2")
  endif()
@@ -47,6 +47,8 @@
 +    "KartPad tvOS marketing version")
 +set(KARTPAD_TVOS_BUILD_NUMBER "1" CACHE STRING
 +    "KartPad tvOS bundle build number")
++set(KARTPAD_TVOS_BUNDLE_IDENTIFIER "dev.kartpad.tv" CACHE STRING
++    "KartPad tvOS product bundle identifier")
  
 +if(CMAKE_SYSTEM_NAME STREQUAL "tvOS" AND MKW_KARTPAD_REPO_ROOT)
 +    set(MKW_KARTPAD_TVOS_DIR "${MKW_KARTPAD_REPO_ROOT}/apple/tvos")
@@ -118,7 +120,7 @@
 +            XCODE_ATTRIBUTE_CURRENT_PROJECT_VERSION "${KARTPAD_TVOS_BUILD_NUMBER}"
 +            XCODE_ATTRIBUTE_GENERATE_INFOPLIST_FILE NO
 +            XCODE_ATTRIBUTE_MARKETING_VERSION "${KARTPAD_TVOS_MARKETING_VERSION}"
-+            XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER dev.kartpad.tv
++            XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "${KARTPAD_TVOS_BUNDLE_IDENTIFIER}"
 +            XCODE_ATTRIBUTE_SUPPORTED_PLATFORMS "appletvos appletvsimulator"
 +            XCODE_ATTRIBUTE_SUPPORTS_MACCATALYST NO
 +            XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY 3
@@ -131,7 +133,7 @@
  if(MKW_HAVE_RETRO_REWIND)
      add_executable(RetroRewind "${MKW_RETRO_REWIND_PRODUCT_SOURCE}" ${MKW_RETRO_REGISTRATION_SOURCES})
      mkw_configure_product(RetroRewind)
-@@ -455,6 +542,10 @@
+@@ -455,6 +544,10 @@
              XCODE_ATTRIBUTE_SUPPORTS_MACCATALYST NO
              XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1,2")
      endif()
@@ -142,7 +144,7 @@
      add_custom_target(mkw_release DEPENDS WiiCompiled RetroRewind)
  else()
      add_custom_target(mkw_release DEPENDS WiiCompiled)
-@@ -529,6 +620,10 @@
+@@ -529,6 +622,10 @@
              XCODE_ATTRIBUTE_SUPPORTS_MACCATALYST NO
              XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1,2")
      endif()

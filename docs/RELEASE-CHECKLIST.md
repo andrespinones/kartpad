@@ -2,8 +2,11 @@
 
 ## tvOS experimental candidate
 
-- [ ] Complete the maintainer-run physical Apple TV matrix in
-      [`docs/TVOS.md`](TVOS.md) before inviting external testers.
+- [ ] Send the first physically untested build only to a small Apple TV
+      bring-up cohort using [`docs/TVOS-TESTING.md`](TVOS-TESTING.md) and the
+      acceptance matrix in [`docs/TVOS.md`](TVOS.md).
+- [ ] Label that artifact experimental and unaccepted until tester evidence
+      completes the physical Apple TV matrix.
 - [ ] Prove Original and Retro Rewind gameplay separately with an Extended
       Gamepad; do not infer Retro WFC acceptance from offline play.
 - [ ] Back up and rehearse restore of Application Support/NAND before asking a

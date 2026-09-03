@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if [[ $# -lt 1 || $# -gt 2 || "$1" != /* || "$1" != *.app ]]; then
-  echo "usage: $0 /absolute/path/to/KartPad.app [TVOS|TVOSSIMULATOR]" >&2
+if [[ $# -lt 1 || $# -gt 3 || "$1" != /* || "$1" != *.app ]]; then
+  echo "usage: $0 /absolute/path/to/KartPad.app [TVOS|TVOSSIMULATOR] [bundle-id]" >&2
   exit 64
 fi
 app="$1"
 expected_platform="${2:-TVOS}"
+expected_bundle_identifier="${3:-dev.kartpad.tv}"
 case "${expected_platform}" in TVOS|TVOSSIMULATOR) ;; *) exit 64 ;; esac
 
 plist="${app}/Info.plist"
@@ -18,7 +19,8 @@ test -f "${app}/PrivacyInfo.xcprivacy"
 test -f "${app}/initial_pipeline_cache.db"
 test -f "${app}/dsp_coef.bin"
 plutil -lint "${plist}" "${app}/PrivacyInfo.xcprivacy" >/dev/null
-test "$(plutil -extract CFBundleIdentifier raw "${plist}")" = "dev.kartpad.tv"
+test "$(plutil -extract CFBundleIdentifier raw "${plist}")" = \
+  "${expected_bundle_identifier}"
 test "$(plutil -extract CFBundleExecutable raw "${plist}")" = "KartPad"
 test "$(plutil -extract MinimumOSVersion raw "${plist}")" = "17.0"
 test "$(plutil -extract GCSupportsControllerUserInteraction raw "${plist}")" = "true"

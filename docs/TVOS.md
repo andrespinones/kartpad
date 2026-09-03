@@ -53,7 +53,8 @@ it can be reconstructed:
 | --- | --- | --- |
 | Extracted RMCP01 data | `Library/Caches/KartPad/GameData` | Restage from the user's Mac |
 | Retro Rewind pack | `Library/Caches/KartPad/RetroRewind` | Download and verify again |
-| Config, NAND, saves, diagnostics | `Library/Application Support/KartPad` | Back up to the user's Mac before testing |
+| Config, NAND, saves, runtime logs | `Library/Application Support/KartPad` | Back up to the user's Mac before testing |
+| Controller diagnostics | `Library/Application Support/SunPad/Logs` | Collect separately with the diagnostics script |
 
 Application Support is not treated as a permanent guarantee on Apple TV. The
 developer preview includes a Mac-side backup command, and testers must back up
@@ -104,6 +105,25 @@ Back up saves and configuration before replacing or deleting the app:
 ./scripts/backup-tvos-state.sh "Living Room" /absolute/path/to/new-backup
 ```
 
+The default bundle identifier is `dev.kartpad.tv`. If a tester signs the app
+with a different identifier, use that same identifier for the build and every
+device operation in the shell session:
+
+```sh
+export KARTPAD_TVOS_BUNDLE_IDENTIFIER=com.example.kartpad.tv
+```
+
+This keeps game-data staging, backups, and diagnostic collection pointed at
+the signed app's actual container.
+
+Collect path-redacted runtime and controller logs after a failure. This does
+not copy game data or saves, but the tester should still review the output
+before sharing it:
+
+```sh
+./scripts/collect-tvos-diagnostics.sh "Living Room" /absolute/path/to/new-diagnostics
+```
+
 ## Physical acceptance matrix
 
 Record the Apple TV model, tvOS version, Xcode/SDK, controller models, source
@@ -127,18 +147,36 @@ commit, binary SHA-256, and whether the run used Original or Retro Rewind.
 - [ ] A full cup and at least a 30-minute soak record frame pacing, audio,
   memory pressure, temperature, and controller behavior.
 - [ ] A native layered tvOS app icon is compiled and visually checked on the
-  Apple TV Home Screen before an external build is distributed.
+  Apple TV Home Screen before a broader beta is distributed.
 - [ ] The exact tester artifact contains no private data, derived branding,
   signing material, local paths, or unsupported public claims.
 
-## External testing gate
+## External hardware bring-up
 
-Do not recruit testers merely because the source compiles. The first external
-test build requires one maintainer-run physical Apple TV pass covering install,
-game-data staging, controller input, Original gameplay, Retro Rewind download
-and gameplay, save/relaunch, and backup. After that pass, publish a narrowly
-scoped tester checklist and collect exact device/build evidence. Keep issues
-open until the reported hardware path has been retested.
+The maintainer does not currently have physical Apple TV hardware, so a small
+outside cohort will perform the first physical acceptance pass. This is a
+hardware bring-up build, not a supported release.
+
+Before sending it, package and audit one exact candidate. Testers must have a
+paired Apple TV, a Mac with Xcode, an Extended Gamepad, their own supported game
+data, and either their own signing setup or a registered-device build supplied
+by the maintainer. Apple documents
+[running on a paired tvOS device](https://developer.apple.com/documentation/xcode/running-your-app-on-simulated-or-physical-devices)
+and [registered-device distribution](https://developer.apple.com/documentation/xcode/distributing-your-app-to-registered-devices).
+Start with testers who accept that launch may fail and who have no valuable
+KartPad save in the app container.
+
+Give every tester the executable SHA-256 and the physical matrix above. Require
+the Apple TV model, tvOS version, controller model, signing/install method,
+selected mode, failure stage, and collected diagnostics for every result. The first
+priority is missing-data UI, staging, launch, controller input, and one Original
+race. Only then ask that same tester to download Retro Rewind and exercise save,
+relaunch, sleep/wake, and backup. Expand distribution only after at least one
+tester completes both modes. Keep issues open until the reported hardware path
+has been retested.
+
+The concise tester-facing procedure is
+[`docs/TVOS-TESTING.md`](TVOS-TESTING.md).
 
 The first unsigned device build passed on 2026-09-03 with Xcode 26.6 and the
 tvOS 26.5 SDK at a tvOS 17.0 deployment target. See

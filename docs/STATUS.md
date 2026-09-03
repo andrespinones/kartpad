@@ -13,8 +13,10 @@ links as an unsigned arm64 tvOS 17 app, and that app passes the native bundle,
 platform, dependency, symbol, privacy, and private-data audit. No Apple TV is
 paired with the current Mac, so signing, installation, execution, gameplay,
 performance, and save recovery remain untested. Apple TV support is therefore
-not accepted or publicly released. The authoritative scope, build procedure,
-storage boundary, and external-testing gate are in
+not accepted or publicly released. The next gate is a small outside hardware
+bring-up cohort using the exact audited candidate and tester checklist. The
+authoritative scope, build procedure, storage boundary, and external-testing
+gate are in
 [`docs/TVOS.md`](TVOS.md).
 
 ## Current goal

@@ -264,7 +264,7 @@ UIButton *KartPadTVButton(NSString *title, UIColor *color,
 - (void)finishWithRetroRewind:(BOOL)retroRewind;
 - (void)showControllerRequired:(BOOL)retroRewind;
 - (void)downloadRetroRewind;
-- (void)installDownloadedArchive:(NSURL *)location;
+- (void)installArchiveAtPath:(NSString *)archivePath;
 - (UIWindowScene *)availableScene;
 - (void)showFailure:(NSString *)title error:(NSError *)error
               retry:(void (^)(void))retry;
@@ -355,31 +355,21 @@ UIButton *KartPadTVButton(NSString *title, UIColor *color,
   [self.root showStatus:message buttons:@[again, back]];
 }
 
-- (void)installDownloadedArchive:(NSURL *)location {
-  NSString *destination = [NSTemporaryDirectory() stringByAppendingPathComponent:
-      [NSString stringWithFormat:@"KartPad-RetroRewind-%@.zip", NSUUID.UUID.UUIDString]];
-  NSError *moveError = nil;
-  [NSFileManager.defaultManager moveItemAtURL:location
-      toURL:[NSURL fileURLWithPath:destination] error:&moveError];
-  if (moveError != nil) {
-    [self showFailure:@"The download could not be staged." error:moveError
-                 retry:^{ [self downloadRetroRewind]; }];
-    return;
-  }
+- (void)installArchiveAtPath:(NSString *)archivePath {
   [self.root showStatus:@"Verifying and installing the official Retro Rewind pack…"
                     buttons:@[]];
   __weak KartPadTVLaunchHost *weakSelf = self;
   dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
     NSError *installError = nil;
     BOOL installed = [KartPadRetroRewindInstaller
-        installArchiveAtURL:[NSURL fileURLWithPath:destination]
+        installArchiveAtURL:[NSURL fileURLWithPath:archivePath]
                     progress:^(NSString *status, double fraction) {
       dispatch_async(dispatch_get_main_queue(), ^{
         [weakSelf.root showStatus:[NSString stringWithFormat:@"%@\n%.0f%%",
             status, fraction * 100.0] buttons:@[]];
       });
     } error:&installError];
-    [NSFileManager.defaultManager removeItemAtPath:destination error:nil];
+    [NSFileManager.defaultManager removeItemAtPath:archivePath error:nil];
     dispatch_async(dispatch_get_main_queue(), ^{
       if (installed) {
         [weakSelf finishWithRetroRewind:YES];
@@ -401,17 +391,30 @@ UIButton *KartPadTVButton(NSString *title, UIColor *color,
         completionHandler:^(NSURL *location, NSURLResponse *response, NSError *error) {
     NSHTTPURLResponse *http = [response isKindOfClass:NSHTTPURLResponse.class]
         ? (NSHTTPURLResponse *)response : nil;
+    NSError *requestError = error;
+    NSString *stagedArchive = nil;
+    if (requestError == nil && location != nil && http.statusCode == 200) {
+      stagedArchive = [NSTemporaryDirectory() stringByAppendingPathComponent:
+          [NSString stringWithFormat:@"KartPad-RetroRewind-%@.zip",
+                                     NSUUID.UUID.UUIDString]];
+      NSError *moveError = nil;
+      if (![NSFileManager.defaultManager moveItemAtURL:location
+          toURL:[NSURL fileURLWithPath:stagedArchive] error:&moveError]) {
+        requestError = moveError;
+        stagedArchive = nil;
+      }
+    }
     dispatch_async(dispatch_get_main_queue(), ^{
       weakSelf.downloadTask = nil;
-      if (error != nil || location == nil || http.statusCode != 200) {
-        NSError *shownError = error ?: [NSError errorWithDomain:@"dev.kartpad.tv"
+      if (requestError != nil || stagedArchive == nil || http.statusCode != 200) {
+        NSError *shownError = requestError ?: [NSError errorWithDomain:@"dev.kartpad.tv"
             code:http.statusCode userInfo:@{NSLocalizedDescriptionKey:
                 @"The official Retro Rewind download did not return a valid response."}];
         [weakSelf showFailure:@"Retro Rewind download failed." error:shownError
                          retry:^{ [weakSelf downloadRetroRewind]; }];
         return;
       }
-      [weakSelf installDownloadedArchive:location];
+      [weakSelf installArchiveAtPath:stagedArchive];
     });
   }];
   [self.downloadTask resume];

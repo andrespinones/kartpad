@@ -121,10 +121,13 @@ runtime PPC interpreter or JIT. Its acceptance is separate from iPhone/iPad:
 an Apple TV build must prove controller-only gameplay, purge recovery, save
 backup/restore, Original mode, and Retro Rewind mode on physical hardware.
 
-A successful tvOS compile is not permission to invite external testers. First
-complete one maintainer-run physical acceptance pass, then distribute only the
-exact audited tester candidate with a narrow checklist. Offline Retro Rewind
-acceptance does not establish Retro WFC service compatibility.
+A successful tvOS compile is not physical acceptance. Because the maintainer
+does not have Apple TV hardware, the first narrowly distributed build may be a
+hardware bring-up candidate for a small tester cohort. Distribute only the exact
+audited candidate with a narrow checklist, warn testers that no physical launch
+has passed yet, and keep support claims closed until their evidence completes
+the matrix. Offline Retro Rewind acceptance does not establish Retro WFC
+service compatibility.
 
 ---
 

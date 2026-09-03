@@ -13,6 +13,11 @@ runtime_source="$(absolute_from_repo "${1:-build/tvos-game-runtime-source}")"
 xcode_build="$(absolute_from_repo "${2:-build/tvos-game-app-xcode}")"
 translation_root="$(absolute_from_repo "${3:-private/builder/dual-pipeline-smoke/translation}")"
 sdk="${4:-appletvos}"
+bundle_identifier="${KARTPAD_TVOS_BUNDLE_IDENTIFIER:-dev.kartpad.tv}"
+if [[ ! "${bundle_identifier}" =~ ^[A-Za-z0-9][A-Za-z0-9-]*(\.[A-Za-z0-9][A-Za-z0-9-]*)+$ ]]; then
+  echo "ERROR: invalid KARTPAD_TVOS_BUNDLE_IDENTIFIER: ${bundle_identifier}" >&2
+  exit 64
+fi
 case "${sdk}" in
   appletvos)
     dawn_archive="${repo_root}/build/dependency-cache/dawn-tvos-arm64-v20260603.191052.tar.gz"
@@ -84,6 +89,7 @@ cmake -S "${runtime_source}" -B "${xcode_build}" -G Xcode \
   -DMKW_AURORA_DIR="${runtime_source}/aurora-main" \
   -DAURORA_DAWN_PACKAGE_URL="file://${dawn_archive}" \
   -DKARTPAD_TVOS_DAWN_SHA256="${dawn_sha256}" \
+  -DKARTPAD_TVOS_BUNDLE_IDENTIFIER="${bundle_identifier}" \
   -DMKW_TRANSLATED_SHARD_MANIFEST="${translation_root}/build_shards/shards.cmake" \
   -DMKW_KARTPAD_RUNTIME_INCLUDE="${repo_root}/runtime/include" \
   -DMKW_KARTPAD_REPO_ROOT="${repo_root}" \
@@ -93,5 +99,6 @@ cmake --build "${xcode_build}" --config Release --target KartPadDual -- \
   -quiet -sdk "${sdk}" CODE_SIGNING_ALLOWED=NO
 
 app="${xcode_build}/Release-${output_suffix}/KartPad.app"
-"${repo_root}/scripts/audit-tvos-app.sh" "${app}" "${expected_platform}"
+"${repo_root}/scripts/audit-tvos-app.sh" \
+  "${app}" "${expected_platform}" "${bundle_identifier}"
 echo "Built native dual-mode tvOS app: ${app}"
