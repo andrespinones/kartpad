@@ -18,6 +18,20 @@ The exact 67-row matrix in `docs/PRD.md` remains the authority for full
 engineering completion. A community preview may ship with narrower, explicit
 limitations when its exact artifact passes every preview gate below.
 
+## 0.4.0 Preview 1 candidate
+
+- [x] Independent native `KartPadDual` tvOS implementation and full arm64 build
+- [x] Original three-layer Apple TV icon and Top Shelf catalog compile and audit
+- [x] Durable Application Support is separated from purgeable game/mod caches
+- [x] Retro Rewind temporary-download lifetime is safe and its pack remains
+      pinned, size checked, and SHA-256 verified
+- [x] Tester-specific bundle identifiers work across build, audit, staging,
+      backup, and diagnostic scripts
+- [ ] Exact merged source produces iPhone/iPad build 13 and tvOS build 1
+- [ ] Both IPAs package twice byte-identically and pass fresh extraction audits
+- [ ] Release tag, hosted assets, checksums, and hosted re-audits match locally
+- [ ] PR #7 receives an accurate closure response after the replacement lands
+
 ## Published 0.3.0 preview
 
 - [x] Exact source pins, notices, and reproducible dependency graph

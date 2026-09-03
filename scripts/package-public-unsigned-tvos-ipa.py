@@ -10,7 +10,7 @@ from pathlib import Path
 
 RELEASE_TAG = "v0.4.0-preview.1"
 APP_VERSION = "0.4.0"
-APP_BUILD = "13"
+APP_BUILD = "1"
 
 
 def fail(message: str) -> None:
@@ -19,14 +19,14 @@ def fail(message: str) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Create the audited public KartPad unsigned community-preview IPA."
+        description="Create the audited unsigned KartPad Apple TV bring-up IPA."
     )
-    parser.add_argument("app", type=Path, help="Path to the unsigned KartPad.app")
+    parser.add_argument("app", type=Path, help="Path to the unsigned tvOS KartPad.app")
     parser.add_argument(
         "output",
         type=Path,
         nargs="?",
-        help="Output IPA path (defaults to artifacts/KartPad-v0.4.0-preview.1-ios-unsigned.ipa)",
+        help="Output IPA path (defaults to artifacts/KartPad-v0.4.0-preview.1-tvos-unsigned.ipa)",
     )
     args = parser.parse_args()
 
@@ -38,19 +38,20 @@ def main() -> int:
     output = (
         args.output.resolve()
         if args.output
-        else repo / "artifacts/KartPad-v0.4.0-preview.1-ios-unsigned.ipa"
+        else repo / "artifacts/KartPad-v0.4.0-preview.1-tvos-unsigned.ipa"
     )
     if subprocess.check_output(
         ["git", "-C", str(repo), "status", "--porcelain", "--untracked-files=all"],
         text=True,
     ).strip():
-        fail("public IPA packaging requires a clean tracked source tree")
+        fail("public tvOS IPA packaging requires a clean tracked source tree")
     source_commit = subprocess.check_output(
         ["git", "-C", str(repo), "rev-parse", "HEAD"], text=True
     ).strip()
 
     subprocess.run(
-        [str(repo / "scripts/audit-ios-game-app.sh"), str(app), "IOS"], check=True
+        [str(repo / "scripts/audit-tvos-app.sh"), str(app), "TVOS", "dev.kartpad.tv"],
+        check=True,
     )
     metadata = audit_app(app, (str(repo), str(Path.home())))
     with (app / "Info.plist").open("rb") as handle:
@@ -65,12 +66,13 @@ def main() -> int:
         stderr=subprocess.DEVNULL,
         check=False,
     ).returncode == 0:
-        fail("public IPA input app is still signed")
+        fail("public tvOS IPA input app is still signed")
 
     xcode_build = app.parents[1]
     additional_entries = {
-        "INSTALL_IPA.md": repo / "docs/INSTALL_IPA.md",
+        "INSTALL_TVOS.md": repo / "docs/INSTALL_TVOS.md",
         "RELEASE_NOTES.md": repo / "docs/releases/v0.4.0-preview.1.md",
+        "TVOS_TESTING.md": repo / "docs/TVOS-TESTING.md",
         "LICENSES/GPL-3.0.txt": repo / "LICENSES/GPL-3.0.txt",
         "RIGHTS_AND_LICENSES.md": repo / "RIGHTS_AND_LICENSES.md",
         "THIRD_PARTY_NOTICES.md": repo / "THIRD_PARTY_NOTICES.md",
@@ -89,13 +91,14 @@ def main() -> int:
         "ThirdPartyLicenses/xxHash-BSD-2-Clause.txt": xcode_build / "_deps/xxhash-src/LICENSE",
         "ThirdPartyLicenses/zstd-BSD.txt": xcode_build / "_deps/zstd-src/LICENSE",
     }
-    missing_notices = [name for name, path in additional_entries.items() if not path.is_file()]
-    if missing_notices:
-        fail(f"missing release notices: {', '.join(missing_notices)}")
+    missing = [name for name, path in additional_entries.items() if not path.is_file()]
+    if missing:
+        fail(f"missing release notices: {', '.join(missing)}")
     provenance = {
         "schemaVersion": 1,
         "releaseTag": RELEASE_TAG,
         "sourceCommit": source_commit,
+        "platform": "tvOS",
         "appVersion": APP_VERSION,
         "appBuild": APP_BUILD,
         "bundleIdentifier": metadata["bundleIdentifier"],
@@ -105,12 +108,13 @@ def main() -> int:
         "containsSigningMaterial": False,
         "maintainerAuthorizedFreeCommunityRelease": True,
         "upstreamRightsConfirmed": False,
+        "physicalAppleTVAcceptance": False,
         "rightsStatus": "community preview; upstream and game-code rights unresolved",
     }
     digest = package_unsigned_ipa(app, output, provenance, additional_entries)
-    print(f"Public unsigned IPA: {output}")
+    print(f"Public unsigned tvOS IPA: {output}")
     print(f"SHA-256: {digest}")
-    print("This IPA must be re-signed and supplied with the user's own supported game image.")
+    print("This hardware bring-up IPA must be re-signed and supplied with the user's own game data.")
     return 0
 
 

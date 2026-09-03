@@ -146,8 +146,9 @@ commit, binary SHA-256, and whether the run used Original or Retro Rewind.
   game data and redownloading Retro Rewind do not overwrite saves.
 - [ ] A full cup and at least a 30-minute soak record frame pacing, audio,
   memory pressure, temperature, and controller behavior.
-- [ ] A native layered tvOS app icon is compiled and visually checked on the
-  Apple TV Home Screen before a broader beta is distributed.
+- [x] The original three-layer tvOS app icon and Top Shelf artwork compile into
+  `Assets.car` and pass structural inspection.
+- [ ] The compiled icon is visually checked on a physical Apple TV Home Screen.
 - [ ] The exact tester artifact contains no private data, derived branding,
   signing material, local paths, or unsupported public claims.
 

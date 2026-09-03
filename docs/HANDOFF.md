@@ -2,6 +2,14 @@
 
 ## Current state
 
+KartPad `v0.4.0-preview.1` is in release preparation. The branch adds an
+independent native arm64 tvOS 17 target, a three-layer original Apple TV icon,
+safe private-data staging, durable save/configuration storage, purgeable game
+and Retro Rewind caches, controller-only gameplay, backup, and bounded
+diagnostics. A complete unsigned tvOS app builds and audits, but no physical
+Apple TV has run this implementation. The intended release contains separate
+unsigned iPhone/iPad and physically unaccepted tvOS tester IPAs.
+
 KartPad `v0.3.0-preview.5` is published from
 `8e57ac49c161ff576d6eff198ade2ee9b21f575e`. Its unsigned app 0.3.0 build 12
 IPA has SHA-256
@@ -55,17 +63,19 @@ not block offline Retro Rewind support.
 
 ## Next executable work
 
-1. Await the Issue #1 Feather-signed iPad import retest and the Issue #5 MacBook
+1. Finish and hosted-verify the `v0.4.0-preview.1` dual-IPA release, then collect
+   the first physical Apple TV report using `docs/TVOS-TESTING.md`.
+2. Await the Issue #1 Feather-signed iPad import retest and the Issue #5 MacBook
    Air cursor/settings retest requested against Preview 5.
-2. Keep Mii and physical Wii Remote/Nunchuk acceptance open until the Issue #5
+3. Keep Mii and physical Wii Remote/Nunchuk acceptance open until the Issue #5
    reporter can reach the settings and returns real hardware results.
-3. Continue representative performance and frame-pacing work without changing
+4. Continue representative performance and frame-pacing work without changing
    the accepted 0.3.0 release baseline.
-4. Complete the remaining three- and four-player, touch, motion, controller,
+5. Complete the remaining three- and four-player, touch, motion, controller,
    audio, thermal, lifecycle, and long-soak rows in `docs/PRD.md`.
-5. When Retro WFC returns, retest production login, matchmaking, a complete
+6. When Retro WFC returns, retest production login, matchmaking, a complete
    race, results, reconnect, and physical-device online play.
-6. Follow `docs/UPSTREAM_UPDATES.md` whenever WiiCompiled or Retro Rewind
+7. Follow `docs/UPSTREAM_UPDATES.md` whenever WiiCompiled or Retro Rewind
    advances; never accept an unpinned pack or `Code.pul`.
 
 ## Operating constraints

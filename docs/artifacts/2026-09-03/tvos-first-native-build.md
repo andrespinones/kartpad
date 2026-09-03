@@ -86,10 +86,9 @@ inspection only. It does not establish signing, installation, launch, focus
 behavior, controller input, video/audio correctness, Original or Retro Rewind
 gameplay, performance, sleep/wake, save durability, or recovery.
 
-The first proof bundle also has no compiled tvOS brand asset. A layered KartPad
-icon and its Home Screen visual check remain required before a broader beta;
-this does not invalidate the executable/link proof or block a small initial
-hardware bring-up cohort.
+The follow-up candidate compiles the repository-owned three-layer KartPad icon
+and Top Shelf image into `Assets.car`, which passes structural audit. A physical
+Apple TV Home Screen visual check remains open.
 
 The next gate is a narrowly scoped external Apple TV bring-up pass following
 `docs/TVOS.md`, using one exact signed build and recorded executable hash. The
