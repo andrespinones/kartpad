@@ -46,6 +46,11 @@ done
 build_metadata="$(xcrun vtool -show-build "${binary}")"
 test "$(awk '/platform/{print $2; exit}' <<<"${build_metadata}")" = "${expected_platform}"
 test "$(awk '/minos/{print $2; exit}' <<<"${build_metadata}")" = "17.0"
+if [[ "${expected_platform}" = "TVOS" ]] &&
+   xcrun llvm-objdump -d "${binary}" | rg -i '\bldap(?:r|ur)[a-z]*\b' >/dev/null; then
+  echo "ERROR: tvOS app contains an A12-incompatible RCpc load instruction" >&2
+  exit 69
+fi
 
 for forbidden in '*.wbfs' '*.iso' '*.rvz' '*.wia' '*.gcz' 'rksys.dat' \
                  '*.mobileprovision' 'opening.bnr' 'banner.bin' 'icon.bin' \

@@ -95,6 +95,14 @@ cmake -S "${runtime_source}" -B "${xcode_build}" -G Xcode \
   -DMKW_KARTPAD_REPO_ROOT="${repo_root}" \
   -DMKW_KARTPAD_MINIZIP_SOURCE_DIR="${minizip_source}" \
   -DMKW_TRANSLATED_COMPILE_JOBS=2
+if [[ "${sdk}" = "appletvos" ]]; then
+  project="${xcode_build}/mkw_recompiled.xcodeproj/project.pbxproj"
+  if ! rg -F -q -- "'-mcpu=generic' -Xclang -target-feature -Xclang -rcpc" \
+      "${project}"; then
+    echo "ERROR: tvOS runtime targets are missing the A12-safe compiler baseline" >&2
+    exit 69
+  fi
+fi
 cmake --build "${xcode_build}" --config Release --target KartPadDual -- \
   -quiet -sdk "${sdk}" CODE_SIGNING_ALLOWED=NO
 

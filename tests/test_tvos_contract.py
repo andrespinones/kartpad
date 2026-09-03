@@ -28,6 +28,20 @@ class TvOSContractTests(unittest.TestCase):
         self.assertIn("MINIZIP::minizip", patch)
         self.assertIn("KARTPAD_TVOS_BUNDLE_IDENTIFIER", patch)
 
+    def test_tvos_runtime_uses_an_a12_safe_cpu_baseline(self):
+        patch = (ROOT / "patches/wiicompiled-apple-runtime.patch").read_text()
+        compiler_options = patch.split(
+            '+        if(CMAKE_SYSTEM_NAME STREQUAL "tvOS")', 1
+        )[1]
+        tvos_options = compiler_options.split("+        else()", 1)[0]
+        non_tvos_options = compiler_options.split("+        else()", 1)[1].split(
+            "+        endif()", 1
+        )[0]
+        self.assertIn("-mcpu=generic", tvos_options)
+        self.assertIn("-Xclang -target-feature -Xclang -rcpc", tvos_options)
+        self.assertNotIn("-mcpu=apple-m2", tvos_options)
+        self.assertIn("-mcpu=apple-m2", non_tvos_options)
+
     def test_tvos_host_uses_purgeable_cache_storage(self):
         host = (ROOT / "apple/tvos/KartPadTVRuntimeHost.mm").read_text()
         self.assertIn("NSCachesDirectory", host)
@@ -116,6 +130,10 @@ class TvOSContractTests(unittest.TestCase):
         diagnostics = (ROOT / "scripts/collect-tvos-diagnostics.sh").read_text()
         self.assertIn("CODE_SIGNING_ALLOWED=NO", build)
         self.assertIn("KartPadDual", build)
+        self.assertIn(
+            "'-mcpu=generic' -Xclang -target-feature -Xclang -rcpc", build
+        )
+        self.assertIn("A12-incompatible RCpc load instruction", audit)
         dawn = (ROOT / "scripts/build-dawn-tvos.sh").read_text()
         self.assertIn("-ffile-prefix-map=${repo_root}=KartPad", dawn)
         self.assertIn("TVOS", audit)
