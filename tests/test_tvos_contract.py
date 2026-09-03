@@ -1,5 +1,6 @@
 import json
 import plistlib
+import struct
 import unittest
 from pathlib import Path
 
@@ -8,6 +9,13 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class TvOSContractTests(unittest.TestCase):
+    @staticmethod
+    def png_header(path: Path):
+        data = path.read_bytes()
+        if data[:8] != b"\x89PNG\r\n\x1a\n" or data[12:16] != b"IHDR":
+            raise AssertionError(f"not a PNG: {path}")
+        return struct.unpack(">IIBBBBB", data[16:29])
+
     def test_runtime_target_is_native_dual_mode(self):
         patch = (ROOT / "patches/wiicompiled-tvos-runtime.patch").read_text()
         self.assertIn('CMAKE_SYSTEM_NAME STREQUAL "tvOS"', patch)
@@ -38,6 +46,32 @@ class TvOSContractTests(unittest.TestCase):
         host = (ROOT / "apple/tvos/KartPadTVRuntimeHost.mm").read_text()
         self.assertIn("Siri Remote", host)
         self.assertIn("not a supported racing controller", host)
+
+    def test_tvos_brand_assets_are_layered_and_original(self):
+        assets = ROOT / "apple/tvos/Assets.xcassets/App Icon.brandassets"
+        small = json.loads(
+            (assets / "App Icon - Small.imagestack/Contents.json").read_text()
+        )
+        self.assertEqual(
+            [layer["filename"] for layer in small["layers"]],
+            [
+                "Mark.imagestacklayer",
+                "Circuit.imagestacklayer",
+                "Background.imagestacklayer",
+            ],
+        )
+        content = "App Icon - Small.imagestack/{}/Content.imageset/{}"
+        background = assets / content.format("Background.imagestacklayer", "background@2x.png")
+        circuit = assets / content.format("Circuit.imagestacklayer", "circuit@2x.png")
+        mark = assets / content.format("Mark.imagestacklayer", "mark@2x.png")
+        self.assertEqual(self.png_header(background)[:2], (800, 480))
+        self.assertIn(self.png_header(background)[3], (0, 2, 3))
+        self.assertNotIn(b"tRNS", background.read_bytes())
+        self.assertEqual(self.png_header(circuit)[3], 6)
+        self.assertEqual(self.png_header(mark)[3], 6)
+        provenance = (ROOT / "branding/PROVENANCE.md").read_text()
+        self.assertIn("tvOS layered icon", provenance)
+        self.assertNotIn("opening.bnr", provenance.split("## tvOS layered icon", 1)[1])
 
     def test_retro_rewind_remains_pinned_and_hash_verified(self):
         profile = json.loads(
@@ -74,6 +108,8 @@ class TvOSContractTests(unittest.TestCase):
         dawn = (ROOT / "scripts/build-dawn-tvos.sh").read_text()
         self.assertIn("-ffile-prefix-map=${repo_root}=KartPad", dawn)
         self.assertIn("TVOS", audit)
+        self.assertIn("Assets.car", audit)
+        self.assertIn("mark-large.png", audit)
         self.assertIn("expected_bundle_identifier", audit)
         self.assertIn("/Users/[^/]+/|/tmp/kartpad-tvos-", audit)
         self.assertIn("rksys.dat", audit)

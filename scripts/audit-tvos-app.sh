@@ -12,10 +12,12 @@ case "${expected_platform}" in TVOS|TVOSSIMULATOR) ;; *) exit 64 ;; esac
 
 plist="${app}/Info.plist"
 binary="${app}/KartPad"
+assets_car="${app}/Assets.car"
 test -d "${app}"
 test -x "${binary}"
 test -f "${plist}"
 test -f "${app}/PrivacyInfo.xcprivacy"
+test -f "${assets_car}"
 test -f "${app}/initial_pipeline_cache.db"
 test -f "${app}/dsp_coef.bin"
 plutil -lint "${plist}" "${app}/PrivacyInfo.xcprivacy" >/dev/null
@@ -25,13 +27,29 @@ test "$(plutil -extract CFBundleExecutable raw "${plist}")" = "KartPad"
 test "$(plutil -extract MinimumOSVersion raw "${plist}")" = "17.0"
 test "$(plutil -extract GCSupportsControllerUserInteraction raw "${plist}")" = "true"
 test "$(plutil -extract GCSupportedGameControllers.0.ProfileName raw "${plist}")" = "ExtendedGamepad"
+test "$(plutil -extract CFBundleIcons.CFBundlePrimaryIcon raw "${plist}")" = "App Icon - Small"
+test "$(plutil -extract TVTopShelfImage.TVTopShelfPrimaryImage raw "${plist}")" = "Top Shelf Image"
 test "$(plutil -extract UIApplicationSceneManifest.UISceneConfigurations.UIWindowSceneSessionRoleApplication.0.UISceneDelegateClassName raw "${plist}")" = "SDLUIKitSceneDelegate"
+
+asset_info="$(xcrun assetutil --info "${assets_car}")"
+for asset in '"Name" : "App Icon - Small"' \
+             '"RenditionName" : "background-large.png"' \
+             '"RenditionName" : "circuit-large.png"' \
+             '"RenditionName" : "mark-large.png"' \
+             '"Name" : "Top Shelf Image"'; do
+  rg -F -q "${asset}" <<<"${asset_info}" || {
+    echo "ERROR: tvOS Assets.car is missing required rendition: ${asset}" >&2
+    exit 69
+  }
+done
 
 build_metadata="$(xcrun vtool -show-build "${binary}")"
 test "$(awk '/platform/{print $2; exit}' <<<"${build_metadata}")" = "${expected_platform}"
 test "$(awk '/minos/{print $2; exit}' <<<"${build_metadata}")" = "17.0"
 
-for forbidden in '*.wbfs' '*.iso' '*.rvz' '*.wia' '*.gcz' 'rksys.dat' '*.mobileprovision'; do
+for forbidden in '*.wbfs' '*.iso' '*.rvz' '*.wia' '*.gcz' 'rksys.dat' \
+                 '*.mobileprovision' 'opening.bnr' 'banner.bin' 'icon.bin' \
+                 'GameData' 'NAND'; do
   if [[ -n "$(find "${app}" -name "${forbidden}" -print -quit)" ]]; then
     echo "ERROR: tvOS app contains forbidden private/signing data: ${forbidden}" >&2
     exit 70
