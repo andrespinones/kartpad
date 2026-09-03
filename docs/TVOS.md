@@ -2,11 +2,11 @@
 
 ## Current status
 
-Native tvOS support is under active implementation on the maintainer-owned
-`codex/tvos-retro-rewind` branch. There is no public tvOS build and no accepted
-Apple TV gameplay result yet. Until the physical acceptance matrix below
-passes, the correct claim is **buildable experimental tvOS candidate**, not
-supported Apple TV release.
+Native tvOS support is available as the experimental public
+`v0.4.0-preview.1` hardware-bring-up build. There is still no accepted Apple TV
+gameplay result. Until the physical acceptance matrix below passes, the correct
+claim is **public experimental tvOS preview**, not supported Apple TV
+functionality.
 
 This implementation starts from KartPad `main`, the project's pinned upstream
 sources, and Apple/SDL platform contracts. It does not incorporate code from

@@ -1,8 +1,8 @@
 # KartPad
 
 <p align="center">
-  <strong>Mario Kart Wii and Retro Rewind on Apple Silicon Mac, iPhone, and iPad.</strong><br>
-  Native static recompilation through Metal, with touch controls, motion steering, controllers, and optional Retro Rewind content.
+  <strong>Mario Kart Wii and Retro Rewind, native for iOS, iPadOS, macOS, and tvOS.</strong><br>
+  Native static recompilation through Metal, with touch controls, motion steering, controllers, and optional Retro Rewind content. tvOS is currently an experimental preview.
 </p>
 
 <p align="center">
@@ -391,9 +391,10 @@ available without a separate controller:
   input.
 - **Mario Kart shoulders:** R is a compact digital control matching L rather
   than SunPad's Sunshine-specific analog-pressure trigger.
-- **Held acceleration:** A stays asserted for the full touch. After one
-  uninterrupted second it turns cyan and adds light haptic feedback, then
-  returns to green and releases acceleration when the finger lifts.
+- **Acceleration lock:** hold A for one uninterrupted second to turn it cyan,
+  add light haptic feedback, and keep accelerating after lifting your finger.
+  Tap A again to unlock it. Opening a modal, hiding touch controls, or handing
+  Player 1 to a controller also clears the lock.
 - **Customize:** move and resize controls independently, save separate phone
   and tablet arrangements, or reset to the exact default layout.
 - **Controller handoff:** the first extended controller takes Player 1, clears
