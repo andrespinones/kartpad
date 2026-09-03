@@ -2,13 +2,18 @@
 
 ## Current state
 
-KartPad `v0.4.0-preview.1` is in release preparation. The branch adds an
+KartPad `v0.4.0-preview.1` is published from
+`4d32dfac683966ea1cb4f72963deffbe936404da`. The release adds an
 independent native arm64 tvOS 17 target, a three-layer original Apple TV icon,
 safe private-data staging, durable save/configuration storage, purgeable game
 and Retro Rewind caches, controller-only gameplay, backup, and bounded
-diagnostics. A complete unsigned tvOS app builds and audits, but no physical
-Apple TV has run this implementation. The intended release contains separate
-unsigned iPhone/iPad and physically unaccepted tvOS tester IPAs.
+diagnostics. Its separate unsigned iPhone/iPad and tvOS IPAs were each packaged
+twice byte-identically, and the freshly downloaded hosted artifacts match and
+re-audit. Their SHA-256 values are respectively
+`5b959d7a6abba43db3d557bbba3dc3a1ab913650f0717cdf8600afa06fcb32c1`
+and `78dcdf28c947330d480fcc789f0b81b95bafe94497c56f9c26bb6249c5362df1`.
+No physical Apple TV has run this implementation, so tvOS remains an explicitly
+unaccepted tester path.
 
 KartPad `v0.3.0-preview.5` is published from
 `8e57ac49c161ff576d6eff198ade2ee9b21f575e`. Its unsigned app 0.3.0 build 12
@@ -63,8 +68,8 @@ not block offline Retro Rewind support.
 
 ## Next executable work
 
-1. Finish and hosted-verify the `v0.4.0-preview.1` dual-IPA release, then collect
-   the first physical Apple TV report using `docs/TVOS-TESTING.md`.
+1. Collect the first physical Apple TV report against `v0.4.0-preview.1` using
+   `docs/TVOS-TESTING.md`.
 2. Await the Issue #1 Feather-signed iPad import retest and the Issue #5 MacBook
    Air cursor/settings retest requested against Preview 5.
 3. Keep Mii and physical Wii Remote/Nunchuk acceptance open until the Issue #5

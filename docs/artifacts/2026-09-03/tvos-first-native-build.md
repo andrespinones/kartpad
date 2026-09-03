@@ -94,3 +94,19 @@ The next gate is a narrowly scoped external Apple TV bring-up pass following
 `docs/TVOS.md`, using one exact signed build and recorded executable hash. The
 candidate must remain labelled physically unaccepted until tester evidence
 closes the corresponding rows.
+
+## Published hardware-bring-up candidate
+
+The independent implementation landed on `main` through PR #9 at source commit
+`4d32dfac683966ea1cb4f72963deffbe936404da` and was published as
+`v0.4.0-preview.1`. The exact clean merged-source tvOS rebuild retained the
+executable and privacy-manifest hashes above; its compiled `Assets.car` SHA-256
+is `ade08f7ac4e202f7451e1934988e7dda91a0c93067615954f25b8945e2f2368f`.
+
+Two deterministic packages were byte-identical. The published tvOS IPA has
+SHA-256
+`78dcdf28c947330d480fcc789f0b81b95bafe94497c56f9c26bb6249c5362df1`.
+A fresh download matched the local artifact and checksum byte-for-byte and
+passed ZIP integrity, provenance, license/notice, app, asset-catalog, privacy,
+dependency, signing-residue, local-path, and private-data audits. Physical Apple
+TV execution remains open.

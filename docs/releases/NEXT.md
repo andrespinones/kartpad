@@ -44,12 +44,20 @@ material, credentials, or device identifiers.
 
 ## Release gates
 
-- [ ] Merge and verify the complete source on `main`.
-- [ ] Rebuild exact merged source as iOS 0.4.0 build 13 and tvOS 0.4.0 build 1.
-- [ ] Pass full tests, source/safety checks, patch verification, app audits, and
+- [x] Merge and verify the complete source on `main`.
+- [x] Rebuild exact merged source as iOS 0.4.0 build 13 and tvOS 0.4.0 build 1.
+- [x] Pass full tests, source/safety checks, patch verification, app audits, and
       Objective-C++ analysis.
-- [ ] Package each IPA twice deterministically and compare bytes.
-- [ ] Audit exact IPAs and embedded provenance/notices.
-- [ ] Tag the audited source and publish both IPAs plus `SHA256SUMS`.
-- [ ] Download hosted assets, byte-compare, checksum-verify, and re-audit.
-- [ ] Verify remote `main` and the dereferenced tag, then request Apple TV tests.
+- [x] Package each IPA twice deterministically and compare bytes.
+- [x] Audit exact IPAs and embedded provenance/notices.
+- [x] Tag the audited source and publish both IPAs plus `SHA256SUMS`.
+- [x] Download hosted assets, byte-compare, checksum-verify, and re-audit.
+- [x] Verify remote `main` and the dereferenced tag, then request Apple TV tests.
+
+- Published source: `4d32dfac683966ea1cb4f72963deffbe936404da`
+- iPhone/iPad IPA SHA-256:
+  `5b959d7a6abba43db3d557bbba3dc3a1ab913650f0717cdf8600afa06fcb32c1`
+- tvOS IPA SHA-256:
+  `78dcdf28c947330d480fcc789f0b81b95bafe94497c56f9c26bb6249c5362df1`
+- PR #7 closure:
+  `https://github.com/chrissotraidis/kartpad/pull/7#issuecomment-5518667728`

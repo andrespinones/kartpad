@@ -2,10 +2,11 @@
 
 ## tvOS experimental candidate
 
-- [ ] Send the first physically untested build only to a small Apple TV
-      bring-up cohort using [`docs/TVOS-TESTING.md`](TVOS-TESTING.md) and the
-      acceptance matrix in [`docs/TVOS.md`](TVOS.md).
-- [ ] Label that artifact experimental and unaccepted until tester evidence
+- [x] Publish the physically untested artifact only as an explicit hardware-
+      bring-up preview and direct initial testing to a small Apple TV cohort
+      using [`docs/TVOS-TESTING.md`](TVOS-TESTING.md) and the acceptance matrix
+      in [`docs/TVOS.md`](TVOS.md).
+- [x] Label that artifact experimental and unaccepted until tester evidence
       completes the physical Apple TV matrix.
 - [ ] Prove Original and Retro Rewind gameplay separately with an Extended
       Gamepad; do not infer Retro WFC acceptance from offline play.
@@ -27,10 +28,16 @@ limitations when its exact artifact passes every preview gate below.
       pinned, size checked, and SHA-256 verified
 - [x] Tester-specific bundle identifiers work across build, audit, staging,
       backup, and diagnostic scripts
-- [ ] Exact merged source produces iPhone/iPad build 13 and tvOS build 1
-- [ ] Both IPAs package twice byte-identically and pass fresh extraction audits
-- [ ] Release tag, hosted assets, checksums, and hosted re-audits match locally
-- [ ] PR #7 receives an accurate closure response after the replacement lands
+- [x] Exact merged source produces iPhone/iPad build 13 and tvOS build 1
+- [x] Both IPAs package twice byte-identically and pass fresh extraction audits
+- [x] Release tag, hosted assets, checksums, and hosted re-audits match locally
+- [x] PR #7 receives an accurate closure response after the replacement lands
+
+Published source: `4d32dfac683966ea1cb4f72963deffbe936404da`.
+iPhone/iPad IPA SHA-256:
+`5b959d7a6abba43db3d557bbba3dc3a1ab913650f0717cdf8600afa06fcb32c1`.
+tvOS IPA SHA-256:
+`78dcdf28c947330d480fcc789f0b81b95bafe94497c56f9c26bb6249c5362df1`.
 
 ## Published 0.3.0 preview
 
