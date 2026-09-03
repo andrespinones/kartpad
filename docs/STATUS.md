@@ -1,8 +1,34 @@
 # KartPad status
 
-Updated: 2026-09-02
+Updated: 2026-09-03
+
+## Native tvOS work
+
+The maintainer-owned `codex/tvos-retro-rewind` branch contains the first
+independent native tvOS implementation slice: a `KartPadDual` tvOS build graph,
+focus-driven setup host, Extended Gamepad requirement, Mac-side private game
+data staging, official hash-verified Retro Rewind installation, and a fail-closed
+artifact audit. The complete dual Original/Retro Rewind graph now compiles and
+links as an unsigned arm64 tvOS 17 app, and that app passes the native bundle,
+platform, dependency, symbol, privacy, and private-data audit. No Apple TV is
+paired with the current Mac, so signing, installation, execution, gameplay,
+performance, and save recovery remain untested. Apple TV support is therefore
+not accepted. The candidate now includes an original three-layer tvOS icon and
+Top Shelf image compiled into its audited asset catalog. It is being prepared
+as the explicitly experimental `v0.4.0-preview.1` hardware-bring-up build. The
+next gate is a small outside cohort using the exact audited candidate and
+tester checklist. The
+authoritative scope, build procedure, storage boundary, and external-testing
+gate are in
+[`docs/TVOS.md`](TVOS.md).
 
 ## Current goal
+
+**0.4.0 Preview 1 is being prepared.** It will pair an app 0.4.0 build 13
+iPhone/iPad IPA with an app 0.4.0 build 1 tvOS IPA. The Apple TV artifact is a
+physically unaccepted tester build, not a supported-platform claim. Exact
+merged-source builds, deterministic packaging, hosted verification, and the
+external Apple TV matrix remain release/acceptance gates.
 
 **Preview 5 is published.** `v0.3.0-preview.5` points to source commit
 `8e57ac49c161ff576d6eff198ade2ee9b21f575e`. Its unsigned app 0.3.0 build 12

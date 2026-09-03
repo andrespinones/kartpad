@@ -1,7 +1,7 @@
 # Third-party notices
 
 KartPad builds from exact dependency revisions recorded in
-`dependencies.lock.json`. The public unsigned IPA includes the license and
+`dependencies.lock.json`. The public unsigned IPAs include the license and
 notice files collected from the exact pinned sources and package build under
 `ThirdPartyLicenses/`.
 
@@ -13,6 +13,7 @@ notice files collected from the exact pinned sources and package build under
 | Dolphin | `4f8af23db516d8b6e9cd00e7b261a65b026514a8` | GPL-2.0-or-later aggregate compatible with GPL-3.0; DiscIO and hardware/HLE-derived integration |
 | SunPad | `e43f0ea6b797e5110787171957c9dc3c6213269c` | GPL-3.0; Apple touch, menu, and runtime integration reference |
 | SDL 3 | `3.4.4` | zlib; platform and runtime support |
+| Minizip-NG | Dolphin-pinned source | zlib; tvOS Retro Rewind archive extraction |
 | WiimotePairPlus | `8e7f9b12db2da520e4f868305c4861cdf58fa15f` | GPL-2.0-or-later; experimental macOS Wii Remote Bluetooth pairing flow derived from Dolphin WiimotePair |
 | Abseil, Dear ImGui, fmt, FreeType, libpng, Tracy, xxHash, zstd | exact package-build inputs | Their included upstream license files apply |
 
@@ -21,6 +22,6 @@ reversible patches, dependency pins, and build instructions. Pinned upstream
 source is fetched by the public Builder from the repositories recorded in
 `dependencies.lock.json`.
 
-The IPA intentionally contains ahead-of-time translated game logic. That logic
+The IPAs intentionally contain ahead-of-time translated game logic. That logic
 is not claimed to be covered by the open-source licenses listed above. See
 `RIGHTS_AND_LICENSES.md` for the separate community-release boundary.

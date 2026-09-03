@@ -17,8 +17,9 @@ struct KartPadMobileRuntimeSettings {
 
 extern "C" {
 
-// Holds the iOS launch in a native import flow until a complete, validated
-// private RMCP01 data tree is available. Existing valid data returns directly.
+// Holds an Apple-mobile launch in its native setup/import flow until a complete,
+// validated private RMCP01 data tree is available. Existing valid data returns
+// directly.
 bool KartPadMobileEnsureGameDataAvailable();
 
 // Valid after KartPadMobileEnsureGameDataAvailable returns true. The launch
@@ -38,8 +39,9 @@ bool KartPadMobileReadRuntimeSettings(KartPadMobileRuntimeSettings *settings);
 // Classic Controller ABI. Returns false until the UIKit host is installed.
 bool KartPadMobileReadClassicInput(KartPadMobileClassicInputSnapshot *snapshot);
 
-// Reads touch plus the first physical controller for player zero, or the
-// independently assigned physical controller for players one through three.
+// Reads touch (where present) plus the first physical controller for player
+// zero, or the independently assigned physical controller for players one
+// through three.
 bool KartPadMobileReadClassicInputForPlayer(
     unsigned int player, KartPadMobileClassicInputSnapshot *snapshot);
 

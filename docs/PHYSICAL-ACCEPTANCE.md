@@ -1,5 +1,9 @@
 # iPad and iPhone physical acceptance
 
+Native tvOS has its own controller, storage-recovery, and external-testing
+matrix in [`docs/TVOS.md`](TVOS.md). Do not extend the iPhone/iPad results below
+to Apple TV.
+
 KartPad has completed general physical execution acceptance on iPad and iPhone.
 The 0.3.0 iPad run also downloaded, verified, installed, launched, and played a
 single-player match in Retro Rewind 6.12.4. This document is the repeatable
