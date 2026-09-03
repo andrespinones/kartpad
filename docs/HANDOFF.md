@@ -2,18 +2,18 @@
 
 ## Current state
 
-KartPad `v0.4.0-preview.1` is published from
-`4d32dfac683966ea1cb4f72963deffbe936404da`. The release adds an
-independent native arm64 tvOS 17 target, a three-layer original Apple TV icon,
-safe private-data staging, durable save/configuration storage, purgeable game
-and Retro Rewind caches, controller-only gameplay, backup, and bounded
-diagnostics. Its separate unsigned iPhone/iPad and tvOS IPAs were each packaged
-twice byte-identically, and the freshly downloaded hosted artifacts match and
-re-audit. Their SHA-256 values are respectively
-`5b959d7a6abba43db3d557bbba3dc3a1ab913650f0717cdf8600afa06fcb32c1`
-and `78dcdf28c947330d480fcc789f0b81b95bafe94497c56f9c26bb6249c5362df1`.
-No physical Apple TV has run this implementation, so tvOS remains an explicitly
-unaccepted tester path.
+KartPad `v0.4.0-preview.2` is published from
+`e9fa6058ee09fff0b16481ebe4a78d61cea69c87`. It updates both Apple-platform
+artifacts for Retro Rewind 6.12.5, repairs the universal iPhone/iPad three-dot
+menu refresh, and adds a daily upstream-version watcher plus deterministic
+profile updater. Its separate unsigned iPhone/iPad and tvOS IPAs were each
+packaged twice byte-identically, and the freshly downloaded hosted artifacts
+match and re-audit. Their SHA-256 values are respectively
+`a796cd0e29bfd47d78afc50989a959803f9eff434252a3a455af85308b380fe6`
+and `3f8f529a93cc3f1ddfe9e9b71171ba56ead5a49ae3598c449a42f00eed6c5a9a`.
+The signed iPhone build 14 was installed in place, launched, and preserved the
+pre-install configuration, identity, preferences, NAND, and saves byte-for-
+byte. Physical 6.12.5 gameplay and Apple TV remain external acceptance gates.
 
 KartPad `v0.3.0-preview.5` is published from
 `8e57ac49c161ff576d6eff198ade2ee9b21f575e`. Its unsigned app 0.3.0 build 12
@@ -59,8 +59,8 @@ The full device build, app audit, deterministic packaging, hosted checksum,
 and fresh hosted re-audit pass. Issue #1 remains open for reporter confirmation
 on the exact affected iPad and Files provider.
 
-The preview offers Original Mario Kart Wii or optional Retro Rewind 6.12.4.
-A physical iPad completed the official pack download, verification,
+The preview offers Original Mario Kart Wii or optional Retro Rewind 6.12.5.
+The preceding 6.12.4 build completed physical iPad pack download, verification,
 installation, launch, and a playable single-player match. General physical
 execution is accepted on iPad and iPhone. Retro WFC remains unavailable during
 external service maintenance; live public online play is not claimed and does
@@ -68,7 +68,7 @@ not block offline Retro Rewind support.
 
 ## Next executable work
 
-1. Collect the first physical Apple TV report against `v0.4.0-preview.1` using
+1. Collect the first physical Apple TV report against `v0.4.0-preview.2` using
    `docs/TVOS-TESTING.md`.
 2. Await the Issue #1 Feather-signed iPad import retest and the Issue #5 MacBook
    Air cursor/settings retest requested against Preview 5.

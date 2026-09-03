@@ -26,10 +26,16 @@ limitations when its exact artifact passes every preview gate below.
 - [x] Kamek v2/v3 parser keeps file and command bounds validation
 - [x] Universal iPhone/iPad menu refresh cannot restore the SunPad menu
 - [x] Daily upstream-version check and deterministic profile updater
-- [ ] Exact merged source produces iPhone/iPad build 14 and tvOS build 2
-- [ ] Both IPAs package twice byte-identically and pass fresh extraction audits
-- [ ] Release tag, hosted assets, checksums, and hosted re-audits match locally
+- [x] Exact merged source produces iPhone/iPad build 14 and tvOS build 2
+- [x] Both IPAs package twice byte-identically and pass fresh extraction audits
+- [x] Release tag, hosted assets, checksums, and hosted re-audits match locally
 - [ ] Physical testers accept the 6.12.5 flow and the Apple TV matrix
+
+Published source: `e9fa6058ee09fff0b16481ebe4a78d61cea69c87`.
+iPhone/iPad IPA SHA-256:
+`a796cd0e29bfd47d78afc50989a959803f9eff434252a3a455af85308b380fe6`.
+tvOS IPA SHA-256:
+`3f8f529a93cc3f1ddfe9e9b71171ba56ead5a49ae3598c449a42f00eed6c5a9a`.
 
 ## 0.4.0 Preview 1 candidate
 

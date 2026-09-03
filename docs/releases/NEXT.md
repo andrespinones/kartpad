@@ -43,15 +43,18 @@ Apple TV acceptance.
 
 ## Release gates
 
-- [ ] Merge and verify the complete source on `main`.
-- [ ] Rebuild exact merged source as iOS 0.4.0 build 14 and tvOS 0.4.0 build 2.
-- [ ] Pass full tests, source/safety checks, patch verification, app audits, and
+- [x] Merge and verify the complete source on `main`.
+- [x] Rebuild exact merged source as iOS 0.4.0 build 14 and tvOS 0.4.0 build 2.
+- [x] Pass full tests, source/safety checks, patch verification, app audits, and
       Objective-C++ analysis.
-- [ ] Package each IPA twice deterministically and compare bytes.
-- [ ] Audit exact IPAs and embedded provenance/notices.
-- [ ] Tag the audited source and publish both IPAs plus `SHA256SUMS`.
-- [ ] Download hosted assets, byte-compare, checksum-verify, and re-audit.
-- [ ] Verify remote `main` and the dereferenced tag, then request device tests.
+- [x] Package each IPA twice deterministically and compare bytes.
+- [x] Audit exact IPAs and embedded provenance/notices.
+- [x] Tag the audited source and publish both IPAs plus `SHA256SUMS`.
+- [x] Download hosted assets, byte-compare, checksum-verify, and re-audit.
+- [x] Verify remote `main` and the dereferenced tag, then request device tests.
 
-Published source and artifact hashes are recorded here only after the hosted
-assets pass the same checks as the local candidates.
+- Published source: `e9fa6058ee09fff0b16481ebe4a78d61cea69c87`
+- iPhone/iPad IPA SHA-256:
+  `a796cd0e29bfd47d78afc50989a959803f9eff434252a3a455af85308b380fe6`
+- tvOS IPA SHA-256:
+  `3f8f529a93cc3f1ddfe9e9b71171ba56ead5a49ae3598c449a42f00eed6c5a9a`

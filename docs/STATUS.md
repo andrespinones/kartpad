@@ -15,7 +15,7 @@ paired with the current Mac, so signing, installation, execution, gameplay,
 performance, and save recovery remain untested. Apple TV support is therefore
 not accepted. The candidate includes an original three-layer tvOS icon and Top
 Shelf image compiled into its audited asset catalog. It is published as the
-explicitly experimental `v0.4.0-preview.1` hardware-bring-up build. The next
+explicitly experimental `v0.4.0-preview.2` hardware-bring-up build. The next
 gate is a small outside cohort using the exact audited candidate and tester
 checklist. The
 authoritative scope, build procedure, storage boundary, and external-testing
@@ -24,13 +24,18 @@ gate are in
 
 ## Current goal
 
-**0.4.0 Preview 2 is the current release candidate.** It advances the pinned
-Retro Rewind input and translated graph to 6.12.5, adds a daily upstream
-version watcher and deterministic profile updater, and repairs the universal
-iPhone/iPad three-dot menu after inherited settings refreshes. The candidate
-is app 0.4.0 build 14 on iPhone/iPad and build 2 on tvOS. Translation and source
-contracts pass; exact merged-source platform builds, deterministic packages,
-hosted comparison, and physical 6.12.5/tvOS acceptance remain separate gates.
+**0.4.0 Preview 2 is published.** `v0.4.0-preview.2` points to source commit
+`e9fa6058ee09fff0b16481ebe4a78d61cea69c87`. Its app 0.4.0 build 14
+iPhone/iPad IPA has SHA-256
+`a796cd0e29bfd47d78afc50989a959803f9eff434252a3a455af85308b380fe6`;
+its app 0.4.0 build 2 tvOS IPA has SHA-256
+`3f8f529a93cc3f1ddfe9e9b71171ba56ead5a49ae3598c449a42f00eed6c5a9a`.
+It advances the pinned Retro Rewind input and translated graph to 6.12.5, adds
+a daily upstream version watcher and deterministic profile updater, and repairs
+the universal iPhone/iPad three-dot menu after inherited settings refreshes.
+Exact merged-source builds, deterministic double packages, hosted byte
+comparison, checksums, fresh hosted audits, and the daily workflow pass.
+Physical 6.12.5 gameplay and tvOS acceptance remain separate gates.
 The established physical 6.12.4 iPad result is not relabeled as 6.12.5 proof.
 
 **0.4.0 Preview 1 is published.** `v0.4.0-preview.1` points to source commit
