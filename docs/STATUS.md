@@ -24,6 +24,15 @@ gate are in
 
 ## Current goal
 
+**0.4.0 Preview 2 is the current release candidate.** It advances the pinned
+Retro Rewind input and translated graph to 6.12.5, adds a daily upstream
+version watcher and deterministic profile updater, and repairs the universal
+iPhone/iPad three-dot menu after inherited settings refreshes. The candidate
+is app 0.4.0 build 14 on iPhone/iPad and build 2 on tvOS. Translation and source
+contracts pass; exact merged-source platform builds, deterministic packages,
+hosted comparison, and physical 6.12.5/tvOS acceptance remain separate gates.
+The established physical 6.12.4 iPad result is not relabeled as 6.12.5 proof.
+
 **0.4.0 Preview 1 is published.** `v0.4.0-preview.1` points to source commit
 `4d32dfac683966ea1cb4f72963deffbe936404da`. Its app 0.4.0 build 13
 iPhone/iPad IPA has SHA-256

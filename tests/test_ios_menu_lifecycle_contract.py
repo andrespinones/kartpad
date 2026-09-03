@@ -52,6 +52,18 @@ class IOSMenuLifecycleContractTests(unittest.TestCase):
         offsets = [root.index(value) for value in expected_order]
         self.assertEqual(offsets, sorted(offsets))
 
+    def test_inherited_refresh_cannot_restore_the_sunpad_menu(self) -> None:
+        runtime = (REPO / "apple/ios/KartPadRuntimeOverlayHost.mm").read_text()
+        refresh = runtime.split("- (void)refreshMenuButton {", 1)[1].split(
+            "- (void)layoutSubviews {", 1
+        )[0]
+        self.assertIn("[super refreshMenuButton];", refresh)
+        self.assertIn("[self setNeedsLayout];", refresh)
+        self.assertIn("[self layoutIfNeeded];", refresh)
+        self.assertIn('hasPrefix:@"Experimental Performance Mode"', runtime)
+        self.assertIn('hasPrefix:@"Experimental 60 FPS"', runtime)
+        self.assertIn('menuButton.menu = [UIMenu menuWithTitle:@"KartPad"', runtime)
+
     def test_foreground_reasserts_overlay_attachment_and_z_order(self) -> None:
         shell = (REPO / "apple/ios/KartPadShellViewController.mm").read_text()
         runtime = (REPO / "apple/ios/KartPadRuntimeOverlayHost.mm").read_text()
