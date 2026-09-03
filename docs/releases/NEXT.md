@@ -38,12 +38,18 @@ retaining the existing app container, preferences, game data, and saves.
 
 ## Release gates
 
-- [ ] Merge and verify the complete source on `main`.
-- [ ] Rebuild exact merged source as iOS 0.4.0 build 15 and tvOS build 3.
+- [x] Merge and verify the complete source on `main`.
+- [x] Rebuild exact merged source as iOS 0.4.0 build 15 and tvOS build 3.
 - [x] Pass full tests, source/safety checks, patch verification, app audits, and
       physical iPhone touch-editor acceptance.
-- [ ] Package each IPA twice deterministically and compare bytes.
-- [ ] Audit exact IPAs and embedded provenance/notices.
-- [ ] Tag the audited source and publish both IPAs plus `SHA256SUMS`.
-- [ ] Download hosted assets, byte-compare, checksum-verify, and re-audit.
-- [ ] Verify remote `main` and the dereferenced tag.
+- [x] Package each IPA twice deterministically and compare bytes.
+- [x] Audit exact IPAs and embedded provenance/notices.
+- [x] Tag the audited source and publish both IPAs plus `SHA256SUMS`.
+- [x] Download hosted assets, byte-compare, checksum-verify, and re-audit.
+- [x] Verify remote `main` and the dereferenced tag.
+
+- Published source: `369159153bef0d045edf5cc1cf3b1b444b36a284`
+- iPhone/iPad IPA SHA-256:
+  `af80c2bc6fcabdb4eee84aed05254eccef76d7e6bbf83f2c7f21101168c665c8`
+- tvOS IPA SHA-256:
+  `9ee2a9b05bff56261d4d4986eca54840e98ade8ae0abd3ac623c1f2393dcf5cc`
