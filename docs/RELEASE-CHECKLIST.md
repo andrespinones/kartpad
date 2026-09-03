@@ -19,6 +19,17 @@ The exact 67-row matrix in `docs/PRD.md` remains the authority for full
 engineering completion. A community preview may ship with narrower, explicit
 limitations when its exact artifact passes every preview gate below.
 
+## 0.4.0 stable candidate
+
+- [x] Physical iPhone launches Retro Rewind 6.12.5 with existing data intact
+- [x] Physical iPhone accepts per-control Hide/Show and the editor Back path
+- [x] Untouched-iPhone default seeding preserves custom iPhone and iPad layouts
+- [x] Full tests, source pins, repository safety, and SunPad snapshot pass
+- [ ] Exact merged source produces iPhone/iPad build 15 and tvOS build 3
+- [ ] Both IPAs package twice byte-identically and pass extraction audits
+- [ ] Stable tag, hosted assets, checksums, and hosted re-audits match locally
+- [ ] Remote `main` and dereferenced `v0.4.0` match the audited source
+
 ## 0.4.0 Preview 2 candidate
 
 - [x] Official Retro Rewind 6.12.5 archive, code, XML, and upstream source pins

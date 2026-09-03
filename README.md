@@ -18,11 +18,11 @@
 ![KartPad running a race on DK Summit on iPad](docs/images/kartpad-dk-summit-ipad.png)
 
 > [!IMPORTANT]
-> **The latest preview includes KartPad's dual-mode Mario Kart Wii and Retro
+> **The latest release includes KartPad's dual-mode Mario Kart Wii and Retro
 > Rewind build for iPhone and iPad.** It must be re-signed before installation
 > and requires your own legally obtained supported game image. Retro Rewind is
 > optional and installs through KartPad from the official version-locked pack.
-> Preview 2 of KartPad 0.4 updates Retro Rewind to 6.12.5, repairs the universal
+> KartPad 0.4 updates Retro Rewind to 6.12.5, repairs the universal
 > iPhone/iPad settings menu, and includes the native Apple TV hardware-bring-up
 > build. Apple TV support still
 > needs external physical testing before it can be called supported.
@@ -36,14 +36,14 @@
 | Question | Answer |
 |---|---|
 | Is this Dolphin or streaming? | No. WiiCompiled translates the game's PowerPC code ahead of time, then KartPad compiles it for ARM64 and presents it through Metal. |
-| Is an IPA included in the GitHub release? | **Yes.** `v0.4.0-preview.2` includes separate audited unsigned ARM64 IPAs for iPhone/iPad and experimental Apple TV hardware bring-up. Both require local re-signing and user-supplied supported game data. |
+| Is an IPA included in the GitHub release? | **Yes.** `v0.4.0` includes separate audited unsigned ARM64 IPAs for iPhone/iPad and experimental Apple TV hardware bring-up. Both require local re-signing and user-supplied supported game data. |
 | Can the source create an IPA? | Yes. The Personal IPA Builder can also translate a supported user-owned game executable and create a separate private unsigned IPA on an Apple Silicon Mac. |
 | Does it include Mario Kart Wii? | No. You must provide your own legally obtained supported PAL `RMCP01` revision 0 WBFS/ISO. |
 | Does it support Retro Rewind? | **Yes.** Choose Original Mario Kart Wii or Retro Rewind when KartPad opens. KartPad can download, verify, and install the official Retro Rewind 6.12.5 pack. The 6.12.5 build is ready for tester acceptance; the preceding 6.12.4 flow has completed physical iPad install, launch, and single-player acceptance. |
 | Does online play work? | The online-capable build passes login, matchmaking, a two-player race, results, ratings, and lobby return against a compatible isolated WFC server. As of 1 September 2026, the public Retro WFC service is in maintenance, so live public online play is temporarily unavailable. That external outage does not block Retro Rewind installation or offline play. |
 | Do touch, tilt, and controllers work? | Touch, motion steering, and ordinary GameController-compatible pads are implemented, with general physical acceptance on iPhone and iPad. Direct Wii Remote/Nunchuk pairing is a separate experimental, macOS-only path that still needs external hardware testing. |
 | Can I use a custom Mii? | **Experimentally.** On Mac, iPhone, or iPad, open **Game Data & Saves → Manage Miis…** and import a standard 74-byte `.mii` file. Restart KartPad, then select it in **License Settings → Change Mii**. KartPad does not yet create Miis. |
-| Are Android and Apple TV supported? | Apple TV has an experimental native hardware-bring-up IPA in `v0.4.0-preview.2`, but it is not accepted as supported until physical testers complete the matrix. Android is documented as a future implementation target, not a supported build. |
+| Are Android and Apple TV supported? | Apple TV has an experimental native hardware-bring-up IPA in `v0.4.0`, but it is not accepted as supported until physical testers complete the matrix. Android is documented as a future implementation target, not a supported build. |
 | How much storage does it need? | The app is about 80 MiB and extracted Mario Kart Wii data uses about 2.5 GiB. Retro Rewind downloads an additional 1.72 GiB archive and needs temporary installation space. Keeping the WBFS/ISO on the device requires more space. |
 
 ## Original Mario Kart Wii or Retro Rewind
@@ -105,7 +105,7 @@ retail game data.
 | iPhone/iPad | The full 29,065-function ARM64 retail app has been packaged as an unsigned IPA; locally signed builds have been installed and physically accepted on both iPhone and iPad, reaching live races, importing a supported private WBFS, and preserving saves |
 | Game content | Version-locked dual-mode Original Mario Kart Wii / Retro Rewind 6.12.5 flow without bundling either game's private data; 6.12.5 awaits physical acceptance while the preceding 6.12.4 iPad install, launch, and initial single-player gameplay pass remains accepted |
 | Online multiplayer | Local Mac-to-iPad-Simulator login, matchmaking, room, race, native results, ratings, and lobby return pass; the public Retro WFC service is currently unavailable during maintenance, which does not block the accepted Retro Rewind install and offline-play flow |
-| Distribution | `v0.4.0-preview.2` provides source plus separate unsigned iPhone/iPad and experimental tvOS community-preview IPAs containing translated game logic. They contain no disc image, extracted game assets, Retro Rewind pack, saves, signing identity, or provisioning profile |
+| Distribution | `v0.4.0` provides source plus separate unsigned iPhone/iPad and experimental tvOS community IPAs containing translated game logic. They contain no disc image, extracted game assets, Retro Rewind pack, saves, signing identity, or provisioning profile |
 
 The evidence ledger, exact open rows, and known risks live in
 [`docs/STATUS.md`](docs/STATUS.md). The 67-row release matrix is in
@@ -200,8 +200,8 @@ provide the required direct Wii Remote HID pairing path.
 
 ### Download the unsigned iPhone/iPad IPA
 
-Download `KartPad-v0.4.0-preview.2-ios-unsigned.ipa` and `SHA256SUMS` from the
-[latest preview](https://github.com/chrissotraidis/kartpad/releases/tag/v0.4.0-preview.2).
+Download `KartPad-v0.4.0-ios-unsigned.ipa` and `SHA256SUMS` from the
+[latest release](https://github.com/chrissotraidis/kartpad/releases/tag/v0.4.0).
 Verify the checksum, re-sign the IPA with AltStore Classic plus AltServer or
 another compatible personal-signing workflow, and select your own supported
 PAL `RMCP01` revision 0 image on first launch. See
@@ -210,7 +210,7 @@ update-preservation guidance.
 
 ### Test the experimental Apple TV build
 
-The same preview includes `KartPad-v0.4.0-preview.2-tvos-unsigned.ipa` for a
+The same release includes `KartPad-v0.4.0-tvos-unsigned.ipa` for a
 small physical-hardware bring-up cohort. It has passed native build and package
 audits but has not run on the maintainer's Apple TV hardware. Re-sign it for
 your paired Apple TV, stage your own supported extracted data, and follow
@@ -503,7 +503,7 @@ Useful starting points:
 
 ### Can I download an IPA or playable app?
 
-Yes. `v0.4.0-preview.2` provides separate unsigned iPhone/iPad and experimental
+Yes. `v0.4.0` provides separate unsigned iPhone/iPad and experimental
 Apple TV IPAs that must be re-signed before installation. They contain
 KartPad's compiled ARM64 translation but no disc image or extracted game assets,
 so you must supply your own legally obtained supported game data. The Personal
@@ -566,7 +566,7 @@ iPhone or iPad.
 ### Are Android or Apple TV supported?
 
 Apple Silicon Mac, iPhone, and iPad are supported. An experimental native Apple
-TV tester IPA is included in `v0.4.0-preview.2`; it has passed build and package
+TV tester IPA is included in `v0.4.0`; it has passed build and package
 audits but still needs physical Apple TV acceptance before tvOS can be called
 supported. See [the tvOS implementation and acceptance plan](docs/TVOS.md).
 Android may be investigated later.

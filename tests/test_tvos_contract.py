@@ -125,7 +125,7 @@ class TvOSContractTests(unittest.TestCase):
         self.assertIn("<user-home>", diagnostics)
         self.assertNotIn("GameData", diagnostics)
 
-    def test_preview_release_contracts_cover_ios_and_tvos(self):
+    def test_stable_release_contracts_cover_ios_and_tvos(self):
         ios_package = (ROOT / "scripts/package-public-unsigned-ipa.py").read_text()
         ios_audit = (ROOT / "scripts/audit-public-unsigned-ipa.py").read_text()
         tvos_package = (
@@ -133,16 +133,16 @@ class TvOSContractTests(unittest.TestCase):
         ).read_text()
         tvos_audit = (ROOT / "scripts/audit-public-unsigned-tvos-ipa.py").read_text()
         for script in (ios_package, ios_audit, tvos_package, tvos_audit):
-            self.assertIn('RELEASE_TAG = "v0.4.0-preview.2"', script)
+            self.assertIn('RELEASE_TAG = "v0.4.0"', script)
             self.assertIn('APP_VERSION = "0.4.0"', script)
-        self.assertIn('APP_BUILD = "14"', ios_package)
-        self.assertIn('APP_BUILD = "14"', ios_audit)
-        self.assertIn('APP_BUILD = "2"', tvos_package)
-        self.assertIn('APP_BUILD = "2"', tvos_audit)
+        self.assertIn('APP_BUILD = "15"', ios_package)
+        self.assertIn('APP_BUILD = "15"', ios_audit)
+        self.assertIn('APP_BUILD = "3"', tvos_package)
+        self.assertIn('APP_BUILD = "3"', tvos_audit)
         self.assertIn('"physicalAppleTVAcceptance": False', tvos_package)
         self.assertIn('"physicalAppleTVAcceptance": False', tvos_audit)
         self.assertTrue((ROOT / "docs/INSTALL_TVOS.md").is_file())
-        self.assertTrue((ROOT / "docs/releases/v0.4.0-preview.2.md").is_file())
+        self.assertTrue((ROOT / "docs/releases/v0.4.0.md").is_file())
 
 
 if __name__ == "__main__":
