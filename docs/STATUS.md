@@ -24,16 +24,18 @@ gate are in
 
 ## Current goal
 
-**The next iPhone touch-layout candidate passed maintainer testing.**
-It seeds the maintainer's captured compact layout only on untouched iPhone
-installs, leaves existing custom layouts and all iPad layouts unchanged, lets
-users hide or restore individual controls (including the D-pad as one group),
-and returns from layout editing to Touch Control Settings with **Back**. The
-D-pad remains visible by default because it performs tricks and wheelies. The
-source and pinned-overlay contracts, full test suite, device build, package
-audit, signed in-place install, launch, and save/preferences preservation pass.
-The physical iPhone also passed Retro Rewind launch, per-control hiding, and
-the editor's Back path. The stable 0.4.0 build/package/publish chain is next.
+**0.4.0 is published as KartPad's second stable community release.** The
+`v0.4.0` tag points to source commit
+`369159153bef0d045edf5cc1cf3b1b444b36a284`. Its iPhone/iPad app 0.4.0 build
+15 IPA has SHA-256
+`af80c2bc6fcabdb4eee84aed05254eccef76d7e6bbf83f2c7f21101168c665c8`;
+its experimental tvOS app 0.4.0 build 3 IPA has SHA-256
+`9ee2a9b05bff56261d4d4986eca54840e98ade8ae0abd3ac623c1f2393dcf5cc`.
+The physical iPhone passed Retro Rewind 6.12.5 launch, per-control hiding, and
+the editor's Back path. Exact merged-source builds, double deterministic
+packages, local and fresh hosted audits, hosted byte comparison, checksums,
+and remote tag/main verification pass. Physical Apple TV acceptance remains
+open, so that included artifact is still explicitly experimental.
 
 **0.4.0 Preview 2 is published.** `v0.4.0-preview.2` points to source commit
 `e9fa6058ee09fff0b16481ebe4a78d61cea69c87`. Its app 0.4.0 build 14

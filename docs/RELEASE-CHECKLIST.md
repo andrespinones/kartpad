@@ -25,10 +25,16 @@ limitations when its exact artifact passes every preview gate below.
 - [x] Physical iPhone accepts per-control Hide/Show and the editor Back path
 - [x] Untouched-iPhone default seeding preserves custom iPhone and iPad layouts
 - [x] Full tests, source pins, repository safety, and SunPad snapshot pass
-- [ ] Exact merged source produces iPhone/iPad build 15 and tvOS build 3
-- [ ] Both IPAs package twice byte-identically and pass extraction audits
-- [ ] Stable tag, hosted assets, checksums, and hosted re-audits match locally
-- [ ] Remote `main` and dereferenced `v0.4.0` match the audited source
+- [x] Exact merged source produces iPhone/iPad build 15 and tvOS build 3
+- [x] Both IPAs package twice byte-identically and pass extraction audits
+- [x] Stable tag, hosted assets, checksums, and hosted re-audits match locally
+- [x] Remote `main` and dereferenced `v0.4.0` match the audited source
+
+Published source: `369159153bef0d045edf5cc1cf3b1b444b36a284`.
+iPhone/iPad IPA SHA-256:
+`af80c2bc6fcabdb4eee84aed05254eccef76d7e6bbf83f2c7f21101168c665c8`.
+tvOS IPA SHA-256:
+`9ee2a9b05bff56261d4d4986eca54840e98ade8ae0abd3ac623c1f2393dcf5cc`.
 
 ## 0.4.0 Preview 2 candidate
 

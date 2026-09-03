@@ -2,6 +2,17 @@
 
 ## Current state
 
+KartPad `v0.4.0` is published as the second stable community release from
+`369159153bef0d045edf5cc1cf3b1b444b36a284`. The iPhone/iPad app 0.4.0 build
+15 IPA has SHA-256
+`af80c2bc6fcabdb4eee84aed05254eccef76d7e6bbf83f2c7f21101168c665c8`;
+the experimental tvOS app 0.4.0 build 3 IPA has SHA-256
+`9ee2a9b05bff56261d4d4986eca54840e98ade8ae0abd3ac623c1f2393dcf5cc`.
+Both exact-main builds and two independent packages per platform pass. Fresh
+anonymous downloads match the local bytes, checksums, provenance, and audits.
+GitHub marks this non-prerelease as **Latest**. Physical Apple TV acceptance
+remains open.
+
 The `codex/iphone-touch-layout-editor` candidate captures the maintainer's
 current physical-iPhone control positions as the default for untouched iPhone
 installs only. Existing custom layouts and every iPad layout remain unchanged.
