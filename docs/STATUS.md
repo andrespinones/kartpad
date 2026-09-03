@@ -24,6 +24,16 @@ gate are in
 
 ## Current goal
 
+**The next iPhone touch-layout candidate is installed for maintainer testing.**
+It seeds the maintainer's captured compact layout only on untouched iPhone
+installs, leaves existing custom layouts and all iPad layouts unchanged, lets
+users hide or restore individual controls (including the D-pad as one group),
+and returns from layout editing to Touch Control Settings with **Back**. The
+D-pad remains visible by default because it performs tricks and wheelies. The
+source and pinned-overlay contracts, full test suite, device build, package
+audit, signed in-place install, launch, and save/preferences preservation pass.
+Hands-on editor behavior remains the merge and stable-release gate.
+
 **0.4.0 Preview 2 is published.** `v0.4.0-preview.2` points to source commit
 `e9fa6058ee09fff0b16481ebe4a78d61cea69c87`. Its app 0.4.0 build 14
 iPhone/iPad IPA has SHA-256

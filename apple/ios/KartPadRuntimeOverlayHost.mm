@@ -44,6 +44,8 @@
 @property(nonatomic, assign) BOOL kartPadGasInputSelfTestStarted;
 @property(nonatomic, assign) BOOL kartPadModalInputSelfTestStarted;
 @property(nonatomic, assign) BOOL kartPadEditorUITestStarted;
+@property(nonatomic, weak) UIButton *kartPadVisibilityButton;
+@property(nonatomic, copy) NSString *kartPadSelectedControlIdentifier;
 - (void)resetKartPadControlAppearance;
 @end
 
@@ -54,7 +56,10 @@
 - (void)rPressureChanged:(uint8_t)pressure fullPress:(BOOL)fullPress;
 - (void)clearTouchInput;
 - (void)buttonDown:(UIButton *)button;
+- (void)endLayoutEditing;
+- (void)finishLayoutEditing;
 - (void)refreshMenuButton;
+- (void)resetLayout;
 - (void)toggleSettingsPanel;
 - (void)selectControlForEditing:(UIView *)control;
 - (void)reportProblem;
@@ -70,6 +75,75 @@ KartPadRuntimeOverlayHost *gRuntimeOverlayHost = nil;
 BOOL gKartPadRetroRewindSelected = NO;
 NSString *const kKartPadRequestedRuntimeProfileKey =
     @"KartPadRequestedRuntimeProfile";
+NSString *const kKartPadHiddenTouchControlsKey =
+    @"KartPadHiddenTouchControls";
+
+void KartPadSeedPhoneTouchLayoutDefaults(BOOL force) {
+  if (UIDevice.currentDevice.userInterfaceIdiom != UIUserInterfaceIdiomPhone) {
+    return;
+  }
+
+  NSUserDefaults *defaults = NSUserDefaults.standardUserDefaults;
+  BOOL changed = NO;
+  if (force || [defaults dictionaryForKey:@"SunPadControlOrigins"] == nil) {
+    [defaults setObject:@{
+      @"L" : NSStringFromCGPoint(CGPointMake(0.93580568318565682,
+                                               0.42246621616846858)),
+      @"R" : NSStringFromCGPoint(CGPointMake(0.8208055524263117,
+                                               0.5224662162495497)),
+      @"X" : NSStringFromCGPoint(CGPointMake(0.12563888892222205,
+                                               0.53485360360900902)),
+      @"Y" : NSStringFromCGPoint(CGPointMake(0.055472222222222207,
+                                               0.56739864864054057)),
+      @"Z" : NSStringFromCGPoint(CGPointMake(0.84591666666666665,
+                                               0.3783220720432432)),
+    } forKey:@"SunPadControlOrigins"];
+    changed = YES;
+  }
+  if (force || [defaults dictionaryForKey:@"SunPadControlSizeScales"] == nil) {
+    [defaults setObject:@{
+      @"L" : @0.9791940450668335,
+      @"R" : @0.6000000238418579,
+    } forKey:@"SunPadControlSizeScales"];
+    [[SunPadSettings sharedSettings] setSizeScale:0.9791940450668335
+                                       forControl:@"L"];
+    [[SunPadSettings sharedSettings] setSizeScale:0.6000000238418579
+                                       forControl:@"R"];
+    changed = YES;
+  }
+  if (force || [defaults objectForKey:@"SunPadExperimentalDPadOrigin"] == nil) {
+    [defaults setObject:NSStringFromCGPoint(
+        CGPointMake(0.084500001609325415, 0.34521396397747761))
+                 forKey:@"SunPadExperimentalDPadOrigin"];
+    changed = YES;
+  }
+  if (force || [defaults objectForKey:@"SunPadExperimentalDPadScale"] == nil) {
+    [defaults setDouble:0.7827200293540955
+                 forKey:@"SunPadExperimentalDPadScale"];
+    changed = YES;
+  }
+  if (changed) [defaults synchronize];
+}
+
+NSSet<NSString *> *KartPadHiddenTouchControls() {
+  NSArray<NSString *> *saved = [NSUserDefaults.standardUserDefaults
+      stringArrayForKey:kKartPadHiddenTouchControlsKey];
+  return [NSSet setWithArray:saved ?: @[]];
+}
+
+NSString *KartPadVisibilityIdentifier(UIView *control) {
+  NSString *identifier = control.accessibilityIdentifier;
+  if ([identifier hasPrefix:@"D_"]) return @"ExperimentalDPad";
+  return identifier;
+}
+
+BOOL KartPadViewIsEffectivelyHidden(UIView *view) {
+  for (UIView *candidate = view; candidate != nil;
+       candidate = candidate.superview) {
+    if (candidate.hidden || candidate.alpha < 0.01) return YES;
+  }
+  return NO;
+}
 
 UIViewController *KartPadVisibleViewController(UIWindow *window) {
   UIViewController *controller = window.rootViewController;
@@ -1318,6 +1392,133 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
 
 @implementation KartPadGameOverlay
 
+- (instancetype)initWithFrame:(CGRect)frame {
+  // Seed only a genuinely untouched phone layout. Existing custom layouts and
+  // every iPad layout retain their current values.
+  KartPadSeedPhoneTouchLayoutDefaults(NO);
+  return [super initWithFrame:frame];
+}
+
+- (void)kartPadFinishLayoutEditing {
+  [super finishLayoutEditing];
+  [self toggleSettingsPanel];
+}
+
+- (void)endLayoutEditing {
+  [super endLayoutEditing];
+  self.kartPadSelectedControlIdentifier = nil;
+}
+
+- (void)kartPadToggleSelectedControlVisibility {
+  NSString *identifier = self.kartPadSelectedControlIdentifier;
+  if (identifier.length == 0) return;
+
+  NSMutableSet<NSString *> *hidden =
+      [KartPadHiddenTouchControls() mutableCopy];
+  BOOL showing = [hidden containsObject:identifier];
+  if (showing) {
+    [hidden removeObject:identifier];
+  } else {
+    [hidden addObject:identifier];
+  }
+  NSArray<NSString *> *saved =
+      [[hidden allObjects] sortedArrayUsingSelector:@selector(compare:)];
+  [NSUserDefaults.standardUserDefaults setObject:saved
+                                           forKey:kKartPadHiddenTouchControlsKey];
+  [NSUserDefaults.standardUserDefaults synchronize];
+  if (showing) {
+    for (UIView *control in self.subviews) {
+      if (![KartPadVisibilityIdentifier(control) isEqualToString:identifier]) {
+        continue;
+      }
+      control.hidden = NO;
+      control.userInteractionEnabled = YES;
+      control.alpha = 1.0;
+    }
+  }
+  [self setNeedsLayout];
+  [self layoutIfNeeded];
+}
+
+- (void)kartPadConfigureTouchLayoutEditor {
+  UIButton *done = (UIButton *)KartPadSubviewWithAccessibilityLabel(
+      self, @"Finish moving touch controls", UIButton.class);
+  if (done == nil) return;
+
+  [done setTitle:@"Back" forState:UIControlStateNormal];
+  done.accessibilityHint = @"Saves the layout and returns to touch control settings.";
+  [done removeTarget:self action:@selector(finishLayoutEditing)
+     forControlEvents:UIControlEventTouchUpInside];
+  [done removeTarget:self action:@selector(kartPadFinishLayoutEditing)
+     forControlEvents:UIControlEventTouchUpInside];
+  [done addTarget:self action:@selector(kartPadFinishLayoutEditing)
+   forControlEvents:UIControlEventTouchUpInside];
+
+  UIStackView *stack = [done.superview isKindOfClass:UIStackView.class]
+      ? (UIStackView *)done.superview : nil;
+  if (self.kartPadVisibilityButton == nil && stack != nil) {
+    UIButton *visibility = [UIButton buttonWithType:UIButtonTypeSystem];
+    [visibility setTitle:@"Hide" forState:UIControlStateNormal];
+    [visibility setTitleColor:UIColor.whiteColor forState:UIControlStateNormal];
+    visibility.titleLabel.font =
+        [UIFont systemFontOfSize:15.0 weight:UIFontWeightSemibold];
+    visibility.backgroundColor = [UIColor colorWithWhite:0.18 alpha:0.96];
+    visibility.layer.cornerRadius = 10.0;
+    visibility.accessibilityLabel = @"Hide selected touch control";
+    visibility.enabled = NO;
+    [visibility addTarget:self
+                   action:@selector(kartPadToggleSelectedControlVisibility)
+         forControlEvents:UIControlEventTouchUpInside];
+    [stack insertArrangedSubview:visibility
+                         atIndex:MAX((NSInteger)stack.arrangedSubviews.count - 1,
+                                     0)];
+    [visibility.widthAnchor constraintEqualToConstant:68.0].active = YES;
+    [visibility.heightAnchor constraintEqualToConstant:40.0].active = YES;
+    self.kartPadVisibilityButton = visibility;
+  }
+
+  NSSet<NSString *> *hidden = KartPadHiddenTouchControls();
+  BOOL editing = !KartPadViewIsEffectivelyHidden(done);
+  for (UIView *control in self.subviews) {
+    NSString *identifier = KartPadVisibilityIdentifier(control);
+    if (identifier.length == 0 || ![hidden containsObject:identifier]) continue;
+    control.hidden = !editing;
+    control.userInteractionEnabled = editing;
+    if (editing) control.alpha = 0.35;
+  }
+
+  NSString *selected = self.kartPadSelectedControlIdentifier;
+  BOOL selectedHidden = selected.length > 0 && [hidden containsObject:selected];
+  [self.kartPadVisibilityButton
+      setTitle:selectedHidden ? @"Show" : @"Hide"
+      forState:UIControlStateNormal];
+  self.kartPadVisibilityButton.accessibilityLabel = selectedHidden
+      ? @"Show selected touch control" : @"Hide selected touch control";
+  self.kartPadVisibilityButton.enabled = selected.length > 0;
+}
+
+- (void)selectControlForEditing:(UIView *)control {
+  [super selectControlForEditing:control];
+  self.kartPadSelectedControlIdentifier =
+      KartPadVisibilityIdentifier(control);
+  [self kartPadConfigureTouchLayoutEditor];
+}
+
+- (void)resetLayout {
+  [super resetLayout];
+  [NSUserDefaults.standardUserDefaults
+      removeObjectForKey:kKartPadHiddenTouchControlsKey];
+  KartPadSeedPhoneTouchLayoutDefaults(YES);
+  for (UIView *control in self.subviews) {
+    if (KartPadVisibilityIdentifier(control).length == 0) continue;
+    control.hidden = NO;
+    control.userInteractionEnabled = YES;
+    control.alpha = 1.0;
+  }
+  self.kartPadSelectedControlIdentifier = nil;
+  [self setNeedsLayout];
+}
+
 - (void)toggleSettingsPanel {
   // Opening or closing a touch-modal must never leave a gameplay control held.
   // Keep this in KartPad's owner layer so the pinned SunPad snapshot remains
@@ -1544,6 +1745,8 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
     }
 #endif
   }
+
+  [self kartPadConfigureTouchLayoutEditor];
 
   UIMenu *sourceMenu = menuButton.menu;
   if (sourceMenu == nil ||

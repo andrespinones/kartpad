@@ -2,6 +2,17 @@
 
 ## Current state
 
+The `codex/iphone-touch-layout-editor` candidate captures the maintainer's
+current physical-iPhone control positions as the default for untouched iPhone
+installs only. Existing custom layouts and every iPad layout remain unchanged.
+The editor lets a user hide or restore individual controls, treats the four
+D-pad directions as one control, and returns to Touch Control Settings through
+an explicit **Back** action. The D-pad remains present by default because it
+drives tricks and wheelies. Source contracts, the pinned SunPad snapshot, a
+fresh unsigned device build, app audit, signed in-place installation, launch,
+and before/after save and preference checks pass. Hands-on editor acceptance is
+still pending before merge or a stable release.
+
 KartPad `v0.4.0-preview.2` is published from
 `e9fa6058ee09fff0b16481ebe4a78d61cea69c87`. It updates both Apple-platform
 artifacts for Retro Rewind 6.12.5, repairs the universal iPhone/iPad three-dot

@@ -387,7 +387,8 @@ ABI without changing the copied baseline.
 The landscape touch surface keeps every Wii Classic Controller action
 available without a separate controller:
 
-- **Left:** steering stick, D-pad, L, Start, and Select within thumb reach.
+- **Left:** steering stick, D-pad, L, Start, and Select within thumb reach. The
+  D-pad performs tricks and wheelies; it is not required for basic steering.
 - **Right:** action buttons, R/ZL/ZR, and a second stick for menu-compatible
   input.
 - **Mario Kart shoulders:** R is a compact digital control matching L rather
@@ -396,8 +397,11 @@ available without a separate controller:
   add light haptic feedback, and keep accelerating after lifting your finger.
   Tap A again to unlock it. Opening a modal, hiding touch controls, or handing
   Player 1 to a controller also clears the lock.
-- **Customize:** move and resize controls independently, save separate phone
-  and tablet arrangements, or reset to the exact default layout.
+- **Customize:** move and resize controls independently, select any control to
+  hide or restore it, and use **Back** to return directly to Touch Control
+  Settings. Phone and tablet arrangements remain separate. New iPhone installs
+  use the maintainer-tested compact layout; existing custom layouts and iPad
+  defaults are preserved. Reset restores the appropriate device default.
 - **Controller handoff:** the first extended controller takes Player 1, clears
   held touch input, and hides touch controls by default. Disconnecting it
   restores touch; additional controllers keep stable Player 2–4 slots.
@@ -530,7 +534,7 @@ and racing will be retested when Retro WFC is available again.
 
 ### Does KartPad support Retro Rewind?
 
-Yes. The 0.3.0 preview opens with an Original / Retro Rewind chooser and
+Yes. The 0.4.0 preview opens with an Original / Retro Rewind chooser and
 installs a separately downloaded,
 hash-verified Retro Rewind 6.12.5 pack. KartPad does not bundle Mario Kart Wii
 or Retro Rewind content. Physical iPad build 7 completes the pack download,
@@ -561,10 +565,11 @@ iPhone or iPad.
 
 ### Are Android or Apple TV supported?
 
-Not currently. The supported targets are Apple Silicon Mac, iPhone, and iPad.
-Apple TV is now an active native-port target; see [the tvOS implementation and
-acceptance plan](docs/TVOS.md). It is not yet a supported public build. Android
-may be investigated later.
+Apple Silicon Mac, iPhone, and iPad are supported. An experimental native Apple
+TV tester IPA is included in `v0.4.0-preview.2`; it has passed build and package
+audits but still needs physical Apple TV acceptance before tvOS can be called
+supported. See [the tvOS implementation and acceptance plan](docs/TVOS.md).
+Android may be investigated later.
 
 ### How much storage does KartPad use?
 
