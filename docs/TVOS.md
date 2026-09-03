@@ -2,10 +2,14 @@
 
 ## Current status
 
-Native tvOS support is available as the experimental public
-`v0.4.0` hardware-bring-up build. There is still no accepted Apple TV
-gameplay result. Until the physical acceptance matrix below passes, the correct
-claim is **public experimental tvOS preview**, not supported Apple TV
+Native tvOS support is available as an experimental public hardware-bring-up
+path. An external Apple TV 4K (3rd generation) tester reached playable Original
+Mario Kart Wii and Retro Rewind on tvOS 26.5/26.6 with an Extended Gamepad, but
+the public `v0.4.0` build could not write config, NAND, saves, or logs under
+Application Support. The `v0.4.1` hotfix moves all filesystem-backed tvOS state
+to Caches, matching the successful physical workaround. Until the remaining
+physical acceptance matrix passes on the exact hotfix artifact, the correct
+claim is **public experimental tvOS build**, not supported Apple TV
 functionality.
 
 This implementation starts from KartPad `main`, the project's pinned upstream
@@ -53,14 +57,17 @@ it can be reconstructed:
 | --- | --- | --- |
 | Extracted RMCP01 data | `Library/Caches/KartPad/GameData` | Restage from the user's Mac |
 | Retro Rewind pack | `Library/Caches/KartPad/RetroRewind` | Download and verify again |
-| Config, NAND, saves, runtime logs | `Library/Application Support/KartPad` | Back up to the user's Mac before testing |
-| Controller diagnostics | `Library/Application Support/SunPad/Logs` | Collect separately with the diagnostics script |
+| Config, NAND, saves, runtime logs | `Library/Caches/KartPad` | Back up to the user's Mac before and after testing |
+| Controller diagnostics | `Library/Caches/SunPad/Logs` | Collect separately with the diagnostics script |
 
-Application Support is not treated as a permanent guarantee on Apple TV. The
-developer preview includes a Mac-side backup command, and testers must back up
-before replacing or deleting the app. A later broadly supported release needs
-a tested durable sync/restore design, such as an appropriately entitled
-CloudKit container, before it can promise durable saves.
+[Apple documents](https://developer.apple.com/library/archive/documentation/General/Conceptual/AppleTV_PG/)
+tvOS local files outside the small preferences allowance as purgeable. The
+developer build therefore keeps every writable filesystem path under Caches and
+includes a Mac-side backup command. Testers must assume config, saves, game
+data, and logs can disappear under storage pressure and must back up before
+replacing or deleting the app. A later broadly supported release needs a tested
+durable sync/restore design, such as an appropriately entitled CloudKit
+container, before it can promise durable saves.
 
 ## Building the first candidate
 
@@ -154,9 +161,14 @@ commit, binary SHA-256, and whether the run used Original or Retro Rewind.
 
 ## External hardware bring-up
 
-The maintainer does not currently have physical Apple TV hardware, so a small
-outside cohort will perform the first physical acceptance pass. This is a
-hardware bring-up build, not a supported release.
+The maintainer does not currently have physical Apple TV hardware, so an
+outside cohort performs physical acceptance. The first report confirms both
+modes can reach smooth playable gameplay with audio, 3D rendering, menus, and
+wireless gamepad input. It also exposed error 513 on Application Support; the
+reporter's cache-root workaround succeeded and is the basis of `v0.4.1`.
+Save/relaunch, sleep/wake, multi-controller, purge recovery, and an exact public
+hotfix retest remain open. This is still a hardware bring-up build, not a
+supported release.
 
 Before sending it, package and audit one exact candidate. Testers must have a
 paired Apple TV, a Mac with Xcode, an Extended Gamepad, their own supported game

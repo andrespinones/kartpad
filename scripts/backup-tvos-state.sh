@@ -14,7 +14,7 @@ if [[ -e "${destination}" ]]; then
 fi
 mkdir -p "${destination}"
 xcrun devicectl device copy from --device "${device}" \
-  --source "Library/Application Support/KartPad" \
+  --source "Library/Caches/KartPad" \
   --destination "${destination}" \
   --domain-type appDataContainer \
   --domain-identifier "${bundle_identifier}"

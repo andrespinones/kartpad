@@ -15,25 +15,33 @@ or physical-device result exists yet.
 
 ## Native tvOS work
 
-The maintainer-owned `codex/tvos-retro-rewind` branch contains the first
-independent native tvOS implementation slice: a `KartPadDual` tvOS build graph,
+The repository contains an independent native tvOS implementation slice: a
+`KartPadDual` tvOS build graph,
 focus-driven setup host, Extended Gamepad requirement, Mac-side private game
 data staging, official hash-verified Retro Rewind installation, and a fail-closed
 artifact audit. The complete dual Original/Retro Rewind graph now compiles and
 links as an unsigned arm64 tvOS 17 app, and that app passes the native bundle,
-platform, dependency, symbol, privacy, and private-data audit. No Apple TV is
-paired with the current Mac, so signing, installation, execution, gameplay,
-performance, and save recovery remain untested. Apple TV support is therefore
-not accepted. The candidate includes an original three-layer tvOS icon and Top
-Shelf image compiled into its audited asset catalog. It remains explicitly
-experimental in the `v0.4.0` hardware-bring-up build. The next
-gate is a small outside cohort using the exact audited candidate and tester
-checklist. The
+platform, dependency, symbol, privacy, and private-data audit. An external Apple
+TV 4K (3rd generation) run on tvOS 26.5/26.6 accepted playable Original and
+Retro Rewind video, audio, menus, and Extended Gamepad input after moving the
+runtime from unwritable Application Support to Caches. The `v0.4.1` tvOS-only
+hotfix incorporates that path correction; exact public-artifact retesting,
+save recovery, sleep/wake, multi-controller, and sustained performance remain
+open. Apple TV support is therefore still experimental. The candidate includes
+an original three-layer tvOS icon and Top Shelf image compiled into its audited
+asset catalog. The
 authoritative scope, build procedure, storage boundary, and external-testing
 gate are in
 [`docs/TVOS.md`](TVOS.md).
 
 ## Current goal
+
+**0.4.1 tvOS storage hotfix is in release validation.** It moves tvOS config,
+NAND, saves, runtime logs, and controller diagnostics to purgeable Caches,
+retains cache-first diagnostics with a legacy Application Support fallback,
+and adds a non-atomic config write fallback for the physical error-513 path.
+The iPhone/iPad 0.4.0 release is unchanged. The exact tvOS build, deterministic
+package, hosted comparison, and reporter retest remain open.
 
 **0.4.0 is published as KartPad's second stable community release.** The
 `v0.4.0` tag points to source commit

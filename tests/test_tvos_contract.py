@@ -28,13 +28,24 @@ class TvOSContractTests(unittest.TestCase):
         self.assertIn("MINIZIP::minizip", patch)
         self.assertIn("KARTPAD_TVOS_BUNDLE_IDENTIFIER", patch)
 
-    def test_tvos_host_keeps_rebuildable_and_durable_state_separate(self):
+    def test_tvos_host_uses_purgeable_cache_storage(self):
         host = (ROOT / "apple/tvos/KartPadTVRuntimeHost.mm").read_text()
-        self.assertIn("NSApplicationSupportDirectory", host)
         self.assertIn("NSCachesDirectory", host)
+        self.assertNotIn("NSApplicationSupportDirectory", host)
+        self.assertIn("return KartPadTVCacheRoot();", host)
         self.assertIn('@"GameData"', host)
+        self.assertIn('@"Logs"', host)
         self.assertIn("KartPadRetroRewindInstaller.installedRootPath", host)
         self.assertIn("KartPadTVWriteRuntimePaths", host)
+        self.assertIn("atomically:NO", host)
+        runtime_patch = (ROOT / "patches/wiicompiled-tvos-runtime.patch").read_text()
+        self.assertIn("#if TARGET_OS_TV", runtime_patch)
+        self.assertIn('"Caches";', runtime_patch)
+        diagnostics = (ROOT / "apple/tvos/KartPadTVSunPadDiagnostics.mm").read_text()
+        self.assertIn(
+            "#define NSApplicationSupportDirectory NSCachesDirectory", diagnostics
+        )
+        self.assertIn("SunPadDiagnostics.mm", diagnostics)
 
     def test_extended_gamepad_is_explicit_and_siri_remote_is_not_gameplay(self):
         with (ROOT / "apple/tvos/RuntimeInfo.plist").open("rb") as handle:
@@ -119,30 +130,36 @@ class TvOSContractTests(unittest.TestCase):
         self.assertIn("80d18895b39c63bd80f457398bfcbb91", stage)
         for script in (build, stage, backup, diagnostics):
             self.assertIn("KARTPAD_TVOS_BUNDLE_IDENTIFIER", script)
-        self.assertIn("Application Support/KartPad/Logs", diagnostics)
-        self.assertIn("Application Support/SunPad/Logs", diagnostics)
+        self.assertIn("Library/Caches/KartPad", backup)
+        self.assertIn("Library/Caches/KartPad/Logs", diagnostics)
+        self.assertIn("Library/Caches/SunPad/Logs", diagnostics)
+        self.assertIn("Library/Application Support/KartPad/Logs", diagnostics)
+        self.assertIn("Library/Application Support/SunPad/Logs", diagnostics)
         self.assertIn("<app-container>", diagnostics)
         self.assertIn("<user-home>", diagnostics)
         self.assertNotIn("GameData", diagnostics)
 
-    def test_stable_release_contracts_cover_ios_and_tvos(self):
+    def test_release_contracts_cover_ios_and_tvos(self):
         ios_package = (ROOT / "scripts/package-public-unsigned-ipa.py").read_text()
         ios_audit = (ROOT / "scripts/audit-public-unsigned-ipa.py").read_text()
         tvos_package = (
             ROOT / "scripts/package-public-unsigned-tvos-ipa.py"
         ).read_text()
         tvos_audit = (ROOT / "scripts/audit-public-unsigned-tvos-ipa.py").read_text()
-        for script in (ios_package, ios_audit, tvos_package, tvos_audit):
+        for script in (ios_package, ios_audit):
             self.assertIn('RELEASE_TAG = "v0.4.0"', script)
             self.assertIn('APP_VERSION = "0.4.0"', script)
+        for script in (tvos_package, tvos_audit):
+            self.assertIn('RELEASE_TAG = "v0.4.1"', script)
+            self.assertIn('APP_VERSION = "0.4.1"', script)
         self.assertIn('APP_BUILD = "15"', ios_package)
         self.assertIn('APP_BUILD = "15"', ios_audit)
-        self.assertIn('APP_BUILD = "3"', tvos_package)
-        self.assertIn('APP_BUILD = "3"', tvos_audit)
+        self.assertIn('APP_BUILD = "4"', tvos_package)
+        self.assertIn('APP_BUILD = "4"', tvos_audit)
         self.assertIn('"physicalAppleTVAcceptance": False', tvos_package)
         self.assertIn('"physicalAppleTVAcceptance": False', tvos_audit)
         self.assertTrue((ROOT / "docs/INSTALL_TVOS.md").is_file())
-        self.assertTrue((ROOT / "docs/releases/v0.4.0.md").is_file())
+        self.assertTrue((ROOT / "docs/releases/v0.4.1.md").is_file())
 
 
 if __name__ == "__main__":

@@ -14,19 +14,23 @@ if [[ -e "${destination}" ]]; then
 fi
 mkdir -p "${destination}/KartPad" "${destination}/Controller"
 
-copied=0
-if xcrun devicectl device copy from --device "${device}" \
-    --source "Library/Application Support/KartPad/Logs" \
-    --destination "${destination}/KartPad" \
+copy_logs() {
+  local source="$1"
+  local output="$2"
+  xcrun devicectl device copy from --device "${device}" \
+    --source "${source}" \
+    --destination "${output}" \
     --domain-type appDataContainer \
-    --domain-identifier "${bundle_identifier}"; then
+    --domain-identifier "${bundle_identifier}"
+}
+
+copied=0
+if copy_logs "Library/Caches/KartPad/Logs" "${destination}/KartPad" ||
+   copy_logs "Library/Application Support/KartPad/Logs" "${destination}/KartPad"; then
   copied=1
 fi
-if xcrun devicectl device copy from --device "${device}" \
-    --source "Library/Application Support/SunPad/Logs" \
-    --destination "${destination}/Controller" \
-    --domain-type appDataContainer \
-    --domain-identifier "${bundle_identifier}"; then
+if copy_logs "Library/Caches/SunPad/Logs" "${destination}/Controller" ||
+   copy_logs "Library/Application Support/SunPad/Logs" "${destination}/Controller"; then
   copied=1
 fi
 if [[ "${copied}" == 0 ]]; then

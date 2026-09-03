@@ -1,9 +1,10 @@
 # KartPad Apple TV bring-up test
 
-This candidate has passed an arm64 tvOS build and static audit, but it has never
-run on physical Apple TV hardware. Treat it as an engineering bring-up build,
-not a supported release. Do not use an Apple TV container that holds valuable
-KartPad saves.
+An externally built cache-root candidate has reached playable Original Mario
+Kart Wii and Retro Rewind on physical Apple TV 4K hardware. The exact public
+`v0.4.1` hotfix still needs a signed-container retest. Treat it as an
+engineering bring-up build, not a supported release, and do not rely on its
+purgeable local storage for valuable saves.
 
 ## What the tester needs
 
@@ -20,8 +21,9 @@ an issue.
 ## Install and stage data
 
 Install the signed candidate using Xcode Device Hub or Apple Configurator. Do
-not uninstall an existing KartPad build unless its Application Support has been
-backed up first.
+not uninstall an existing KartPad build unless its `Library/Caches/KartPad`
+state has been backed up first. tvOS may purge this directory under storage
+pressure even when the app remains installed.
 
 The repository scripts default to the `dev.kartpad.tv` app container. If the
 candidate was signed with a different bundle identifier, set it before any

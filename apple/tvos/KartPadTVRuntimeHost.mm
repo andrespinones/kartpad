@@ -22,16 +22,16 @@ NSString *const kKartPadSupportedDOLHash =
 BOOL gKartPadTVRuntimeActive = NO;
 BOOL gKartPadTVRetroRewindSelected = NO;
 
-NSString *KartPadTVSupportRoot() {
-  return [[NSSearchPathForDirectoriesInDomains(
-      NSApplicationSupportDirectory, NSUserDomainMask, YES) firstObject]
-      stringByAppendingPathComponent:@"KartPad"];
-}
-
 NSString *KartPadTVCacheRoot() {
   return [[NSSearchPathForDirectoriesInDomains(
       NSCachesDirectory, NSUserDomainMask, YES) firstObject]
       stringByAppendingPathComponent:@"KartPad"];
+}
+
+NSString *KartPadTVSupportRoot() {
+  // tvOS permits only purgeable local files outside its small preferences
+  // allowance. Keep all filesystem-backed runtime state in Library/Caches.
+  return KartPadTVCacheRoot();
 }
 
 NSString *KartPadTVGameDataRoot() {
@@ -109,9 +109,12 @@ BOOL KartPadTVWriteRuntimePaths(NSError **error) {
   NSFileManager *files = NSFileManager.defaultManager;
   NSString *support = KartPadTVSupportRoot();
   NSString *cache = KartPadTVCacheRoot();
+  NSString *logs = [support stringByAppendingPathComponent:@"Logs"];
   if (![files createDirectoryAtPath:support withIntermediateDirectories:YES
                          attributes:nil error:error] ||
       ![files createDirectoryAtPath:cache withIntermediateDirectories:YES
+                         attributes:nil error:error] ||
+      ![files createDirectoryAtPath:logs withIntermediateDirectories:YES
                          attributes:nil error:error]) {
     return NO;
   }
@@ -147,8 +150,18 @@ BOOL KartPadTVWriteRuntimePaths(NSError **error) {
   } else {
     config = [config stringByAppendingString:paths];
   }
-  return [config writeToFile:configPath atomically:YES
-                    encoding:NSUTF8StringEncoding error:error];
+  NSError *atomicError = nil;
+  if ([config writeToFile:configPath atomically:YES
+                 encoding:NSUTF8StringEncoding error:&atomicError]) {
+    return YES;
+  }
+  NSError *directError = nil;
+  if ([config writeToFile:configPath atomically:NO
+                 encoding:NSUTF8StringEncoding error:&directError]) {
+    return YES;
+  }
+  if (error != nullptr) *error = directError ?: atomicError;
+  return NO;
 }
 
 BOOL KartPadTVHasExtendedController() {
@@ -450,6 +463,9 @@ UIButton *KartPadTVButton(NSString *title, UIColor *color,
 - (BOOL)run {
   NSError *error = nil;
   [NSFileManager.defaultManager createDirectoryAtPath:KartPadTVSupportRoot()
+      withIntermediateDirectories:YES attributes:nil error:&error];
+  [NSFileManager.defaultManager createDirectoryAtPath:
+      [KartPadTVSupportRoot() stringByAppendingPathComponent:@"Logs"]
       withIntermediateDirectories:YES attributes:nil error:&error];
   [NSFileManager.defaultManager createDirectoryAtPath:KartPadTVCacheRoot()
       withIntermediateDirectories:YES attributes:nil error:&error];
