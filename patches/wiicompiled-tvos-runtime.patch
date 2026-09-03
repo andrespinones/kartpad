@@ -43,9 +43,9 @@
 +
 +set(MKW_KARTPAD_MINIZIP_SOURCE_DIR "" CACHE PATH
 +    "Pinned minizip-ng source used by KartPad's tvOS Retro Rewind installer")
-+set(KARTPAD_TVOS_MARKETING_VERSION "0.4.0" CACHE STRING
++set(KARTPAD_TVOS_MARKETING_VERSION "0.4.1" CACHE STRING
 +    "KartPad tvOS marketing version")
-+set(KARTPAD_TVOS_BUILD_NUMBER "3" CACHE STRING
++set(KARTPAD_TVOS_BUILD_NUMBER "4" CACHE STRING
 +    "KartPad tvOS bundle build number")
 +set(KARTPAD_TVOS_BUNDLE_IDENTIFIER "dev.kartpad.tv" CACHE STRING
 +    "KartPad tvOS product bundle identifier")
@@ -89,7 +89,7 @@
 +        "${MKW_KARTPAD_SUNPAD_DIR}/SunPadControllerMapping.mm"
 +        "${MKW_KARTPAD_SUNPAD_DIR}/SunPadInputMixer.mm"
 +        "${MKW_KARTPAD_SUNPAD_DIR}/SunPadSettings.mm"
-+        "${MKW_KARTPAD_SUNPAD_DIR}/SunPadDiagnostics.mm")
++        "${MKW_KARTPAD_TVOS_DIR}/KartPadTVSunPadDiagnostics.mm")
 +    foreach(source IN LISTS MKW_KARTPAD_TVOS_SOURCES)
 +        if(NOT EXISTS "${source}")
 +            message(FATAL_ERROR "Missing KartPad tvOS host source: ${source}")
@@ -163,6 +163,37 @@
      add_dependencies(mkw_release KartPadDual)
  endif()
  
+--- a/include/runtime_config.h
++++ b/include/runtime_config.h
+@@ -21,6 +21,7 @@
+ #ifdef __APPLE__
+ #include <mach-o/dyld.h>
+ #include <pwd.h>
++#include <TargetConditionals.h>
+ #include <unistd.h>
+ #endif
+ #ifdef _WIN32
+@@ -217,12 +218,18 @@
+     // logs into its signed resources. HOME is container-aware for a future
+     // sandboxed build; the account database is a defensive non-sandboxed
+     // fallback for unusual launch environments that omit HOME.
++    const char* libraryDirectory =
++#if TARGET_OS_TV
++        "Caches";
++#else
++        "Application Support";
++#endif
+     if (const char* home = std::getenv("HOME"); home && *home) {
+-        return std::filesystem::path(home) / "Library" / "Application Support" / "KartPad";
++        return std::filesystem::path(home) / "Library" / libraryDirectory / "KartPad";
+     }
+     if (const passwd* account = getpwuid(getuid());
+         account && account->pw_dir && *account->pw_dir) {
+-        return std::filesystem::path(account->pw_dir) / "Library" / "Application Support" / "KartPad";
++        return std::filesystem::path(account->pw_dir) / "Library" / libraryDirectory / "KartPad";
+     }
+ #endif
+     return std::filesystem::current_path() / kApplicationDirectoryName;
 --- a/src/main.cpp
 +++ b/src/main.cpp
 @@ -63,7 +63,7 @@

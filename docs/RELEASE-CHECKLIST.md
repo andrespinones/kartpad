@@ -10,7 +10,7 @@
       completes the physical Apple TV matrix.
 - [ ] Prove Original and Retro Rewind gameplay separately with an Extended
       Gamepad; do not infer Retro WFC acceptance from offline play.
-- [ ] Back up and rehearse restore of Application Support/NAND before asking a
+- [ ] Back up and rehearse restore of Caches/KartPad before asking a
       tester to risk saved progress.
 - [ ] Re-audit the exact signed tester artifact for private game data, Retro
       Rewind content, derived game artwork, signing material, and local paths.
@@ -18,6 +18,17 @@
 The exact 67-row matrix in `docs/PRD.md` remains the authority for full
 engineering completion. A community preview may ship with narrower, explicit
 limitations when its exact artifact passes every preview gate below.
+
+## 0.4.1 tvOS storage hotfix candidate
+
+- [x] Redirect tvOS config, NAND, saves, and logs from Application Support to Caches
+- [x] Keep iOS and macOS Application Support behavior unchanged
+- [x] Add atomic-write fallback and explicit runtime log-directory creation
+- [x] Update cache-first backup and diagnostic collection with legacy log fallback
+- [ ] Build and audit exact merged-source tvOS app 0.4.1 build 4
+- [ ] Package twice byte-identically and pass fresh extraction audits
+- [ ] Publish tag, IPA, checksum, and verify a fresh hosted download
+- [ ] Receive reporter acceptance on the exact signed hotfix artifact
 
 ## 0.4.0 stable candidate
 

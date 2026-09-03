@@ -1,12 +1,14 @@
 # Install the experimental KartPad Apple TV build
 
-KartPad `v0.4.0` includes an unsigned ARM64 tvOS IPA for hardware
-bring-up. It has passed compilation and package audits but has not run on the
-maintainer's Apple TV hardware. Treat it as an experimental tester build, not
-supported Apple TV functionality.
+KartPad `v0.4.1` is a tvOS-only storage hotfix with an unsigned ARM64 IPA for
+hardware bring-up. A reporter's equivalent cache-root build reached playable
+Original Mario Kart Wii and Retro Rewind on Apple TV 4K hardware. The exact
+public hotfix still needs tester acceptance, so treat it as an experimental
+build, not supported Apple TV functionality.
 
-1. Download `KartPad-v0.4.0-tvos-unsigned.ipa` and `SHA256SUMS` from
-   the release and verify the checksum.
+1. Download `KartPad-v0.4.1-tvos-unsigned.ipa` and `SHA256SUMS` from
+   the [0.4.1 release](https://github.com/chrissotraidis/kartpad/releases/tag/v0.4.1)
+   and verify the checksum.
 2. Re-sign the IPA with your own Apple development identity and bundle
    identifier, then install it on a paired Apple TV through Xcode or a
    compatible tvOS signing workflow.
@@ -22,7 +24,10 @@ Nintendo assets, Retro Rewind pack, saves, signing identity, provisioning
 profile, or Wii banner artwork. KartPad downloads and hash-verifies the pinned
 official Retro Rewind pack only after the tester selects that mode.
 
-Update in place with the same signing identity and bundle identifier. Back up
-Application Support before deleting the app or changing signing identities.
-Never attach game data, Retro Rewind files, saves, signing material, device
-identifiers, or a complete app container to a public report.
+Update in place with the same signing identity and bundle identifier. KartPad's
+tvOS config, NAND, saves, logs, game data, and downloaded pack live under
+`Library/Caches`; tvOS may purge them under storage pressure. Run
+`scripts/backup-tvos-state.sh` before and after meaningful testing and before
+deleting the app or changing signing identities. Never attach game data, Retro
+Rewind files, saves, signing material, device identifiers, or a complete app
+container to a public report.
