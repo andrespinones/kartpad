@@ -3,7 +3,7 @@
 ## Current status
 
 Native tvOS support is available as the experimental public
-`v0.4.0-preview.2` hardware-bring-up build. There is still no accepted Apple TV
+`v0.4.0` hardware-bring-up build. There is still no accepted Apple TV
 gameplay result. Until the physical acceptance matrix below passes, the correct
 claim is **public experimental tvOS preview**, not supported Apple TV
 functionality.

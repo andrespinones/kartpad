@@ -2,6 +2,19 @@
 
 ## Current state
 
+The `codex/iphone-touch-layout-editor` candidate captures the maintainer's
+current physical-iPhone control positions as the default for untouched iPhone
+installs only. Existing custom layouts and every iPad layout remain unchanged.
+The editor lets a user hide or restore individual controls, treats the four
+D-pad directions as one control, and returns to Touch Control Settings through
+an explicit **Back** action. The D-pad remains present by default because it
+drives tricks and wheelies. Source contracts, the pinned SunPad snapshot, a
+fresh unsigned device build, app audit, signed in-place installation, launch,
+and before/after save and preference checks pass. The maintainer then accepted
+Retro Rewind launch, per-control hiding, and the editor's Back path on the
+physical iPhone. These results clear the iPhone gate for the stable 0.4.0
+release; physical Apple TV acceptance remains open.
+
 KartPad `v0.4.0-preview.2` is published from
 `e9fa6058ee09fff0b16481ebe4a78d61cea69c87`. It updates both Apple-platform
 artifacts for Retro Rewind 6.12.5, repairs the universal iPhone/iPad three-dot
@@ -68,7 +81,7 @@ not block offline Retro Rewind support.
 
 ## Next executable work
 
-1. Collect the first physical Apple TV report against `v0.4.0-preview.2` using
+1. Collect the first physical Apple TV report against `v0.4.0` using
    `docs/TVOS-TESTING.md`.
 2. Await the Issue #1 Feather-signed iPad import retest and the Issue #5 MacBook
    Air cursor/settings retest requested against Preview 5.

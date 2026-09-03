@@ -14,8 +14,8 @@ platform, dependency, symbol, privacy, and private-data audit. No Apple TV is
 paired with the current Mac, so signing, installation, execution, gameplay,
 performance, and save recovery remain untested. Apple TV support is therefore
 not accepted. The candidate includes an original three-layer tvOS icon and Top
-Shelf image compiled into its audited asset catalog. It is published as the
-explicitly experimental `v0.4.0-preview.2` hardware-bring-up build. The next
+Shelf image compiled into its audited asset catalog. It remains explicitly
+experimental in the `v0.4.0` hardware-bring-up build. The next
 gate is a small outside cohort using the exact audited candidate and tester
 checklist. The
 authoritative scope, build procedure, storage boundary, and external-testing
@@ -23,6 +23,17 @@ gate are in
 [`docs/TVOS.md`](TVOS.md).
 
 ## Current goal
+
+**The next iPhone touch-layout candidate passed maintainer testing.**
+It seeds the maintainer's captured compact layout only on untouched iPhone
+installs, leaves existing custom layouts and all iPad layouts unchanged, lets
+users hide or restore individual controls (including the D-pad as one group),
+and returns from layout editing to Touch Control Settings with **Back**. The
+D-pad remains visible by default because it performs tricks and wheelies. The
+source and pinned-overlay contracts, full test suite, device build, package
+audit, signed in-place install, launch, and save/preferences preservation pass.
+The physical iPhone also passed Retro Rewind launch, per-control hiding, and
+the editor's Back path. The stable 0.4.0 build/package/publish chain is next.
 
 **0.4.0 Preview 2 is published.** `v0.4.0-preview.2` points to source commit
 `e9fa6058ee09fff0b16481ebe4a78d61cea69c87`. Its app 0.4.0 build 14

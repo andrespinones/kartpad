@@ -1,10 +1,9 @@
-# KartPad v0.4.0-preview.2 release rollup
+# KartPad v0.4.0 release rollup
 
 Updated: 2026-09-03
 
-This is the living validation record for the Retro Rewind 6.12.5 and universal
-menu repair preview. User-facing notes are in
-[`v0.4.0-preview.2.md`](v0.4.0-preview.2.md).
+This is the living validation record for the second stable KartPad community
+release. User-facing notes are in [`v0.4.0.md`](v0.4.0.md).
 
 ## Included changes
 
@@ -16,25 +15,21 @@ menu repair preview. User-facing notes are in
 - Universal iPhone/iPad three-dot-menu refresh repair: the menu remains titled
   KartPad and keeps the accepted consolidated hierarchy without the obsolete
   SunPad performance and 60 FPS experiments.
-- iPhone/iPad app 0.4.0 build 14 and tvOS app 0.4.0 build 2.
+- Maintainer-tested compact defaults for untouched iPhones, per-control
+  Hide/Show, grouped D-pad visibility, and a direct Back path from the editor.
+- iPhone/iPad app 0.4.0 build 15 and tvOS app 0.4.0 build 3.
 
 ## Accepted baseline
 
-The preceding signed iPad candidate was installed in place over
-`dev.kartpad.app`. Its Application Support/NAND tree matched byte-for-byte
-before and after installation, and hands-on checks accepted Retro Rewind
-6.12.4, Original Mario Kart Wii, ordinary controller input, and the repaired
-three-dot menu through exit/reopen and mode changes.
-
-Preview 2's 6.12.5 translation, fresh platform builds, and package audits are
-release gates. They do not by themselves establish physical 6.12.5 gameplay or
-Apple TV acceptance.
+The preceding signed iPad candidate preserved its complete Application Support
+and NAND tree while passing Original Mario Kart Wii, Retro Rewind 6.12.4,
+ordinary controller input, and the corrected three-dot menu. The stable 0.4.0
+candidate then installed in place on the maintainer's iPhone and passed Retro
+Rewind 6.12.5 launch, per-control hiding, and the editor's Back path while
+retaining the existing app container, preferences, game data, and saves.
 
 ## External acceptance still required
 
-- Install the exact iPhone/iPad candidate in place, verify the three-dot menu,
-  install Retro Rewind 6.12.5, and complete a race without losing existing
-  saves or settings.
 - Install the exact tvOS candidate on physical Apple TV hardware and follow
   `docs/TVOS-TESTING.md` through private staging, controller input, Original and
   Retro Rewind races, relaunch, sleep/wake, and save durability.
@@ -43,18 +38,12 @@ Apple TV acceptance.
 
 ## Release gates
 
-- [x] Merge and verify the complete source on `main`.
-- [x] Rebuild exact merged source as iOS 0.4.0 build 14 and tvOS 0.4.0 build 2.
+- [ ] Merge and verify the complete source on `main`.
+- [ ] Rebuild exact merged source as iOS 0.4.0 build 15 and tvOS build 3.
 - [x] Pass full tests, source/safety checks, patch verification, app audits, and
-      Objective-C++ analysis.
-- [x] Package each IPA twice deterministically and compare bytes.
-- [x] Audit exact IPAs and embedded provenance/notices.
-- [x] Tag the audited source and publish both IPAs plus `SHA256SUMS`.
-- [x] Download hosted assets, byte-compare, checksum-verify, and re-audit.
-- [x] Verify remote `main` and the dereferenced tag, then request device tests.
-
-- Published source: `e9fa6058ee09fff0b16481ebe4a78d61cea69c87`
-- iPhone/iPad IPA SHA-256:
-  `a796cd0e29bfd47d78afc50989a959803f9eff434252a3a455af85308b380fe6`
-- tvOS IPA SHA-256:
-  `3f8f529a93cc3f1ddfe9e9b71171ba56ead5a49ae3598c449a42f00eed6c5a9a`
+      physical iPhone touch-editor acceptance.
+- [ ] Package each IPA twice deterministically and compare bytes.
+- [ ] Audit exact IPAs and embedded provenance/notices.
+- [ ] Tag the audited source and publish both IPAs plus `SHA256SUMS`.
+- [ ] Download hosted assets, byte-compare, checksum-verify, and re-audit.
+- [ ] Verify remote `main` and the dereferenced tag.
