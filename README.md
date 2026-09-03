@@ -43,7 +43,7 @@
 | Does online play work? | The online-capable build passes login, matchmaking, a two-player race, results, ratings, and lobby return against a compatible isolated WFC server. As of 1 September 2026, the public Retro WFC service is in maintenance, so live public online play is temporarily unavailable. That external outage does not block Retro Rewind installation or offline play. |
 | Do touch, tilt, and controllers work? | Touch, motion steering, and ordinary GameController-compatible pads are implemented, with general physical acceptance on iPhone and iPad. Direct Wii Remote/Nunchuk pairing is a separate experimental, macOS-only path that still needs external hardware testing. |
 | Can I use a custom Mii? | **Experimentally.** On Mac, iPhone, or iPad, open **Game Data & Saves → Manage Miis…** and import a standard 74-byte `.mii` file. Restart KartPad, then select it in **License Settings → Change Mii**. KartPad does not yet create Miis. |
-| Are Android and Apple TV supported? | Apple TV has an experimental native hardware-bring-up IPA in `v0.4.0`, but it is not accepted as supported until physical testers complete the matrix. Android is documented as a future implementation target, not a supported build. |
+| Are Android and Apple TV supported? | Apple TV has an experimental native hardware-bring-up IPA in `v0.4.0`, but it is not accepted as supported until physical testers complete the matrix. Native Android implementation is now an active, evidence-gated project; no Android APK or runtime claim exists yet. |
 | How much storage does it need? | The app is about 80 MiB and extracted Mario Kart Wii data uses about 2.5 GiB. Retro Rewind downloads an additional 1.72 GiB archive and needs temporary installation space. Keeping the WBFS/ISO on the device requires more space. |
 
 ## Original Mario Kart Wii or Retro Rewind
@@ -569,7 +569,10 @@ Apple Silicon Mac, iPhone, and iPad are supported. An experimental native Apple
 TV tester IPA is included in `v0.4.0`; it has passed build and package
 audits but still needs physical Apple TV acceptance before tvOS can be called
 supported. See [the tvOS implementation and acceptance plan](docs/TVOS.md).
-Android may be investigated later.
+Native Android implementation is now active, beginning with a reproducible
+ARM64 toolchain, JNI shell, and Vulkan fixture. No Android APK or gameplay
+claim exists yet. See the [Android architecture and feasibility plan](docs/ANDROID.md)
+and [autonomous Android goal loop](docs/ANDROID-GOAL-LOOP.md).
 
 ### How much storage does KartPad use?
 
