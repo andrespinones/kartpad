@@ -2828,3 +2828,29 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   selection.** Controller-driven Retro race/save, trustworthy timing, physical
   controller/audio/rumble, hardware, and release acceptance remain open. No
   private input or binary was committed or published.
+
+## 2026-09-04 — Android A3 Retro Rewind controller race/save
+
+- Registered an ignored Xbox-compatible virtual controller through Android's
+  normal `uinput`/InputReader path, selected the production Retro Rewind
+  profile, and used controller input for title/license/menu navigation and all
+  live race acceleration/steering.
+- Rejected blind long steering intervals after they repeatedly left a narrow
+  lava course. Selected GCN Baby Park and replaced them with a content-free
+  state-trace feedback loop that emitted only ordinary analog controller
+  events. It completed the live Time Trial at finish stage 4; results reported
+  `17:13.562`, best lap `00:19.742`, and ghost creation.
+- The controller's explicit one-hour registration expired mid-race. The
+  runtime logged channel-zero disconnect/reconnect and completed the same race
+  after reattachment, with no fatal signature.
+- Advancing results changed the isolated Retro save from SHA-256 `3c4aeacd...`
+  to `7279ad4d...`. A force-stop and production-chooser cold relaunch as a new
+  process retained the exact post-results hash, reconnected the controller,
+  reached the branded title, and accepted navigation back to Baby Park.
+- Classification: **Pass for controller-driven Retro emulator gameplay,
+  race/results, save mutation, and byte-stable controller-attached cold
+  relaunch.** The deliberately slow record did not replace the faster bundled
+  selectable ghost, so visible new-record reload, trustworthy timing, physical
+  controller/audio/rumble, physical hardware, and release acceptance remain
+  open. No APK, AAB, private input, save, trace, console, or screenshot was
+  published.

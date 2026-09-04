@@ -530,6 +530,24 @@ controller-driven Retro race/save, timing, physical controller/audio/rumble,
 hardware, or release gates. Evidence:
 [`docs/artifacts/2026-09-04/android/a3-production-mode-chooser.md`](artifacts/2026-09-04/android/a3-production-mode-chooser.md).
 
+The same production Retro profile now passes a complete controller-driven
+emulator race/results/save/cold-relaunch slice. An Android InputReader-visible
+Xbox-compatible virtual controller navigated the retail menus and drove Mario
+through Retro Rewind's GCN Baby Park to finish stage 4. The results reported
+`17:13.562`, best lap `00:19.742`, and ghost creation; advancing results changed
+the isolated Retro save from SHA-256 `3c4aeacd...` to `7279ad4d...`. A cold
+production-chooser relaunch with the controller already attached reached the
+branded title as a new process, retained the exact post-results hash, and
+accepted controller navigation back to Baby Park. The temporary controller's
+explicit one-hour registration expired mid-race; the runtime recorded an
+ordinary disconnect/reconnect and the same live race completed afterward.
+This closes the emulator controller gameplay, race/results, save mutation, and
+byte-stable cold-relaunch slice. The slow new ghost did not replace the faster
+bundled selectable ghost, so visible new-record reload remains open alongside
+trustworthy timing, physical controller/audio/rumble, physical hardware, and
+release acceptance. Evidence:
+[`docs/artifacts/2026-09-04/android/a3-retro-controller-race-save.md`](artifacts/2026-09-04/android/a3-retro-controller-race-save.md).
+
 ## Native tvOS work
 
 The maintainer-owned `codex/tvos-retro-rewind` branch contains the first
