@@ -468,6 +468,19 @@ offline title/menu relaunch, not a race, production mode chooser, general
 fresh-NAND creation, touch parity, or physical hardware. Evidence:
 [`docs/artifacts/2026-09-04/android/a3-dual-runtime-offline-boot.md`](artifacts/2026-09-04/android/a3-dual-runtime-offline-boot.md).
 
+A bounded follow-up now proves that Retro Rewind's native Replay path can load
+the official SNES Donut Plains 1 expert card, follow the expanded course, cross
+into lap 2, and reach a three-lap finish/results presentation on the API 36
+ARM64 emulator. The save hash changed after the result. Running the same RKG
+through KartPad's diagnostic live-controller bridge still diverges around 19
+seconds even when the base-course metadata override is disabled, so that
+override is ruled out and the fixture is not valid A3 acceptance. The replay's
+displayed result also differs from the official card time, so timing fidelity
+is not claimed. This narrows the remaining problem to the diagnostic
+RKG/live-controller boundary, most likely Retro Rewind transmission semantics;
+a controller-driven race remains open. Evidence:
+[`docs/artifacts/2026-09-04/android/a3-retro-replay-isolation.md`](artifacts/2026-09-04/android/a3-retro-replay-isolation.md).
+
 ## Native tvOS work
 
 The maintainer-owned `codex/tvos-retro-rewind` branch contains the first

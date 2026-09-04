@@ -2675,3 +2675,33 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   parity, physical hardware, and release acceptance remain open. No private
   input, APK, or AAB was committed or published. Evidence:
   `docs/artifacts/2026-09-04/android/a3-dual-runtime-offline-boot.md`.
+
+## 2026-09-04 — Android A3 Retro replay isolation
+
+- Reused the validated offline 6.12.5 pack on the API 36 ARM64 emulator and
+  manually matched the official SNES Donut Plains 1 expert's Mario,
+  Sneakster, and Manual metadata.
+- Added a temporary debug launch switch that disabled the existing base-course
+  RKG metadata writes. The live-controller fixture retained its expected
+  238-frame synchronization offset but again entered the barrier/off-road
+  failure around `00:19.380`; the switch was removed after it falsified the
+  metadata-overwrite hypothesis.
+- Renamed the diagnostic input out of its recognized path, cold-started Retro
+  Rewind, and selected its native Replay path for the same official card. It
+  followed the expanded course, crossed into lap 2, and reached the three-lap
+  finish/results presentation without an Android fatal record. The result was
+  `00:57.691`, not the card's `01:34.086`, so no timing-fidelity claim is made.
+- The KartPad save changed from the prior accepted cold-relaunch SHA-256
+  `9c451f517267b800a7100bcf3f7445917ddca2361dc7deb1d184f76086600604`
+  to `c5496e08dceab593a787b1363b2a4ce756313cebd768ab2d0d814c99db931383`
+  after results. After diagnostic cleanup and installation of the clean rebuilt
+  APK, a force-stop/cold launch returned to the branded Retro title and retained
+  that exact changed hash.
+- Classification: **Partial pass for native Retro Rewind expanded-course replay
+  and results on the Android emulator; fail for using the live-controller RKG
+  fixture as A3 race proof.** The metadata override is ruled out. The remaining
+  boundary is most likely Retro Rewind transmission/RKG input semantics, but a
+  controller-driven race, trustworthy timing, its save/relaunch, mode
+  switching, physical hardware, and release acceptance remain open. No APK,
+  AAB, or private input was published. Evidence:
+  `docs/artifacts/2026-09-04/android/a3-retro-replay-isolation.md`.

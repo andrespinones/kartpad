@@ -980,6 +980,17 @@ a race, the production chooser, arbitrary fresh-NAND creation, touch/controller
 parity, or a physical device. Evidence is in
 `docs/artifacts/2026-09-04/android/a3-dual-runtime-offline-boot.md`.
 
+The next emulator isolation shows that Retro Rewind's native Replay path can
+execute the official SNES Donut Plains 1 expert through lap 2 and a three-lap
+finish/results presentation. The same RKG still diverges when converted into
+live Classic Controller state, whether the diagnostic base-course metadata
+override is enabled or disabled. The replay result time also does not match the
+official card, so this is execution-path evidence rather than timing or
+controller acceptance. Continue at the Retro Rewind transmission/RKG-to-live-
+input boundary; do not relabel the replay as the controller-driven A3 race.
+Evidence is in
+`docs/artifacts/2026-09-04/android/a3-retro-replay-isolation.md`.
+
 Do not begin the touch-UI port until A2's controller-driven Original-mode proof
 passes. Physical Android hardware remains authoritative for vendor Vulkan and
 controller behavior; Retro Rewind installation and touch parity follow from
