@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
@@ -93,13 +94,24 @@ final class RetroRewindPipelineDeviceFixture {
                     "replacement synthetic install failed: " + replacement.error);
             require(validateInstalled(context, secondContract).isValid(),
                     "replacement installed content did not validate");
+
+            String recoveryToken = "device-recovery";
+            Path support = RetroRewindInstallStorage.supportRoot(context.getFilesDir());
+            Path installed = RetroRewindInstallStorage.installedRoot(context.getFilesDir());
+            Path recoveryRollback = support.resolve("RetroRewind.rollback-" + recoveryToken);
+            Files.move(installed, recoveryRollback, StandardCopyOption.ATOMIC_MOVE);
+            Path staleStaging = RetroRewindInstallStorage.createStagingDirectory(
+                    context.getFilesDir(), recoveryToken);
+            Files.write(staleStaging.resolve("interrupted.tmp"),
+                    "interrupted".getBytes(StandardCharsets.UTF_8));
             RetroRewindInstallStorage.recover(context.getFilesDir());
             require(validateInstalled(context, secondContract).isValid(),
-                    "startup recovery changed the replacement install");
+                    "startup recovery did not restore the rollback install");
             require(noTransientInstallDirectories(context),
-                    "successful replacement left staging or rollback state");
+                    "startup recovery left staging or rollback state");
 
-            Log.i(TAG, "A3 device install faults passed existing=preserved replacement=valid");
+            Log.i(TAG, "A3 device install faults passed existing=preserved " +
+                    "replacement=valid recovery=restored");
         } catch (Exception error) {
             Log.e(TAG, "A3 device install faults failed", error);
         } finally {

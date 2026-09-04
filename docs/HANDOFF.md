@@ -271,7 +271,9 @@ not block offline Retro Rewind support.
    ARM64 AVDs. It rejects a corrupt archive before extraction, preserves the
    validated active install across an injected activation failure, cleans the
    failed staging tree, atomically replaces the pack on success, and
-   revalidates it after recovery with no transient state. The trigger and
+   then recreates the single-rollback/no-active-install crash window. Startup
+   recovery restores the valid pack and removes stale staging with no
+   transient state. The trigger and
    implementation are debug-only; release compilation and API-28 lint remain
    clean. This closes the emulator form of that fault, not the official
    production-size install, real full-disk behavior, gameplay/mode routing, or

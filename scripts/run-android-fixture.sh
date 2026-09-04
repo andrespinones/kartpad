@@ -82,7 +82,8 @@ wait_for_marker() {
 "$adb" shell am start -W \
   -n dev.kartpad.android/.RetroRewindWorkerFixtureActivity \
   --ez dev.kartpad.android.TEST_RETRO_REWIND_PIPELINE true >/dev/null
-wait_for_marker "A3 device install faults passed existing=preserved replacement=valid"
+wait_for_marker \
+  "A3 device install faults passed existing=preserved replacement=valid recovery=restored"
 "$adb" shell am force-stop dev.kartpad.android
 
 "$adb" shell am start -W -n dev.kartpad.android/.KartPadActivity \

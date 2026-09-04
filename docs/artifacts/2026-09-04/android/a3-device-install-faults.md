@@ -27,8 +27,9 @@ passes, on both supported emulator page-size lanes.
   `ACTIVATION_FAILURE`, deletes only its staging tree, and retains the prior
   valid install.
 - A final validated replacement uses the real same-volume atomic swap. It
-  remains valid after startup recovery, with no staging or rollback directory
-  left behind.
+  is then moved into the precise single-rollback/no-active-install crash state
+  alongside stale staging. Startup recovery restores that validated pack and
+  deletes the stale staging, with no transient directory left behind.
 - All fixture implementation and triggers live in the debug source set. The
   release Kotlin/Java graph compiles and API-28 lint passes without the device
   fixture class.
@@ -40,7 +41,8 @@ passes, on both supported emulator page-size lanes.
 - `scripts/run-android-fixture.sh KartPad_API_35_PS16K_ARM64`: pass on a wiped
   API 35 ARM64 AVD with 16 KiB pages.
 - Both final runs observed
-  `A3 device install faults passed existing=preserved replacement=valid`, then
+  `A3 device install faults passed existing=preserved replacement=valid
+  recovery=restored`, then
   passed the existing 4 GiB guest-memory, scheduler/fiber, SDL controller,
   resumable-transfer, unique-worker, Vulkan present, orientation, and three
   background/foreground recreation checks.
@@ -54,7 +56,7 @@ passes, on both supported emulator page-size lanes.
   `ref/upstream/rr-pulsar` mismatch: local `b566a5d...` versus pinned
   `29e76d4...`. This checkpoint does not mutate that user/private checkout.
 - The exact source-only debug APK is 33,843,921 bytes at SHA-256
-  `24690199ee0bc3a4d582338c723333a57480ba7ad6af2058f6593ce1658c6ea8`.
+  `f9f9a83182b9de5ff76f6751355677c3f97c90eb6246b7bdffb87c95c7b95b65`.
 - Both emulators were shut down and `adb devices` is empty.
 
 The first compile correctly rejected checked `IOException` calls inside a
@@ -63,9 +65,10 @@ the lambda fixed that source error; the fixture behavior did not change.
 
 ## Classification
 
-**Pass for existing-valid-install preservation and atomic replacement through
-Android's real app-private filesystem, JNI extractor, validation, activation,
-and recovery paths on 4 KiB and 16 KiB emulator lanes.** This does not prove
+**Pass for existing-valid-install preservation, atomic replacement, and the
+single-rollback process-death recovery state through Android's real app-private
+filesystem, JNI extractor, validation, and activation paths on 4 KiB and 16
+KiB emulator lanes.** This does not prove
 the 1.86 GB official archive, real storage exhaustion, normal mode routing,
 Retro Rewind gameplay, or physical hardware. No production archive, private
 data, device identifier, APK, or AAB was downloaded or published.

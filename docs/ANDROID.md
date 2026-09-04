@@ -931,7 +931,8 @@ A debug-only bounded fixture runs the production pipeline through the APK's
 JNI extractor and real app-private filesystem on wiped 4 KiB and 16 KiB ARM64
 AVDs. Corrupt input is refused before extraction, an injected activation
 failure retains the previously validated install and cleans staging, and a
-valid replacement survives recovery with no transient directories. This is
+valid replacement survives a recreated single-rollback process-death state;
+recovery restores it and removes stale staging with no transient directories. This is
 synthetic fault evidence, not a production-size install or gameplay result.
 Do not begin the touch-UI port until A2's controller-driven Original-mode proof
 passes. Physical Android hardware remains authoritative for vendor Vulkan and
