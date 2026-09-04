@@ -47,3 +47,27 @@ diff --git a/translator/src/Translator.Core/Parsing/Kamek/KamekPulFile.cs b/tran
 -            throw new InvalidDataException("File is neither a combined Code.pul nor a raw Kamek v3 chunk.");
 +            throw new InvalidDataException("File is neither a combined Code.pul nor a raw Kamek v2/v3 chunk.");
          }
+diff --git a/translator/tests/Translator.Tests/BaseTranslationModAwarenessTests.cs b/translator/tests/Translator.Tests/BaseTranslationModAwarenessTests.cs
+--- a/translator/tests/Translator.Tests/BaseTranslationModAwarenessTests.cs
++++ b/translator/tests/Translator.Tests/BaseTranslationModAwarenessTests.cs
+@@ -130,7 +130,7 @@ public sealed class BaseTranslationModAwarenessTests
+         var chunkSize = KamekChunk.HeaderSize + code.Length + commands.Sum(command => command.Length);
+         var data = new byte[chunkSize];
+         BinaryPrimitives.WriteUInt32BigEndian(data.AsSpan(0x00), KamekChunk.Magic0);
+-        BinaryPrimitives.WriteUInt32BigEndian(data.AsSpan(0x04), KamekChunk.Magic1);
++        BinaryPrimitives.WriteUInt32BigEndian(data.AsSpan(0x04), KamekChunk.MagicV3);
+         BinaryPrimitives.WriteUInt32BigEndian(data.AsSpan(0x08), 0x10);
+         BinaryPrimitives.WriteUInt32BigEndian(data.AsSpan(0x0C), (uint)code.Length);
+         BinaryPrimitives.WriteUInt32BigEndian(data.AsSpan(0x18), (uint)chunkSize);
+diff --git a/translator/tests/Translator.Tests/KamekPulFileTests.cs b/translator/tests/Translator.Tests/KamekPulFileTests.cs
+--- a/translator/tests/Translator.Tests/KamekPulFileTests.cs
++++ b/translator/tests/Translator.Tests/KamekPulFileTests.cs
+@@ -89,7 +89,7 @@ public sealed class KamekPulFileTests
+         var chunkSize = KamekChunk.HeaderSize + code.Length + commandSize;
+         var data = new byte[chunkSize];
+         WriteU32(data, 0x00, KamekChunk.Magic0);
+-        WriteU32(data, 0x04, KamekChunk.Magic1);
++        WriteU32(data, 0x04, KamekChunk.MagicV3);
+         WriteU32(data, 0x08, bssSize);
+         WriteU32(data, 0x0C, (uint)code.Length);
+         WriteU32(data, 0x10, 0);
