@@ -549,13 +549,25 @@ inspection of the exact cold-loaded, CRC-valid save found a zero personal-ghost
 bitfield and no Time Trial leaderboard timer in its only initialized license.
 The retained exact pre-race save was then recovered read-only from the emulator:
 the pre/post files differ by only 12 bytes, confined to ordinary race/statistic
-fields plus the core CRC, with no leaderboard or ghost payload change. The slow
-run therefore did not create a retained personal record/ghost. Both variants of
-a matching packaged Baby Park RKG were rejected after visible live-player runs
-diverged and remained at race stage 2; neither changed the save. A
-faster record/save/reload proof remains open alongside
-trustworthy timing, physical controller/audio/rumble, physical hardware, and
-release acceptance. Evidence:
+fields plus the core CRC, with no leaderboard or ghost payload change. Both
+variants of a matching packaged Baby Park RKG were rejected after visible
+live-player runs diverged and remained at race stage 2; neither changed the
+save.
+
+A subsequent ordinary-controller feedback run finished Baby Park in
+`02:31.465`, with three recorded lap splits and native finish stage 4. The game
+reported ghost creation and showed the new result ahead of `17:13.562` in the
+same-session leaderboard. Advancing results changed RKSYS from `7279ad4d...`
+to CRC-valid `9c6c7b52...`, again only in ordinary statistics and the core CRC.
+Inspection of Retro's actual custom-track storage corrected the earlier RKSYS-
+only conclusion: Baby Park is stored under Pulsar course key `d6cac6a4`, whose
+`ldb.pul` and `150/2m31s465.rkg` were written beside the already-retained
+`150/17m13s562.rkg`. All three survived force-stop and a new production-chooser
+process. The base game's 32-bit RKSYS personal-ghost field does not describe
+Retro Rewind's expanded course set. This closes durable custom-track record
+storage on the emulator; a visible cold personal-replay selection still remains
+open alongside trustworthy timing, physical controller/audio/rumble, physical
+hardware, and release acceptance. Evidence:
 [`docs/artifacts/2026-09-04/android/a3-retro-controller-race-save.md`](artifacts/2026-09-04/android/a3-retro-controller-race-save.md).
 
 ## Native tvOS work

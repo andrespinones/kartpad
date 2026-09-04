@@ -93,9 +93,10 @@ only `1/1`. The exact cold-loaded 2,867,200-byte save retained SHA-256
 Read-only semantic inspection found valid `RKSD0006`/`RKPD` structures and an
 exact core CRC-32 match, but the only initialized license had personal-ghost
 bitfield `0x00000000` and no nonzero primary Time Trial leaderboard timers.
-The post-results mutation therefore did not include a retained personal record
-or ghost. A faster controller-driven result is still required for the
-record/save/reload part of A3.
+At that point this was interpreted as no retained personal record or ghost.
+The later custom-track storage inspection below corrects that RKSYS-only
+conclusion: Retro Rewind stores expanded-course records under Pulsar rather
+than the base game's 32-slot ghost table.
 
 ## Rejected fast-fixture follow-up
 
@@ -115,6 +116,44 @@ the bounded fixture console has SHA-256
 These attempts are rejected diagnostics, not race, record, or controller
 acceptance. The RKG and trace markers were removed from the app afterward.
 
+## Faster live-controller follow-up and storage correction
+
+A revised bounded feedback driver was attached to a fresh, ordinary-controller
+Baby Park Time Trial in the same visible emulator. It emitted only accelerator,
+brake, and analog-axis events through Android InputReader. The run reached
+native finish stage 4 at race timer tick 9,326 and reported `02:31.465`. The
+result screen displayed three valid lap splits, the remaining expanded lap
+slots as `99:59.999`, and `A ghost has been created for KartPad!`. The next
+screen showed `02:31.465` ahead of `17:13.562` in the session leaderboard.
+
+The ignored 702,567-byte state trace has SHA-256
+`c3d5a9bbd0d0b03e0c730b74ab281b23d2215840bf8a24e411a4215542518682`.
+Advancing results changed the redirected RKSYS from `7279ad4d...` to
+`9c6c7b52c0d1ae7c74489be53123d1943a84917f6869119ca319af5c33b58917`.
+The latter has valid `RKSD0006`/`RKPD` structures and matching core CRC; versus
+`7279ad4d...`, only seven statistic bytes and the four-byte CRC changed. Its
+base-game personal-ghost bitfield remains zero and has no primary timer.
+
+That is expected for this expanded Retro course. Read-only inspection found
+the actual course-scoped storage at
+`NAND/shared2/Pulsar/RetroRewind6/Ghosts/d6cac6a4`: its 4,544-byte `ldb.pul`
+identifies `GCN Baby Park` and has SHA-256
+`638186a678f60fea6e3c3b6bab03b8745059c57d4c47c21c4ba3dd989a3838f9`.
+The `150` directory contains both durable personal streams:
+
+- `2m31s465.rkg`, 368 bytes, SHA-256
+  `1858e595a7d79a8aa144a698e6dce144e7017b683eca621a14d5b77a21d19ff3`;
+- `17m13s562.rkg`, 460 bytes, SHA-256
+  `3f0b33ecd602601b69fbdf0711941b09884a0ed740047d8ea8657f6748946571`.
+
+The app was force-stopped and relaunched through the production chooser as a
+new process. The Pulsar database and both RKGs remained present with the exact
+hashes above. A controller-navigation attempt reached the correct Baby Park
+packaged-ghost card, but a reconnect modal and repeated virtual D-pad input
+prevented a clean capture of the personal `Select Ghost` replay path. Durable
+custom-track record storage is therefore proven; visible cold personal-replay
+selection remains open.
+
 ## Honest classification
 
 **Pass for production-profile Retro Rewind controller discovery, menu input,
@@ -122,5 +161,7 @@ live analog gameplay, normal disconnect/reconnect handling, complete race and
 results presentation, post-results save mutation, and byte-stable
 controller-attached cold relaunch.** It is not physical-controller, physical-
 device, tactile-rumble, audible-quality, sustained-performance, trustworthy-
-timing, personal-record/ghost persistence, or release acceptance. No APK, AAB, game data,
-save, trace, console, or screenshot was published.
+timing, visible cold personal-replay selection, or release acceptance. Durable
+Retro custom-track personal-record/ghost storage across a production-path cold
+relaunch now passes. No APK, AAB, game data, save, trace, console, or screenshot
+was published.

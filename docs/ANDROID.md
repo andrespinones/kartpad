@@ -42,10 +42,14 @@ validates the installed pack and presents side-by-side Original/Retro choices
 before SDL starts; both paths reach their distinct titles through the visible
 chooser. A virtual-controller-driven Retro Rewind Time Trial now reaches its
 ordinary result flow and persists a CRC-valid save mutation across a cold
-production-chooser relaunch. That deliberately slow run did not set a personal
-record or retain a personal ghost, so a faster record/save/reload proof,
-general fresh-NAND handling, touch parity, and physical-device acceptance
-remain open.
+production-chooser relaunch. A second feedback-driven run finished in
+`02:31.465`; Retro Rewind wrote it as a course-scoped `2m31s465.rkg` beside the
+earlier `17m13s562.rkg` and updated Baby Park's `ldb.pul`. Those Pulsar files
+survived a force-stop and production-chooser cold relaunch. Retro custom-track
+records are not represented by the base game's 32-slot RKSYS ghost bitfield,
+which explains the earlier false negative. A visible cold replay from the
+personal-ghost browser, general fresh-NAND handling, touch parity, and
+physical-device acceptance remain open.
 
 The first independent A3 source slice extracted archive member-path validation
 into `runtime/src/retro_rewind/archive_path.cpp`. The existing iOS/tvOS installer

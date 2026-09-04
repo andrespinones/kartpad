@@ -2901,3 +2901,29 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   first diagnose the offline replay-to-live-player divergence. All temporary
   RKG and trace markers were removed, and the visible emulator was left at the
   clean production chooser.
+
+## 2026-09-04 — Android A3 Retro Rewind fast live record and storage correction
+
+- Returned to the visible API 36 ARM64 emulator and drove GCN Baby Park with
+  the Android InputReader-visible virtual Xbox controller. A revised bounded
+  feedback driver completed the live run at finish stage 4 in `02:31.465`, with
+  three valid recorded lap splits and no guest-memory or finish-state writes.
+- The result flow displayed `A ghost has been created for KartPad!` and placed
+  `02:31.465` ahead of the prior `17:13.562` result. Advancing results changed
+  the redirected RKSYS from `7279ad4d...` to CRC-valid `9c6c7b52...`; its 11
+  changed bytes were still ordinary statistics plus the core CRC, with a zero
+  base-game personal-ghost bitfield.
+- Corrected the interpretation by inspecting Retro Rewind's Pulsar storage.
+  Course key `d6cac6a4` identifies GCN Baby Park, and its separate custom-track
+  database now contains `150/2m31s465.rkg` beside the earlier retained
+  `150/17m13s562.rkg`. The updated 4,544-byte `ldb.pul` names GCN Baby Park.
+  These files survived force-stop and a new process launched through the
+  production chooser; the base game's 32-slot RKSYS fields are not the source
+  of truth for Retro's expanded course set.
+- Classification: **Pass for repeatable ordinary-controller completion and
+  durable Retro custom-track ghost storage across cold relaunch.** A fully
+  visible cold selection/replay of the personal ghost remains open, as do
+  trustworthy timing, physical controller/audio/rumble, physical hardware,
+  and release acceptance. The emulator was left visibly running at the clean
+  production chooser; no APK, AAB, game data, save, trace, or screenshot was
+  published.
