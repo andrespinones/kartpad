@@ -661,6 +661,7 @@ narrower performance, audio, motion, and controller refinements can continue.
 | [`docs/STATUS.md`](docs/STATUS.md) | Accepted evidence, current risks, and honest open work |
 | [`docs/PERF.md`](docs/PERF.md) | Performance measurement contract and acceptance gates |
 | [`docs/KNOWN-ISSUES.md`](docs/KNOWN-ISSUES.md) | Known limitations and current workarounds |
+| [`docs/TECH-DEBT.md`](docs/TECH-DEBT.md) | Maintainer-owned follow-ups and the evidence required before they can ship |
 | [`docs/IOS-THREE-DOT-MENU-FIX.md`](docs/IOS-THREE-DOT-MENU-FIX.md) | Reusable UIKit menu appearance, lifecycle repair, and validation checklist |
 | [`docs/FUTURE-FEATURES.md`](docs/FUTURE-FEATURES.md) | Researched but deferred product features, beginning with RetroAchievements |
 | [`docs/releases/NEXT.md`](docs/releases/NEXT.md) | Living Preview 5 validation and publication record |
