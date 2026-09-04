@@ -16,6 +16,14 @@ plus shared aspect-state synchronization. Physical testing of the exact tvOS
 artifact remains open, so A12 compatibility and supported Apple TV operation
 are not claimed.
 
+The Issue #17 reporter accepted the exact public `v0.4.1` tvOS storage hotfix on
+an Apple TV 4K (3rd generation) running tvOS 26.5/26.6. Config writes no longer
+raise error 513, both profiles launch, NAND/save and settings changes survive a
+normal relaunch, and the cache-root backup script succeeds. This resolves the
+reported storage defect without establishing the still-open 0.4.2, A12,
+sleep/wake, restore, multi-controller, purge-recovery, or sustained-performance
+gates.
+
 The `codex/iphone-touch-layout-editor` candidate captures the maintainer's
 current physical-iPhone control positions as the default for untouched iPhone
 installs only. Existing custom layouts and every iPad layout remain unchanged.
