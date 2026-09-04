@@ -1,6 +1,6 @@
 # KartPad status
 
-Updated: 2026-09-03
+Updated: 2026-09-04
 
 ## Native Android work
 
@@ -25,7 +25,9 @@ platform, dependency, symbol, privacy, and private-data audit. An external Apple
 TV 4K (3rd generation) run on tvOS 26.5/26.6 accepted playable Original and
 Retro Rewind video, audio, menus, and Extended Gamepad input after moving the
 runtime from unwritable Application Support to Caches. The `v0.4.1` tvOS-only
-hotfix incorporates that path correction; exact public-artifact retesting,
+hotfix incorporates that path correction. The 0.4.2 candidate adds a generic
+compiler baseline, explicitly disables RCpc instructions, and rejects those
+instructions during final-binary audit; exact public-artifact retesting,
 save recovery, sleep/wake, multi-controller, and sustained performance remain
 open. Apple TV support is therefore still experimental. The candidate includes
 an original three-layer tvOS icon and Top Shelf image compiled into its audited
@@ -35,6 +37,16 @@ gate are in
 [`docs/TVOS.md`](TVOS.md).
 
 ## Current goal
+
+**0.4.2 is in release validation.** It refreshes the accepted iPhone/iPad path
+as app 0.4.2 build 16 and the experimental tvOS path as app 0.4.2 build 5. The
+shared mobile runtime now reports the host-selected aspect mode through the
+guest system configuration. tvOS additionally uses a generic AArch64 compiler
+baseline with RCpc disabled and a fail-closed final-binary instruction audit.
+The release does not add tvOS Settings UI, controller rumble, or multichannel
+audio, and it does not claim physical A12 acceptance. Exact merged-source
+builds, deterministic packages, publication, and hosted verification remain
+release gates.
 
 **0.4.1 tvOS storage hotfix is published.** The `v0.4.1` tag dereferences to
 source commit `d0e77d5c9bc48a7f1f6aaedf79fd00d5e616dc0c`. Its tvOS app 0.4.1

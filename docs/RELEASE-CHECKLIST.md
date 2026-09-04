@@ -19,6 +19,20 @@ The exact 67-row matrix in `docs/PRD.md` remains the authority for full
 engineering completion. A community preview may ship with narrower, explicit
 limitations when its exact artifact passes every preview gate below.
 
+## 0.4.2 maintenance candidate
+
+- [x] Preserve the accepted iPhone/iPad product and tvOS controller/launch flow
+- [x] Make guest aspect state follow the existing mobile host selection
+- [x] Use the generic tvOS CPU baseline with RCpc explicitly disabled
+- [x] Fail closed if Xcode drops the compiler forwarding sequence or the final
+      tvOS executable contains an RCpc load instruction
+- [ ] Build and audit exact merged-source iOS 0.4.2 build 16 and tvOS build 5
+- [ ] Package both IPAs twice byte-identically and pass fresh extraction audits
+- [ ] Publish the stable tag, both IPAs, and `SHA256SUMS`
+- [ ] Verify fresh hosted downloads byte-for-byte and re-audit them
+- [ ] Receive physical acceptance for the exact tvOS artifact before claiming
+      A12 compatibility or supported Apple TV functionality
+
 ## 0.4.1 tvOS storage hotfix candidate
 
 - [x] Redirect tvOS config, NAND, saves, and logs from Application Support to Caches

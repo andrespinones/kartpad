@@ -107,9 +107,9 @@ The default release model is:
 
 A public prebuilt `.app` or `.ipa` is a separate legal and provenance gate. Do not describe one as releasable merely because a package audit finds no ISO file.
 
-**Current preview decision:** the maintainer separately authorized the free
-unsigned `v0.4.0` iPhone/iPad community IPA and the tvOS-only `v0.4.1` storage
-hotfix IPA under the narrow, unresolved-rights boundary in
+**Current community-release decision:** the maintainer separately authorized
+the free unsigned `v0.4.2` iPhone/iPad community IPA and experimental tvOS IPA
+under the narrow, unresolved-rights boundary in
 `RIGHTS_AND_LICENSES.md`. The tvOS artifact remains an experimental
 hardware-bring-up build pending exact-artifact reporter acceptance. This
 decision does not mark the full PRD matrix complete or authorize paid or

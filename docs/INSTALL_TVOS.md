@@ -1,13 +1,12 @@
 # Install the experimental KartPad Apple TV build
 
-KartPad `v0.4.1` is a tvOS-only storage hotfix with an unsigned ARM64 IPA for
-hardware bring-up. A reporter's equivalent cache-root build reached playable
-Original Mario Kart Wii and Retro Rewind on Apple TV 4K hardware. The exact
-public hotfix still needs tester acceptance, so treat it as an experimental
-build, not supported Apple TV functionality.
+KartPad `v0.4.2` includes an unsigned ARM64 tvOS IPA for hardware bring-up. It
+carries forward the cache-root storage correction and adds a generic compiler
+baseline with RCpc instructions disabled and audited out of the final binary.
+Treat it as an experimental build, not supported Apple TV functionality.
 
-1. Download `KartPad-v0.4.1-tvos-unsigned.ipa` and `SHA256SUMS` from
-   the [0.4.1 release](https://github.com/chrissotraidis/kartpad/releases/tag/v0.4.1)
+1. Download `KartPad-v0.4.2-tvos-unsigned.ipa` and `SHA256SUMS` from
+   the [0.4.2 release](https://github.com/chrissotraidis/kartpad/releases/tag/v0.4.2)
    and verify the checksum.
 2. Re-sign the IPA with your own Apple development identity and bundle
    identifier, then install it on a paired Apple TV through Xcode or a
