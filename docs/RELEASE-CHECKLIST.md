@@ -26,12 +26,22 @@ limitations when its exact artifact passes every preview gate below.
 - [x] Use the generic tvOS CPU baseline with RCpc explicitly disabled
 - [x] Fail closed if Xcode drops the compiler forwarding sequence or the final
       tvOS executable contains an RCpc load instruction
-- [ ] Build and audit exact merged-source iOS 0.4.2 build 16 and tvOS build 5
-- [ ] Package both IPAs twice byte-identically and pass fresh extraction audits
-- [ ] Publish the stable tag, both IPAs, and `SHA256SUMS`
-- [ ] Verify fresh hosted downloads byte-for-byte and re-audit them
+- [x] Build and audit exact merged-source iOS 0.4.2 build 16 and tvOS build 5
+- [x] Package both IPAs twice byte-identically and pass fresh extraction audits
+- [x] Publish the stable tag, both IPAs, and `SHA256SUMS`
+- [x] Verify fresh hosted downloads byte-for-byte and re-audit them
 - [ ] Receive physical acceptance for the exact tvOS artifact before claiming
       A12 compatibility or supported Apple TV functionality
+
+Published source: `776a2a6a0e367b6d06f627c983f5da4a565ea104`.
+iPhone/iPad executable SHA-256:
+`fc9801af64251af68431ca04ce73c76d397cfff4d478c55c66c708cb86fcf704`.
+iPhone/iPad IPA SHA-256:
+`4c498de9a858bf9d59e6f082ebbe7a34e64935831601dc0981de42be8a8d473e`.
+tvOS executable SHA-256:
+`ceea40f50dd06d7a1ec7d37ee84cb620a5af74ec885cfb25babc9792583c0f30`.
+tvOS IPA SHA-256:
+`0802f7e572da3df9b8daf5b09b45717584fad33c07d8be4ba5c6d8fadceaab3f`.
 
 ## 0.4.1 tvOS storage hotfix candidate
 

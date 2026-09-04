@@ -2,16 +2,19 @@
 
 ## Current state
 
-KartPad `v0.4.0` is published as the second stable community release from
-`369159153bef0d045edf5cc1cf3b1b444b36a284`. The iPhone/iPad app 0.4.0 build
-15 IPA has SHA-256
-`af80c2bc6fcabdb4eee84aed05254eccef76d7e6bbf83f2c7f21101168c665c8`;
-the experimental tvOS app 0.4.0 build 3 IPA has SHA-256
-`9ee2a9b05bff56261d4d4986eca54840e98ade8ae0abd3ac623c1f2393dcf5cc`.
+KartPad `v0.4.2` is published as the latest stable community release from
+`776a2a6a0e367b6d06f627c983f5da4a565ea104`. The iPhone/iPad app 0.4.2 build
+16 IPA has SHA-256
+`4c498de9a858bf9d59e6f082ebbe7a34e64935831601dc0981de42be8a8d473e`;
+the experimental tvOS app 0.4.2 build 5 IPA has SHA-256
+`0802f7e572da3df9b8daf5b09b45717584fad33c07d8be4ba5c6d8fadceaab3f`.
 Both exact-main builds and two independent packages per platform pass. Fresh
-anonymous downloads match the local bytes, checksums, provenance, and audits.
-GitHub marks this non-prerelease as **Latest**. Physical Apple TV acceptance
-remains open.
+hosted downloads match the local bytes, checksums, provenance, and audits.
+The release keeps iPhone/iPad as the accepted community path and carries the
+tvOS cache-root fix, generic AArch64 baseline, RCpc exclusion and binary audit,
+plus shared aspect-state synchronization. Physical testing of the exact tvOS
+artifact remains open, so A12 compatibility and supported Apple TV operation
+are not claimed.
 
 The `codex/iphone-touch-layout-editor` candidate captures the maintainer's
 current physical-iPhone control positions as the default for untouched iPhone
@@ -95,7 +98,7 @@ not block offline Retro Rewind support.
 1. Begin Android A0 on the authorized second machine using
    `docs/ANDROID-GOAL-LOOP.md`: bootstrap pinned tools and prove the source-only
    ARM64 SDL/JNI/Vulkan fixture before private game integration.
-2. Collect the first physical Apple TV report against `v0.4.0` using
+2. Collect a physical Apple TV report against the exact `v0.4.2` asset using
    `docs/TVOS-TESTING.md`.
 3. Await the Issue #1 Feather-signed iPad import retest and the Issue #5 MacBook
    Air cursor/settings retest requested against Preview 5.

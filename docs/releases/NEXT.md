@@ -34,11 +34,20 @@ saves. Version 0.4.2 does not alter those host paths.
 
 ## Release gates
 
-- [ ] Merge and verify the complete release source on `main`.
-- [ ] Rebuild exact merged source as iOS 0.4.2 build 16 and tvOS build 5.
-- [ ] Pass full tests, source/safety checks, patch verification, and app audits.
-- [ ] Package each IPA twice deterministically and compare bytes.
-- [ ] Audit exact IPAs and embedded provenance/notices.
-- [ ] Tag the audited source and publish both IPAs plus `SHA256SUMS`.
-- [ ] Download hosted assets, byte-compare, checksum-verify, and re-audit.
-- [ ] Verify remote `main` and the dereferenced tag.
+- [x] Merge and verify the complete release source on `main`.
+- [x] Rebuild exact merged source as iOS 0.4.2 build 16 and tvOS build 5.
+- [x] Pass full tests, source/safety checks, patch verification, and app audits.
+- [x] Package each IPA twice deterministically and compare bytes.
+- [x] Audit exact IPAs and embedded provenance/notices.
+- [x] Tag the audited source and publish both IPAs plus `SHA256SUMS`.
+- [x] Download hosted assets, byte-compare, checksum-verify, and re-audit.
+- [x] Verify remote `main` and the dereferenced tag.
+
+Published source: `776a2a6a0e367b6d06f627c983f5da4a565ea104`.
+iPhone/iPad IPA SHA-256:
+`4c498de9a858bf9d59e6f082ebbe7a34e64935831601dc0981de42be8a8d473e`.
+Experimental tvOS IPA SHA-256:
+`0802f7e572da3df9b8daf5b09b45717584fad33c07d8be4ba5c6d8fadceaab3f`.
+
+Physical acceptance of the exact tvOS release remains open and is required
+before any A12 compatibility or supported Apple TV claim.
