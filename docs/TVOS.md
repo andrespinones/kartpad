@@ -7,15 +7,17 @@ path. An external Apple TV 4K (3rd generation) tester reached playable Original
 Mario Kart Wii and Retro Rewind on tvOS 26.5/26.6 with an Extended Gamepad, but
 the public `v0.4.0` build could not write config, NAND, saves, or logs under
 Application Support. The `v0.4.1` hotfix moves all filesystem-backed tvOS state
-to Caches, matching the successful physical workaround. Until the remaining
-physical acceptance matrix passes on the exact hotfix artifact, the correct
+to Caches, matching the successful physical workaround. The 0.4.2 candidate
+also uses a generic compiler baseline, disables RCpc instructions, and rejects
+them during final-binary audit. Until the remaining physical acceptance matrix
+passes on an exact public artifact, the correct
 claim is **public experimental tvOS build**, not supported Apple TV
 functionality.
 
 This implementation starts from KartPad `main`, the project's pinned upstream
-sources, and Apple/SDL platform contracts. It does not incorporate code from
-pull request #7. That pull request remains useful feasibility evidence, but its
-patch is not the implementation source for this branch.
+sources, and Apple/SDL platform contracts. External pull requests remain useful
+feasibility evidence, but the shipped implementation and acceptance gates are
+maintainer-owned.
 
 ## First candidate scope
 
