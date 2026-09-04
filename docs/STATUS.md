@@ -495,6 +495,24 @@ than a proven save/settings defect. Full first-run license creation is still
 open, and the controller-race fixture conclusion is unchanged. Evidence:
 [`docs/artifacts/2026-09-04/android/a3-retro-replay-isolation.md`](artifacts/2026-09-04/android/a3-retro-replay-isolation.md).
 
+Explicit Original to Retro Rewind to Original switching then reproduced the
+previously intermittent Mii exit once across eight observed pre-fix Original
+launches (six base-only controls and two within the switch sequence). The crash
+record showed an alarm callback had overwritten the
+interrupted translated caller's callee-saved r30 heap pointer. RFL alarm
+polling now runs callbacks against a private interrupt register context while
+briefly suppressing guest scheduler switching. The patched build passed ten of
+ten Original cold launches and a visible-emulator Original/Retro/Original
+sequence; the final Original process continued through the title attract
+sequence, both saves retained their exact hashes, and no new missing-target
+record appeared. Fresh patch reproduction, Apple arm64 compilation, and the
+strict package/privacy audit pass for local APK SHA-256
+`2ba4b4acf7a395c3d810ff81c0327ad15f9bfbbcbcd76da026ec37444ff7b7d2`.
+This closes the reproduced callback corruption and bounded emulator switch,
+not the production chooser, controller-driven Retro race/save, trustworthy
+timing, physical controller/audio/rumble, hardware, or release gates. Evidence:
+[`docs/artifacts/2026-09-04/android/a3-rfl-alarm-context.md`](artifacts/2026-09-04/android/a3-rfl-alarm-context.md).
+
 ## Native tvOS work
 
 The maintainer-owned `codex/tvos-retro-rewind` branch contains the first

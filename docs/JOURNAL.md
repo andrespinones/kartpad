@@ -2775,3 +2775,28 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   do not prove a missing-save, settings, leaderboard, or Mii-manager defect.
   Full first-run license creation remains open. No private file or diagnostic
   APK was committed or published.
+
+## 2026-09-04 — Android A3 RFL alarm context isolation
+
+- Explicit Original to Retro Rewind to Original switching reproduced the
+  intermittent Mii initialization exit once across eight observed pre-fix
+  Original launches: six base-only controls and two within the switch sequence.
+  The private crash record showed r30 changed from the
+  expected guest heap pointer to a callback result before the second allocation.
+- Root cause was RFL alarm polling executing guest callbacks against the live
+  translated caller register file. The override now uses a private interrupt
+  context and suppresses guest scheduler switching only while pumping the
+  bounded alarm queue.
+- Ten of ten patched Original cold launches remained alive after 28 seconds. A
+  subsequent visible-emulator Original/Retro/Original sequence passed beyond
+  35/35/40 seconds, retained both exact save hashes, and produced no new
+  missing-target record.
+- Fresh Android preparation reproduced the source, the affected Apple arm64
+  runtime object compiled, and the strict package/privacy audit passed for the
+  local-only APK at SHA-256
+  `2ba4b4acf7a395c3d810ff81c0327ad15f9bfbbcbcd76da026ec37444ff7b7d2`.
+- Classification: **Pass for the diagnosed callback corruption and bounded
+  emulator mode switch.** Controller-driven Retro race/save, trustworthy
+  timing, production mode selection, physical controller/audio/rumble,
+  physical hardware, and release acceptance remain open. No private input or
+  binary was committed or published.
