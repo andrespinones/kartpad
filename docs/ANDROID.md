@@ -20,9 +20,11 @@
   versioned public resources plus Context-derived app-private config/cache/
   NAND paths. Its SDL controller bridge now also fails neutral and stops rumble
   across Android surface loss/backgrounding, survives virtual hotplug/reconnect,
-  and accepts short controller presses after a controller-attached cold launch.
-  Continue A2 with a complete controller-driven race/save; keep emulator and
-  physical-device claims separate.
+  accepts short controller presses after a controller-attached cold launch,
+  and completes a three-lap controller-driven emulator race with a durable
+  ghost that reloads after force-stop/relaunch. Continue A2 on a real
+  controller and physical Android device; keep emulator and physical-device
+  claims separate.
 
 KartPad can be ported to Android without changing its defining architecture.
 The Android build should contain the same ahead-of-time translated Original
@@ -790,14 +792,11 @@ AArch64 scheduler/register stress pass on both pinned AVDs. A2's private
 29,065-function Original runtime compiles, links, and packages through Gradle.
 Its exact public resources install before SDL loads, and a cleared API 36
 launch reaches translated constructors and Vulkan using only app-private
-config/cache/NAND paths before the expected missing-DVD failure. Continue A2 by
-staging the validated ignored DATA directory outside the APK and setting its
-app-private path. One content-free trace feedback run now proves a complete
-three-lap emulator player race and retail results through ordinary Android key
-events without guest-state writes. Next reproduce post-race save creation and
-controller input after cold relaunch, then use the Aurora-to-Classic SDL
-controller bridge to repeat the complete race without weakening the package
-privacy boundary. The bridge's deterministic source-only contract passes on
+config/cache/NAND paths before the expected missing-DVD failure. Validated
+ignored DATA staged outside the APK now boots the complete game. One content-
+free trace feedback run first proved a complete three-lap emulator player race
+and retail results through ordinary Android key events without guest-state
+writes. The bridge's deterministic source-only contract passes on
 both page-size lanes, and Android `WPADControlMotor` routes Start/Stop output
 to the same resolved SDL pad. A temporary emulator virtual gamepad now proves
 Android InputReader/SDL discovery, mapped button and analog input, disconnect,
@@ -805,8 +804,12 @@ reconnect, and same-PID HOT background/foreground behavior. That test exposed
 and fixed ART CheckJNI aborts caused by Java-backed SDL polling from switched
 Wii guest-fiber stacks; Android polling is now scheduler-stack-only and KPAD
 reads cached event state. The earlier cold-title input observation was a
-cadence false alarm. Continue with a natural controller-driven complete race,
-post-race save/relaunch, and physical Bluetooth/USB controller plus rumble;
+cadence false alarm. The same exact APK now also completes a three-lap
+controller-driven N64 Mario Raceway run at `04:28.063`, saves the KartPad
+ghost, retains the changed save hash across a controller-attached force-stop
+and cold launch, and visibly reloads the record. Continue with a physical
+Bluetooth/USB controller plus tactile rumble, audible-output confirmation,
+performance acceptance, and the complete run on physical Android hardware;
 the emulator virtual pad is not physical acceptance. Do not repeat the
 rejected retail-KPAD RKG replay unchanged: even
 the exact Baby Mario / Nanobike / Manual staff configuration diverged by guest

@@ -2052,3 +2052,37 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   every physical-controller/device row.** No APK/AAB or private data was
   published. Evidence:
   `docs/artifacts/2026-09-03/android/a2-controller-cold-relaunch.md`.
+
+## 2026-09-04 — Android A2 complete controller race and durable ghost
+
+- Reused the exact local-only cold-input APK, SHA-256
+  `2c11450996f33a35ba3aa85dcf16c1c467bf6fd4a0943edef966557639d7a6e7`,
+  with validated ignored RMCP01 data and an isolated all-cups save in the API
+  36 ARM64 emulator sandbox.
+- Kept the temporary Xbox-compatible `/dev/uinput` device on Android's real
+  InputReader/SDL/Aurora/Classic/KPAD path. A host feedback loop read only the
+  opt-in content-free state trace and emitted ordinary controller analog and
+  button events; it never wrote guest state or forced completion.
+- Mario / Standard Kart M / Automatic completed all three N64 Mario Raceway
+  laps at `04:28.063` (`01:23.445`, `01:19.112`, `01:45.506`). The trace moved
+  from stage 2 to stage 4 at race timer tick `16308`, and retail results stated
+  `Saved ghost data for KartPad!`.
+- The save changed from pre-race SHA-256
+  `40f5d5ae5ad93c39253559628a34359aa4627ebdc1b04605327cf2c59a5ff7e1`
+  to `23c15850daace1587661aa07a99f08e450313963b469e683f13ae5dc0d6af005`.
+  A force-stop/controller-attached cold launch retained the post-race hash,
+  logged controller channel 0 connected on new PID `10983`, and displayed the
+  `04:28.063` KartPad ghost in the course list and ghost chooser.
+- The accepted run began fresh at a temporary 1280x720 AVD override after the
+  original 2400x1080 surface proved too slow for a practical feedback run. The
+  override, marker, live trace, controller, app, shared exports, and emulator
+  were all cleaned up. An earlier `-wipe-data` mistake affected only the
+  disposable AVD sandbox; independent private inputs and the isolated fixture
+  were restaged, and no tracked, published, physical-device, or maintainer save
+  was affected.
+- Classification: **Pass for a complete controller-driven emulator race,
+  results, ghost save, cold relaunch, and visible saved-result reload; open for
+  physical controller/rumble, audible-output confirmation, performance, and
+  physical Android hardware.** No APK/AAB or private data was published.
+  Evidence:
+  `docs/artifacts/2026-09-04/android/a2-controller-complete-race-save.md`.

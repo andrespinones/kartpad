@@ -1,6 +1,6 @@
 # KartPad status
 
-Updated: 2026-09-03
+Updated: 2026-09-04
 
 ## Native Android work
 
@@ -191,6 +191,23 @@ controller-after-cold-launch navigation, not a complete controller race/save,
 physical controller, tactile rumble, audible output, performance, or physical
 Android acceptance. A2 remains open. Evidence:
 [`docs/artifacts/2026-09-03/android/a2-controller-cold-relaunch.md`](artifacts/2026-09-03/android/a2-controller-cold-relaunch.md).
+
+The exact same APK now also passes the complete controller-driven emulator
+race/save/relaunch gate. An InputReader/SDL virtual controller selected the
+Time Trial configuration and supplied every race acceleration and analog-
+steering input while a content-free state trace provided feedback only. Mario
+finished all three N64 Mario Raceway laps at `04:28.063`; the retail results
+screen reported `Saved ghost data for KartPad!`, and the trace transitioned
+from race stage 2 to results stage 4. The isolated save changed from SHA-256
+`40f5d5ae5ad93c39253559628a34359aa4627ebdc1b04605327cf2c59a5ff7e1`
+to `23c15850daace1587661aa07a99f08e450313963b469e683f13ae5dc0d6af005`.
+After a force-stop and controller-attached cold launch, the save retained that
+exact hash, the new process logged controller channel 0 connected, and both the
+course list and ghost chooser displayed KartPad's `04:28.063` record. This
+closes the emulator controller race/results/save/relaunch slice, not physical
+controller, rumble, audible output, performance, or physical-device
+acceptance. A2 remains open. Evidence:
+[`docs/artifacts/2026-09-04/android/a2-controller-complete-race-save.md`](artifacts/2026-09-04/android/a2-controller-complete-race-save.md).
 
 ## Native tvOS work
 

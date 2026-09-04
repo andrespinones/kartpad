@@ -106,8 +106,12 @@ not block offline Retro Rewind support.
    startup exposed deferred SDL polling and short-edge collapse; scheduler-
    fiber handoff plus a one-snapshot press latch now let exact uninstrumented
    250 ms taps advance cold title/intro, Select License, and Main Menu.
-   Controller-after-relaunch is therefore green on the emulator, while a
-   complete controller-driven race and post-race save/relaunch remain open.
+   Controller-after-relaunch is therefore green on the emulator. The same
+   exact APK subsequently completed all three N64 Mario Raceway laps through
+   Android's virtual InputReader/SDL controller path at `04:28.063`, reached
+   results, saved the KartPad ghost, retained the changed save hash across a
+   force-stop/cold launch with the controller attached, and visibly reloaded
+   that result.
    Aurora's discovered
    SDL pads now feed the Android Classic/KPAD path through a deterministic
    mapping contract, and `WPADControlMotor` now reaches that same resolved pad
@@ -119,9 +123,10 @@ not block offline Retro Rewind support.
    lifecycle behavior now pass on the emulator; tactile output and all physical
    controller/device behavior remain unaccepted. A
    temporary exact-configuration retail-KPAD RKG replay also diverged by guest
-   time 8.580 and was removed; do not repeat it unchanged. Establish a complete
-   reproducible post-race save/relaunch, then repeat the complete race with a
-   real controller and physical Android hardware. Evidence
+   time 8.580 and was removed; do not repeat it unchanged. Repeat the complete
+   race with a real controller and physical Android hardware, verify tactile
+   rumble and audible output there, and retain emulator performance as a
+   separate non-acceptance observation. Evidence
    is in `docs/artifacts/2026-09-03/android/a2-emulator-boot-lifecycle.md` and
    `docs/artifacts/2026-09-03/android/a2-debug-input-replay.md`, plus
    `docs/artifacts/2026-09-03/android/a2-keyboard-steer-diagnostic.md` and
@@ -130,8 +135,9 @@ not block offline Retro Rewind support.
    `docs/artifacts/2026-09-03/android/a2-controller-lifecycle.md`, plus
    `docs/artifacts/2026-09-03/android/a2-state-trace-player-race.md`, plus
    `docs/artifacts/2026-09-03/android/a2-virtual-controller-hotplug.md`, plus
-   `docs/artifacts/2026-09-03/android/a2-controller-cold-relaunch.md`. A2
-   remains open.
+   `docs/artifacts/2026-09-03/android/a2-controller-cold-relaunch.md`, plus
+   `docs/artifacts/2026-09-04/android/a2-controller-complete-race-save.md`.
+   A2 remains open.
 2. Collect the first physical Apple TV report against `v0.4.0` using
    `docs/TVOS-TESTING.md`.
 3. Await the Issue #1 Feather-signed iPad import retest and the Issue #5 MacBook
