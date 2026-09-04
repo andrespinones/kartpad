@@ -1,7 +1,7 @@
 diff --git a/cmake/PublicProducts.cmake b/cmake/PublicProducts.cmake
 --- a/cmake/PublicProducts.cmake
 +++ b/cmake/PublicProducts.cmake
-@@ -276,6 +276,59 @@ if(MKW_HAVE_RETRO_REWIND)
+@@ -276,6 +276,60 @@ if(MKW_HAVE_RETRO_REWIND)
      if(MKW_RETRO_BLOB_OBJECTS)
          target_sources(RetroRewind PRIVATE ${MKW_RETRO_BLOB_OBJECTS})
      endif()
@@ -13,7 +13,8 @@ diff --git a/cmake/PublicProducts.cmake b/cmake/PublicProducts.cmake
 +            "${MKW_KARTPAD_REPO_ROOT}/runtime/include")
 +        target_link_libraries(RetroRewind PRIVATE
 +            "-framework AppKit" "-framework UniformTypeIdentifiers"
-+            "-framework IOBluetooth" "-framework IOKit")
++            "-framework IOBluetooth" "-framework IOKit"
++            "-framework CoreBluetooth")
 +    endif()
 +    if(CMAKE_SYSTEM_NAME STREQUAL "iOS" AND
 +       DEFINED MKW_KARTPAD_MOBILE_SOURCES AND MKW_KARTPAD_MOBILE_SOURCES)

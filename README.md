@@ -196,6 +196,31 @@ and long-session behavior still require reporter hardware acceptance. iPhone
 and iPad show the experimental control entry for clarity, but iOS/iPadOS do not
 provide the required direct Wii Remote HID pairing path.
 
+### Connect Switch 2 Joy-Con 2 controllers on macOS
+
+The macOS build also has an opt-in **Controls → Experimental Joy-Con 2
+(Switch 2)** path for Nintendo Switch 2 Joy-Con 2 (L), Joy-Con 2 (R), and Pro
+Controller 2 hardware. macOS does not expose these controllers as HID devices,
+so KartPad talks to them directly over Bluetooth LE with CoreBluetooth and
+publishes each one as its own SDL virtual gamepad. No kernel extension,
+DriverKit driver, or SIP change is involved.
+
+Each Joy-Con 2 is an independent player held sideways with SL/SR at the top,
+so two Joy-Con 2 halves give two local players. Open **Controls → Connect
+Joy-Con 2…**, hold `SYNC` on each Joy-Con until its LEDs run back and forth,
+and wait for the panel to report `Connected as Player N`. The player LEDs
+follow KartPad's port assignment. Choose the **Joy-Con 2 Sideways
+(Experimental)** preset in Controller Settings for each player: the bottom face
+button accelerates, the right one brakes, SL/SR are L/R, the rail bumper is a
+trick button, and Plus/Capture pauses.
+
+KartPad stores this Mac's Bluetooth address on the Joy-Con so a later button
+press reconnects without `SYNC`. A Joy-Con still paired to a Switch 2 is
+ignored until you hold `SYNC`; hold `SYNC` on the Switch 2 again to move it
+back. This bridge follows public reverse engineering of the Switch 2
+controller protocol and still needs reporter hardware acceptance for stick
+calibration, reconnect, and long-session behavior. Rumble is not implemented.
+
 ## Install or build
 
 ### Download the unsigned iPhone/iPad IPA
@@ -411,6 +436,8 @@ available without a separate controller:
   stages standard `.mii` records without replacing saves or game data.
 - **Experimental Wii hardware:** direct Wii Remote/Nunchuk pairing is available
   only in the macOS build; the iPhone/iPad entry explains that platform limit.
+- **Experimental Switch 2 hardware:** the macOS build can connect Joy-Con 2 and
+  Pro Controller 2 directly over Bluetooth LE, one sideways player per Joy-Con.
 
 KartPad's owning layer adds two actions ahead of SunPad's unchanged menu:
 
@@ -562,6 +589,14 @@ Nunchuk**, pair with the red SYNC button, attach the Nunchuk, and choose the
 experimental preset in Controller Settings. This direct Bluetooth path still
 needs wider testing with original Wii Remote hardware. It is not available on
 iPhone or iPad.
+
+### Can I use Switch 2 Joy-Con 2 controllers as two separate players?
+
+Experimentally, on macOS only. Enable **Controls → Experimental Joy-Con 2
+(Switch 2)**, hold `SYNC` on each Joy-Con 2, and pick the **Joy-Con 2 Sideways
+(Experimental)** preset for each player in Controller Settings. KartPad speaks
+the controllers' Bluetooth LE protocol directly, so no driver or SIP change is
+needed. It is not available on iPhone or iPad.
 
 ### Are Android or Apple TV supported?
 

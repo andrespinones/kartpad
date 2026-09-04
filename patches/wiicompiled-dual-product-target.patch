@@ -18,7 +18,7 @@ diff --git a/cmake/PublicProducts.cmake b/cmake/PublicProducts.cmake
 index 111d354..366d43e 100644
 --- a/cmake/PublicProducts.cmake
 +++ b/cmake/PublicProducts.cmake
-@@ -282,9 +282,80 @@ else()
+@@ -282,9 +282,81 @@ else()
      message(STATUS "RetroRewind target disabled (run translate-mod and emit-build-shards)")
  endif()
  
@@ -47,7 +47,8 @@ index 111d354..366d43e 100644
 +            "${MKW_KARTPAD_REPO_ROOT}/runtime/include")
 +        target_link_libraries(KartPadDual PRIVATE
 +            "-framework AppKit" "-framework UniformTypeIdentifiers"
-+            "-framework IOBluetooth" "-framework IOKit")
++            "-framework IOBluetooth" "-framework IOKit"
++            "-framework CoreBluetooth")
 +    endif()
 +    if(CMAKE_SYSTEM_NAME STREQUAL "iOS" AND
 +       DEFINED MKW_KARTPAD_MOBILE_SOURCES AND MKW_KARTPAD_MOBILE_SOURCES)

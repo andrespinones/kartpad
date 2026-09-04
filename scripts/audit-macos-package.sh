@@ -22,7 +22,7 @@ executable="${contents}/MacOS/${executable_name}"
 
 test "${bundle_identifier}" = "dev.kartpad.app"
 test "$(plutil -extract NSBluetoothAlwaysUsageDescription raw "${plist}")" = \
-  "KartPad uses Bluetooth to pair and connect an experimental Wii Remote and Nunchuk."
+  "KartPad uses Bluetooth to connect experimental Wii Remote, Nunchuk, and Nintendo Switch 2 Joy-Con 2 controllers."
 test -x "${executable}"
 test -f "${contents}/Resources/${icon_name%.icns}.icns"
 test -f "${contents}/MacOS/dsp_coef.bin"

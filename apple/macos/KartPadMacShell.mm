@@ -1,4 +1,5 @@
 #import "KartPadMacShell.h"
+#import "KartPadJoyCon2.h"
 #import "KartPadMiiManager.h"
 #import "KartPadWiimotePairing.h"
 
@@ -549,6 +550,46 @@ static NSString *DiagnosticsReport() {
   KartPadShowWiimotePairing();
 }
 
+- (void)toggleExperimentalJoyCon2:(NSMenuItem *)sender {
+  NSUserDefaults *defaults = NSUserDefaults.standardUserDefaults;
+  const BOOL enabled = ![defaults boolForKey:KartPadExperimentalJoyCon2DefaultsKey];
+  if (enabled) {
+    NSAlert *warning = [NSAlert new];
+    warning.messageText = @"Enable Experimental Joy-Con 2 Support?";
+    warning.informativeText =
+        @"KartPad will talk to Nintendo Switch 2 Joy-Con 2 and Pro Controller 2 hardware directly over Bluetooth LE. Each Joy-Con becomes its own sideways player. macOS will ask for Bluetooth permission the first time. This path is experimental and may change with controller firmware updates.";
+    [warning addButtonWithTitle:@"Enable and Connect"];
+    [warning addButtonWithTitle:@"Cancel"];
+    if ([warning runModal] != NSAlertFirstButtonReturn) return;
+  }
+  [defaults setBool:enabled forKey:KartPadExperimentalJoyCon2DefaultsKey];
+  sender.state = enabled ? NSControlStateValueOn : NSControlStateValueOff;
+  KartPadApplyExperimentalJoyCon2Preference();
+  if (enabled) KartPadShowJoyCon2Pairing();
+}
+
+- (void)pairJoyCon2:(id)sender {
+  (void)sender;
+  [NSUserDefaults.standardUserDefaults setBool:YES
+      forKey:KartPadExperimentalJoyCon2DefaultsKey];
+  for (NSMenuItem *item in [self controlsMenuItems]) {
+    if (item.action == @selector(toggleExperimentalJoyCon2:)) {
+      item.state = NSControlStateValueOn;
+    }
+  }
+  KartPadApplyExperimentalJoyCon2Preference();
+  KartPadShowJoyCon2Pairing();
+}
+
+- (NSArray<NSMenuItem *> *)controlsMenuItems {
+  for (NSMenuItem *item in NSApp.mainMenu.itemArray.firstObject.submenu.itemArray) {
+    if ([item.title isEqualToString:@"Controls"] && item.submenu != nil) {
+      return item.submenu.itemArray;
+    }
+  }
+  return @[];
+}
+
 - (void)showControllerSettings:(id)sender {
   (void)sender;
   [NSApp activateIgnoringOtherApps:YES];
@@ -1064,6 +1105,20 @@ static void InstallMenu() {
       keyEquivalent:@""];
   pairWiimote.target = Controller();
   [controlsMenu addItem:pairWiimote];
+  [controlsMenu addItem:NSMenuItem.separatorItem];
+  NSMenuItem *experimentalJoyCon2 = [[NSMenuItem alloc]
+      initWithTitle:@"Experimental Joy-Con 2 (Switch 2)"
+             action:@selector(toggleExperimentalJoyCon2:) keyEquivalent:@""];
+  experimentalJoyCon2.target = Controller();
+  experimentalJoyCon2.state = [NSUserDefaults.standardUserDefaults
+      boolForKey:KartPadExperimentalJoyCon2DefaultsKey]
+      ? NSControlStateValueOn : NSControlStateValueOff;
+  [controlsMenu addItem:experimentalJoyCon2];
+  NSMenuItem *pairJoyCon2 = [[NSMenuItem alloc]
+      initWithTitle:@"Connect Joy-Con 2…" action:@selector(pairJoyCon2:)
+      keyEquivalent:@""];
+  pairJoyCon2.target = Controller();
+  [controlsMenu addItem:pairJoyCon2];
   controlsMenuItem.submenu = controlsMenu;
   [appMenu insertItem:controlsMenuItem atIndex:insertIndex++];
 
@@ -1081,6 +1136,9 @@ void KartPadMacShellInstall(void) {
   dispatch_async(dispatch_get_main_queue(), ^{
     [NSApplication sharedApplication];
     InstallMenu();
+    // Runs once the main run loop is pumping, after Aurora has initialized
+    // SDL's joystick subsystem, so stored Joy-Con 2 pairings can attach.
+    KartPadApplyExperimentalJoyCon2Preference();
   });
 }
 

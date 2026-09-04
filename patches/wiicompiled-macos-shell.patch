@@ -1,7 +1,7 @@
 diff --git a/cmake/PublicProducts.cmake b/cmake/PublicProducts.cmake
 --- a/cmake/PublicProducts.cmake
 +++ b/cmake/PublicProducts.cmake
-@@ -267,6 +267,33 @@ if(TARGET mkw_base_sensitive)
+@@ -267,6 +267,37 @@ if(TARGET mkw_base_sensitive)
      target_sources(WiiCompiled PRIVATE $<TARGET_OBJECTS:mkw_base_sensitive>)
  endif()
 
@@ -11,9 +11,11 @@ diff --git a/cmake/PublicProducts.cmake b/cmake/PublicProducts.cmake
 +    set(MKW_KARTPAD_MACOS_DIR "${MKW_KARTPAD_REPO_ROOT}/apple/macos")
 +    set(MKW_KARTPAD_MACOS_SHELL "${MKW_KARTPAD_MACOS_DIR}/KartPadMacShell.mm")
 +    set(MKW_KARTPAD_WIIMOTE_PAIRING "${MKW_KARTPAD_MACOS_DIR}/KartPadWiimotePairing.mm")
++    set(MKW_KARTPAD_JOYCON2 "${MKW_KARTPAD_MACOS_DIR}/KartPadJoyCon2.mm")
 +    set(MKW_KARTPAD_MII_MANAGER "${MKW_KARTPAD_REPO_ROOT}/apple/shared/KartPadMiiManager.mm")
 +    set(MKW_KARTPAD_MACOS_SOURCES "${MKW_KARTPAD_MACOS_SHELL}"
-+        "${MKW_KARTPAD_WIIMOTE_PAIRING}" "${MKW_KARTPAD_MII_MANAGER}")
++        "${MKW_KARTPAD_WIIMOTE_PAIRING}" "${MKW_KARTPAD_JOYCON2}"
++        "${MKW_KARTPAD_MII_MANAGER}")
 +    if(NOT EXISTS "${MKW_KARTPAD_MACOS_SHELL}")
 +        message(FATAL_ERROR "Missing KartPad macOS shell: ${MKW_KARTPAD_MACOS_SHELL}")
 +    endif()
@@ -25,11 +27,13 @@ diff --git a/cmake/PublicProducts.cmake b/cmake/PublicProducts.cmake
 +        "${MKW_KARTPAD_MACOS_DIR}" "${MKW_KARTPAD_REPO_ROOT}/apple/shared"
 +        "${MKW_KARTPAD_REPO_ROOT}/runtime/include")
 +    set_source_files_properties("${MKW_KARTPAD_MACOS_SHELL}"
-+        "${MKW_KARTPAD_WIIMOTE_PAIRING}" "${MKW_KARTPAD_MII_MANAGER}"
++        "${MKW_KARTPAD_WIIMOTE_PAIRING}" "${MKW_KARTPAD_JOYCON2}"
++        "${MKW_KARTPAD_MII_MANAGER}"
 +        PROPERTIES COMPILE_OPTIONS "-fobjc-arc" SKIP_PRECOMPILE_HEADERS TRUE)
 +    target_link_libraries(WiiCompiled PRIVATE
 +        "-framework AppKit" "-framework UniformTypeIdentifiers"
-+        "-framework IOBluetooth" "-framework IOKit")
++        "-framework IOBluetooth" "-framework IOKit"
++        "-framework CoreBluetooth")
 +endif()
 +
  if(MKW_HAVE_RETRO_REWIND)

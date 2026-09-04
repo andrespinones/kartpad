@@ -1,0 +1,49 @@
+diff --git a/src/settings_overlay.cpp b/src/settings_overlay.cpp
+--- a/src/settings_overlay.cpp
++++ b/src/settings_overlay.cpp
+@@ -192,6 +192,23 @@
+     "back",          // Z: Minus
+     "unmapped",      // L: Nunchuk Z arrives on the left-trigger axis
+     "south",         // R: Wii Remote B / drift
++    "dpad_up", "dpad_down", "dpad_left", "dpad_right",
++};
++
++// One Switch 2 Joy-Con held sideways through KartPad's experimental Bluetooth
++// LE bridge. The bridge already rotates the face buttons by position, so the
++// bottom button accelerates and the right one brakes like a single Joy-Con on
++// Switch. SL/SR are the shoulders, the rail bumper (L or R) lands on D-pad Up
++// for tricks, and the rail trigger (ZL or ZR) is the right trigger.
++constexpr std::array<const char*, PAD_BUTTON_COUNT> kJoyCon2SidewaysPreset = {
++    "south",          // A: bottom face button
++    "east",           // B: right face button
++    "north",          // X: top face button
++    "west",           // Y: left face button
++    "start",          // Start: Plus (R) / Capture (L)
++    "back",           // Z: C (R) / Minus (L)
++    "left_shoulder",  // L: SL
++    "right_shoulder", // R: SR
+     "dpad_up", "dpad_down", "dpad_left", "dpad_right",
+ };
+ 
+@@ -509,6 +526,21 @@
+         PADSerializeMappings();
+         mappings = PADGetButtonMappings(port, &mappingCount);
+     }
++    if (ImGui::Button("Joy-Con 2 Sideways (Experimental)")) {
++        const uint32_t port = static_cast<uint32_t>(g_controllerPort);
++        for (size_t i = 0; i < kControllerButtons.size(); ++i) {
++            if (const NativeButtonItem* native = FindNativeButton(kJoyCon2SidewaysPreset[i])) {
++                PADSetButtonMapping(port,
++                    PADButtonMapping{native->nativeButton, kControllerButtons[i].padButton});
++                PADSetAltButtonMapping(port,
++                    PADButtonMapping{PAD_NATIVE_BUTTON_INVALID, kControllerButtons[i].padButton});
++                RuntimeConfigFile::SetControllerButton(i, kJoyCon2SidewaysPreset[i]);
++            }
++        }
++        altRowExpanded.fill(false);
++        PADSerializeMappings();
++        mappings = PADGetButtonMappings(port, &mappingCount);
++    }
+ 
+     ImGui::SeparatorText("Button mapping");
+     for (size_t i = 0; i < kControllerButtons.size(); ++i) {

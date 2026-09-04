@@ -80,7 +80,7 @@ plutil -insert LSApplicationCategoryType -string public.app-category.games "${pl
 plutil -insert LSMinimumSystemVersion -string 14.0 "${plist}"
 plutil -insert NSHighResolutionCapable -bool true "${plist}"
 plutil -insert NSBluetoothAlwaysUsageDescription -string \
-  "KartPad uses Bluetooth to pair and connect an experimental Wii Remote and Nunchuk." "${plist}"
+  "KartPad uses Bluetooth to connect experimental Wii Remote, Nunchuk, and Nintendo Switch 2 Joy-Con 2 controllers." "${plist}"
 plutil -insert NSPrincipalClass -string NSApplication "${plist}"
 
 # Bundle every non-system dylib and rewrite absolute paths. Release builds are
