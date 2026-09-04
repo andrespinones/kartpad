@@ -2705,3 +2705,32 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   switching, physical hardware, and release acceptance remain open. No APK,
   AAB, or private input was published. Evidence:
   `docs/artifacts/2026-09-04/android/a3-retro-replay-isolation.md`.
+
+## 2026-09-04 — Android A3 Retro fixture simulator controls
+
+- Selected the official `ExpertsRT/10_150.rkg` card on the API 36 ARM64
+  emulator: Koopa Troopa, Cheep Charger, Manual, Classic Controller, course ID
+  16, 6,578 frames, and `01:45.736`. Because Cheep Charger is a kart, the
+  selected Outside transmission is a no-op matching the RKG default.
+- With metadata forcing disabled, the stage-1 fixture initially followed the
+  course but diverged near the fence around 21 seconds and was stationary by
+  about 35 seconds. This falsifies the remaining transmission explanation.
+- An experimental native build delayed input consumption until RaceManager
+  stage 2. Its transcript confirmed the changed boundary, but the same kart
+  diverged into water at about `00:07.383`, earlier than the control. The
+  one-line change was reverted; the observed 238-row trace offset represents
+  countdown samples rather than proven fixture-frame lead.
+- A subsequent oracle setup accidentally used the wrong Android debug-extra
+  name and launched the base profile. Its save-country recovery attempt left
+  the synthetic emulator save unusable; preserved copies and the pre-existing
+  Retro save were not deleted. This invalidates the current emulator save as a
+  continuation precondition but does not alter earlier committed evidence.
+- Restored the source behavior, rebuilt the dual ARM64 APK, and passed the
+  strict package/privacy audit at SHA-256
+  `44b485b9e0a6c2dcc0292777d32e81116981462881e14aa3ead739b5f1e386b1`.
+  That clean local APK was installed and the RKG/state-trace diagnostics were
+  removed; it was not launched against the now-invalid save.
+- Classification: **Fail for both proposed fixture causes; useful narrowing.**
+  Metadata forcing, transmission choice, and the stage-2 start theory are now
+  ruled out. A real controller race and a clean simulator save precondition
+  remain open. No APK, AAB, RKG, disc, save, or pack was published.

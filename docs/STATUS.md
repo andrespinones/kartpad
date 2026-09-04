@@ -476,9 +476,12 @@ through KartPad's diagnostic live-controller bridge still diverges around 19
 seconds even when the base-course metadata override is disabled, so that
 override is ruled out and the fixture is not valid A3 acceptance. The replay's
 displayed result also differs from the official card time, so timing fidelity
-is not claimed. This narrows the remaining problem to the diagnostic
-RKG/live-controller boundary, most likely Retro Rewind transmission semantics;
-a controller-driven race remains open. Evidence:
+is not claimed. A second exact kart/default-transmission card diverged too,
+ruling out Retro Rewind's Inside/Outside bike choice. Delaying fixture
+consumption from countdown stage 1 to race stage 2 made divergence earlier
+(`00:07.383` versus roughly 21 seconds), so that experimental timing change was
+reverted. The remaining fault is still within the diagnostic RKG/player-state
+boundary; a controller-driven race remains open. Evidence:
 [`docs/artifacts/2026-09-04/android/a3-retro-replay-isolation.md`](artifacts/2026-09-04/android/a3-retro-replay-isolation.md).
 
 ## Native tvOS work

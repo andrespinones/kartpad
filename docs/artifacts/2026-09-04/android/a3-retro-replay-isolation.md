@@ -37,6 +37,32 @@ seen with metadata forcing enabled. Disabling the base-course metadata writes
 therefore did not fix the failure. The temporary launch switch was removed
 from source after this falsification.
 
+## Default-kart and countdown controls
+
+A second official card, `ExpertsRT/10_150.rkg`, identified Koopa Troopa,
+Cheep Charger, Manual, Classic Controller, course ID 16, 6,578 input frames,
+and `01:45.736`. Cheep Charger is a kart, so Retro Rewind's Outside
+transmission choice is a no-op and matches the RKG's default transmission.
+After manually selecting that exact setup with metadata forcing disabled, the
+fixture was on course initially but diverged beside the fence around 21
+seconds and was stationary against it by about 35 seconds. This rules out the
+Inside/Outside bike-transmission mismatch as the general cause.
+
+The trace's 238-sample difference from race time initially suggested that RKG
+consumption began too early. A one-line experimental build delayed fixture
+consumption from countdown stage 1 to active-race stage 2. The runtime
+transcript confirmed `synchronized at RaceManager stage=2`, but the same kart
+then diverged into the water around `00:07.383`, materially earlier than the
+stage-1 control. The experiment therefore falsified that start-boundary fix
+and was reverted from source. The 238 samples are countdown rows in the state
+trace, not proof of an RKG-frame lead.
+
+The reverted dual ARM64 APK rebuilt successfully and passed the strict
+package/privacy audit at SHA-256
+`44b485b9e0a6c2dcc0292777d32e81116981462881e14aa3ead739b5f1e386b1`.
+It was installed locally after removing the RKG and state-trace diagnostics;
+it was not published.
+
 ## Native replay control
 
 The diagnostic RKG file was renamed out of the recognized path and the process
@@ -60,9 +86,11 @@ changed hash remained exact.
 **Partial pass.** The Android Retro Rewind runtime can execute the expanded
 course and its native replay through a three-lap finish/results path, so the
 earlier failure is not caused by the metadata override or a general inability
-to run Retro Rewind race physics. The player-side diagnostic RKG bridge still
-diverges and cannot be used as A3 race acceptance. Its most likely remaining
-boundary is Retro Rewind's transmission/RKG-to-live-controller semantics, but
-that cause is not yet proven. A controller-driven race, trustworthy timing,
-save/relaunch verification for that controller-driven race, mode switching,
-and physical-device execution remain open.
+to run Retro Rewind race physics. The default-kart control also rules out the
+Inside/Outside transmission choice, and the stage-2 control rules out the
+proposed countdown-start correction. The player-side diagnostic RKG bridge
+still diverges and cannot be used as A3 race acceptance; the remaining cause
+is within fixture-to-player state/cadence or another unisolated race-state
+difference. A controller-driven race, trustworthy timing, save/relaunch
+verification for that controller-driven race, mode switching, and
+physical-device execution remain open.
