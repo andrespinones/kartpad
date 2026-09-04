@@ -513,6 +513,23 @@ not the production chooser, controller-driven Retro race/save, trustworthy
 timing, physical controller/audio/rumble, hardware, or release gates. Evidence:
 [`docs/artifacts/2026-09-04/android/a3-rfl-alarm-context.md`](artifacts/2026-09-04/android/a3-rfl-alarm-context.md).
 
+Android now has a production-owned pre-SDL mode chooser. It validates the
+pinned Retro Rewind installation off the UI thread, presents Original and
+Retro choices together at landscape phone density, routes an unavailable
+Retro choice to the existing installer, and passes activity recreation after
+a landscape flip. The exact audited APK selected Retro without a debug extra,
+reached its branded title beyond 30 seconds, then cold-selected Original and
+reached its distinct title beyond 30 seconds. Both saves retained their exact
+hashes and no new missing-target record appeared. The production manifest
+exports only the chooser; the SDL activity is private, with protected shell
+access retained only in debug builds. Build, lint, four installer contracts,
+release-manifest merge, and package/privacy audit pass for local APK SHA-256
+`7088f683c9cc765c77a12203646af6d9ecdb13f1eb77f559b4bfdbc75e1caf94`.
+This closes the emulator production-chooser/mode-selection slice, not the
+controller-driven Retro race/save, timing, physical controller/audio/rumble,
+hardware, or release gates. Evidence:
+[`docs/artifacts/2026-09-04/android/a3-production-mode-chooser.md`](artifacts/2026-09-04/android/a3-production-mode-chooser.md).
+
 ## Native tvOS work
 
 The maintainer-owned `codex/tvos-retro-rewind` branch contains the first

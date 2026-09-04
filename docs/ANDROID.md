@@ -37,9 +37,11 @@ the production installer and its first real dual-runtime gate. The complete
 Original/Retro Rewind graph now links into one Android `libmain.so`; an explicit
 validated Retro Rewind selection reaches its branded title and main menu
 offline on the ARM64 emulator and preserves the save across force-stop/cold
-relaunch without falling back to Original mode. A Retro Rewind race, the
-production mode chooser, general fresh-NAND handling, touch parity, and
-physical-device acceptance remain open.
+relaunch without falling back to Original mode. A production launcher now
+validates the installed pack and presents side-by-side Original/Retro choices
+before SDL starts; both paths reach their distinct titles through the visible
+chooser. A controller-driven Retro Rewind race, general fresh-NAND handling,
+touch parity, and physical-device acceptance remain open.
 
 The first independent A3 source slice extracted archive member-path validation
 into `runtime/src/retro_rewind/archive_path.cpp`. The existing iOS/tvOS installer
@@ -135,32 +137,34 @@ current iOS functionality from the longer-term parity target.
 ## Architecture
 
 ```text
-KartPadActivity : SDLActivity
+KartPadLaunchActivity
++-- validated Original / Retro Rewind chooser
 |
-+-- SDL SurfaceView
-|   `-- Aurora -> Dawn -> Vulkan
-|
-+-- KartPadOverlayView
-|   +-- gameplay touch controls
-|   +-- mode chooser
-|   +-- menus and settings
-|   `-- import/install/status layers
-|
-+-- Android services
-|   +-- Storage Access Framework import
-|   +-- Retro Rewind download/install
-|   +-- sensors and haptics
-|   `-- diagnostics share intent
-|
-`-- JNI / stable mobile-host C ABI
-    `-- libmain.so (arm64-v8a)
-        +-- Original profile
-        +-- Retro Rewind profile
-        +-- WiiCompiled runtime and HLE
-        +-- Android guest memory and fibers
-        +-- SDL audio and controllers
-        +-- Android TLS and BSD sockets
-        `-- Aurora / Dawn Vulkan
+`-- KartPadActivity : SDLActivity
+    |
+    +-- SDL SurfaceView
+    |   `-- Aurora -> Dawn -> Vulkan
+    |
+    +-- KartPadOverlayView
+    |   +-- gameplay touch controls
+    |   +-- menus and settings
+    |   `-- import/install/status layers
+    |
+    +-- Android services
+    |   +-- Storage Access Framework import
+    |   +-- Retro Rewind download/install
+    |   +-- sensors and haptics
+    |   `-- diagnostics share intent
+    |
+    `-- JNI / stable mobile-host C ABI
+        `-- libmain.so (arm64-v8a)
+            +-- Original profile
+            +-- Retro Rewind profile
+            +-- WiiCompiled runtime and HLE
+            +-- Android guest memory and fibers
+            +-- SDL audio and controllers
+            +-- Android TLS and BSD sockets
+            `-- Aurora / Dawn Vulkan
 ```
 
 The current
@@ -180,6 +184,7 @@ every visible application screen.
 Do not introduce a second engine framework or an elaborate Android navigation
 stack. The shell needs only:
 
+- `KartPadLaunchActivity`, the pre-SDL validated mode chooser;
 - `KartPadActivity`, derived from `SDLActivity`;
 - `KartPadOverlayView`, a deterministic Canvas-based overlay;
 - a small state coordinator for setup, menus, and native-runtime readiness;

@@ -23,7 +23,7 @@ class KartPadActivity : SDLActivity() {
             KartPadRuntimeResources.install(this)
             Os.setenv("KARTPAD_ANDROID_FILES_DIR", filesDir.absolutePath, true)
             Os.setenv("KARTPAD_ANDROID_CACHE_DIR", cacheDir.absolutePath, true)
-            configureDebugRuntimeProfile()
+            configureRuntimeProfile()
             configureDebugRkgInput()
             configureDebugStateTrace()
         }
@@ -42,14 +42,18 @@ class KartPadActivity : SDLActivity() {
         Log.i(TAG, "A0 SDLActivity shell created")
     }
 
-    private fun configureDebugRuntimeProfile() {
-        if (!BuildConfig.DEBUG) return
+    private fun configureRuntimeProfile() {
+        val debugRequested = if (BuildConfig.DEBUG) {
+            intent.getStringExtra(DEBUG_EXTRA_RUNTIME_PROFILE)
+        } else {
+            null
+        }
+        val requested = debugRequested ?: intent.getStringExtra(EXTRA_RUNTIME_PROFILE) ?: "base"
 
-        when (val requested = intent.getStringExtra(DEBUG_EXTRA_RUNTIME_PROFILE)) {
-            null -> Os.unsetenv("KARTPAD_RUNTIME_PROFILE")
+        when (requested) {
             "base" -> {
                 Os.setenv("KARTPAD_RUNTIME_PROFILE", requested, true)
-                Log.i(TAG, "A3 debug runtime profile requested=base")
+                Log.i(TAG, "A3 runtime profile requested=base")
             }
             "retro_rewind" -> {
                 val installed = RetroRewindInstallValidator.validate(
@@ -58,12 +62,12 @@ class KartPadActivity : SDLActivity() {
                     RetroRewindInstallValidator.productionContract(),
                 )
                 check(installed.isValid) {
-                    "Debug Retro Rewind launch requires a validated installed pack"
+                    "Retro Rewind launch requires a validated installed pack"
                 }
                 Os.setenv("KARTPAD_RUNTIME_PROFILE", requested, true)
-                Log.i(TAG, "A3 debug runtime profile requested=retro_rewind installed=valid")
+                Log.i(TAG, "A3 runtime profile requested=retro_rewind installed=valid")
             }
-            else -> error("Unsupported debug runtime profile")
+            else -> error("Unsupported runtime profile")
         }
     }
 
@@ -199,6 +203,7 @@ class KartPadActivity : SDLActivity() {
     }
 
     companion object {
+        const val EXTRA_RUNTIME_PROFILE = "dev.kartpad.android.RUNTIME_PROFILE"
         private const val TAG = "KartPadFixture"
         private const val DEBUG_RKG_RELATIVE_PATH = "KartPad/Diagnostics/TestInput.rkg"
         private const val DEBUG_RKG_KEYBOARD_STEER_RELATIVE_PATH =

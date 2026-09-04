@@ -2800,3 +2800,31 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   timing, production mode selection, physical controller/audio/rumble,
   physical hardware, and release acceptance remain open. No private input or
   binary was committed or published.
+
+## 2026-09-04 — Android A3 production mode chooser
+
+- Replaced normal reliance on the debug runtime-profile extra with a
+  production launcher that validates Retro Rewind before SDL starts and shows
+  side-by-side Original and Retro choices. The first vertical render put Retro
+  below the fold and was rejected; the compact layout shows both choices at
+  the emulator's landscape phone density.
+- Selecting the preserved valid install through the visible chooser reached
+  the branded Retro title beyond 30 seconds. A cold chooser launch then
+  selected Original and reached its title beyond 30 seconds. The production
+  profile logs were distinct, both save hashes stayed exact, and no new
+  missing-target record appeared.
+- A landscape flip recreated the chooser with both controls restored. A
+  debug-only missing-install control showed the download state and routed to
+  the production installer without moving or deleting the installed pack.
+- Made the SDL activity private in the release manifest while retaining
+  `DUMP`-protected shell access in debug builds. Android lint also exposed and
+  fixed an existing API-28-incompatible `Stream.toList()` call in a debug
+  install fixture.
+- Full dual-profile build, lint, release-manifest merge, content/storage/
+  pipeline/worker contracts, and strict package/privacy audit pass for the
+  local-only APK at SHA-256
+  `7088f683c9cc765c77a12203646af6d9ecdb13f1eb77f559b4bfdbc75e1caf94`.
+- Classification: **Pass for the production chooser and bounded emulator mode
+  selection.** Controller-driven Retro race/save, trustworthy timing, physical
+  controller/audio/rumble, hardware, and release acceptance remain open. No
+  private input or binary was committed or published.
