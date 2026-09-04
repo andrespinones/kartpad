@@ -2231,8 +2231,9 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
   KartPadMotionSteering *motion = [KartPadMotionSteering sharedSteering];
   NSString *status = motion.sensorAvailable
       ? [NSString stringWithFormat:
-            @"Tilt the device like a steering wheel. Current state: %@. Sensitivity: %.1fx. Physical controllers take priority.",
-            motion.enabled ? @"On" : @"Off", motion.sensitivity]
+            @"Tilt steering: %@. Shake tricks/wheelies: %@. Sensitivity: %.1fx. Physical controllers take priority.",
+            motion.enabled ? @"On" : @"Off",
+            motion.shakeTricksEnabled ? @"On" : @"Off", motion.sensitivity]
       : @"Motion data is unavailable on this device or Simulator. Touch and physical-controller steering remain available.";
   UIAlertController *sheet =
       [UIAlertController alertControllerWithTitle:@"Motion Steering"
@@ -2261,6 +2262,15 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
                   handler:^(UIAlertAction *action) {
       (void)action;
       motion.inverted = !motion.inverted;
+    }]];
+    [sheet addAction:[UIAlertAction
+        actionWithTitle:motion.shakeTricksEnabled
+            ? @"Disable Shake Tricks/Wheelies"
+            : @"Enable Shake Tricks/Wheelies"
+                    style:UIAlertActionStyleDefault
+                  handler:^(UIAlertAction *action) {
+      (void)action;
+      motion.shakeTricksEnabled = !motion.shakeTricksEnabled;
     }]];
     [sheet addAction:[UIAlertAction
         actionWithTitle:@"Cycle Sensitivity"
@@ -2774,14 +2784,12 @@ extern "C" bool KartPadMobileReadClassicInputForPlayer(
   }
   KartPadClassicInputState adapted =
       kartpad::mobile::AdaptSunPadInput(source);
+  KartPadMotionSteering *motion = [KartPadMotionSteering sharedSteering];
+  const BOOL shakeTrick = player == 0 ? [motion consumeShakeTrick] : NO;
   if (player == 0 &&
       [KartPadPhysicalControllers sharedControllers].connectedControllerCount == 0) {
-    const float motion = [KartPadMotionSteering sharedSteering].currentSteering;
-    const int motionStick = static_cast<int>(std::lround(motion * 127.0f));
-    if (std::abs(motionStick) > std::abs(static_cast<int>(adapted.leftStickX))) {
-      adapted.leftStickX = static_cast<std::int8_t>(
-          std::clamp(motionStick, -127, 127));
-    }
+    kartpad::mobile::ApplyMotionInput(adapted, motion.currentSteering,
+                                      shakeTrick);
   }
   snapshot->buttons = adapted.buttons;
   snapshot->leftStickX = std::clamp(static_cast<float>(adapted.leftStickX) / 127.0f,
