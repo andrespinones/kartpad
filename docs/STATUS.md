@@ -209,6 +209,14 @@ controller, rumble, audible output, performance, or physical-device
 acceptance. A2 remains open. Evidence:
 [`docs/artifacts/2026-09-04/android/a2-controller-complete-race-save.md`](artifacts/2026-09-04/android/a2-controller-complete-race-save.md).
 
+The first physical-device session now has a read-only, serial-redacting intake
+gate. It rejects emulators and unsupported API, ABI, page-size, or free-space
+configurations, and reports sanitized model plus controller-source,
+installed-package, and Vulkan-inventory state. Its eleven-case fake-ADB contract
+passes. The live host had no ADB target, so this is tooling evidence only and
+does not change A2's open physical acceptance rows. Evidence:
+[`docs/artifacts/2026-09-04/android/a2-physical-device-preflight.md`](artifacts/2026-09-04/android/a2-physical-device-preflight.md).
+
 ## Native tvOS work
 
 The maintainer-owned `codex/tvos-retro-rewind` branch contains the first

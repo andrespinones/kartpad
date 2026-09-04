@@ -2086,3 +2086,24 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   physical Android hardware.** No APK/AAB or private data was published.
   Evidence:
   `docs/artifacts/2026-09-04/android/a2-controller-complete-race-save.md`.
+
+## 2026-09-04 — Android A2 physical-device intake gate
+
+- Rechecked ADB after the complete emulator checkpoint; no physical device or
+  emulator was attached, so no install, app-data mutation, or physical
+  acceptance attempt was made.
+- Added a read-only physical-device preflight that requires exactly one
+  authorized target, rejects emulators, verifies API 28+, `arm64-v8a`, 4 KiB
+  or 16 KiB pages, and 4 GiB free on `/data`, and records sanitized model,
+  controller-source, installed-package, and Vulkan-inventory state.
+- The preflight never prints the ADB serial, controller names, or Vulkan JSON.
+  Its eleven-case fake-ADB contract covers pass, optional inventory absence,
+  absent/unauthorized targets, emulator, mid-probe disconnect, unsupported
+  API/ABI/page size, low space, and missing-controller notice; every case also
+  checks that the sentinel serial is absent.
+- Classification: **Pass for deterministic, privacy-safe physical-device
+  intake tooling; physical Android acceptance not run.** A2 remains open for
+  the real-device controller race/save/relaunch, lifecycle, audible audio,
+  tactile rumble, and performance rows. No APK/AAB or private data was
+  published. Evidence:
+  `docs/artifacts/2026-09-04/android/a2-physical-device-preflight.md`.

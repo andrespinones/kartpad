@@ -2,7 +2,7 @@
 
 ## Status and decision
 
-- **Assessment updated:** 3 September 2026.
+- **Assessment updated:** 4 September 2026.
 - **Assessment type:** repository review plus A0 source-only implementation and
   ARM64 emulator execution.
 - **Runtime proof:** A0 passes. The local non-playable source-only APK now also
@@ -25,6 +25,12 @@
   ghost that reloads after force-stop/relaunch. Continue A2 on a real
   controller and physical Android device; keep emulator and physical-device
   claims separate.
+
+The next physical session starts with the read-only
+`scripts/check-android-physical-device.sh` intake gate. Its mocked contract
+covers eleven supported and rejected device states and proves that the ADB
+serial is not emitted; the current host has no attached ADB target, so this
+does not satisfy a physical A2 row.
 
 KartPad can be ported to Android without changing its defining architecture.
 The Android build should contain the same ahead-of-time translated Original

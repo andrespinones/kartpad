@@ -126,8 +126,12 @@ not block offline Retro Rewind support.
    time 8.580 and was removed; do not repeat it unchanged. Repeat the complete
    race with a real controller and physical Android hardware, verify tactile
    rumble and audible output there, and retain emulator performance as a
-   separate non-acceptance observation. Evidence
-   is in `docs/artifacts/2026-09-03/android/a2-emulator-boot-lifecycle.md` and
+   separate non-acceptance observation. Run
+   `scripts/check-android-physical-device.sh` before installing or mutating the
+   first device; it rejects emulators/unsupported hardware and redacts the ADB
+   serial. Its eleven-case contract passes, while the live host currently has no
+   ADB target. Evidence is in
+   `docs/artifacts/2026-09-03/android/a2-emulator-boot-lifecycle.md` and
    `docs/artifacts/2026-09-03/android/a2-debug-input-replay.md`, plus
    `docs/artifacts/2026-09-03/android/a2-keyboard-steer-diagnostic.md` and
    `docs/artifacts/2026-09-03/android/a2-sdl-controller-bridge.md`, plus
@@ -136,7 +140,8 @@ not block offline Retro Rewind support.
    `docs/artifacts/2026-09-03/android/a2-state-trace-player-race.md`, plus
    `docs/artifacts/2026-09-03/android/a2-virtual-controller-hotplug.md`, plus
    `docs/artifacts/2026-09-03/android/a2-controller-cold-relaunch.md`, plus
-   `docs/artifacts/2026-09-04/android/a2-controller-complete-race-save.md`.
+   `docs/artifacts/2026-09-04/android/a2-controller-complete-race-save.md` and
+   `docs/artifacts/2026-09-04/android/a2-physical-device-preflight.md`.
    A2 remains open.
 2. Collect the first physical Apple TV report against `v0.4.0` using
    `docs/TVOS-TESTING.md`.
