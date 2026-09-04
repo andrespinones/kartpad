@@ -130,7 +130,12 @@ not block offline Retro Rewind support.
    `scripts/check-android-physical-device.sh` before installing or mutating the
    first device; it rejects emulators/unsupported hardware and redacts the ADB
    serial. Its eleven-case contract passes, while the live host currently has no
-   ADB target. Evidence is in
+   ADB target. Retain the physical session's raw log only in an ignored path,
+   then run the strict session summarizer documented in `android/README.md`
+   against it. Strict mode requires the automated
+   controller/audio/lifecycle/crash-free signals in that single capture but
+   does not replace listening, tactile, race/save, or performance judgment.
+   Evidence is in
    `docs/artifacts/2026-09-03/android/a2-emulator-boot-lifecycle.md` and
    `docs/artifacts/2026-09-03/android/a2-debug-input-replay.md`, plus
    `docs/artifacts/2026-09-03/android/a2-keyboard-steer-diagnostic.md` and
@@ -141,7 +146,8 @@ not block offline Retro Rewind support.
    `docs/artifacts/2026-09-03/android/a2-virtual-controller-hotplug.md`, plus
    `docs/artifacts/2026-09-03/android/a2-controller-cold-relaunch.md`, plus
    `docs/artifacts/2026-09-04/android/a2-controller-complete-race-save.md` and
-   `docs/artifacts/2026-09-04/android/a2-physical-device-preflight.md`.
+   `docs/artifacts/2026-09-04/android/a2-physical-device-preflight.md`, plus
+   `docs/artifacts/2026-09-04/android/a2-runtime-signal-sanitizer.md`.
    A2 remains open.
 2. Collect the first physical Apple TV report against `v0.4.0` using
    `docs/TVOS-TESTING.md`.

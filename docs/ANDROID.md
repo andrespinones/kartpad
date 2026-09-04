@@ -821,6 +821,12 @@ rejected retail-KPAD RKG replay unchanged: even
 the exact Baby Mario / Nanobike / Manual staff configuration diverged by guest
 time 8.580.
 
+For that physical run, retain raw logcat only in an ignored path and use
+`scripts/summarize-android-a2-session.py --require-signal-matrix` to emit the
+bounded controller/audio/lifecycle/fatal-signal record. The strict summary is
+supporting evidence only; audible quality, tactile rumble, race/save behavior,
+and performance remain hands-on acceptance.
+
 The A0 commands and sanitized result are recorded in
 [`android/README.md`](../android/README.md) and
 [`a0-source-only-fixture.md`](artifacts/2026-09-03/android/a0-source-only-fixture.md).

@@ -217,6 +217,16 @@ passes. The live host had no ADB target, so this is tooling evidence only and
 does not change A2's open physical acceptance rows. Evidence:
 [`docs/artifacts/2026-09-04/android/a2-physical-device-preflight.md`](artifacts/2026-09-04/android/a2-physical-device-preflight.md).
 
+A bounded Android session-log sanitizer now converts a private capture into an
+allowlist-only JSON signal summary. Its self-test passes and strict mode cannot
+merge separate logs. Applied retrospectively to the exact controller-race
+console, it confirms 32 kHz stereo initialization, non-silent PCM, 194,856,192
+submitted bytes with zero post-start empty observations, controller events,
+and no fatal signature while retaining 465 dropped blocks. The combined matrix
+correctly remains false because that capture lacks lifecycle events; none of
+this replaces listening or physical acceptance. Evidence:
+[`docs/artifacts/2026-09-04/android/a2-runtime-signal-sanitizer.md`](artifacts/2026-09-04/android/a2-runtime-signal-sanitizer.md).
+
 ## Native tvOS work
 
 The maintainer-owned `codex/tvos-retro-rewind` branch contains the first

@@ -74,6 +74,14 @@ Kart M record.
 
 - The strict Android package/privacy audit passed again against the exact APK
   and reported the expected SHA-256.
+- A retrospective allowlist-only summary of the retained exact-race console
+  recorded 32 kHz stereo playback initialization, one non-silent sample event
+  with peak 3,988, 194,856,192 submitted bytes across 507,904 queue checks,
+  zero post-start empty observations, controller connect/disconnect events,
+  and no fatal signature. It intentionally reports the combined automated
+  signal matrix as false because this console did not contain the lifecycle
+  transitions proved in the separate lifecycle run. This is non-silent stream
+  evidence, not a claim that audible quality was judged.
 - The repository safety audit and `git diff --check` passed.
 - The retained private save copy matches the post-race and post-relaunch
   SHA-256 above.
@@ -100,6 +108,9 @@ trace, console, save, and screenshots remain ignored and unpublished.
 
 **Pass for a complete controller-driven emulator race, retail results, ghost
 save, controller-attached cold relaunch, byte-stable save persistence, and
-visible result reload.** A2 remains open for a real Bluetooth/USB controller,
-tactile rumble, audible-output confirmation, performance acceptance, and the
-complete run on physical Android hardware.
+visible result reload.** The same exact-race console now has a committed,
+content-free
+[runtime-signal summary](a2-controller-complete-runtime-signals.json). A2
+remains open for a real
+Bluetooth/USB controller, tactile rumble, audible-output confirmation,
+performance acceptance, and the complete run on physical Android hardware.

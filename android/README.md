@@ -68,6 +68,22 @@ serial. A pass is only preflight evidence: the printed manual rows still
 require a hands-on physical race, save/relaunch, lifecycle checks, listening,
 and tactile rumble confirmation.
 
+Keep a full session log only in an ignored private path, then create a bounded
+publishable signal summary without copying arbitrary log lines:
+
+```sh
+./scripts/summarize-android-a2-session.py --require-signal-matrix \
+  private/android-a2-physical-session.log
+```
+
+Strict mode accepts only one capture (or standard input) and requires
+controller connection, initialized and non-silent SDL audio with submitted
+bytes, one complete surface pause/resume cycle, and no fatal signature. Its
+strict lifecycle row also requires the standard-gamepad suspend/resume pair.
+Its result is automated runtime evidence only; audible quality, tactile
+rumble, race completion, saved-result reload, and performance remain hands-on
+checks.
+
 On an Apple Silicon Mac, explicitly install the pinned public toolchain and
 AVDs, then verify it:
 

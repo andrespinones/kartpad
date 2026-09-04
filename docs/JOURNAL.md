@@ -2107,3 +2107,27 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   tactile rumble, and performance rows. No APK/AAB or private data was
   published. Evidence:
   `docs/artifacts/2026-09-04/android/a2-physical-device-preflight.md`.
+
+## 2026-09-04 — Android A2 bounded runtime-signal evidence
+
+- Added a streaming allowlist-only Android session-log summarizer. It emits a
+  fixed content-free JSON schema for SDL audio initialization/non-silent/queue
+  counters, channel-zero controller events, lifecycle counts, and explicit
+  fatal-signature counts; it never copies arbitrary raw lines or source paths.
+- Strict mode accepts only one capture or stdin and requires controller,
+  non-silent submitted audio, a complete surface pause/resume plus gamepad-
+  suspension cycle, and no fatal signature. It deliberately does not claim
+  audible quality, tactile rumble, gameplay completion, save persistence, or
+  performance.
+- The self-test passes and rejects both malformed telemetry and a fatal signal.
+  A two-file strict invocation exits 2 rather than merging unrelated sessions.
+- Retrospective use on the exact controller-race console produced deterministic
+  sanitized JSON: 32 kHz stereo, peak 3,988, 194,856,192 submitted bytes, zero
+  post-start empty observations through 507,904 checks, 465 dropped blocks,
+  controller events, and no fatal signature. Its combined matrix is correctly
+  false because that one console lacks lifecycle events.
+- Classification: **Pass for bounded Android A2 runtime-log evidence; A2 still
+  open for the one-capture physical signal matrix and every hands-on physical
+  row.** No APK/AAB, raw log, device identifier, controller name, save, or game
+  data was published. Evidence:
+  `docs/artifacts/2026-09-04/android/a2-runtime-signal-sanitizer.md`.
