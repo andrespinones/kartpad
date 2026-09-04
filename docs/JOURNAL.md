@@ -2022,3 +2022,33 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   race/save and all physical-controller/hardware rows.** No APK/AAB or private
   data was published. Evidence:
   `docs/artifacts/2026-09-03/android/a2-virtual-controller-hotplug.md`.
+
+## 2026-09-03 — Android A2 controller cold-relaunch handoff
+
+- The virtual InputReader/SDL controller navigated the entire Time Trial setup
+  and entered live N64 Mario Raceway, closing controller-driven race entry on
+  the emulator. A force-stop/relaunch with the controller still attached then
+  exposed a real cold-input failure while rendering continued.
+- Guest-fiber SDL polls were safely rejected but their work was lost. The
+  corrected WiiCompiled boundary sets a pending request and services it on the
+  original scheduler/JNI stack after a host-fiber return.
+- Diagnostic timing exposed a second issue: one deferred poll could batch a
+  down/up pair, leaving the level cache released before KPAD read it. Aurora
+  now retains event-backed press edges for one game snapshot while preserving
+  held levels.
+- On exact uninstrumented PID `6595`, with the virtual controller attached
+  before process startup, two deliberately short 250 ms taps advanced to
+  Select License and then Main Menu. The process stayed live with no CheckJNI
+  abort. One earlier clean-build launch independently hit the known
+  intermittent missing Mii callback at `MiiManager::Init+0x134`; controlled
+  retries remained live.
+- Fresh preparation reproduced the final changed source byte-for-byte. The
+  host gamepad contract, repository safety, overlay snapshot, diff check, full
+  ARM64 build, and strict package/privacy audit pass. The local-only
+  103,440,032-byte APK has SHA-256
+  `2c11450996f33a35ba3aa85dcf16c1c467bf6fd4a0943edef966557639d7a6e7`.
+  Classification: **Pass for emulator controller setup/race entry and cold
+  title/license/menu navigation; open for a complete controller race/save and
+  every physical-controller/device row.** No APK/AAB or private data was
+  published. Evidence:
+  `docs/artifacts/2026-09-03/android/a2-controller-cold-relaunch.md`.

@@ -76,10 +76,14 @@ behavior, OEM lifecycle, and device Vulkan performance remain untested.
 
 ## Adjacent corrections
 
-The earlier "cold relaunch input did not advance" observation was a cadence
-false alarm. On the unchanged fresh PID `4204`, five normally spaced Enter
-presses advanced title, license selection, and Main Menu while logging the
-expected core and Classic triggers.
+The earlier keyboard "cold relaunch input did not advance" observation was a
+cadence false alarm. On the unchanged fresh PID `4204`, five normally spaced
+Enter presses advanced title, license selection, and Main Menu while logging
+the expected core and Classic triggers. A later controller-attached cold
+relaunch was a separate real failure: safe guest-fiber polls were deferred but
+not serviced reliably, and a batched down/up pair could collapse before KPAD
+read it. That follow-up is corrected and evidenced separately in
+`a2-controller-cold-relaunch.md`.
 
 The completed `05:17.517` feedback race's `Ghost data could not be saved`
 message is consistent with the already documented native macOS result for a

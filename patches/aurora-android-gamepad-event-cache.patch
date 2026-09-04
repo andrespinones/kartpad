@@ -14,11 +14,12 @@
  
 --- a/lib/input.hpp
 +++ b/lib/input.hpp
-@@ -20,6 +20,13 @@
+@@ -20,6 +20,14 @@
    Sint32 m_index = -1;
    Sint32 m_playerIndex = -1;
    bool m_hasRumble = false;
 +  uint32_t m_standardButtons = 0;
++  uint32_t m_standardButtonPresses = 0;
 +  int16_t m_standardLeftX = 0;
 +  int16_t m_standardLeftY = 0;
 +  int16_t m_standardLeftTrigger = 0;
@@ -62,7 +63,7 @@
        controller = &candidate;
      }
    }
-@@ -381,38 +389,16 @@
+@@ -381,38 +389,17 @@
  
    GameController* controller =
        resolve_standard_gamepad(player, allowSingleUnassigned);
@@ -99,7 +100,8 @@
 -                                         SDL_GAMEPAD_AXIS_LEFT_TRIGGER);
 -  state->rightTrigger = SDL_GetGamepadAxis(controller->m_controller,
 -                                          SDL_GAMEPAD_AXIS_RIGHT_TRIGGER);
-+  state->buttons = controller->m_standardButtons;
++  state->buttons = controller->m_standardButtons | controller->m_standardButtonPresses;
++  controller->m_standardButtonPresses = 0;
 +  state->leftX = controller->m_standardLeftX;
 +  state->leftY = controller->m_standardLeftY;
 +  state->leftTrigger = controller->m_standardLeftTrigger;
@@ -127,7 +129,7 @@
  }
  
  void set_standard_gamepads_active(bool active) noexcept {
-@@ -446,16 +430,98 @@
+@@ -446,16 +430,99 @@
    }
  
    if (!active) {
@@ -187,6 +189,7 @@
 +  const uint32_t mask = standard_button_mask(button);
 +  if (pressed) {
 +    it->second.m_standardButtons |= mask;
++    it->second.m_standardButtonPresses |= mask;
 +  } else {
 +    it->second.m_standardButtons &= ~mask;
 +  }
@@ -228,7 +231,7 @@
  Sint32 get_instance_for_player(uint32_t player) noexcept {
    for (const auto& [which, controller] : g_GameControllers) {
      if (player_index(which) == player) {
-@@ -491,6 +557,7 @@
+@@ -491,6 +558,7 @@
      const auto props = SDL_GetGamepadProperties(ctrl);
      controller.m_hasRumble = SDL_GetBooleanProperty(props, SDL_PROP_GAMEPAD_CAP_RUMBLE_BOOLEAN, true);
      controller.m_hasRgbLed = SDL_GetBooleanProperty(props, SDL_PROP_GAMEPAD_CAP_RGB_LED_BOOLEAN, false);
@@ -236,7 +239,7 @@
      SDL_JoystickID instance = SDL_GetJoystickID(SDL_GetGamepadJoystick(ctrl));
      g_GameControllers[instance] = controller;
      ensure_player_index(g_GameControllers[instance]);
-@@ -510,6 +577,7 @@
+@@ -510,6 +578,7 @@
    // The SDL mapping changed underneath us; drop the cached PAD bindings so they
    // are rebuilt from the new one.
    it->second.m_mappingLoaded = false;
@@ -244,7 +247,7 @@
    ensure_player_index(it->second);
    apply_port_preferences();
    return true;
-@@ -518,6 +586,9 @@
+@@ -518,6 +587,9 @@
  void remove_controller(Uint32 instance) noexcept {
    std::scoped_lock lock(g_standardGamepadBridgeMutex);
    if (auto it = g_GameControllers.find(instance); it != g_GameControllers.end()) {
@@ -254,7 +257,7 @@
      SDL_CloseGamepad(it->second.m_controller);
      g_GameControllers.erase(it);
      apply_port_preferences();
-@@ -533,8 +604,7 @@
+@@ -533,8 +605,7 @@
  
  int32_t player_index(Uint32 instance) noexcept {
    if (auto it = g_GameControllers.find(instance); it != g_GameControllers.end()) {

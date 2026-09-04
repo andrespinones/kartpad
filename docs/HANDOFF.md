@@ -101,8 +101,13 @@ not block offline Retro Rewind support.
    keyboard stick. Those fixed replays diverge, but a content-free native
    trace feedback run using ordinary Android key events completed all three
    N64 Mario Raceway laps and reached retail results. The game declined ghost
-   saving, and injected keys did not advance the title after its cold relaunch,
-   so post-race save creation and controller-after-relaunch remain open.
+   saving. A later controller-only pass navigated the full Time Trial setup and
+   entered live N64 Mario Raceway. A controller retained across cold process
+   startup exposed deferred SDL polling and short-edge collapse; scheduler-
+   fiber handoff plus a one-snapshot press latch now let exact uninstrumented
+   250 ms taps advance cold title/intro, Select License, and Main Menu.
+   Controller-after-relaunch is therefore green on the emulator, while a
+   complete controller-driven race and post-race save/relaunch remain open.
    Aurora's discovered
    SDL pads now feed the Android Classic/KPAD path through a deterministic
    mapping contract, and `WPADControlMotor` now reaches that same resolved pad
@@ -110,9 +115,9 @@ not block offline Retro Rewind support.
    makes that bridge neutral, rejects new rumble starts, and stops active
    rumble; a corrected process retained its PID through four emulator cycles.
    One earlier corrected process ended silently after one cycle and remains an
-   unexplained non-reproduced exit. No controller was attached, so
-   attached-controller input and tactile behavior remain implementation/compile
-   evidence only. A
+   unexplained non-reproduced exit. Virtual attached-controller input and
+   lifecycle behavior now pass on the emulator; tactile output and all physical
+   controller/device behavior remain unaccepted. A
    temporary exact-configuration retail-KPAD RKG replay also diverged by guest
    time 8.580 and was removed; do not repeat it unchanged. Establish a complete
    reproducible post-race save/relaunch, then repeat the complete race with a
@@ -123,7 +128,9 @@ not block offline Retro Rewind support.
    `docs/artifacts/2026-09-03/android/a2-sdl-controller-bridge.md`, plus
    `docs/artifacts/2026-09-03/android/a2-sdl-controller-rumble.md`, plus
    `docs/artifacts/2026-09-03/android/a2-controller-lifecycle.md`, plus
-   `docs/artifacts/2026-09-03/android/a2-state-trace-player-race.md`. A2
+   `docs/artifacts/2026-09-03/android/a2-state-trace-player-race.md`, plus
+   `docs/artifacts/2026-09-03/android/a2-virtual-controller-hotplug.md`, plus
+   `docs/artifacts/2026-09-03/android/a2-controller-cold-relaunch.md`. A2
    remains open.
 2. Collect the first physical Apple TV report against `v0.4.0` using
    `docs/TVOS-TESTING.md`.

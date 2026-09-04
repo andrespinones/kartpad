@@ -169,6 +169,29 @@ hotplug and lifecycle behavior, not physical controller, motor, latency, OEM,
 or device-performance acceptance. A2 remains open. Evidence:
 [`docs/artifacts/2026-09-03/android/a2-virtual-controller-hotplug.md`](artifacts/2026-09-03/android/a2-virtual-controller-hotplug.md).
 
+A controller-only follow-up drove the complete Time Trial setup flow and
+entered live N64 Mario Raceway gameplay. Keeping the virtual controller
+attached across a force-stop/cold launch then exposed a second scheduler
+boundary: guest-fiber polls were safely skipped but never reliably serviced on
+Android's original JNI stack. Guest requests are now handed off to the
+scheduler fiber after a host-fiber return. Because one safe poll can collect a
+short press and release together, event-backed button presses are latched for
+one game snapshot so the edge is not collapsed. On the exact uninstrumented
+PID `6595`, a 250 ms south-button tap from a controller attached before process
+startup advanced to Select License, and another advanced to Main Menu. Fresh
+patch preparation reproduces the changed source byte-for-byte; the host
+gamepad contract, repository safety, overlay snapshot, diff check, full ARM64
+build, and strict package audit pass. The exact local-only APK is 103,440,032
+bytes with SHA-256
+`2c11450996f33a35ba3aa85dcf16c1c467bf6fd4a0943edef966557639d7a6e7`.
+One first launch of the clean scheduler build independently hit the known
+intermittent untranslated Mii callback at `MiiManager::Init+0x134`; a controlled
+retry and the final latch build remained live. This closes emulator
+controller-after-cold-launch navigation, not a complete controller race/save,
+physical controller, tactile rumble, audible output, performance, or physical
+Android acceptance. A2 remains open. Evidence:
+[`docs/artifacts/2026-09-03/android/a2-controller-cold-relaunch.md`](artifacts/2026-09-03/android/a2-controller-cold-relaunch.md).
+
 ## Native tvOS work
 
 The maintainer-owned `codex/tvos-retro-rewind` branch contains the first

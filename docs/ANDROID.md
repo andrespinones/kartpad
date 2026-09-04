@@ -19,8 +19,10 @@
   runtime and now cold-starts through translated constructors and Vulkan using
   versioned public resources plus Context-derived app-private config/cache/
   NAND paths. Its SDL controller bridge now also fails neutral and stops rumble
-  across Android surface loss/backgrounding. Continue A2 with controller-driven
-  gameplay; keep emulator and physical-device claims separate.
+  across Android surface loss/backgrounding, survives virtual hotplug/reconnect,
+  and accepts short controller presses after a controller-attached cold launch.
+  Continue A2 with a complete controller-driven race/save; keep emulator and
+  physical-device claims separate.
 
 KartPad can be ported to Android without changing its defining architecture.
 The Android build should contain the same ahead-of-time translated Original
