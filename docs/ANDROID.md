@@ -53,8 +53,14 @@ stream through the exact `02:31.465` finish while leaving the save, Pulsar
 database, and RKG byte-identical. The same live Retro result then survived a
 forced 180-degree landscape change and a complete HOME/foreground
 `surfaceDestroyed`/`surfaceCreated` cycle in the original process, again with
-all three persistence hashes unchanged. General fresh-NAND handling, touch
-parity, and physical-device acceptance remain open.
+all three persistence hashes unchanged. A subsequent clean runtime correction
+keeps Wii's local KD/NCD services available when Internet networking is
+disabled. Two independent fresh redirected-NAND launches then created the
+exact format-valid empty RKSYS and reached the Retro title. From that empty
+state, the Android InputReader/SDL controller path created a KartPad license,
+and a cold production-chooser relaunch displayed the same license with the
+save byte-identical and CRC-valid. Touch parity and physical-device acceptance
+remain open.
 
 The first independent A3 source slice extracted archive member-path validation
 into `runtime/src/retro_rewind/archive_path.cpp`. The existing iOS/tvOS installer

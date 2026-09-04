@@ -91,12 +91,52 @@ retained as a correctness fix, but it did not by itself resolve this failure.
   `9c6c7b52c0d1ae7c74489be53123d1943a84917f6869119ca319af5c33b58917`
   after a final clean launch.
 
+## Controller-driven first license and cold reload
+
+The immediate continuation tested the remaining first-run interaction on the
+same clean APK and standalone emulator. Before starting the game, a temporary
+Xbox-compatible `/dev/uinput` controller was registered through Android's
+documented command boundary. InputReader classified `/dev/input/event12` as an
+external keyboard, gamepad, and joystick with the Xbox key layout. All game
+input below followed the ordinary InputReader, SDL, Aurora, Classic-controller,
+and KPAD path; no application or guest state was injected.
+
+The existing Retro save was copied to an app-private test backup, then the
+exact game-created empty RKSYS above was placed at the redirected Retro path.
+The production chooser launched Retro Rewind and ordinary south-button input:
+
+1. advanced the title to four `NEW` license slots;
+2. selected the first slot and confirmed creation;
+3. displayed and selected the existing KartPad Mii;
+4. confirmed `A new license will be created for KartPad`; and
+5. reached `Your new license is ready` with the KartPad card visible.
+
+The resulting RKSYS remained 2,867,200 bytes and changed to SHA-256
+`4b83dc4a02dd351d1e594b1c9c13ecd7530e6c80520957d4c576c46c88b0972d`.
+Read-only semantic validation found `RKSD0006` at the file header, `RKPD` in
+license slot zero, and an exact stored/calculated core CRC-32 match
+(`21a244ff`).
+
+The app was force-stopped and started again through the production chooser as
+a new process. It reached the Retro title, retained the exact license-save
+hash, and ordinary controller input advanced to the license screen where slot
+1 visibly displayed the KartPad Mii and name rather than `NEW`. The accepted
+created-license and cold-license screenshots have SHA-256 values
+`5c27520ec6b5e58b67826ff772313ca89b3d414dd05b59ec45839471f647d8cf`
+and
+`310517bbfdb1192eb96659fa12ebe80e5c4503c05593bf16483a5a02d41e1da0`;
+the private screenshots were not added to the repository.
+
+Finally, the test-created save was retained only in app-private test storage,
+the original Retro save was restored to exact SHA-256
+`9c6c7b52c0d1ae7c74489be53123d1943a84917f6869119ca319af5c33b58917`,
+and a final production Retro launch reached the title.
+
 ## Classification
 
-**Pass for fresh offline Retro system-memory creation and cold title relaunch
-on the API 36 ARM64 emulator.** The prior seeded-empty-save precondition is no
-longer required for this path. Controller-driven creation of a new player
-license from that title was not exercised in this check, and physical hardware,
-physical controller behavior, audio/rumble quality, performance, and release
-acceptance remain open. No APK, AAB, game data, save, trace, or screenshot was
-published.
+**Pass for fresh offline Retro system-memory creation, controller-driven first
+license creation, and byte-stable cold license reload on the API 36 ARM64
+emulator.** The prior seeded-empty-save precondition is no longer required for
+this path. Physical hardware, physical controller behavior, audio/rumble
+quality, performance, and release acceptance remain open. No APK, AAB, game
+data, save, trace, or screenshot was published.

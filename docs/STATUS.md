@@ -491,8 +491,9 @@ empty base save and reached the branded title. The exact clean build then
 remained alive with that byte-identical empty save and no leaderboard, followed
 by six of six identical cold-launch passes. Removing the leaderboard alone also
 did not reproduce the earlier exit. Those exits are transient evidence rather
-than a proven save/settings defect. Full first-run license creation is still
-open, and the controller-race fixture conclusion is unchanged. Evidence:
+than a proven save/settings defect. At that checkpoint, full first-run license
+creation was still open; the controller-race fixture conclusion is unchanged.
+Evidence:
 [`docs/artifacts/2026-09-04/android/a3-retro-replay-isolation.md`](artifacts/2026-09-04/android/a3-retro-replay-isolation.md).
 
 The disclosed format-valid empty-save precondition is now removed for the
@@ -507,9 +508,23 @@ with SHA-256 `708c7a040e0cfe6cd815690e63f46d1678f17899bce0e786f7480030830f1d13`;
 a cold relaunch also passed. The clean local APK passed package/privacy audit,
 and the original emulator saves were restored with exact hashes after the
 test. This closes fresh offline Retro system-memory creation on the API 36
-ARM64 emulator, not controller-driven first license creation, physical
-hardware/controller, audio/rumble quality, performance, or release acceptance.
+ARM64 emulator, not physical hardware/controller, audio/rumble quality,
+performance, or release acceptance.
 Evidence:
+[`docs/artifacts/2026-09-04/android/a3-fresh-save-offline-kd.md`](artifacts/2026-09-04/android/a3-fresh-save-offline-kd.md).
+
+The controller-driven continuation now closes first license creation on that
+fresh emulator state. Starting from the exact game-created empty RKSYS, an
+Android InputReader-visible virtual Xbox controller selected `NEW`, confirmed
+license creation, selected the existing KartPad Mii, and reached `Your new
+license is ready.` The resulting 2,867,200-byte save has valid `RKSD0006` and
+slot-zero `RKPD` structures, a matching core CRC-32, and SHA-256
+`4b83dc4a02dd351d1e594b1c9c13ecd7530e6c80520957d4c576c46c88b0972d`.
+After force-stop and a new production-chooser process, the save remained
+byte-identical and slot 1 visibly displayed the KartPad license. The original
+Retro save was then restored to its exact pre-test `9c6c7b52...` hash and the
+clean title relaunched. This is emulator controller evidence, not physical
+controller/device or release acceptance. Evidence:
 [`docs/artifacts/2026-09-04/android/a3-fresh-save-offline-kd.md`](artifacts/2026-09-04/android/a3-fresh-save-offline-kd.md).
 
 Explicit Original to Retro Rewind to Original switching then reproduced the

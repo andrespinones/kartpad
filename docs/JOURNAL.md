@@ -2997,3 +2997,29 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   running at the clean Retro title; no private data or application package was
   published. Evidence:
   `docs/artifacts/2026-09-04/android/a3-fresh-save-offline-kd.md`.
+
+## 2026-09-04 — Android A3 first license from clean save
+
+- Continued on the unchanged clean APK with the standalone emulator still
+  visible. Registered the temporary Xbox-compatible `/dev/uinput` device;
+  Android InputReader exposed it as `/dev/input/event12` with keyboard,
+  gamepad, joystick, external, and Xbox-layout classification.
+- Preserved the exact active Retro save app-privately and substituted the
+  exact game-created empty RKSYS from the fresh-save pass. Ordinary controller
+  input advanced through the title, first `NEW` slot, creation confirmation,
+  KartPad Mii selection, and final `Your new license is ready` screen.
+- The created 2,867,200-byte save changed to SHA-256
+  `4b83dc4a02dd351d1e594b1c9c13ecd7530e6c80520957d4c576c46c88b0972d`.
+  Read-only inspection validated its `RKSD0006` header, slot-zero `RKPD`, and
+  exact stored/calculated core CRC-32 `21a244ff`.
+- After force-stop and production-chooser cold relaunch, the save remained
+  byte-identical and the first license card visibly displayed the KartPad Mii
+  and name. The test-created state was retained only in ignored app-private
+  storage, the original Retro save was restored to exact SHA-256 `9c6c7b52...`,
+  and a final clean Retro launch reached the title.
+- Classification: **Pass for controller-driven first license creation and
+  byte-stable cold license reload from a clean emulator save.** This is not
+  physical-controller/device, audio/rumble, performance, or release evidence.
+  The emulator was left visibly running; no application package, save, private
+  input, or screenshot was published. Evidence:
+  `docs/artifacts/2026-09-04/android/a3-fresh-save-offline-kd.md`.
