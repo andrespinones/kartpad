@@ -484,15 +484,15 @@ reverted. The remaining fault is still within the diagnostic RKG/player-state
 boundary; a controller-driven race remains open. Evidence:
 [`docs/artifacts/2026-09-04/android/a3-retro-replay-isolation.md`](artifacts/2026-09-04/android/a3-retro-replay-isolation.md).
 
-The simulator save damaged by the later save-country diagnostic is now
-isolated and recovered. Retro fails during translated Mii initialization when
-its redirected save is absent, before any `NANDCreate`, and an
-Original-compatible empty `rksys.dat` still fails after the Retro title even
-with a regenerated settings file and no leaderboard. Restoring the preserved
-Retro save, settings, and leaderboard as one coherent set stays alive beyond
-50 seconds and reaches the branded title under the clean audited APK. This
-keeps the replay-fixture finding valid while leaving general fresh Retro save
-creation open. Evidence:
+The later simulator save-precondition diagnosis was revalidated and corrected.
+Guest-address-only instrumentation showed valid Mii-library heap allocations;
+with the redirected save absent, Retro populated it from the format-valid
+empty base save and reached the branded title. The exact clean build then
+remained alive with that byte-identical empty save and no leaderboard, followed
+by six of six identical cold-launch passes. Removing the leaderboard alone also
+did not reproduce the earlier exit. Those exits are transient evidence rather
+than a proven save/settings defect. Full first-run license creation is still
+open, and the controller-race fixture conclusion is unchanged. Evidence:
 [`docs/artifacts/2026-09-04/android/a3-retro-replay-isolation.md`](artifacts/2026-09-04/android/a3-retro-replay-isolation.md).
 
 ## Native tvOS work

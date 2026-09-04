@@ -2756,3 +2756,22 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   title. No APK, AAB, save, disc, RKG, or pack was published.
 - Classification: **Pass for simulator-state recovery and root-boundary
   isolation; general fresh Retro save creation remains open.**
+
+## 2026-09-04 — Android A3 save-precondition correction
+
+- Revalidated the prior save-precondition diagnosis rather than building on a
+  single process exit. Temporary content-free telemetry around Mii-library
+  allocations showed heap `0x9011299c`, vtable `0x802a2ff8`, a 417,568-byte
+  first allocation, and two 6,400-byte allocations without corruption.
+- With the Retro redirect absent, the runtime populated it from the valid empty
+  base save and reached the branded title. After removing the telemetry and
+  rebuilding the exact clean APK at the prior audited SHA-256, the same empty
+  save remained alive beyond 55 seconds. Removing only the leaderboard also
+  stayed alive.
+- Six subsequent identical clean force-stop/cold-launch cycles all remained
+  alive after 22 seconds. The preserved original Retro save and leaderboard
+  were restored afterward and the title again stayed live.
+- Classification: **Correction.** The earlier exits are not reproducible and
+  do not prove a missing-save, settings, leaderboard, or Mii-manager defect.
+  Full first-run license creation remains open. No private file or diagnostic
+  APK was committed or published.

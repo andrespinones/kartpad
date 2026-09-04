@@ -63,21 +63,21 @@ package/privacy audit at SHA-256
 It was installed locally after removing the RKG and state-trace diagnostics;
 it was not published.
 
-## Save-precondition recovery
+## Save-precondition revalidation
 
-The later save-country diagnostic had replaced the Retro redirect's
-`rksys.dat` with a format-valid empty file that boots Original mode. A cold
-Retro launch with no save did not create one: it failed during translated Mii
-manager initialization before any `NANDCreate` request. Supplying that same
-empty save also failed after the branded title. Removing the leaderboard file
-and regenerating `RRGameSettings.pul` did not repair the launch.
+An initial recovery sequence appeared to associate post-title process exits
+with a missing or format-valid empty redirected `rksys.dat`. That association
+did not survive controlled repetition. Temporary guest-address-only telemetry
+showed both Mii-library allocations using the same valid heap and vtable. With
+the redirected save absent, the runtime populated it from the valid empty base
+save and reached the branded title.
 
-The original Retro save, settings, and leaderboard were then restored as one
-coherent set from the preserved pre-test copies. A cold launch remained alive
-beyond 50 seconds and reached the branded title. The old and regenerated
-settings files differed only in `MiscParams.lastSelectedCup` (`0x00000042`
-versus the fresh `0xffffffff` sentinel), but both failed with the empty save;
-that field and the leaderboard are therefore not sufficient causes.
+The telemetry was then removed and the exact clean build was retested. It
+remained alive with the byte-identical empty save and no leaderboard. Six
+additional identical force-stop/cold-launch cycles each remained alive after
+22 seconds. Removing only the leaderboard also did not reproduce the exit.
+The earlier process exits are therefore non-reproducible transient evidence,
+not proof of a fresh-save, settings, leaderboard, or Mii-manager defect.
 
 Temporary NAND-path logging was removed. The clean dual ARM64 APK rebuilt,
 passed the strict package/privacy audit at SHA-256
@@ -117,7 +117,7 @@ difference. A controller-driven race, trustworthy timing, save/relaunch
 verification for that controller-driven race, mode switching, and
 physical-device execution remain open.
 
-The recovery control also establishes that the fixture divergence is separate
-from the later test-save damage. Retro Rewind currently requires the preserved
-coherent save set on this emulator; general missing-save creation and reuse of
-an Original-compatible empty `rksys.dat` remain unsupported boundaries.
+The revalidation also establishes that the fixture divergence is separate
+from the later diagnostic state changes. The emulator can repopulate the Retro
+redirect from the Original-compatible empty save and cold-launch repeatedly;
+full first-run license creation is not claimed until that UI flow is completed.
