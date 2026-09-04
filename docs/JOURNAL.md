@@ -2638,3 +2638,40 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   offline pack revalidation on the ARM64 emulator.** Gameplay/mode switching,
   physical acceptance, and publishing remain open. Evidence:
   `docs/artifacts/2026-09-04/android/a3-production-install.md`.
+
+## 2026-09-04 — Android A3 dual-runtime offline boot
+
+- Regenerated the full private dual translation graph and drove it through the
+  real Android build. The first builds exposed three integration defects:
+  Gradle tried to build standalone products, Android `KartPadDual` inherited a
+  standalone-base dependency through PCH reuse, and generated Retro blob
+  assembly used Windows-only section syntax.
+- Android now selects exactly `WiiCompiled` or `KartPadDual` from the prepared
+  graph, builds the dual product as the sole `libmain.so` with its own PCH, and
+  normalizes copied Retro `.S` inputs to an ELF read-only data section without
+  mutating private generated sources.
+- A fresh patch preparation and complete dual build pass. The strict audit
+  accepts the 119,088,910-byte APK at SHA-256
+  `d1490d5b6d9ed38012a5793e609c6c05dd4d26c1704abad9d6e423cac43867c9`
+  and finds only SDL, libc++, and `libmain.so` native libraries with no private
+  data or local-path leakage.
+- The preserved 6 GiB emulator data filesystem had only about 2.3 GiB free, so
+  the roughly 1.9 GiB validated pack and 2.5 GiB disc could not coexist. After
+  a recoverable overlay backup, the disposable AVD was expanded/wiped to a
+  10 GiB filesystem and retained about 3.8 GiB free after staging.
+- With airplane mode enabled, explicit validated `retro_rewind` selection
+  activated the Retro profile, mounted 4,878 overlays, emitted Vulkan/audio
+  evidence, and reached the branded title and main menu without base fallback.
+  A format-valid empty diagnostic save was used only after both base and Retro
+  controls reproduced the wiped-NAND system-memory warning.
+- Retro Rewind created a KartPad license. Its real save hash remained exactly
+  `9c451f517267b800a7100bcf3f7445917ddca2361dc7deb1d184f76086600604`
+  across force-stop/airplane-mode cold relaunch, which again reached the Retro
+  main menu. Source contracts, generated link test, shell syntax, package
+  audit, and diff checks pass.
+- Classification: **Pass for Android dual linking and an explicit validated
+  Retro Rewind 6.12.5 offline title/menu boot with save-preserving cold
+  relaunch.** A race, production chooser, general fresh-NAND creation, touch
+  parity, physical hardware, and release acceptance remain open. No private
+  input, APK, or AAB was committed or published. Evidence:
+  `docs/artifacts/2026-09-04/android/a3-dual-runtime-offline-boot.md`.

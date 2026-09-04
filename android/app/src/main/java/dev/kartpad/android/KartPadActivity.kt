@@ -23,6 +23,7 @@ class KartPadActivity : SDLActivity() {
             KartPadRuntimeResources.install(this)
             Os.setenv("KARTPAD_ANDROID_FILES_DIR", filesDir.absolutePath, true)
             Os.setenv("KARTPAD_ANDROID_CACHE_DIR", cacheDir.absolutePath, true)
+            configureDebugRuntimeProfile()
             configureDebugRkgInput()
             configureDebugStateTrace()
         }
@@ -39,6 +40,31 @@ class KartPadActivity : SDLActivity() {
         )
         mLayout.bringChildToFront(overlay)
         Log.i(TAG, "A0 SDLActivity shell created")
+    }
+
+    private fun configureDebugRuntimeProfile() {
+        if (!BuildConfig.DEBUG) return
+
+        when (val requested = intent.getStringExtra(DEBUG_EXTRA_RUNTIME_PROFILE)) {
+            null -> Os.unsetenv("KARTPAD_RUNTIME_PROFILE")
+            "base" -> {
+                Os.setenv("KARTPAD_RUNTIME_PROFILE", requested, true)
+                Log.i(TAG, "A3 debug runtime profile requested=base")
+            }
+            "retro_rewind" -> {
+                val installed = RetroRewindInstallValidator.validate(
+                    RetroRewindInstallStorage.installedRoot(filesDir)
+                        .resolve(RetroRewindRelease.ROOT),
+                    RetroRewindInstallValidator.productionContract(),
+                )
+                check(installed.isValid) {
+                    "Debug Retro Rewind launch requires a validated installed pack"
+                }
+                Os.setenv("KARTPAD_RUNTIME_PROFILE", requested, true)
+                Log.i(TAG, "A3 debug runtime profile requested=retro_rewind installed=valid")
+            }
+            else -> error("Unsupported debug runtime profile")
+        }
     }
 
     private fun configureDebugRkgInput() {
@@ -185,6 +211,8 @@ class KartPadActivity : SDLActivity() {
             "dev.kartpad.android.TEST_RETRO_REWIND_EXTRACTION"
         private const val DEBUG_EXTRA_RETRO_REWIND_WORKER =
             "dev.kartpad.android.TEST_RETRO_REWIND_WORKER"
+        private const val DEBUG_EXTRA_RUNTIME_PROFILE =
+            "dev.kartpad.android.TEST_RUNTIME_PROFILE"
         private const val DEBUG_RESUME_FIXTURE_SHA256 =
             "cb9d5fc3b83611af65032f73119285de4e97d4b2b9f7b2e9567443635358483a"
         private const val MIN_RKG_BYTES = 0x90L

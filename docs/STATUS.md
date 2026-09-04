@@ -453,6 +453,21 @@ offline installed-content revalidation on the emulator, not Retro Rewind
 gameplay/mode switching or physical hardware. Evidence:
 [`docs/artifacts/2026-09-04/android/a3-production-install.md`](artifacts/2026-09-04/android/a3-production-install.md).
 
+The complete Android Original/Retro Rewind graph now also compiles and links as
+one `libmain.so`, and the Retro Rewind profile passes an explicit offline
+runtime boot on the expanded API 36 ARM64 emulator. The first attempts exposed
+and fixed Android product over-building, an accidental standalone-base target
+dependency through precompiled-header reuse, and Windows-only section syntax in
+generated Retro blob assembly. With airplane mode enabled, the app selected the
+Retro Rewind translated profile, mounted 4,878 overlays, reached the branded
+title and main menu, preserved its save exactly across force-stop/cold relaunch,
+and did not fall back to Original mode. A base-mode control showed the wiped-
+NAND system-memory warning was shared; a format-valid diagnostic empty save was
+therefore used as a disclosed test precondition. This closes dual linking and
+offline title/menu relaunch, not a race, production mode chooser, general
+fresh-NAND creation, touch parity, or physical hardware. Evidence:
+[`docs/artifacts/2026-09-04/android/a3-dual-runtime-offline-boot.md`](artifacts/2026-09-04/android/a3-dual-runtime-offline-boot.md).
+
 ## Native tvOS work
 
 The maintainer-owned `codex/tvos-retro-rewind` branch contains the first

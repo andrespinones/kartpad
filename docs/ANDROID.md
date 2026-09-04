@@ -32,15 +32,23 @@ covers twelve supported and rejected device states and proves that the ADB
 serial is not emitted; the current host has no attached ADB target, so this
 does not satisfy a physical A2 row.
 
-While that external A2 prerequisite is unavailable, the first independent A3
-source slice extracts archive member-path validation into
-`runtime/src/retro_rewind/archive_path.cpp`. The existing iOS/tvOS installer
+While that external A2 prerequisite is unavailable, A3 has advanced through
+the production installer and its first real dual-runtime gate. The complete
+Original/Retro Rewind graph now links into one Android `libmain.so`; an explicit
+validated Retro Rewind selection reaches its branded title and main menu
+offline on the ARM64 emulator and preserves the save across force-stop/cold
+relaunch without falling back to Original mode. A Retro Rewind race, the
+production mode chooser, general fresh-NAND handling, touch parity, and
+physical-device acceptance remain open.
+
+The first independent A3 source slice extracted archive member-path validation
+into `runtime/src/retro_rewind/archive_path.cpp`. The existing iOS/tvOS installer
 now consumes that byte-oriented contract using minizip's explicit filename
 length, including embedded-NUL rejection. Host tests cover every prohibited
 path class, the pinned NDK compiles it for API-28 ARM64 with warnings as errors,
-and fresh Apple patch preparation succeeds. Android download,
-storage, extraction, activation, rollback, and gameplay remain unimplemented;
-this does not pass A3 or change A2's status.
+and fresh Apple patch preparation succeeds. This historical slice did not pass
+A3 or change A2's status; later sections record the implemented Android
+download, storage, extraction, activation, and rollback pipeline.
 
 The next source-only slice adds `ArchiveScan` beside that validator and wires
 the Apple installer through it. The portable scan rejects invalid paths,
@@ -957,6 +965,20 @@ revalidated the installed 6.12.5 pack offline. This closes official pack
 installation on the emulator, not Retro Rewind gameplay, mode switching, or
 physical-device acceptance. Evidence is in
 `docs/artifacts/2026-09-04/android/a3-production-install.md`.
+
+The first dual-runtime A3 execution gate now passes as well. Android preparation
+normalizes generated Retro blob assembly to ELF section syntax, the dual product
+owns its shared-library output and precompiled header, and Gradle requests only
+the product represented by the prepared graph. The resulting 119,088,910-byte
+APK passes the strict privacy/package audit. With the production-validated pack
+and networking disabled, explicit `retro_rewind` selection reaches the branded
+title and main menu, mounts 4,878 overlays, and preserves the exact save hash
+across a force-stop/cold relaunch without Original-mode fallback. A base-mode
+control reproduced the wiped-NAND system-memory warning, so this bounded proof
+discloses its format-valid empty diagnostic save precondition. It does not prove
+a race, the production chooser, arbitrary fresh-NAND creation, touch/controller
+parity, or a physical device. Evidence is in
+`docs/artifacts/2026-09-04/android/a3-dual-runtime-offline-boot.md`.
 
 Do not begin the touch-UI port until A2's controller-driven Original-mode proof
 passes. Physical Android hardware remains authoritative for vendor Vulkan and
