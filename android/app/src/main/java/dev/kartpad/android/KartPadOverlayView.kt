@@ -5,6 +5,10 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.RectF
+import android.os.Build
+import android.os.Handler
+import android.os.Looper
+import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowInsets
@@ -32,6 +36,7 @@ class KartPadOverlayView(context: Context) : View(context) {
 
     private val controls = mutableListOf<Control>()
     private val pointerOwners = mutableMapOf<Int, String>()
+    private val mainHandler = Handler(Looper.getMainLooper())
     private val fillPaint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val strokePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
@@ -50,10 +55,13 @@ class KartPadOverlayView(context: Context) : View(context) {
     private var leftY = 0f
     private var rightX = 0f
     private var rightY = 0f
+    private var gasHoldGeneration = 0
+    private var gasLocked = false
 
     init {
         setWillNotDraw(false)
         isFocusable = true
+        isHapticFeedbackEnabled = true
         importantForAccessibility = IMPORTANT_FOR_ACCESSIBILITY_YES
         contentDescription = "KartPad touch controls"
         buildControls()
@@ -103,6 +111,7 @@ class KartPadOverlayView(context: Context) : View(context) {
                     return event.actionMasked != MotionEvent.ACTION_DOWN && pointerOwners.isNotEmpty()
                 }
                 pointerOwners[pointerId] = control.id
+                if (control.id == "A") beginGasPress()
                 updateOwnedControl(control, event.getX(actionIndex), event.getY(actionIndex))
             }
             MotionEvent.ACTION_MOVE -> {
@@ -137,6 +146,9 @@ class KartPadOverlayView(context: Context) : View(context) {
         leftY = 0f
         rightX = 0f
         rightY = 0f
+        gasLocked = false
+        gasHoldGeneration += 1
+        updateGasAccessibility()
         nativeClearTouchState()
         invalidate()
     }
@@ -158,7 +170,7 @@ class KartPadOverlayView(context: Context) : View(context) {
             0.84525f, 0.5268581f, Color.argb(235, 184, 184, 184), true)
         controls += button("L", "L", BUTTON_L, 94f, 46f,
             0.09058333f, 0.25399774f, dark)
-        controls += button("R", "R", BUTTON_R, 210f, 46f,
+        controls += button("R", "R", BUTTON_R, 94f, 46f,
             0.86875f, 0.27291667f, dark)
         controls += button("Z", "Z", BUTTON_ZR, 46f, 46f,
             0.97125f, 0.43507883f, Color.argb(240, 97, 46, 148))
@@ -226,7 +238,11 @@ class KartPadOverlayView(context: Context) : View(context) {
     private fun drawButton(canvas: Canvas, control: Control) {
         val active = pointerOwners.containsValue(control.id)
         fillPaint.style = Paint.Style.FILL
-        fillPaint.color = if (active) brighten(control.fill) else control.fill
+        fillPaint.color = when {
+            control.id == "A" && gasLocked -> LOCKED_GAS_COLOR
+            active -> brighten(control.fill)
+            else -> control.fill
+        }
         val radius = min(control.frame.width(), control.frame.height()) * 0.5f
         canvas.drawRoundRect(control.frame, radius, radius, fillPaint)
         canvas.drawRoundRect(control.frame, radius, radius, strokePaint)
@@ -285,6 +301,7 @@ class KartPadOverlayView(context: Context) : View(context) {
 
     private fun releasePointer(pointerId: Int) {
         val owner = pointerOwners.remove(pointerId) ?: return
+        if (owner == "A") gasHoldGeneration += 1
         when (controls.firstOrNull { it.id == owner }?.kind) {
             Kind.LEFT_STICK -> { leftX = 0f; leftY = 0f }
             Kind.RIGHT_STICK -> { rightX = 0f; rightY = 0f }
@@ -293,11 +310,36 @@ class KartPadOverlayView(context: Context) : View(context) {
     }
 
     private fun publishState(connected: Boolean) {
-        var buttons = 0
+        var buttons = if (gasLocked) BUTTON_A else 0
         pointerOwners.values.forEach { owner ->
             buttons = buttons or (controls.firstOrNull { it.id == owner }?.mask ?: 0)
         }
         nativePublishTouchState(buttons, leftX, leftY, rightX, rightY, connected)
+    }
+
+    private fun beginGasPress() {
+        gasHoldGeneration += 1
+        if (gasLocked) {
+            gasLocked = false
+            updateGasAccessibility()
+            return
+        }
+        val generation = gasHoldGeneration
+        mainHandler.postDelayed({
+            if (generation != gasHoldGeneration ||
+                !pointerOwners.containsValue("A")) return@postDelayed
+            gasLocked = true
+            updateGasAccessibility()
+            performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+            publishState(connected = true)
+            invalidate()
+        }, GAS_LOCK_DELAY_MS)
+    }
+
+    private fun updateGasAccessibility() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            stateDescription = if (gasLocked) "Acceleration locked" else null
+        }
     }
 
     private fun brighten(color: Int): Int = Color.argb(
@@ -315,6 +357,8 @@ class KartPadOverlayView(context: Context) : View(context) {
     private external fun nativeClearTouchState()
 
     private companion object {
+        const val GAS_LOCK_DELAY_MS = 1_000L
+        val LOCKED_GAS_COLOR: Int = Color.argb(250, 15, 199, 235)
         const val BUTTON_UP = 0x00000001
         const val BUTTON_LEFT = 0x00000002
         const val BUTTON_ZR = 0x00000004

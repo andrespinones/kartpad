@@ -25,6 +25,23 @@ class AndroidTouchOverlayContractTests(unittest.TestCase):
         self.assertIn("override fun onWindowFocusChanged(hasFocus: Boolean)", activity)
         self.assertGreaterEqual(activity.count("kartPadOverlay.clearTouchInput()"), 2)
 
+    def test_one_second_gas_lock_has_visual_haptic_and_accessibility_state(self) -> None:
+        source = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadOverlayView.kt").read_text()
+        self.assertIn("GAS_LOCK_DELAY_MS = 1_000L", source)
+        self.assertIn("gasLocked = true", source)
+        self.assertIn("LOCKED_GAS_COLOR", source)
+        self.assertIn("HapticFeedbackConstants.VIRTUAL_KEY", source)
+        self.assertIn("isHapticFeedbackEnabled = true", source)
+        self.assertIn('"Acceleration locked"', source)
+        self.assertIn("var buttons = if (gasLocked) BUTTON_A else 0", source)
+        self.assertIn("gasLocked = false", source)
+
+    def test_r_is_the_same_compact_digital_pill_as_l(self) -> None:
+        source = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadOverlayView.kt").read_text()
+        self.assertIn('button("L", "L", BUTTON_L, 94f, 46f', source)
+        self.assertIn('button("R", "R", BUTTON_R, 94f, 46f', source)
+        self.assertIn("const val BUTTON_R = 0x00000200", source)
+
     def test_runtime_preparation_applies_touch_bridge(self) -> None:
         script = (REPO / "scripts/prepare-android-game-runtime.sh").read_text()
         self.assertIn("wiicompiled-android-touch-input.patch", script)

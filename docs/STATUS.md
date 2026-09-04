@@ -623,11 +623,13 @@ selection to the adjacent NEW slot in the same live process. The fresh build
 also corrected game-runtime preparation so a dual shard graph prepares and
 builds the dual product instead of silently preparing a base-only runtime. The
 119,090,830-byte local APK has SHA-256
-`0d39e63d7650d06e548e0099e2c102d7a08d4db2a54d05bcda8366a934ef268c`
+`258f80025ad0b094e577d699d785c5cb4b36a72e30e268b1cfa17ff408473b3b`
 and passes the strict package audit. This closes only the first emulator
-touch/JNI/KPAD slice; persistent editing, acceleration lock/haptics, controller
-handoff, virtual accessibility nodes, right-stick guest behavior, tablet and
-physical touch, motion, and physical-device acceptance remain open. Evidence:
+touch/JNI/KPAD slice. R visibly matches L's compact digital pill; a 1.3-second
+A hold turns cyan and stays asserted after finger-up, and the next A tap
+restores green/unlocked state. Persistent editing, controller handoff, virtual
+accessibility nodes, right-stick guest behavior, physical haptic feel, tablet
+and physical touch, motion, and physical-device acceptance remain open. Evidence:
 [`docs/artifacts/2026-09-04/android/a4-touch-overlay-input.md`](artifacts/2026-09-04/android/a4-touch-overlay-input.md).
 
 ## Native tvOS work

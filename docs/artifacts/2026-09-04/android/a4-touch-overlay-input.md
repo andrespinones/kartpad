@@ -15,6 +15,13 @@ controller handoff, tablet, or physical-device acceptance result.
 - `KartPadOverlayView` owns a transparent Canvas overlay with stable
   pointer-ID ownership for multitouch, the left and C sticks, A/B/X/Y/Z,
   Start, L/R, and grouped D-pad controls.
+- KartPad's Classic R is a normal digital shoulder and uses the same compact
+  `94x46dp` pill as L, matching the accepted iOS override rather than SunPad's
+  wide pressure-trigger artwork.
+- Holding A uninterrupted for one second locks acceleration, changes A to the
+  accepted cyan state, invokes Android's light virtual-key haptic, keeps A
+  asserted after finger-up, and lets the next ordinary A tap unlock it. The
+  locked state is exposed through Android's accessibility state description.
 - A narrow JNI bridge publishes normalized axes and Classic button bits to a
   mutex-protected native state. Rising button edges remain latched for one
   guest sample so a short Android tap cannot disappear between KPAD polls.
@@ -46,7 +53,7 @@ and Gradle explicitly configured `buildCMakeDebug[arm64-v8a][KartPadDual]`.
   `1080x2400`, rotation 1, and a real logical/application frame of
   `2400x1080`; the production chooser visibly fills that wide surface.
 - The audited dual APK is 119,090,830 bytes with SHA-256
-  `0d39e63d7650d06e548e0099e2c102d7a08d4db2a54d05bcda8366a934ef268c`.
+  `258f80025ad0b094e577d699d785c5cb4b36a72e30e268b1cfa17ff408473b3b`.
 - Retro Rewind reached its title with the complete overlay visible. The
   ignored screenshot SHA-256 is
   `bfe80193d49bf6a234d65e9f80b639bfffd1f0ae7a67791d84bf5f76a283fd96`.
@@ -56,18 +63,27 @@ and Gradle explicitly configured `buildCMakeDebug[arm64-v8a][KartPadDual]`.
 - A second touchscreen tap on the visible D-pad Right control moved selection
   from the existing KartPad license to the upper-right NEW slot. Its ignored
   screenshot SHA-256 is
-  `7fa74b44ebd7dec8011d656aef35a4e3cddf9d150f43ccb291699b76d9aa9fbb`.
+  `63c34f61606ef15a4cf2a3434a7312a695b8ed267975b7e48b072bb0f7465d2a`.
+- In the exact final APK, R visibly matches L. Its ignored title screenshot is
+  `b1c2266a723962bbfa979273aae552ec3fe872adf66294bf1b1a7523fb93496d`.
+- A 1.3-second A hold advanced the guest, then left the A control cyan after
+  finger-up. The next A tap returned it to green without advancing or killing
+  the process. The ignored locked/unlocked screenshot hashes are
+  `e00fae029ea51010d0a4c7c507650be0fa8a1d73bbdadb7108463cda12dce62b`
+  and
+  `c297c5e655e2cebae441ddc588d77f439588a77ae54b5095454f8c010332d47f`.
 - The same process PID remained alive and logcat contained no fatal,
   `UnsatisfiedLinkError`, or profile-selection failure after both inputs.
 
 ## Classification
 
 **Pass for the first Android A4 emulator touch slice: correct native landscape
-geometry, visible full control set, JNI/KPAD A input, and JNI/KPAD D-pad input
-on the complete dual Retro runtime.**
+geometry, visible full control set, compact digital R parity, one-second cyan
+A lock/tap-to-unlock, JNI/KPAD A input, and JNI/KPAD D-pad input on the
+complete dual Retro runtime.**
 
-Still open: right-stick guest behavior, one-second acceleration lock and
-haptics, persistent editing/opacity/size/hide, controller hide/restore,
+Still open: right-stick guest behavior, persistent editing/opacity/size/hide,
+controller hide/restore, physical-device haptic feel,
 virtual accessibility nodes, screenshot goldens, tablet layout, physical
 touch ergonomics/latency, motion steering, and physical-device acceptance. No
 APK, AAB, screenshot, private graph, save, or game data was published.
