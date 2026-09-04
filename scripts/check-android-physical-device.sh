@@ -18,7 +18,11 @@ fail() {
 [[ "$minimum_free_kib" =~ ^[0-9]+$ ]] || \
   fail "KARTPAD_ANDROID_A2_MIN_FREE_KIB must be an integer"
 
-devices="$($adb devices -l)"
+set +e
+devices="$("$adb" devices -l 2>&1)"
+devices_status=$?
+set -e
+(( devices_status == 0 )) || fail "unable to enumerate ADB targets; no device serial was printed"
 ready_count="$(printf '%s\n' "$devices" |
   awk 'NR > 1 && $2 == "device" { count++ } END { print count + 0 }')"
 unavailable_count="$(printf '%s\n' "$devices" |

@@ -212,7 +212,7 @@ acceptance. A2 remains open. Evidence:
 The first physical-device session now has a read-only, serial-redacting intake
 gate. It rejects emulators and unsupported API, ABI, page-size, or free-space
 configurations, and reports sanitized model plus controller-source,
-installed-package, and Vulkan-inventory state. Its eleven-case fake-ADB contract
+installed-package, and Vulkan-inventory state. Its twelve-case fake-ADB contract
 passes. The live host had no ADB target, so this is tooling evidence only and
 does not change A2's open physical acceptance rows. Evidence:
 [`docs/artifacts/2026-09-04/android/a2-physical-device-preflight.md`](artifacts/2026-09-04/android/a2-physical-device-preflight.md).
@@ -226,6 +226,14 @@ and no fatal signature while retaining 465 dropped blocks. The combined matrix
 correctly remains false because that capture lacks lifecycle events; none of
 this replaces listening or physical acceptance. Evidence:
 [`docs/artifacts/2026-09-04/android/a2-runtime-signal-sanitizer.md`](artifacts/2026-09-04/android/a2-runtime-signal-sanitizer.md).
+
+The physical session now also has a tested two-phase capture wrapper. It keeps
+raw logcat in Android's volatile buffer, scopes retrieval to KartPad's package
+UID and a device-sourced start timestamp, streams directly into the strict
+sanitizer, and emits neither UID nor ADB serial. Its start/summary/redaction
+contract passes. No device is attached, so physical execution remains open.
+Evidence:
+[`docs/artifacts/2026-09-04/android/a2-uid-scoped-capture.md`](artifacts/2026-09-04/android/a2-uid-scoped-capture.md).
 
 ## Native tvOS work
 

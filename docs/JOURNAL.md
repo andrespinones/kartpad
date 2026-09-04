@@ -2097,10 +2097,10 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   or 16 KiB pages, and 4 GiB free on `/data`, and records sanitized model,
   controller-source, installed-package, and Vulkan-inventory state.
 - The preflight never prints the ADB serial, controller names, or Vulkan JSON.
-  Its eleven-case fake-ADB contract covers pass, optional inventory absence,
-  absent/unauthorized targets, emulator, mid-probe disconnect, unsupported
-  API/ABI/page size, low space, and missing-controller notice; every case also
-  checks that the sentinel serial is absent.
+  Its twelve-case fake-ADB contract covers pass, optional inventory absence,
+  absent/unauthorized targets, enumeration failure, emulator, mid-probe
+  disconnect, unsupported API/ABI/page size, low space, and missing-controller
+  notice; every case also checks that the sentinel serial is absent.
 - Classification: **Pass for deterministic, privacy-safe physical-device
   intake tooling; physical Android acceptance not run.** A2 remains open for
   the real-device controller race/save/relaunch, lifecycle, audible audio,
@@ -2131,3 +2131,25 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   row.** No APK/AAB, raw log, device identifier, controller name, save, or game
   data was published. Evidence:
   `docs/artifacts/2026-09-04/android/a2-runtime-signal-sanitizer.md`.
+
+## 2026-09-04 — Android A2 UID-scoped capture path
+
+- Added a two-phase physical-session wrapper. `start` runs the hardware
+  preflight and stores only the device's own log timestamp in the ignored
+  bootstrap directory; `summarize` reads KartPad-UID-scoped volatile logcat
+  from that point and streams it into the strict signal sanitizer.
+- Raw logcat never reaches a host file. The package UID and ADB serial are not
+  emitted, and direct logcat errors are replaced with a generic message because
+  ADB can echo its transport serial on disconnect.
+- The fake-ADB contract passes start, strict summary, arbitrary private-line
+  exclusion, and disconnect-error redaction. Bash syntax, repository safety,
+  and diff checks pass. A disposable API 36 boot independently confirmed the
+  real device-side `-T TIME` / `--uid=UIDS` options and exact UID/timestamp
+  invocation, then shut down without launching KartPad. The host still has no
+  physical ADB target, so the real capture command stopped before creating its
+  marker.
+- Classification: **Pass for the tested UID-scoped/raw-log-free capture path;
+  physical execution not run.** A2 remains open for all real-device and
+  hands-on rows. No APK/AAB, raw log, device identifier, package UID,
+  controller name, save, or game data was published. Evidence:
+  `docs/artifacts/2026-09-04/android/a2-uid-scoped-capture.md`.

@@ -43,15 +43,15 @@ Command:
 Result:
 
 ```text
-Android physical-device preflight contract passed (11 cases; ADB serial redacted).
+Android physical-device preflight contract passed (12 cases; ADB serial redacted).
 ```
 
-The eleven isolated fake-ADB cases cover a passing 16 KiB ARM64 device,
+The twelve isolated fake-ADB cases cover a passing 16 KiB ARM64 device,
 optional package/Vulkan inventory absence, missing controller notice, no
-target, unauthorized target, emulator rejection, mid-probe disconnect, API
-27, wrong ABI, unsupported page size, and insufficient free space. Every case
-also rejects accidental appearance of the sentinel ADB serial in command
-output, including an ADB error that contains it.
+target, unauthorized target, enumeration failure, emulator rejection,
+mid-probe disconnect, API 27, wrong ABI, unsupported page size, and
+insufficient free space. Every case also rejects accidental appearance of the
+sentinel ADB serial in command output, including ADB errors that contain it.
 
 The controller masks are the pinned NDK definitions from `android/input.h`:
 `AINPUT_SOURCE_GAMEPAD` (`0x00000401`) and `AINPUT_SOURCE_JOYSTICK`
@@ -60,8 +60,8 @@ The controller masks are the pinned NDK definitions from `android/input.h`:
 Script SHA-256 values:
 
 ```text
-f3b0708568b733a257c2cf391227e8e6949f6aa56c684d13a9aac47fcd4ceba1  scripts/check-android-physical-device.sh
-d7be203060a06c1c9b1f50e26e36e174ad949e08358989d7da2a78693430a4c5  scripts/test-android-physical-device-preflight.sh
+30e0588d06bb4676433bc7858ca0eff95fd8c7938c72cde1eeb60d259ac9d35c  scripts/check-android-physical-device.sh
+931abfe4d21a431126dfcc8ecf14c75d6da901ee5b8b95ed9df75e4e37022a7b  scripts/test-android-physical-device-preflight.sh
 ```
 
 ## Live host classification

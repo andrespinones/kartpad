@@ -28,7 +28,7 @@
 
 The next physical session starts with the read-only
 `scripts/check-android-physical-device.sh` intake gate. Its mocked contract
-covers eleven supported and rejected device states and proves that the ADB
+covers twelve supported and rejected device states and proves that the ADB
 serial is not emitted; the current host has no attached ADB target, so this
 does not satisfy a physical A2 row.
 
@@ -826,6 +826,11 @@ For that physical run, retain raw logcat only in an ignored path and use
 bounded controller/audio/lifecycle/fatal-signal record. The strict summary is
 supporting evidence only; audible quality, tactile rumble, race/save behavior,
 and performance remain hands-on acceptance.
+
+Prefer `scripts/capture-android-a2-session.sh start|summarize` for the actual
+session: it keeps raw logcat in Android's volatile buffer, scopes retrieval to
+KartPad's UID from a device-sourced timestamp, and streams directly into that
+strict sanitizer without emitting the UID or ADB serial.
 
 The A0 commands and sanitized result are recorded in
 [`android/README.md`](../android/README.md) and

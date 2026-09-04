@@ -84,6 +84,22 @@ Its result is automated runtime evidence only; audible quality, tactile
 rumble, race completion, saved-result reload, and performance remain hands-on
 checks.
 
+For the physical run, the preferred two-phase wrapper avoids writing raw
+logcat to the host at all:
+
+```sh
+./scripts/capture-android-a2-session.sh start
+# Complete the controller race, lifecycle, listening, and rumble checks.
+./scripts/capture-android-a2-session.sh summarize \
+  > .android-bootstrap/android-a2-physical-runtime-signals.json
+```
+
+`start` records only the device's log timestamp in the ignored bootstrap
+directory. `summarize` requests logs from that timestamp for KartPad's package
+UID, streams them directly through the strict sanitizer, and emits only JSON
+on stdout. ADB errors are suppressed or serial-redacted. Review the JSON before
+copying it into a publishable evidence directory.
+
 On an Apple Silicon Mac, explicitly install the pinned public toolchain and
 AVDs, then verify it:
 

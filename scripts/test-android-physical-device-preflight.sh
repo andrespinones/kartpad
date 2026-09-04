@@ -13,6 +13,10 @@ set -euo pipefail
 
 scenario="${FAKE_ADB_SCENARIO:-pass}"
 if [[ "${1:-}" == devices ]]; then
+  if [[ "$scenario" == devices-error ]]; then
+    echo "error while enumerating PRIVATE-SERIAL" >&2
+    exit 1
+  fi
   echo 'List of devices attached'
   case "$scenario" in
     absent) ;;
@@ -86,6 +90,7 @@ run_case minimal 0 'package=not-installed input_controller_candidates=1 vulkan_i
 run_case no-controller 0 'no gamepad/joystick source is visible'
 run_case absent 1 'ready=0 unavailable=0'
 run_case unauthorized 1 'ready=0 unavailable=1'
+run_case devices-error 1 'unable to enumerate ADB targets'
 run_case emulator 1 'is an emulator'
 run_case disconnect 1 'adb shell command failed'
 run_case old-api 1 'below KartPad'
@@ -93,4 +98,4 @@ run_case wrong-abi 1 'expected arm64-v8a'
 run_case wrong-page 1 'expected 4096 or 16384'
 run_case low-space 1 'A2 preflight requires'
 
-echo 'Android physical-device preflight contract passed (11 cases; ADB serial redacted).'
+echo 'Android physical-device preflight contract passed (12 cases; ADB serial redacted).'

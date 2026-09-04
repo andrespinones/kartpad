@@ -129,10 +129,11 @@ not block offline Retro Rewind support.
    separate non-acceptance observation. Run
    `scripts/check-android-physical-device.sh` before installing or mutating the
    first device; it rejects emulators/unsupported hardware and redacts the ADB
-   serial. Its eleven-case contract passes, while the live host currently has no
-   ADB target. Retain the physical session's raw log only in an ignored path,
-   then run the strict session summarizer documented in `android/README.md`
-   against it. Strict mode requires the automated
+   serial. Its twelve-case contract passes, while the live host currently has no
+   ADB target. Use `scripts/capture-android-a2-session.sh start` immediately
+   before the run and its `summarize` phase afterward; the tested wrapper keeps
+   raw logcat off the host, scopes retrieval to KartPad's UID, and sends it
+   directly through the strict sanitizer. Strict mode requires the automated
    controller/audio/lifecycle/crash-free signals in that single capture but
    does not replace listening, tactile, race/save, or performance judgment.
    Evidence is in
@@ -147,7 +148,8 @@ not block offline Retro Rewind support.
    `docs/artifacts/2026-09-03/android/a2-controller-cold-relaunch.md`, plus
    `docs/artifacts/2026-09-04/android/a2-controller-complete-race-save.md` and
    `docs/artifacts/2026-09-04/android/a2-physical-device-preflight.md`, plus
-   `docs/artifacts/2026-09-04/android/a2-runtime-signal-sanitizer.md`.
+   `docs/artifacts/2026-09-04/android/a2-runtime-signal-sanitizer.md` and
+   `docs/artifacts/2026-09-04/android/a2-uid-scoped-capture.md`.
    A2 remains open.
 2. Collect the first physical Apple TV report against `v0.4.0` using
    `docs/TVOS-TESTING.md`.
