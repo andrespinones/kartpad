@@ -59,8 +59,12 @@ disabled. Two independent fresh redirected-NAND launches then created the
 exact format-valid empty RKSYS and reached the Retro title. From that empty
 state, the Android InputReader/SDL controller path created a KartPad license,
 and a cold production-chooser relaunch displayed the same license with the
-save byte-identical and CRC-valid. Touch parity and physical-device acceptance
-remain open.
+save byte-identical and CRC-valid. A4 now has its first live touch slice: the
+complete phone control set renders over the dual Retro runtime at a true
+`2400x1080`, and direct touchscreen A and D-pad Right events advance the guest
+through title and license selection. Persistent layout editing, acceleration
+lock/haptics, controller handoff, full accessibility, tablet/physical touch,
+motion, and physical-device acceptance remain open.
 
 The first independent A3 source slice extracted archive member-path validation
 into `runtime/src/retro_rewind/archive_path.cpp`. The existing iOS/tvOS installer

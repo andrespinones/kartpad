@@ -612,6 +612,24 @@ physical controller/audio/rumble, physical hardware, and release acceptance
 remain open. Evidence:
 [`docs/artifacts/2026-09-04/android/a3-retro-controller-race-save.md`](artifacts/2026-09-04/android/a3-retro-controller-race-save.md).
 
+The first A4 touch slice now passes on the API 36 ARM64 emulator. A transparent
+Canvas overlay presents KartPad's accepted phone geometry with stable
+multitouch ownership, full Classic button coverage, two sticks, lifecycle
+clearing, and a native short-tap latch. After removing a stale emulator display
+override, Android reported a real rotated `2400x1080` application frame. The
+complete `KartPadDual` runtime reached the Retro Rewind title with the overlay
+visible; a touchscreen A tap advanced to Select License and D-pad Right moved
+selection to the adjacent NEW slot in the same live process. The fresh build
+also corrected game-runtime preparation so a dual shard graph prepares and
+builds the dual product instead of silently preparing a base-only runtime. The
+119,090,830-byte local APK has SHA-256
+`0d39e63d7650d06e548e0099e2c102d7a08d4db2a54d05bcda8366a934ef268c`
+and passes the strict package audit. This closes only the first emulator
+touch/JNI/KPAD slice; persistent editing, acceleration lock/haptics, controller
+handoff, virtual accessibility nodes, right-stick guest behavior, tablet and
+physical touch, motion, and physical-device acceptance remain open. Evidence:
+[`docs/artifacts/2026-09-04/android/a4-touch-overlay-input.md`](artifacts/2026-09-04/android/a4-touch-overlay-input.md).
+
 ## Native tvOS work
 
 The maintainer-owned `codex/tvos-retro-rewind` branch contains the first
