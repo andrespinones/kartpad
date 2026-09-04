@@ -2854,3 +2854,26 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   controller/audio/rumble, physical hardware, and release acceptance remain
   open. No APK, AAB, private input, save, trace, console, or screenshot was
   published.
+
+## 2026-09-04 — Android A3 Retro Rewind cold record inspection
+
+- Repeated the cold-relaunch test visibly in the API 36 ARM64 emulator with
+  the Android-recognized virtual Xbox controller attached. A direct launch of
+  the private SDL activity first selected `base` by design and was rejected as
+  a test-harness error; the corrected production launcher showed both choices,
+  selected validated Retro Rewind, and reached its branded title as new PID
+  7904.
+- Controller navigation returned to the course ghost screen after the true
+  production-path cold launch. It still showed only `1/1`, with a faster
+  packaged Rewind ghost rather than the completed `17:13.562` run.
+- Pulled the exact cold-loaded save read-only. It remained 2,867,200 bytes at
+  SHA-256 `7279ad4d...`, had valid `RKSD0006` and `RKPD` structures, and its
+  stored core CRC-32 exactly matched a fresh calculation. The only initialized
+  license had personal-ghost bitfield `0x00000000` and no nonzero primary Time
+  Trial leaderboard timer.
+- Classification: **Correction and narrowed pass.** The prior race/results,
+  save mutation, and byte-stable cold persistence remain valid, but the slow
+  result did not create a retained personal record/ghost. A faster
+  controller-driven record/save/reload proof remains open. The emulator was
+  left running visibly in Retro Rewind; no private save or binary was
+  published.

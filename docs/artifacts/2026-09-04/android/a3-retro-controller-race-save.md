@@ -73,12 +73,21 @@ console records the canonical overlay at line 101, controller channel-zero
 connection at line 533, active KPAD reads, and no fatal signature; its SHA-256
 is `7ea11624c6e1a1982baabb5735e61834440ec7d88fd2001a2e7c9dd28f7426e6`.
 
-The menu continued to surface the faster bundled `01:15.379` Rewind ghost as
-the single selectable entry, so this checkpoint does not claim a visible
-reload of the much slower new ghost. It proves the post-results save mutation
-and byte-stable cold-process persistence. A faster valid record or direct
-save-semantic inspection is still needed before claiming visible new-result
-reload.
+The menu continued to surface only one faster packaged Rewind ghost, so the
+initial checkpoint did not claim a visible reload of the much slower run.
+
+A follow-up visible-emulator test force-stopped the app again, launched the
+production `KartPadLaunchActivity`, selected the validated Retro Rewind choice
+on-screen, reached the branded title as new PID 7904, and navigated by the same
+Android-recognized controller back to the course ghost screen. It again showed
+only `1/1`. The exact cold-loaded 2,867,200-byte save retained SHA-256
+`7279ad4db655b893f8b2dd1a1427512c4d5799efe9047a94e67b35080c600401`.
+Read-only semantic inspection found valid `RKSD0006`/`RKPD` structures and an
+exact core CRC-32 match, but the only initialized license had personal-ghost
+bitfield `0x00000000` and no nonzero primary Time Trial leaderboard timers.
+The post-results mutation therefore did not include a retained personal record
+or ghost. A faster controller-driven result is still required for the
+record/save/reload part of A3.
 
 ## Honest classification
 
@@ -87,5 +96,5 @@ live analog gameplay, normal disconnect/reconnect handling, complete race and
 results presentation, post-results save mutation, and byte-stable
 controller-attached cold relaunch.** It is not physical-controller, physical-
 device, tactile-rumble, audible-quality, sustained-performance, trustworthy-
-timing, faster-record reload, or release acceptance. No APK, AAB, game data,
+timing, personal-record/ghost persistence, or release acceptance. No APK, AAB, game data,
 save, trace, console, or screenshot was published.

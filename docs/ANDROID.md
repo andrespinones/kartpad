@@ -40,8 +40,12 @@ offline on the ARM64 emulator and preserves the save across force-stop/cold
 relaunch without falling back to Original mode. A production launcher now
 validates the installed pack and presents side-by-side Original/Retro choices
 before SDL starts; both paths reach their distinct titles through the visible
-chooser. A controller-driven Retro Rewind race, general fresh-NAND handling,
-touch parity, and physical-device acceptance remain open.
+chooser. A virtual-controller-driven Retro Rewind Time Trial now reaches its
+ordinary result flow and persists a CRC-valid save mutation across a cold
+production-chooser relaunch. That deliberately slow run did not set a personal
+record or retain a personal ghost, so a faster record/save/reload proof,
+general fresh-NAND handling, touch parity, and physical-device acceptance
+remain open.
 
 The first independent A3 source slice extracted archive member-path validation
 into `runtime/src/retro_rewind/archive_path.cpp`. The existing iOS/tvOS installer

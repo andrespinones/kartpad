@@ -542,8 +542,13 @@ accepted controller navigation back to Baby Park. The temporary controller's
 explicit one-hour registration expired mid-race; the runtime recorded an
 ordinary disconnect/reconnect and the same live race completed afterward.
 This closes the emulator controller gameplay, race/results, save mutation, and
-byte-stable cold-relaunch slice. The slow new ghost did not replace the faster
-bundled selectable ghost, so visible new-record reload remains open alongside
+byte-stable cold-relaunch slice. A second visible force-stop/relaunch through
+the production chooser again selected Retro, reached the branded title, and
+returned to the course ghost screen. It still showed only `1/1`; read-only
+inspection of the exact cold-loaded, CRC-valid save found a zero personal-ghost
+bitfield and no Time Trial leaderboard timer in its only initialized license.
+The slow run therefore did not create a retained personal record/ghost; a
+faster record/save/reload proof remains open alongside
 trustworthy timing, physical controller/audio/rumble, physical hardware, and
 release acceptance. Evidence:
 [`docs/artifacts/2026-09-04/android/a3-retro-controller-race-save.md`](artifacts/2026-09-04/android/a3-retro-controller-race-save.md).
