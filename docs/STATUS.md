@@ -570,7 +570,12 @@ Baby Park, displayed `KartPad 02:31.465` as personal card `1/2`, selected
 Replay, and reached the exact `02:31.465` result with the original three lap
 splits. The save, Pulsar database, and RKG retained their exact pre-replay
 hashes, and the new-process console had no fatal signature. This also closes
-visible cold personal-ghost reload/replay on the emulator. Trustworthy timing,
+visible cold personal-ghost reload/replay on the emulator. The same PID then
+survived a forced 180-degree landscape change and a HOME/foreground cycle that
+logged `onPause`, `surfaceDestroyed`, `onStop`, followed by `onStart`,
+`onResume`, and `surfaceCreated`; rendering returned to the intact result and
+all three persistence hashes remained exact. This closes Retro runtime
+rotation/background surface recreation on the emulator. Trustworthy timing,
 physical controller/audio/rumble, physical hardware, and release acceptance
 remain open. Evidence:
 [`docs/artifacts/2026-09-04/android/a3-retro-controller-race-save.md`](artifacts/2026-09-04/android/a3-retro-controller-race-save.md).

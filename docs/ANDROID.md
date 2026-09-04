@@ -50,8 +50,11 @@ records are not represented by the base game's 32-slot RKSYS ghost bitfield,
 which explains the earlier false negative. The new process then surfaced the
 `KartPad 02:31.465` personal card as `1/2`; its Replay path consumed the stored
 stream through the exact `02:31.465` finish while leaving the save, Pulsar
-database, and RKG byte-identical. General fresh-NAND handling, touch parity,
-and physical-device acceptance remain open.
+database, and RKG byte-identical. The same live Retro result then survived a
+forced 180-degree landscape change and a complete HOME/foreground
+`surfaceDestroyed`/`surfaceCreated` cycle in the original process, again with
+all three persistence hashes unchanged. General fresh-NAND handling, touch
+parity, and physical-device acceptance remain open.
 
 The first independent A3 source slice extracted archive member-path validation
 into `runtime/src/retro_rewind/archive_path.cpp`. The existing iOS/tvOS installer

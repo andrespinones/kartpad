@@ -162,6 +162,23 @@ and `2m31s465.rkg` remained `1858e595...`. The new-process console has SHA-256
 and no fatal signature. Durable storage and visible cold personal replay are
 therefore both proven on the emulator.
 
+## Retro runtime lifecycle follow-up
+
+With the exact replay result still visible, the emulator was forced from
+rotation 0 to rotation 180. Android delivered a same-size `surfaceChanged`, the
+Retro frame remained visible, and the process retained PID 12558. HOME then
+delivered `onPause`, `surfaceDestroyed`, and `onStop`. Bringing the existing
+singleTask forward produced a hot resume with `onStart`, `onResume`,
+`surfaceCreated`, and `surfaceChanged`; the exact result returned in the same
+process.
+
+The rotation and post-resume screenshots have SHA-256 values `d80c372d...` and
+`fccebe13...`. After restoring automatic rotation 0, the intact-result
+screenshot has SHA-256 `a04b7709...`. PID-scoped logcat had no fatal signature,
+and RKSYS, `ldb.pul`, and `2m31s465.rkg` retained their exact hashes. This closes
+Retro runtime rotation and background/foreground surface recreation on the
+emulator without broadening the claim to physical hardware.
+
 ## Honest classification
 
 **Pass for production-profile Retro Rewind controller discovery, menu input,

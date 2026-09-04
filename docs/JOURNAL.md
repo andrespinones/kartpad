@@ -2946,3 +2946,21 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   trustworthy timing, audio/rumble quality, and release acceptance remain
   open. No APK, AAB, game data, save, trace, console, or screenshot was
   published.
+
+## 2026-09-04 — Android A3 Retro runtime lifecycle
+
+- With the cold personal replay result still visible, forced the emulator from
+  rotation 0 to rotation 180. Android delivered `surfaceChanged`, rendering
+  remained intact, and the game process retained PID 12558.
+- Sent HOME and observed `onPause`, `surfaceDestroyed`, and `onStop`. Bringing
+  the existing singleTask forward was a hot task resume, not a new launch; it
+  delivered `onStart`, `onResume`, `surfaceCreated`, and `surfaceChanged`, and
+  restored the exact Retro result screen in the same PID.
+- Restored the emulator to automatic rotation 0. RKSYS, Baby Park `ldb.pul`,
+  and `2m31s465.rkg` remained byte-identical at `9c6c7b52...`, `638186a6...`,
+  and `1858e595...`, and PID-scoped logcat contained no fatal signature.
+- Classification: **Pass for Retro runtime landscape rotation and full
+  background/foreground surface recreation on the emulator.** This is not
+  physical-device, physical-controller, audio/rumble-quality, performance, or
+  release acceptance. No APK, AAB, game data, save, log, or screenshot was
+  published.
