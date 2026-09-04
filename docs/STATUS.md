@@ -1,6 +1,6 @@
 # KartPad status
 
-Updated: 2026-09-04
+Updated: 2026-09-05
 
 ## Native Android work
 
@@ -39,6 +39,14 @@ gate are in
 [`docs/TVOS.md`](TVOS.md).
 
 ## Current goal
+
+**0.4.3 is the current community maintenance candidate.** Four external
+contributions were reviewed at their exact heads and accepted individually:
+profile-aware Retro Rewind dispatch, an installed-version viewport startup
+guard, lower-latency iOS audio buffering, and opt-in default-off shake tricks.
+The combined source passes translator, native, unsigned iPhoneOS build, and app
+audit gates. Exact merged-source double packaging and hosted verification remain
+release gates. Android work is separate and unchanged.
 
 **0.4.2 is published as the latest stable community release.** The `v0.4.2`
 tag dereferences to audited source commit
