@@ -2734,3 +2734,25 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   Metadata forcing, transmission choice, and the stage-2 start theory are now
   ruled out. A real controller race and a clean simulator save precondition
   remain open. No APK, AAB, RKG, disc, save, or pack was published.
+
+## 2026-09-04 — Android A3 Retro save-precondition recovery
+
+- Instrumented the API 36 ARM64 emulator after the diagnostic save-country
+  setup. With the Retro `rksys.dat` absent, translated Mii initialization failed
+  before the runtime received a `NANDCreate` call. A format-valid empty save
+  that boots Original mode also failed in Retro after the branded title.
+- Isolated the adjacent Retro state. Removing the leaderboard and regenerating
+  `RRGameSettings.pul` did not fix the empty-save launch. The old and fresh
+  settings differed only at `MiscParams.lastSelectedCup` (`0x42` versus
+  `0xffffffff`), and both failed against the empty save.
+- Restoring the preserved original Retro save, settings, and leaderboard as a
+  coherent trio remained alive beyond 50 seconds and reached the branded
+  title. This separates the damaged diagnostic precondition from the earlier
+  live-player replay divergence.
+- Removed the temporary NAND logging, rebuilt the clean dual ARM64 APK, passed
+  the strict package/privacy audit at SHA-256
+  `340c33f207a651cb2be0f01cc7663dca64a946adfd7e2f033ae4882f5e4b807e`,
+  installed it locally, and cold-launched the restored Retro state to the
+  title. No APK, AAB, save, disc, RKG, or pack was published.
+- Classification: **Pass for simulator-state recovery and root-boundary
+  isolation; general fresh Retro save creation remains open.**

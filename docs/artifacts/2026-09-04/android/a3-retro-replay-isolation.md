@@ -63,6 +63,28 @@ package/privacy audit at SHA-256
 It was installed locally after removing the RKG and state-trace diagnostics;
 it was not published.
 
+## Save-precondition recovery
+
+The later save-country diagnostic had replaced the Retro redirect's
+`rksys.dat` with a format-valid empty file that boots Original mode. A cold
+Retro launch with no save did not create one: it failed during translated Mii
+manager initialization before any `NANDCreate` request. Supplying that same
+empty save also failed after the branded title. Removing the leaderboard file
+and regenerating `RRGameSettings.pul` did not repair the launch.
+
+The original Retro save, settings, and leaderboard were then restored as one
+coherent set from the preserved pre-test copies. A cold launch remained alive
+beyond 50 seconds and reached the branded title. The old and regenerated
+settings files differed only in `MiscParams.lastSelectedCup` (`0x00000042`
+versus the fresh `0xffffffff` sentinel), but both failed with the empty save;
+that field and the leaderboard are therefore not sufficient causes.
+
+Temporary NAND-path logging was removed. The clean dual ARM64 APK rebuilt,
+passed the strict package/privacy audit at SHA-256
+`340c33f207a651cb2be0f01cc7663dca64a946adfd7e2f033ae4882f5e4b807e`,
+installed over the diagnostic build, and cold-launched the restored coherent
+Retro state to the branded title. It remains local and was not published.
+
 ## Native replay control
 
 The diagnostic RKG file was renamed out of the recognized path and the process
@@ -94,3 +116,8 @@ is within fixture-to-player state/cadence or another unisolated race-state
 difference. A controller-driven race, trustworthy timing, save/relaunch
 verification for that controller-driven race, mode switching, and
 physical-device execution remain open.
+
+The recovery control also establishes that the fixture divergence is separate
+from the later test-save damage. Retro Rewind currently requires the preserved
+coherent save set on this emulator; general missing-save creation and reuse of
+an Original-compatible empty `rksys.dat` remain unsupported boundaries.
