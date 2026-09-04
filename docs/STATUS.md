@@ -147,12 +147,27 @@ three N64 Mario Raceway Time Trial laps, reached native finish stage 4, and
 displayed retail results for `05:17.517`; the strict trace summarizer accepts
 one 19,032-sample race segment from countdown through finish. No guest-state
 write or forced finish was used. The game reported that ghost data could not
-be saved, and injected keys did not advance the title after the subsequent
-cold relaunch, so post-race save creation and controller-after-relaunch remain
-open. The original in-sandbox save was restored byte-for-byte and all debug
-markers were removed. A2 also remains open for attached-controller input and
-rumble, audible audio, and physical Android hardware. Evidence:
+be saved, consistent with the previously observed native recorder overflow on
+a slow unguided run; this is not post-race save proof. A later same-process
+cold-input retry advanced title, license, and Main Menu with normally spaced
+key events, correcting the earlier stuck-title observation. The original
+in-sandbox save was restored byte-for-byte and all debug markers were removed.
+A2 remains open for a natural controller race/save, audible audio, and
+physical Android hardware. Evidence:
 [`docs/artifacts/2026-09-03/android/a2-state-trace-player-race.md`](artifacts/2026-09-03/android/a2-state-trace-player-race.md).
+
+Android's real InputReader-to-SDL discovery path is now exercised with a
+temporary emulator virtual gamepad. The first hotplug exposed an ART CheckJNI
+abort: game-side SDL queries crossed into Java from a switched Wii guest-fiber
+stack. Event-backed controller snapshots, queued rumble, scheduler-only
+Android event polling, and removal of the opportunistic Android pump close
+both that query path and a separately reproduced reconnect crash. Exact-final
+PID `5007` retained button and analog input through connect, disconnect,
+reconnect, HOME/background, HOT foreground resume, post-resume input, and
+final disconnect without an Android fatal. This passes emulator controller
+hotplug and lifecycle behavior, not physical controller, motor, latency, OEM,
+or device-performance acceptance. A2 remains open. Evidence:
+[`docs/artifacts/2026-09-03/android/a2-virtual-controller-hotplug.md`](artifacts/2026-09-03/android/a2-virtual-controller-hotplug.md).
 
 ## Native tvOS work
 

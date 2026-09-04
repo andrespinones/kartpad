@@ -1981,3 +1981,44 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   emulator race/results; open for post-race save, controller-after-relaunch,
   real controller/rumble, audible audio, and physical hardware.** Evidence:
   `docs/artifacts/2026-09-03/android/a2-state-trace-player-race.md`.
+
+## 2026-09-03 — Android A2 virtual-controller hotplug and JNI fiber ownership
+
+- Created a temporary ignored `/dev/uinput` Xbox-compatible controller on the
+  API 36 ARM64 emulator. Android InputReader and SDL discovered it through the
+  production controller path; no application-side controller state was
+  injected.
+- Pre-fix PID `4204` aborted under ART CheckJNI on the first south-button event.
+  `SDL_GamepadConnected` forced Java-backed device polling from WiiCompiled's
+  switched guest-fiber stack, invalidating ART's JNI transition-frame
+  reference. Caching event-backed button/axis state fixed game-side reads, but
+  a second hotplug on PID `4658` reproduced the same abort directly from
+  `aurora::window::poll_events` during `AdvanceDueRetraces`.
+- The exact correction makes standard KPAD reads pure cached snapshots, queues
+  rumble for safe polling, exposes the original scheduler-fiber boundary, and
+  permits Android SDL polling only on that stack. Aurora's opportunistic
+  Android pump is disabled; other platforms retain existing behavior.
+- Final PID `5007` survived connect, mapped button input, analog selection,
+  disconnect, reconnect, HOME/background, HOT same-PID foreground, post-resume
+  input, and final disconnect. The log recorded the expected core
+  `0x00000800` / Classic `0x00000010` trigger and no CheckJNI, Java, or native
+  fatal record.
+- A normally paced same-process keyboard retry also advanced the earlier cold
+  title through license selection to Main Menu, correcting that observation as
+  a cadence false alarm. The prior `05:17.517` ghost-save message is consistent
+  with the native slow-run recorder-overflow precedent, but no post-race save
+  is claimed.
+- Fresh preparation reproduces all seven changed upstream files exactly. Host
+  controller contract, ARM64 build/link/package, lint, release Kotlin compile,
+  storage contract, repository safety, SunPad snapshot, diff check, and strict
+  APK/privacy audit pass. The source verifier accepts 444 hunks across 48
+  patches before the known unrelated ignored `rr-pulsar` pin mismatch.
+- The local-only 103,437,088-byte APK has SHA-256
+  `44cbeed7bdca40541bdee71b944ffce17ee63fba10c05dca9777f0fe04f6a715`;
+  its stripped 83,540,120-byte `libmain.so` is
+  `67449ea532d61a17580f941b38ba74f52a2ea3cacf9d331a49bcf3143b69294a`.
+  Classification: **Pass for emulator controller input/analog/hotplug,
+  reconnect, and HOT lifecycle behavior; open for a natural controller-driven
+  race/save and all physical-controller/hardware rows.** No APK/AAB or private
+  data was published. Evidence:
+  `docs/artifacts/2026-09-03/android/a2-virtual-controller-hotplug.md`.

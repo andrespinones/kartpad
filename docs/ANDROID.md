@@ -795,15 +795,18 @@ three-lap emulator player race and retail results through ordinary Android key
 events without guest-state writes. Next reproduce post-race save creation and
 controller input after cold relaunch, then use the Aurora-to-Classic SDL
 controller bridge to repeat the complete race without weakening the package
-privacy boundary. The bridge's deterministic
-source-only contract passes on both page-size lanes, and Android
-`WPADControlMotor` now routes Start/Stop output to the same resolved SDL pad.
-Surface loss/backgrounding suspends the bridge and stops active rumble; a
-corrected API 36 process retained its PID through four such cycles, although
-one preceding process ended silently after one cycle and remains unexplained.
-No attached-controller input or rumble acceptance is claimed until actual
-hardware is attached. Do not repeat the rejected retail-KPAD RKG replay
-unchanged: even
+privacy boundary. The bridge's deterministic source-only contract passes on
+both page-size lanes, and Android `WPADControlMotor` routes Start/Stop output
+to the same resolved SDL pad. A temporary emulator virtual gamepad now proves
+Android InputReader/SDL discovery, mapped button and analog input, disconnect,
+reconnect, and same-PID HOT background/foreground behavior. That test exposed
+and fixed ART CheckJNI aborts caused by Java-backed SDL polling from switched
+Wii guest-fiber stacks; Android polling is now scheduler-stack-only and KPAD
+reads cached event state. The earlier cold-title input observation was a
+cadence false alarm. Continue with a natural controller-driven complete race,
+post-race save/relaunch, and physical Bluetooth/USB controller plus rumble;
+the emulator virtual pad is not physical acceptance. Do not repeat the
+rejected retail-KPAD RKG replay unchanged: even
 the exact Baby Mario / Nanobike / Manual staff configuration diverged by guest
 time 8.580.
 
