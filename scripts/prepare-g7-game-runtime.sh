@@ -63,6 +63,8 @@ patch -p1 -d "${runtime_source}" < \
 patch -p1 -d "${runtime_source}" < \
   "${repo_root}/patches/wiicompiled-local-wfc-test-route.patch"
 patch -p1 -d "${runtime_source}" < \
+  "${repo_root}/patches/wiicompiled-offline-kd-services.patch"
+patch -p1 -d "${runtime_source}" < \
   "${repo_root}/patches/wiicompiled-blocking-stream-recv-wait.patch"
 patch -p1 -d "${runtime_source}" < \
   "${repo_root}/patches/wiicompiled-mii-seed.patch"

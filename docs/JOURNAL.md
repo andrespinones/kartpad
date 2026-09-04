@@ -2964,3 +2964,36 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   physical-device, physical-controller, audio/rumble-quality, performance, or
   release acceptance. No APK, AAB, game data, save, log, or screenshot was
   published.
+
+## 2026-09-04 — Android A3 fresh offline save initialization
+
+- Reproduced the clean redirected-NAND failure visibly on the standalone API
+  36 ARM64 emulator. Retro created a correctly sized but all-zero RKSYS and
+  reported that Wii system memory could not be written or read.
+- Narrow instrumentation showed that file creation/preallocation succeeded,
+  while the following virtual-device open failed after two `-42` operations.
+  The offline preference was rejecting all `/dev/net/*` devices before
+  classification, including local Wii KD request/time and NCD services needed
+  by first-run save initialization.
+- Added a common runtime patch that keeps those KD/NCD services available when
+  online networking is disabled while preserving the offline gate for IP and
+  SSL. Also retained an Android NAND semantic correction that removes the
+  unrelated create-on-open fallback. All temporary tracing was removed.
+- A fully fresh runtime preparation and clean Android build passed. The local
+  APK SHA-256 is
+  `262d821e6b2b769872df50e48e16a36b8c636b528bc9c1d03a17ae37624baaa7`,
+  its package/privacy audit passed, and its native library has no save-trace
+  markers.
+- Two independent fresh redirected-NAND cold launches visibly reached the
+  Retro Rewind title and generated the exact known-valid 2,867,200-byte empty
+  RKSYS at SHA-256
+  `708c7a040e0cfe6cd815690e63f46d1678f17899bce0e786f7480030830f1d13`.
+  Cold relaunch passed. The original base and Retro saves were restored and
+  retained their exact pre-test hashes after a final launch.
+- Classification: **Pass for fresh offline Retro system-memory creation and
+  cold title relaunch on the emulator.** Controller-driven new-license
+  creation, physical hardware/controller, audio/rumble quality, performance,
+  and release acceptance remain open. The standalone emulator was left visibly
+  running at the clean Retro title; no private data or application package was
+  published. Evidence:
+  `docs/artifacts/2026-09-04/android/a3-fresh-save-offline-kd.md`.

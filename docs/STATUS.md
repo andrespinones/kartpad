@@ -495,6 +495,23 @@ than a proven save/settings defect. Full first-run license creation is still
 open, and the controller-race fixture conclusion is unchanged. Evidence:
 [`docs/artifacts/2026-09-04/android/a3-retro-replay-isolation.md`](artifacts/2026-09-04/android/a3-retro-replay-isolation.md).
 
+The disclosed format-valid empty-save precondition is now removed for the
+fresh Retro emulator path. With `[network] enabled = false`, the runtime had
+incorrectly rejected every `/dev/net/*` device before classification, including
+the local Wii KD request/time and NCD services required during first-run
+system-memory initialization. The common runtime patch now leaves those local
+services available offline while continuing to gate only IP and SSL devices.
+Two independent fresh redirected-NAND launches visibly reached the Retro
+Rewind title and each created the exact 2,867,200-byte format-valid empty RKSYS
+with SHA-256 `708c7a040e0cfe6cd815690e63f46d1678f17899bce0e786f7480030830f1d13`;
+a cold relaunch also passed. The clean local APK passed package/privacy audit,
+and the original emulator saves were restored with exact hashes after the
+test. This closes fresh offline Retro system-memory creation on the API 36
+ARM64 emulator, not controller-driven first license creation, physical
+hardware/controller, audio/rumble quality, performance, or release acceptance.
+Evidence:
+[`docs/artifacts/2026-09-04/android/a3-fresh-save-offline-kd.md`](artifacts/2026-09-04/android/a3-fresh-save-offline-kd.md).
+
 Explicit Original to Retro Rewind to Original switching then reproduced the
 previously intermittent Mii exit once across eight observed pre-fix Original
 launches (six base-only controls and two within the switch sequence). The crash
