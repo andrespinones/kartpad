@@ -2877,3 +2877,27 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   controller-driven record/save/reload proof remains open. The emulator was
   left running visibly in Retro Rewind; no private save or binary was
   published.
+
+## 2026-09-04 — Android A3 Retro Rewind save-diff and fast-fixture rejection
+
+- Recovered the retained ignored pre-race save directly from the emulator and
+  verified its full SHA-256 is the recorded `3c4aeacd...`. It differs from the
+  cold-loaded `7279ad4d...` post-race save by only 12 bytes: ordinary
+  race/statistic updates within the initialized license plus the core CRC.
+  Neither leaderboard data nor a personal-ghost bit/payload changed.
+- Identified Retro Rewind's zero-based track map and inspected its Baby Park
+  expert RKGs structurally. The primary `01:15.379` stream requires Peach,
+  Mach Bike, Manual and 4,759 frames; the alternate `01:26.822` stream requires
+  Mario, Standard Kart M, Manual and 5,445 frames.
+- Ran the matching primary metadata visibly through the existing ignored debug
+  input boundary, selecting Peach, Mach Bike and Baby Park on-screen. Both
+  Retro-specific Inside and Outside transmission variants consumed the full
+  stream but diverged and remained at race stage 2. The alternate stream also
+  diverged. No finish was forced and the save stayed byte-identical at
+  `7279ad4d...`.
+- Classification: **Rejected diagnostic, with useful narrowing.** Packaged
+  ghost playback cannot stand in for a fast live-player record on this build.
+  The next record/save/reload attempt must use ordinary controller steering or
+  first diagnose the offline replay-to-live-player divergence. All temporary
+  RKG and trace markers were removed, and the visible emulator was left at the
+  clean production chooser.

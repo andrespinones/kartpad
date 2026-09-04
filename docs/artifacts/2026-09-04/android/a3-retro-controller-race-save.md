@@ -62,6 +62,14 @@ to
 `7279ad4db655b893f8b2dd1a1427512c4d5799efe9047a94e67b35080c600401`.
 The Original save remained out of scope and untouched.
 
+The exact pre-race file was later recovered read-only from an ignored emulator
+recovery copy and independently matched the recorded `3c4aeacd...` hash. A
+byte comparison against the cold-loaded post-race file found only 12 changed
+bytes: four single-byte increments and one four-byte distance/statistic value
+inside the initialized license's ordinary race-statistics region, plus the
+four-byte core CRC-32. No leaderboard entry, personal-ghost bitfield, or ghost
+payload byte changed.
+
 ## Cold relaunch
 
 With the controller attached, the app was force-stopped and relaunched through
@@ -88,6 +96,24 @@ bitfield `0x00000000` and no nonzero primary Time Trial leaderboard timers.
 The post-results mutation therefore did not include a retained personal record
 or ghost. A faster controller-driven result is still required for the
 record/save/reload part of A3.
+
+## Rejected fast-fixture follow-up
+
+Retro Rewind's own Baby Park expert streams were tested only as an ignored
+debug diagnostic. The primary `01:15.379` stream identifies Peach, Mach Bike,
+Manual and 4,759 frames. A visible emulator retry selected that exact
+character, vehicle and course, then tested both Retro Rewind transmission
+choices. Both live-player runs consumed the complete stream but diverged,
+remained at race stage 2, and stopped against the course boundary. The earlier
+alternate `01:26.822` Mario/Standard Kart stream likewise diverged. No native
+finish was forced and the save remained exactly `7279ad4d...` afterward.
+
+The retained ignored Outside-variant trace has SHA-256
+`7fbd18d913818f07731ef602fc1f898ba3c460b5db9c8cfa97184ee124aa1623`;
+the bounded fixture console has SHA-256
+`b711da419151d366159698113786592d9d10a21827fbec7742ff5a7a91692bdd`.
+These attempts are rejected diagnostics, not race, record, or controller
+acceptance. The RKG and trace markers were removed from the app afterward.
 
 ## Honest classification
 

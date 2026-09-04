@@ -547,7 +547,12 @@ the production chooser again selected Retro, reached the branded title, and
 returned to the course ghost screen. It still showed only `1/1`; read-only
 inspection of the exact cold-loaded, CRC-valid save found a zero personal-ghost
 bitfield and no Time Trial leaderboard timer in its only initialized license.
-The slow run therefore did not create a retained personal record/ghost; a
+The retained exact pre-race save was then recovered read-only from the emulator:
+the pre/post files differ by only 12 bytes, confined to ordinary race/statistic
+fields plus the core CRC, with no leaderboard or ghost payload change. The slow
+run therefore did not create a retained personal record/ghost. Both variants of
+a matching packaged Baby Park RKG were rejected after visible live-player runs
+diverged and remained at race stage 2; neither changed the save. A
 faster record/save/reload proof remains open alongside
 trustworthy timing, physical controller/audio/rumble, physical hardware, and
 release acceptance. Evidence:
