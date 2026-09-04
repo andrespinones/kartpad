@@ -565,9 +565,14 @@ only conclusion: Baby Park is stored under Pulsar course key `d6cac6a4`, whose
 `150/17m13s562.rkg`. All three survived force-stop and a new production-chooser
 process. The base game's 32-bit RKSYS personal-ghost field does not describe
 Retro Rewind's expanded course set. This closes durable custom-track record
-storage on the emulator; a visible cold personal-replay selection still remains
-open alongside trustworthy timing, physical controller/audio/rumble, physical
-hardware, and release acceptance. Evidence:
+storage on the emulator. A subsequent controlled cold navigation selected GCN
+Baby Park, displayed `KartPad 02:31.465` as personal card `1/2`, selected
+Replay, and reached the exact `02:31.465` result with the original three lap
+splits. The save, Pulsar database, and RKG retained their exact pre-replay
+hashes, and the new-process console had no fatal signature. This also closes
+visible cold personal-ghost reload/replay on the emulator. Trustworthy timing,
+physical controller/audio/rumble, physical hardware, and release acceptance
+remain open. Evidence:
 [`docs/artifacts/2026-09-04/android/a3-retro-controller-race-save.md`](artifacts/2026-09-04/android/a3-retro-controller-race-save.md).
 
 ## Native tvOS work

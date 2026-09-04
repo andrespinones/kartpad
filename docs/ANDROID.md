@@ -47,9 +47,11 @@ production-chooser relaunch. A second feedback-driven run finished in
 earlier `17m13s562.rkg` and updated Baby Park's `ldb.pul`. Those Pulsar files
 survived a force-stop and production-chooser cold relaunch. Retro custom-track
 records are not represented by the base game's 32-slot RKSYS ghost bitfield,
-which explains the earlier false negative. A visible cold replay from the
-personal-ghost browser, general fresh-NAND handling, touch parity, and
-physical-device acceptance remain open.
+which explains the earlier false negative. The new process then surfaced the
+`KartPad 02:31.465` personal card as `1/2`; its Replay path consumed the stored
+stream through the exact `02:31.465` finish while leaving the save, Pulsar
+database, and RKG byte-identical. General fresh-NAND handling, touch parity,
+and physical-device acceptance remain open.
 
 The first independent A3 source slice extracted archive member-path validation
 into `runtime/src/retro_rewind/archive_path.cpp`. The existing iOS/tvOS installer

@@ -2927,3 +2927,22 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   and release acceptance. The emulator was left visibly running at the clean
   production chooser; no APK, AAB, game data, save, trace, or screenshot was
   published.
+
+## 2026-09-04 — Android A3 Retro Rewind cold personal replay
+
+- From the clean production chooser, selected Retro Rewind and navigated with
+  the Android InputReader-visible controller to 150cc Time Trials, GCN Baby
+  Park. The fresh process displayed the persisted `KartPad 02:31.465` personal
+  card as `1/2`, correcting the earlier wrong-course `1/1` observation.
+- Selected the card's Replay action. The cold-loaded stream visibly advanced
+  around Baby Park and reached the exact `02:31.465` result with its original
+  `00:35.374`, `00:30.012`, and `00:26.009` recorded splits. No live steering
+  driver or debug RKG fixture was present.
+- After replay, RKSYS remained `9c6c7b52...`, Baby Park `ldb.pul` remained
+  `638186a6...`, and `2m31s465.rkg` remained `1858e595...`. The new-process
+  console SHA-256 was `8f456db1...` and contained no fatal signature.
+- Classification: **Pass for visible production-path cold personal-ghost
+  selection and full replay on the emulator.** Physical controller/device,
+  trustworthy timing, audio/rumble quality, and release acceptance remain
+  open. No APK, AAB, game data, save, trace, console, or screenshot was
+  published.

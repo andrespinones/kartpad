@@ -148,11 +148,19 @@ The `150` directory contains both durable personal streams:
 
 The app was force-stopped and relaunched through the production chooser as a
 new process. The Pulsar database and both RKGs remained present with the exact
-hashes above. A controller-navigation attempt reached the correct Baby Park
-packaged-ghost card, but a reconnect modal and repeated virtual D-pad input
-prevented a clean capture of the personal `Select Ghost` replay path. Durable
-custom-track record storage is therefore proven; visible cold personal-replay
-selection remains open.
+hashes above. Controlled controller navigation returned to 150cc Time Trials
+and selected GCN Baby Park. The cold-loaded screen displayed the personal
+`KartPad 02:31.465` card as `1/2`, and its Replay action visibly consumed the
+stored stream through the exact `02:31.465` finish with recorded splits
+`00:35.374`, `00:30.012`, and `00:26.009`.
+
+The replay-selection, active-replay, and exact-finish screenshots have
+SHA-256 values `2b682429...`, `925c4bf6...`, and `d6e834d3...`, respectively.
+After replay, RKSYS remained `9c6c7b52...`, `ldb.pul` remained `638186a6...`,
+and `2m31s465.rkg` remained `1858e595...`. The new-process console has SHA-256
+`8f456db1ed18ac0624639fb11c691a18d5a1f4a406284505a0801c9c9d91afc4`
+and no fatal signature. Durable storage and visible cold personal replay are
+therefore both proven on the emulator.
 
 ## Honest classification
 
@@ -161,7 +169,6 @@ live analog gameplay, normal disconnect/reconnect handling, complete race and
 results presentation, post-results save mutation, and byte-stable
 controller-attached cold relaunch.** It is not physical-controller, physical-
 device, tactile-rumble, audible-quality, sustained-performance, trustworthy-
-timing, visible cold personal-replay selection, or release acceptance. Durable
-Retro custom-track personal-record/ghost storage across a production-path cold
-relaunch now passes. No APK, AAB, game data, save, trace, console, or screenshot
-was published.
+timing, or release acceptance. Durable Retro custom-track personal-record/ghost
+storage and visible full replay across a production-path cold relaunch now
+pass. No APK, AAB, game data, save, trace, console, or screenshot was published.
