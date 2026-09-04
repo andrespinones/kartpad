@@ -25,12 +25,22 @@ limitations when its exact artifact passes every preview gate below.
 - [x] Accept only source changes with a reproducible defect or bounded feature
 - [x] Preserve individual contributor attribution through separate merges
 - [x] Validate the combined translator, native tests, and unsigned iPhoneOS app
-- [ ] Build and audit exact merged-source iOS 0.4.3 build 17 and tvOS build 6
-- [ ] Package both IPAs twice byte-identically and pass fresh extraction audits
-- [ ] Publish the stable tag, both IPAs, and `SHA256SUMS`
-- [ ] Verify fresh hosted downloads byte-for-byte and re-audit them
+- [x] Build and audit exact merged-source iOS 0.4.3 build 17 and tvOS build 6
+- [x] Package both IPAs twice byte-identically and pass fresh extraction audits
+- [x] Publish the stable tag, both IPAs, and `SHA256SUMS`
+- [x] Verify fresh hosted downloads byte-for-byte and re-audit them
 - [ ] Receive physical acceptance for the exact tvOS artifact before claiming
       A12 compatibility or supported Apple TV functionality
+
+Published source: `2075cacbadbc6053e8fedf6179ab525003bac181`.
+iPhone/iPad executable SHA-256:
+`a1095e26d931768549c00213b5604f88506814c1b3badfa5f6c55a5072075b26`.
+iPhone/iPad IPA SHA-256:
+`a8cfe67b068064a9379a88b99e5e15e9fb982b0ef079aac64622e6f4efea8f4d`.
+tvOS executable SHA-256:
+`a365640bedfd81c779cd98fae9de443c1c81f42f02c19633479ecf77eaafd760`.
+tvOS IPA SHA-256:
+`878f27afc6900c43e07cb3330f3fa811d0cdd074cbc2f14a7e11f99e574cff31`.
 
 ## 0.4.2 maintenance candidate
 

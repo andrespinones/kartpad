@@ -2,25 +2,26 @@
 
 ## Current state
 
-KartPad `v0.4.2` is published as the latest stable community release from
-`776a2a6a0e367b6d06f627c983f5da4a565ea104`. The iPhone/iPad app 0.4.2 build
-16 IPA has SHA-256
-`4c498de9a858bf9d59e6f082ebbe7a34e64935831601dc0981de42be8a8d473e`;
-the experimental tvOS app 0.4.2 build 5 IPA has SHA-256
-`0802f7e572da3df9b8daf5b09b45717584fad33c07d8be4ba5c6d8fadceaab3f`.
-Both exact-main builds and two independent packages per platform pass. Fresh
+KartPad `v0.4.3` is published as the latest stable community release from
+`2075cacbadbc6053e8fedf6179ab525003bac181`. The iPhone/iPad app 0.4.3 build
+17 IPA has SHA-256
+`a8cfe67b068064a9379a88b99e5e15e9fb982b0ef079aac64622e6f4efea8f4d`;
+the experimental tvOS app 0.4.3 build 6 IPA has SHA-256
+`878f27afc6900c43e07cb3330f3fa811d0cdd074cbc2f14a7e11f99e574cff31`.
+Both exact-release-source builds and two independent packages per platform pass. Fresh
 hosted downloads match the local bytes, checksums, provenance, and audits.
 The release keeps iPhone/iPad as the accepted community path and carries the
-tvOS cache-root fix, generic AArch64 baseline, RCpc exclusion and binary audit,
-plus shared aspect-state synchronization. Physical testing of the exact tvOS
-artifact remains open, so A12 compatibility and supported Apple TV operation
-are not claimed.
+tvOS cache-root fix, generic AArch64 baseline, RCpc exclusion and binary audit.
+It adds profile-aware Retro Rewind dispatch, an installed-version iOS startup
+guard, lower-latency iOS audio buffering, and opt-in default-off shake tricks.
+Physical testing of the exact tvOS artifact remains open, so A12 compatibility
+and supported Apple TV operation are not claimed.
 
 The Issue #17 reporter accepted the exact public `v0.4.1` tvOS storage hotfix on
 an Apple TV 4K (3rd generation) running tvOS 26.5/26.6. Config writes no longer
 raise error 513, both profiles launch, NAND/save and settings changes survive a
 normal relaunch, and the cache-root backup script succeeds. This resolves the
-reported storage defect without establishing the still-open 0.4.2, A12,
+reported storage defect without establishing the still-open 0.4.3, A12,
 sleep/wake, restore, multi-controller, purge-recovery, or sustained-performance
 gates.
 
@@ -106,7 +107,7 @@ not block offline Retro Rewind support.
 1. Begin Android A0 on the authorized second machine using
    `docs/ANDROID-GOAL-LOOP.md`: bootstrap pinned tools and prove the source-only
    ARM64 SDL/JNI/Vulkan fixture before private game integration.
-2. Collect a physical Apple TV report against the exact `v0.4.2` asset using
+2. Collect a physical Apple TV report against the exact `v0.4.3` asset using
    `docs/TVOS-TESTING.md`.
 3. Await the Issue #1 Feather-signed iPad import retest and the Issue #5 MacBook
    Air cursor/settings retest requested against Preview 5.

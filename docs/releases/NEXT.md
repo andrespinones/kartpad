@@ -32,10 +32,20 @@ Physical acceptance of the exact tvOS artifact remains open.
 - [x] Review each external pull request at its exact head.
 - [x] Merge accepted contributions individually with contributor attribution.
 - [x] Validate the combined source, translator, native tests, and iPhoneOS app.
-- [ ] Merge and verify the complete release source on `main`.
-- [ ] Rebuild exact merged source as iOS 0.4.3 build 17 and tvOS build 6.
-- [ ] Package each IPA twice deterministically and compare bytes.
-- [ ] Audit exact IPAs and embedded provenance/notices.
-- [ ] Tag the audited source and publish both IPAs plus `SHA256SUMS`.
-- [ ] Download hosted assets, byte-compare, checksum-verify, and re-audit.
-- [ ] Verify remote `main` and the dereferenced tag.
+- [x] Merge and verify the complete release source on `main`.
+- [x] Rebuild exact merged source as iOS 0.4.3 build 17 and tvOS build 6.
+- [x] Package each IPA twice deterministically and compare bytes.
+- [x] Audit exact IPAs and embedded provenance/notices.
+- [x] Tag the audited source and publish both IPAs plus `SHA256SUMS`.
+- [x] Download hosted assets, byte-compare, checksum-verify, and re-audit.
+- [x] Verify remote `main` and the dereferenced tag.
+
+Published source: `2075cacbadbc6053e8fedf6179ab525003bac181`.
+iPhone/iPad executable SHA-256:
+`a1095e26d931768549c00213b5604f88506814c1b3badfa5f6c55a5072075b26`.
+iPhone/iPad IPA SHA-256:
+`a8cfe67b068064a9379a88b99e5e15e9fb982b0ef079aac64622e6f4efea8f4d`.
+Experimental tvOS executable SHA-256:
+`a365640bedfd81c779cd98fae9de443c1c81f42f02c19633479ecf77eaafd760`.
+Experimental tvOS IPA SHA-256:
+`878f27afc6900c43e07cb3330f3fa811d0cdd074cbc2f14a7e11f99e574cff31`.

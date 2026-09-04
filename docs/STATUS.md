@@ -29,7 +29,7 @@ hotfix incorporates that path correction, and the reporter accepted its exact
 public IPA for config writes, both profile launches, normal-relaunch
 persistence, and cache-root backup. The 0.4.2 release adds a generic compiler
 baseline, explicitly disables RCpc instructions, and rejects those instructions
-during final-binary audit; physical testing of the exact 0.4.2 artifact, restore,
+during final-binary audit; physical testing of the exact 0.4.3 artifact, restore,
 sleep/wake, multi-controller, and sustained performance remain open. Apple TV
 support is therefore still experimental. The release includes
 an original three-layer tvOS icon and Top Shelf image compiled into its audited
@@ -40,15 +40,22 @@ gate are in
 
 ## Current goal
 
-**0.4.3 is the current community maintenance candidate.** Four external
-contributions were reviewed at their exact heads and accepted individually:
-profile-aware Retro Rewind dispatch, an installed-version viewport startup
-guard, lower-latency iOS audio buffering, and opt-in default-off shake tricks.
-The combined source passes translator, native, unsigned iPhoneOS build, and app
-audit gates. Exact merged-source double packaging and hosted verification remain
-release gates. Android work is separate and unchanged.
+**0.4.3 is published as the latest stable community release.** The `v0.4.3`
+tag dereferences to audited source commit
+`2075cacbadbc6053e8fedf6179ab525003bac181`. Four external contributions were
+reviewed at their exact heads and accepted individually: profile-aware Retro
+Rewind dispatch, an installed-version viewport startup guard, lower-latency iOS
+audio buffering, and opt-in default-off shake tricks. Exact merged-source iOS
+0.4.3 build 17 and tvOS build 6 builds and app audits passed. Two packages per
+platform were byte-identical, and fresh hosted downloads matched and re-audited.
+The iPhone/iPad IPA SHA-256 is
+`a8cfe67b068064a9379a88b99e5e15e9fb982b0ef079aac64622e6f4efea8f4d`;
+the experimental tvOS IPA SHA-256 is
+`878f27afc6900c43e07cb3330f3fa811d0cdd074cbc2f14a7e11f99e574cff31`.
+Android work is separate and unchanged. Exact tvOS physical acceptance and
+older-device audio monitoring remain open.
 
-**0.4.2 is published as the latest stable community release.** The `v0.4.2`
+**0.4.2 is retained as the preceding stable community release.** The `v0.4.2`
 tag dereferences to audited source commit
 `776a2a6a0e367b6d06f627c983f5da4a565ea104`. It refreshes the accepted
 iPhone/iPad path as app 0.4.2 build 16 and the experimental tvOS path as app
@@ -83,7 +90,7 @@ accepted the exact signed hotfix artifact on an Apple TV 4K (3rd generation):
 `Config.toml` wrote without error 513, Original and Retro Rewind launched,
 NAND/save and settings changes survived normal termination and relaunch, and
 `backup-tvos-state.sh` succeeded. Issue #17 is resolved; broader tvOS and exact
-0.4.2 acceptance remain separate gates.
+0.4.3 acceptance remain separate gates.
 
 **0.4.0 is published as KartPad's second stable community release.** The
 `v0.4.0` tag points to source commit

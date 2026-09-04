@@ -10,10 +10,10 @@ Application Support. The `v0.4.1` hotfix moves all filesystem-backed tvOS state
 to Caches, matching the successful physical workaround. The reporter then
 accepted the exact public `v0.4.1` IPA on the same hardware: error 513 was gone,
 both modes launched, save/config changes survived a normal relaunch, and the
-backup script succeeded. The 0.4.2 candidate also uses a generic compiler
+backup script succeeded. The 0.4.3 release also uses a generic compiler
 baseline, disables RCpc instructions, and rejects them during final-binary
 audit. Until the remaining physical acceptance matrix passes on the exact
-0.4.2 artifact, the correct
+0.4.3 artifact, the correct
 claim is **public experimental tvOS build**, not supported Apple TV
 functionality.
 
@@ -181,7 +181,7 @@ IPA in place. Config writes produced no error 513, Original and Retro Rewind
 both launched, NAND/save and settings changes survived normal termination and
 relaunch, and `backup-tvos-state.sh` captured the cache-root state. This closes
 the storage defect in Issue #17. Sleep/wake, forced termination, restore,
-multi-controller, purge recovery, sustained performance, and the exact 0.4.2
+multi-controller, purge recovery, sustained performance, and the exact 0.4.3
 artifact remain open. This is still a hardware bring-up build, not a supported
 release. The acceptance record is in
 [`docs/artifacts/2026-09-04/tvos-v0.4.1-storage-acceptance.md`](artifacts/2026-09-04/tvos-v0.4.1-storage-acceptance.md).
