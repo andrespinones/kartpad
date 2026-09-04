@@ -52,6 +52,10 @@ archive.
   durable worker. It persisted seven bytes, force-stopped KartPad, confirmed
   the process was absent, then restarted the same UUID at attempt 1 from byte
   7 and completed the verified 92-byte fixture.
+- A body-free HTTPS `HEAD` request to the exact profile URL returned 200,
+  `Content-Length: 1859041899`, `Content-Type: application/zip`, and
+  `Accept-Ranges: bytes`. This confirms current metadata only; it does not
+  prove a ranged GET or download any archive content.
 - All seven Android A3 contract runners, public assemble/release compilation,
   API-28 lint, private game-runtime Kotlin/Java configuration compilation,
   strict package/privacy audit, the 22-test builder suite, SunPad snapshot,

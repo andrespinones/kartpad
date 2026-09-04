@@ -2391,6 +2391,10 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   Android API. The durable API 36 fault run additionally persisted seven bytes,
   killed the app process, and observed the same UUID restart at attempt 1 from
   byte 7 and finish the fully verified fixture.
+- A body-free HTTPS `HEAD` request to the profile URL returned 200, the exact
+  pinned 1,859,041,899-byte length, ZIP content type, and
+  `Accept-Ranges: bytes`. No production archive bytes were downloaded, and a
+  real ranged GET remains unproven.
 - All A3 contract runners, public/private source configurations, release
   compilation, lint, package/privacy audit, builder suite, SunPad snapshot,
   safety, shell, and diff checks pass. The source-only APK is 33,843,921 bytes
