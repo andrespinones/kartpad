@@ -25,11 +25,12 @@ platform, dependency, symbol, privacy, and private-data audit. An external Apple
 TV 4K (3rd generation) run on tvOS 26.5/26.6 accepted playable Original and
 Retro Rewind video, audio, menus, and Extended Gamepad input after moving the
 runtime from unwritable Application Support to Caches. The `v0.4.1` tvOS-only
-hotfix incorporates that path correction. The 0.4.2 candidate adds a generic
+hotfix incorporates that path correction. The 0.4.2 release adds a generic
 compiler baseline, explicitly disables RCpc instructions, and rejects those
-instructions during final-binary audit; exact public-artifact retesting,
-save recovery, sleep/wake, multi-controller, and sustained performance remain
-open. Apple TV support is therefore still experimental. The candidate includes
+instructions during final-binary audit; physical testing of the exact public
+artifact, save recovery, sleep/wake, multi-controller, and sustained
+performance remain open. Apple TV support is therefore still experimental. The
+release includes
 an original three-layer tvOS icon and Top Shelf image compiled into its audited
 asset catalog. The
 authoritative scope, build procedure, storage boundary, and external-testing
@@ -38,15 +39,23 @@ gate are in
 
 ## Current goal
 
-**0.4.2 is in release validation.** It refreshes the accepted iPhone/iPad path
-as app 0.4.2 build 16 and the experimental tvOS path as app 0.4.2 build 5. The
+**0.4.2 is published as the latest stable community release.** The `v0.4.2`
+tag dereferences to audited source commit
+`776a2a6a0e367b6d06f627c983f5da4a565ea104`. It refreshes the accepted
+iPhone/iPad path as app 0.4.2 build 16 and the experimental tvOS path as app
+0.4.2 build 5. The
 shared mobile runtime now reports the host-selected aspect mode through the
 guest system configuration. tvOS additionally uses a generic AArch64 compiler
 baseline with RCpc disabled and a fail-closed final-binary instruction audit.
 The release does not add tvOS Settings UI, controller rumble, or multichannel
 audio, and it does not claim physical A12 acceptance. Exact merged-source
-builds, deterministic packages, publication, and hosted verification remain
-release gates.
+builds and app audits passed; two packages per platform were byte-identical.
+Fresh hosted downloads matched the local files and passed checksum, ZIP,
+private-data, signing-residue, provenance, and app audits. The iPhone/iPad IPA
+SHA-256 is
+`4c498de9a858bf9d59e6f082ebbe7a34e64935831601dc0981de42be8a8d473e`;
+the experimental tvOS IPA SHA-256 is
+`0802f7e572da3df9b8daf5b09b45717584fad33c07d8be4ba5c6d8fadceaab3f`.
 
 **0.4.1 tvOS storage hotfix is published.** The `v0.4.1` tag dereferences to
 source commit `d0e77d5c9bc48a7f1f6aaedf79fd00d5e616dc0c`. Its tvOS app 0.4.1
