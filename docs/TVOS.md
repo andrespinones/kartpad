@@ -7,10 +7,13 @@ path. An external Apple TV 4K (3rd generation) tester reached playable Original
 Mario Kart Wii and Retro Rewind on tvOS 26.5/26.6 with an Extended Gamepad, but
 the public `v0.4.0` build could not write config, NAND, saves, or logs under
 Application Support. The `v0.4.1` hotfix moves all filesystem-backed tvOS state
-to Caches, matching the successful physical workaround. The 0.4.2 candidate
-also uses a generic compiler baseline, disables RCpc instructions, and rejects
-them during final-binary audit. Until the remaining physical acceptance matrix
-passes on an exact public artifact, the correct
+to Caches, matching the successful physical workaround. The reporter then
+accepted the exact public `v0.4.1` IPA on the same hardware: error 513 was gone,
+both modes launched, save/config changes survived a normal relaunch, and the
+backup script succeeded. The 0.4.2 candidate also uses a generic compiler
+baseline, disables RCpc instructions, and rejects them during final-binary
+audit. Until the remaining physical acceptance matrix passes on the exact
+0.4.2 artifact, the correct
 claim is **public experimental tvOS build**, not supported Apple TV
 functionality.
 
@@ -139,9 +142,11 @@ Record the Apple TV model, tvOS version, Xcode/SDK, controller models, source
 commit, binary SHA-256, and whether the run used Original or Retro Rewind.
 
 - [x] Clean unsigned `KartPadDual` build passes `audit-tvos-app.sh`.
-- [ ] Locally signed candidate installs and opens on a physical Apple TV.
+- [x] The exact public `v0.4.1` IPA installs in place after local re-signing and
+  opens on a physical Apple TV.
 - [ ] Missing data shows setup instructions rather than crashing or exiting.
-- [ ] Valid RMCP01 data stages from a Mac and survives ordinary relaunch.
+- [x] Valid RMCP01 data loads from Caches and survives ordinary relaunch on the
+  exact public `v0.4.1` IPA.
 - [ ] Original mode reaches a complete race with correct video and audio.
 - [ ] Retro Rewind downloads, verifies, installs, and reaches a complete race.
 - [ ] Original/Retro mode switching works across clean relaunches.
@@ -149,8 +154,11 @@ commit, binary SHA-256, and whether the run used Original or Retro Rewind.
   reconnect; Siri Remote input never leaks into racing controls.
 - [ ] Two-, three-, and four-controller slot assignment is stable.
 - [ ] A save survives normal exit, relaunch, sleep/wake, and forced termination.
+  The normal-exit/relaunch substep passes on `v0.4.1`; sleep/wake and forced
+  termination remain open.
 - [ ] `backup-tvos-state.sh` captures the save and a restore rehearsal recovers
-  it before any tester is asked to risk meaningful progress.
+  it before any tester is asked to risk meaningful progress. Capture passes on
+  `v0.4.1`; restore remains open.
 - [ ] Purging reconstructible content produces a recovery screen; restaging
   game data and redownloading Retro Rewind do not overwrite saves.
 - [ ] A full cup and at least a 30-minute soak record frame pacing, audio,
@@ -168,9 +176,15 @@ outside cohort performs physical acceptance. The first report confirms both
 modes can reach smooth playable gameplay with audio, 3D rendering, menus, and
 wireless gamepad input. It also exposed error 513 on Application Support; the
 reporter's cache-root workaround succeeded and is the basis of `v0.4.1`.
-Save/relaunch, sleep/wake, multi-controller, purge recovery, and an exact public
-hotfix retest remain open. This is still a hardware bring-up build, not a
-supported release.
+The reporter subsequently re-signed and installed the exact public `v0.4.1`
+IPA in place. Config writes produced no error 513, Original and Retro Rewind
+both launched, NAND/save and settings changes survived normal termination and
+relaunch, and `backup-tvos-state.sh` captured the cache-root state. This closes
+the storage defect in Issue #17. Sleep/wake, forced termination, restore,
+multi-controller, purge recovery, sustained performance, and the exact 0.4.2
+artifact remain open. This is still a hardware bring-up build, not a supported
+release. The acceptance record is in
+[`docs/artifacts/2026-09-04/tvos-v0.4.1-storage-acceptance.md`](artifacts/2026-09-04/tvos-v0.4.1-storage-acceptance.md).
 
 Before sending it, package and audit one exact candidate. Testers must have a
 paired Apple TV, a Mac with Xcode, an Extended Gamepad, their own supported game

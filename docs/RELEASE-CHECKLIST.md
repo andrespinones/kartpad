@@ -52,13 +52,15 @@ tvOS IPA SHA-256:
 - [x] Build and audit exact merged-source tvOS app 0.4.1 build 4
 - [x] Package twice byte-identically and pass fresh extraction audits
 - [x] Publish tag, IPA, checksum, and verify a fresh hosted download
-- [ ] Receive reporter acceptance on the exact signed hotfix artifact
+- [x] Receive reporter acceptance on the exact signed hotfix artifact
 
 Published source: `d0e77d5c9bc48a7f1f6aaedf79fd00d5e616dc0c`.
 tvOS executable SHA-256:
 `a9e5c89ba20406897f8925c48b9683a1582bf902a9335a6922c22db1240f7ce3`.
 tvOS IPA SHA-256:
 `ca62f6e00e0b5260ddb6b836ae2cda969d3bc5655ba4bd3dac19aa9406249e49`.
+The Issue #17 reporter accepted config writes without error 513, both profile
+launches, normal-relaunch persistence, and cache-root backup on 2026-09-04.
 
 ## 0.4.0 stable candidate
 

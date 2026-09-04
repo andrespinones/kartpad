@@ -25,12 +25,13 @@ platform, dependency, symbol, privacy, and private-data audit. An external Apple
 TV 4K (3rd generation) run on tvOS 26.5/26.6 accepted playable Original and
 Retro Rewind video, audio, menus, and Extended Gamepad input after moving the
 runtime from unwritable Application Support to Caches. The `v0.4.1` tvOS-only
-hotfix incorporates that path correction. The 0.4.2 release adds a generic
-compiler baseline, explicitly disables RCpc instructions, and rejects those
-instructions during final-binary audit; physical testing of the exact public
-artifact, save recovery, sleep/wake, multi-controller, and sustained
-performance remain open. Apple TV support is therefore still experimental. The
-release includes
+hotfix incorporates that path correction, and the reporter accepted its exact
+public IPA for config writes, both profile launches, normal-relaunch
+persistence, and cache-root backup. The 0.4.2 release adds a generic compiler
+baseline, explicitly disables RCpc instructions, and rejects those instructions
+during final-binary audit; physical testing of the exact 0.4.2 artifact, restore,
+sleep/wake, multi-controller, and sustained performance remain open. Apple TV
+support is therefore still experimental. The release includes
 an original three-layer tvOS icon and Top Shelf image compiled into its audited
 asset catalog. The
 authoritative scope, build procedure, storage boundary, and external-testing
@@ -69,8 +70,12 @@ Support fallback, and adds a non-atomic config write fallback for the physical
 error-513 path. The exact merged-source build and app audit passed, two packages
 were byte-identical, and a fresh anonymous hosted download matched and passed
 checksum, ZIP, app, privacy, signing-residue, private-data, and provenance
-audits. The iPhone/iPad 0.4.0 release is unchanged. Reporter acceptance on the
-exact signed hotfix artifact remains open.
+audits. The iPhone/iPad 0.4.0 release is unchanged. On 2026-09-04, the reporter
+accepted the exact signed hotfix artifact on an Apple TV 4K (3rd generation):
+`Config.toml` wrote without error 513, Original and Retro Rewind launched,
+NAND/save and settings changes survived normal termination and relaunch, and
+`backup-tvos-state.sh` succeeded. Issue #17 is resolved; broader tvOS and exact
+0.4.2 acceptance remain separate gates.
 
 **0.4.0 is published as KartPad's second stable community release.** The
 `v0.4.0` tag points to source commit

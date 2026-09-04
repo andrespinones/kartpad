@@ -48,6 +48,13 @@ The mobile settings bridge now reports the selected aspect mode through the
 guest `SCGetAspectRatio` result. This removes a deterministic state mismatch
 without adding new tvOS settings UI or changing the accepted launch flow.
 
+The Issue #17 Apple TV 4K (3rd generation) report also found the fixed 1.0x
+render scale visibly soft on a large display and reported that 2.0x or 2.5x
+remained at 60 FPS while the device thermal state was nominal. Treat that as a
+single-device optimization lead, not a new default or sustained-performance
+claim. Any default change belongs with the deferred tvOS settings work and must
+be benchmarked across supported Apple TV hardware and thermal states first.
+
 Acceptance requires all of the following:
 
 - controller-required messaging and input gating remain intact;
