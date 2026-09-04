@@ -1,14 +1,15 @@
 # Technical debt
 
-This file records useful engineering directions that have not cleared KartPad's
-acceptance gates. An entry is not a release promise, an accepted implementation,
-or evidence that the feature works. External pull requests listed here are source
-material only; any follow-up is maintainer-owned and must pass the gates below on
-its exact submitted artifact.
+This file records useful engineering directions that have not fully cleared
+KartPad's acceptance gates. An entry is not a release promise or evidence that a
+feature works on untested hardware. External pull requests listed here are source
+material only; any follow-up is maintainer-owned and its completed and remaining
+gates are stated explicitly below.
 
 ## tvOS A12 compiler baseline
 
-Status: implementation in progress.
+Status: defensive compiler hardening implemented; physical A12 compatibility
+unverified.
 
 The tvOS WiiCompiled targets should use a generic AArch64 CPU baseline and
 explicitly disable RCpc instruction selection. `-mcpu=generic` alone is not
@@ -16,15 +17,18 @@ sufficient with the tested Apple Clang toolchain: it can still emit RCpc loads
 that fault on the A12 Apple TV. Other Apple targets retain the existing Apple M2
 tuning.
 
-Acceptance requires all of the following:
+Completed integration evidence:
 
 - the generated tvOS Xcode project contains `-mcpu=generic` and
   `-Xclang -target-feature -Xclang -rcpc` for every WiiCompiled runtime target;
-- the relevant runtime objects and final executable contain no unsupported RCpc
-  load instructions;
-- the exact resulting app boots, reaches the title screen, produces audio, and
-  completes a race on an A12 Apple TV; and
-- macOS and iOS build behavior remains unchanged.
+- the final tvOS executable contains no unsupported RCpc load instructions;
+- the complete unsigned tvOS build and app audit pass; and
+- the complete iOS Simulator build and app audit pass without changing its CPU
+  tuning.
+
+An A12 compatibility claim still requires the exact resulting app to boot, reach
+the title screen, produce audio, and complete a race on an A12 Apple TV. Until
+such evidence is available, the change is described only as compiler hardening.
 
 Source: pull request [#31](https://github.com/chrissotraidis/kartpad/pull/31)
 and its physical-device follow-up. The submitted pull-request head did not
@@ -32,13 +36,17 @@ include the RCpc fix.
 
 ## tvOS settings and aspect presentation
 
-Status: design split required.
+Status: aspect-state consistency implemented; presentation choices remain deferred.
 
 A Settings bundle could eventually expose presentation preferences, and the
 aspect-ratio behavior should be made explicit. Those are separate decisions from
 the first-run controller and launch-mode flow. The current controller-required
 screen and mode chooser remain part of the tvOS safety and acceptance contract;
 they must not disappear as a side effect of adding preferences.
+
+The mobile settings bridge now reports the selected aspect mode through the
+guest `SCGetAspectRatio` result. This removes a deterministic state mismatch
+without adding new tvOS settings UI or changing the accepted launch flow.
 
 Acceptance requires all of the following:
 
@@ -93,7 +101,8 @@ Source: pull request [#35](https://github.com/chrissotraidis/kartpad/pull/35).
 
 ## Integration order
 
-1. Establish and physically accept the A12 compiler baseline.
+1. Retain the statically verified A12 compiler hardening and keep physical
+   compatibility explicitly unclaimed unless exact-artifact evidence arrives.
 2. Treat aspect semantics as a focused change that preserves controller safety.
 3. Evaluate haptics and multichannel audio as independent hardware experiments.
 4. Rebase each experiment independently and resolve its runtime-host conflicts

@@ -42,6 +42,15 @@ class TvOSContractTests(unittest.TestCase):
         self.assertNotIn("-mcpu=apple-m2", tvos_options)
         self.assertIn("-mcpu=apple-m2", non_tvos_options)
 
+    def test_mobile_aspect_setting_reaches_the_guest_system_config(self):
+        patch = (ROOT / "patches/wiicompiled-ios-settings-bridge.patch").read_text()
+        sc_bridge = patch.split("diff --git a/src/hle/sc.cpp", 1)[1].split(
+            "diff --git a/src/dynamic_aspect.cpp", 1
+        )[0]
+        self.assertIn("TARGET_OS_IOS || TARGET_OS_TV", sc_bridge)
+        self.assertIn("KartPadMobileReadRuntimeSettings(&settings)", sc_bridge)
+        self.assertIn("widescreen = settings.aspectRatioMode != 0", sc_bridge)
+
     def test_tvos_host_uses_purgeable_cache_storage(self):
         host = (ROOT / "apple/tvos/KartPadTVRuntimeHost.mm").read_text()
         self.assertIn("NSCachesDirectory", host)
