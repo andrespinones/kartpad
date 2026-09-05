@@ -94,9 +94,12 @@ class AndroidTouchOverlayContractTests(unittest.TestCase):
         self.assertIn("runDebugMultiPointerFixture()", activity)
         self.assertIn("MotionEvent.ACTION_POINTER_DOWN", overlay)
         self.assertIn("MotionEvent.ACTION_POINTER_UP", overlay)
-        self.assertIn("listOf(0 to a, 1 to b)", overlay)
-        self.assertIn("listOf(BUTTON_A, BUTTON_A or BUTTON_B, BUTTON_B, 0)", overlay)
-        self.assertIn("actual == expected && pointerOwners.isEmpty()", overlay)
+        self.assertIn("listOf(0 to steer, 1 to a, 2 to r, 3 to z)", overlay)
+        self.assertIn("BUTTON_A or BUTTON_R or BUTTON_ZR", overlay)
+        self.assertIn("abs(leftX - 0.75f) < 0.01f", overlay)
+        self.assertIn("afterA=0x", overlay)
+        self.assertIn("afterZ=0x", overlay)
+        self.assertIn("actual == expected && leftX == 0f && leftY == 0f && pointerOwners.isEmpty()", overlay)
 
     def test_source_fixture_clears_a_real_held_touch_when_menu_opens(self) -> None:
         activity = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadActivity.kt").read_text()

@@ -32,7 +32,7 @@ apk="$repo_root/android/app/build/outputs/apk/debug/app-debug.apk"
   --ez dev.kartpad.android.TEST_TOUCH_OVERLAY true \
   --ez dev.kartpad.android.TEST_TOUCH_MULTI_POINTER true >/dev/null
 
-expected="A4 multi-pointer fixture passed a=0x10 both=0x50 b=0x40 neutral=0x0"
+expected="A4 multi-pointer fixture passed steer=0.75 all=0x214 afterA=0x204 afterZ=0x200 steerOnly=0x0 neutral=0x0"
 for _ in {1..30}; do
   output="$("$adb" logcat -d -v brief KartPadFixture:I AndroidRuntime:E '*:S')"
   if grep -Fq "$expected" <<<"$output"; then

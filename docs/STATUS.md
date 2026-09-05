@@ -752,12 +752,13 @@ disconnect states; a second sequence began with A cyan/locked and restored it
    hook cannot bypass real game-data validation in a game-runtime build. The
    resulting audited dual APK SHA-256 is
    `2244ca5d1cf74d85d1b98279f36aa67a165e30dd3510c05612beb48a7b58da94`.
-   A production-gated source fixture now also replays two real Android pointer
-   IDs through the laid-out A/B controls. Both visible canonical lanes publish
-   the exact `A -> A+B -> B -> neutral` Classic masks while retaining B after A
-   lifts and emptying the owner table at completion. The resulting audited dual
-   APK SHA-256 is
-   `726cf06af9208fdcb3fe91b80a89046daf32adbf8b288d54a36d753f81a890ba`.
+   A production-gated source fixture now also replays four real Android pointer
+   IDs through the laid-out left stick, A, R, and Z controls. Both visible
+   canonical lanes sustain 0.75 steering with acceleration, drift, and item
+   held simultaneously, retain steering through independent button lifts, and
+   empty the owner table at neutral completion. The resulting audited dual APK
+   SHA-256 is
+   `205abbb668872500975e734ca52f3132fb18122e80905c35211883f01b4c5967`.
    The selector now also matches iOS's two-choice interaction: it has no
    Android-only recovery button, both cards remain actionable without game
    data, and the chosen profile resumes after the shared import flow. The

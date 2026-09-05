@@ -231,8 +231,14 @@ class KartPadOverlayView(context: Context) : View(context) {
 
     fun runDebugMultiPointerFixture(): String {
         check(isLaidOut && width > 0 && height > 0) { "touch overlay is not laid out" }
+        val move = controls.first { it.id == "move" }
         val a = controls.first { it.id == "A" }.frame.let { PointF(it.centerX(), it.centerY()) }
-        val b = controls.first { it.id == "B" }.frame.let { PointF(it.centerX(), it.centerY()) }
+        val r = controls.first { it.id == "R" }.frame.let { PointF(it.centerX(), it.centerY()) }
+        val z = controls.first { it.id == "Z" }.frame.let { PointF(it.centerX(), it.centerY()) }
+        val steer = PointF(
+            move.frame.centerX() + move.frame.width() * 0.375f,
+            move.frame.centerY(),
+        )
         val downTime = SystemClock.uptimeMillis()
 
         fun dispatch(action: Int, pointers: List<Pair<Int, PointF>>, offset: Long) {
@@ -274,31 +280,77 @@ class KartPadOverlayView(context: Context) : View(context) {
         }
 
         clearTouchInput()
-        dispatch(MotionEvent.ACTION_DOWN, listOf(0 to a), 0)
-        val aOnly = lastPublishedButtons
+        motionSteeringX = 0f
+        dispatch(MotionEvent.ACTION_DOWN, listOf(0 to steer), 0)
+        check(abs(leftX - 0.75f) < 0.01f && abs(leftY) < 0.01f &&
+            lastPublishedButtons == 0
+        ) {
+            "steering pointer produced axes=($leftX,$leftY) buttons=0x${lastPublishedButtons.toString(16)}"
+        }
         dispatch(
             MotionEvent.ACTION_POINTER_DOWN or
                 (1 shl MotionEvent.ACTION_POINTER_INDEX_SHIFT),
-            listOf(0 to a, 1 to b),
+            listOf(0 to steer, 1 to a),
             1,
         )
-        val both = lastPublishedButtons
         dispatch(
-            MotionEvent.ACTION_POINTER_UP,
-            listOf(0 to a, 1 to b),
+            MotionEvent.ACTION_POINTER_DOWN or
+                (2 shl MotionEvent.ACTION_POINTER_INDEX_SHIFT),
+            listOf(0 to steer, 1 to a, 2 to r),
             2,
         )
-        val bOnly = lastPublishedButtons
-        dispatch(MotionEvent.ACTION_UP, listOf(1 to b), 3)
+        dispatch(
+            MotionEvent.ACTION_POINTER_DOWN or
+                (3 shl MotionEvent.ACTION_POINTER_INDEX_SHIFT),
+            listOf(0 to steer, 1 to a, 2 to r, 3 to z),
+            3,
+        )
+        val allButtons = lastPublishedButtons
+        check(allButtons == (BUTTON_A or BUTTON_R or BUTTON_ZR) &&
+            abs(leftX - 0.75f) < 0.01f
+        ) {
+            "four-pointer state buttons=0x${allButtons.toString(16)} axes=($leftX,$leftY)"
+        }
+        dispatch(
+            MotionEvent.ACTION_POINTER_UP or
+                (1 shl MotionEvent.ACTION_POINTER_INDEX_SHIFT),
+            listOf(0 to steer, 1 to a, 2 to r, 3 to z),
+            4,
+        )
+        val afterA = lastPublishedButtons
+        dispatch(
+            MotionEvent.ACTION_POINTER_UP or
+                (2 shl MotionEvent.ACTION_POINTER_INDEX_SHIFT),
+            listOf(0 to steer, 2 to r, 3 to z),
+            5,
+        )
+        val afterZ = lastPublishedButtons
+        dispatch(
+            MotionEvent.ACTION_POINTER_UP or
+                (1 shl MotionEvent.ACTION_POINTER_INDEX_SHIFT),
+            listOf(0 to steer, 2 to r),
+            6,
+        )
+        val steerOnly = lastPublishedButtons
+        check(abs(leftX - 0.75f) < 0.01f) { "steering cleared before its pointer lifted" }
+        dispatch(MotionEvent.ACTION_UP, listOf(0 to steer), 7)
         val neutral = lastPublishedButtons
-        val actual = listOf(aOnly, both, bOnly, neutral)
-        val expected = listOf(BUTTON_A, BUTTON_A or BUTTON_B, BUTTON_B, 0)
-        check(actual == expected && pointerOwners.isEmpty()) {
-            "multi-pointer masks $actual != $expected owners=${pointerOwners.size}"
+        val actual = listOf(allButtons, afterA, afterZ, steerOnly, neutral)
+        val expected = listOf(
+            BUTTON_A or BUTTON_R or BUTTON_ZR,
+            BUTTON_R or BUTTON_ZR,
+            BUTTON_R,
+            0,
+            0,
+        )
+        check(actual == expected && leftX == 0f && leftY == 0f && pointerOwners.isEmpty()) {
+            "multi-pointer states $actual != $expected axes=($leftX,$leftY) " +
+                "owners=${pointerOwners.size}"
         }
         clearTouchInput()
-        return "a=0x${aOnly.toString(16)} both=0x${both.toString(16)} " +
-            "b=0x${bOnly.toString(16)} neutral=0x${neutral.toString(16)}"
+        return "steer=0.75 all=0x${allButtons.toString(16)} " +
+            "afterA=0x${afterA.toString(16)} afterZ=0x${afterZ.toString(16)} " +
+            "steerOnly=0x${steerOnly.toString(16)} neutral=0x${neutral.toString(16)}"
     }
 
     fun runDebugHoldAForModalFixture(): String {

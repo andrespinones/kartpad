@@ -58,10 +58,11 @@ its bypass cannot activate in game-runtime builds. Evidence:
 `docs/artifacts/2026-09-05/android/a4-selector-visual-contract.md`.
 
 Android's production touch owner now has a debug/source-only real `MotionEvent`
-multi-pointer replay. Visible Pixel 6 and Pixel Tablet runs both passed exact
-`A -> A+B -> B -> neutral` publication, proving independent pointer ownership
-when the first finger lifts. The fixture is unreachable in a game-runtime build;
-the complete translated APK still builds, lints, and audits. Evidence:
+multi-pointer replay. Visible Pixel 6 and Pixel Tablet runs both sustain 0.75
+analog steering while A, R, and Z are held together, retain steering through
+independent button lifts, and finish neutral with no owners. The fixture is
+unreachable in a game-runtime build; the complete translated APK still builds,
+lints, and audits. Evidence:
 `docs/artifacts/2026-09-05/android/a4-multipointer-replay.md`.
 
 Android's selector now follows the iOS two-card interaction rather than adding
