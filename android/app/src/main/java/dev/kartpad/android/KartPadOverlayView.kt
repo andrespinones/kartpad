@@ -70,6 +70,7 @@ class KartPadOverlayView(context: Context) : View(context) {
     private var controllerConnected = false
     private var gasHoldGeneration = 0
     private var gasLocked = false
+    private var debugVirtualKeyHapticCount = 0
     private var lastPublishedButtons = 0
     private var accessibilityButtons = 0
     private val accessibilityPulseGenerations = mutableMapOf<String, Int>()
@@ -377,6 +378,78 @@ class KartPadOverlayView(context: Context) : View(context) {
         return "selected=A"
     }
 
+    fun runDebugGasLockFixture(
+        onSuccess: (String) -> Unit,
+        onFailure: (Throwable) -> Unit,
+    ) {
+        runCatching {
+            check(isLaidOut && width > 0 && height > 0) { "touch overlay is not laid out" }
+            clearTouchInput()
+            debugVirtualKeyHapticCount = 0
+            layoutControls()
+            val a = controls.first { it.id == "A" }
+            val downTime = SystemClock.uptimeMillis()
+            dispatchSingleTouch(a, MotionEvent.ACTION_DOWN, downTime, downTime)
+            check(lastPublishedButtons == BUTTON_A && pointerOwners.values.singleOrNull() == "A") {
+                "gas lock did not begin with a held A pointer"
+            }
+            downTime
+        }.onSuccess { downTime ->
+            mainHandler.postDelayed({
+                runCatching {
+                    check(!gasLocked && lastPublishedButtons == BUTTON_A &&
+                        debugVirtualKeyHapticCount == 0
+                    ) { "gas lock activated before one second" }
+                }.onFailure {
+                    clearTouchInput()
+                    onFailure(it)
+                    return@postDelayed
+                }
+                mainHandler.postDelayed({
+                    runCatching {
+                        val a = controls.first { it.id == "A" }
+                        val elapsed = SystemClock.uptimeMillis() - downTime
+                        check(gasLocked && lastPublishedButtons == BUTTON_A &&
+                            pointerOwners.values.singleOrNull() == "A"
+                        ) { "gas lock did not retain A after one second" }
+                        check(buttonFillColor(a) == LOCKED_GAS_COLOR) {
+                            "gas lock did not select the cyan fill"
+                        }
+                        check(Build.VERSION.SDK_INT < Build.VERSION_CODES.R ||
+                            stateDescription == "Acceleration locked"
+                        ) { "gas lock accessibility state was not updated" }
+                        check(debugVirtualKeyHapticCount == 1) {
+                            "gas lock haptic count=$debugVirtualKeyHapticCount"
+                        }
+                        dispatchSingleTouch(
+                            a, MotionEvent.ACTION_UP, downTime,
+                            SystemClock.uptimeMillis(),
+                        )
+                        check(gasLocked && lastPublishedButtons == BUTTON_A &&
+                            pointerOwners.isEmpty()
+                        ) { "releasing the long press cancelled locked acceleration" }
+                        val unlockTime = SystemClock.uptimeMillis()
+                        dispatchSingleTouch(a, MotionEvent.ACTION_DOWN, unlockTime, unlockTime)
+                        dispatchSingleTouch(
+                            a, MotionEvent.ACTION_UP, unlockTime,
+                            SystemClock.uptimeMillis(),
+                        )
+                        check(!gasLocked && lastPublishedButtons == 0 && pointerOwners.isEmpty()) {
+                            "tap did not unlock acceleration"
+                        }
+                        check(debugVirtualKeyHapticCount == 1) {
+                            "unlock unexpectedly changed haptic count=$debugVirtualKeyHapticCount"
+                        }
+                        "delay=${elapsed}ms cyan=true haptics=1 release=locked tap=neutral"
+                    }.onSuccess(onSuccess).onFailure {
+                        clearTouchInput()
+                        onFailure(it)
+                    }
+                }, 200L)
+            }, 900L)
+        }.onFailure(onFailure)
+    }
+
     fun setMotionSteering(value: Float) {
         motionSteeringX = if (controllerConnected) 0f else value.coerceIn(-1f, 1f)
         publishState(connected = true)
@@ -619,13 +692,8 @@ class KartPadOverlayView(context: Context) : View(context) {
     }
 
     private fun drawButton(canvas: Canvas, control: Control) {
-        val active = pointerOwners.containsValue(control.id)
         fillPaint.style = Paint.Style.FILL
-        fillPaint.color = when {
-            control.id == "A" && gasLocked -> LOCKED_GAS_COLOR
-            active -> brighten(control.fill)
-            else -> control.fill
-        }
+        fillPaint.color = buttonFillColor(control)
         val radius = min(control.frame.width(), control.frame.height()) * 0.5f
         canvas.drawRoundRect(control.frame, radius, radius, fillPaint)
         canvas.drawRoundRect(control.frame, radius, radius, strokePaint)
@@ -761,6 +829,22 @@ class KartPadOverlayView(context: Context) : View(context) {
         }
     }
 
+    private fun dispatchSingleTouch(
+        control: Control,
+        action: Int,
+        downTime: Long,
+        eventTime: Long,
+    ) {
+        val event = MotionEvent.obtain(
+            downTime, eventTime, action, control.frame.centerX(), control.frame.centerY(), 0,
+        ).apply { source = InputDevice.SOURCE_TOUCHSCREEN }
+        try {
+            check(onTouchEvent(event)) { "touch overlay rejected ${control.id} action=$action" }
+        } finally {
+            event.recycle()
+        }
+    }
+
     private fun publishState(connected: Boolean) {
         var buttons = (if (gasLocked) BUTTON_A else 0) or accessibilityButtons
         pointerOwners.values.forEach { owner ->
@@ -787,7 +871,7 @@ class KartPadOverlayView(context: Context) : View(context) {
                 !pointerOwners.containsValue("A")) return@postDelayed
             gasLocked = true
             updateGasAccessibility()
-            performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+            performVirtualKeyHaptic()
             publishState(connected = true)
             invalidate()
         }, GAS_LOCK_DELAY_MS)
@@ -846,7 +930,7 @@ class KartPadOverlayView(context: Context) : View(context) {
         val generation = (accessibilityPulseGenerations[control.id] ?: 0) + 1
         accessibilityPulseGenerations[control.id] = generation
         accessibilityButtons = accessibilityButtons or control.mask
-        performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+        performVirtualKeyHaptic()
         publishState(connected = true)
         invalidate()
         mainHandler.postDelayed({
@@ -877,7 +961,7 @@ class KartPadOverlayView(context: Context) : View(context) {
             rightX = x
             rightY = y
         }
-        performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+        performVirtualKeyHaptic()
         publishState(connected = true)
         invalidate()
         mainHandler.postDelayed({
@@ -898,7 +982,7 @@ class KartPadOverlayView(context: Context) : View(context) {
         gasHoldGeneration += 1
         gasLocked = !gasLocked
         updateGasAccessibility()
-        performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+        performVirtualKeyHaptic()
         publishState(connected = true)
         invalidate()
     }
@@ -1071,6 +1155,17 @@ class KartPadOverlayView(context: Context) : View(context) {
         Color.alpha(color), min(255, Color.red(color) + 34),
         min(255, Color.green(color) + 34), min(255, Color.blue(color) + 34),
     )
+
+    private fun buttonFillColor(control: Control): Int = when {
+        control.id == "A" && gasLocked -> LOCKED_GAS_COLOR
+        pointerOwners.containsValue(control.id) -> brighten(control.fill)
+        else -> control.fill
+    }
+
+    private fun performVirtualKeyHaptic() {
+        if (BuildConfig.DEBUG) debugVirtualKeyHapticCount += 1
+        performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+    }
 
     private fun dp(value: Float): Float = value * resources.displayMetrics.density
 

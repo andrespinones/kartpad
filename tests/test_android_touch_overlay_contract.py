@@ -36,6 +36,20 @@ class AndroidTouchOverlayContractTests(unittest.TestCase):
         self.assertIn("if (gasLocked) BUTTON_A else 0", source)
         self.assertIn("gasLocked = false", source)
 
+    def test_gas_lock_runtime_fixture_covers_timing_haptic_release_and_unlock(self) -> None:
+        activity = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadActivity.kt").read_text()
+        overlay = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadOverlayView.kt").read_text()
+        runner = (REPO / "scripts/test-android-touch-gas-lock.sh").read_text()
+        self.assertIn("TEST_TOUCH_GAS_LOCK", activity)
+        self.assertIn("runDebugGasLockFixture", activity)
+        self.assertIn("900L", overlay)
+        self.assertIn("200L", overlay)
+        self.assertIn("buttonFillColor(a) == LOCKED_GAS_COLOR", overlay)
+        self.assertIn('stateDescription == "Acceleration locked"', overlay)
+        self.assertIn("debugVirtualKeyHapticCount == 1", overlay)
+        self.assertIn("release=locked tap=neutral", overlay)
+        self.assertIn("A4 gas lock fixture passed", runner)
+
     def test_canvas_controls_are_accessible_and_operable_as_virtual_nodes(self) -> None:
         source = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadOverlayView.kt").read_text()
         self.assertIn("TouchAccessibilityNodeProvider", source)

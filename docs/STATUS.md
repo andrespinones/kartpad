@@ -758,6 +758,11 @@ disconnect states; a second sequence began with A cyan/locked and restored it
    a 1.25x selected size, and requires Back to reopen Touch Control Settings on
    both canonical emulator layouts. The resulting translated APK SHA-256 is
    `8d4bf7f24fd411edfa1a957dada33dfd425de495bbf6a53e2ce9570493c66c40`.
+   Timed A-button replay now also passes on both layouts: pre-threshold held A
+   is unlocked, about 1.1 seconds produces cyan/accessibility-locked A plus one
+   virtual-key haptic request, release retains the lock, and the next tap
+   returns neutral. The resulting translated APK SHA-256 is
+   `f970b77c37030d2f0d4eb48ed770bb7309ccd866fbae18e4d7553465f510c505`.
    Evidence:
 [`docs/artifacts/2026-09-04/android/a4-touch-settings-menu-checkpoint.md`](artifacts/2026-09-04/android/a4-touch-settings-menu-checkpoint.md).
 [`docs/artifacts/2026-09-04/android/a4-controller-mapping.md`](artifacts/2026-09-04/android/a4-controller-mapping.md).
@@ -777,6 +782,7 @@ disconnect states; a second sequence began with A cyan/locked and restored it
 [`docs/artifacts/2026-09-05/android/a4-touch-state-persistence.md`](artifacts/2026-09-05/android/a4-touch-state-persistence.md).
 [`docs/artifacts/2026-09-05/android/a4-touch-settings-visual-contract.md`](artifacts/2026-09-05/android/a4-touch-settings-visual-contract.md).
 [`docs/artifacts/2026-09-05/android/a4-touch-editor-flow.md`](artifacts/2026-09-05/android/a4-touch-editor-flow.md).
+[`docs/artifacts/2026-09-05/android/a4-touch-gas-lock-replay.md`](artifacts/2026-09-05/android/a4-touch-gas-lock-replay.md).
 Accepted evidence:
 [`docs/artifacts/2026-09-04/android/a4-touch-overlay-input.md`](artifacts/2026-09-04/android/a4-touch-overlay-input.md).
 [`docs/artifacts/2026-09-04/android/a4-controller-handoff.md`](artifacts/2026-09-04/android/a4-controller-handoff.md).

@@ -3496,3 +3496,20 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   trip.** Physical finger-drag ergonomics and touch-only races remain open. No
   package or private artifact was published. Evidence:
   `docs/artifacts/2026-09-05/android/a4-touch-editor-flow.md`.
+
+## 2026-09-05 — Android A4 touch acceleration-lock replay
+
+- Added a debug/source-only timed real-event fixture for holding A through the
+  production touch overlay.
+- Both visible canonical emulator lanes remained unlocked at 900 ms, changed
+  to cyan/accessibility-locked A at about 1.1 seconds, issued exactly one
+  Android virtual-key haptic request, retained locked A after release, and
+  returned neutral after the next A tap.
+- Pixel Tablet passed at 1106 ms and Pixel 6 at 1102 ms. This proves Android
+  haptic dispatch, not physical vibration strength or subjective feel.
+- The complete translated runtime rebuilt locally at APK SHA-256
+  `f970b77c37030d2f0d4eb48ed770bb7309ccd866fbae18e4d7553465f510c505`.
+- Classification: **Pass for canonical emulator acceleration-lock timing,
+  state, and dispatch.** Physical haptic feel and touch-only races remain open.
+  No package or private artifact was published. Evidence:
+  `docs/artifacts/2026-09-05/android/a4-touch-gas-lock-replay.md`.

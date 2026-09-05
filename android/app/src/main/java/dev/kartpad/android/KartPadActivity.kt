@@ -105,10 +105,12 @@ class KartPadActivity : SDLActivity() {
             intent.getBooleanExtra(DEBUG_EXTRA_TOUCH_SETTINGS, false)
         val debugTouchEditor = BuildConfig.DEBUG && !BuildConfig.GAME_RUNTIME &&
             intent.getBooleanExtra(DEBUG_EXTRA_TOUCH_EDITOR, false)
+        val debugGasLock = BuildConfig.DEBUG && !BuildConfig.GAME_RUNTIME &&
+            intent.getBooleanExtra(DEBUG_EXTRA_GAS_LOCK, false)
         kartPadOverlay.visibility = if (
             BuildConfig.GAME_RUNTIME || debugTouchOverlay || debugModalClear ||
                 debugLifecycleClear || debugPersistence != null || debugTouchSettings ||
-                debugTouchEditor
+                debugTouchEditor || debugGasLock
         ) {
             android.view.View.VISIBLE
         } else {
@@ -151,6 +153,13 @@ class KartPadActivity : SDLActivity() {
             addMenuButton()
             addLayoutEditorBar()
             kartPadOverlay.postDelayed({ showTouchControlSettings(debugEditorFlow = true) }, 1_000L)
+        } else if (debugGasLock) {
+            kartPadOverlay.post {
+                kartPadOverlay.runDebugGasLockFixture(
+                    onSuccess = { Log.i(TAG, "A4 gas lock fixture passed $it") },
+                    onFailure = { Log.e(TAG, "A4 gas lock fixture failed", it) },
+                )
+            }
         }
         if (debugTouchOverlay && debugMultiPointer) {
             kartPadOverlay.post {
@@ -1606,6 +1615,8 @@ class KartPadActivity : SDLActivity() {
             "dev.kartpad.android.TEST_TOUCH_SETTINGS"
         private const val DEBUG_EXTRA_TOUCH_EDITOR =
             "dev.kartpad.android.TEST_TOUCH_EDITOR_FLOW"
+        private const val DEBUG_EXTRA_GAS_LOCK =
+            "dev.kartpad.android.TEST_TOUCH_GAS_LOCK"
         private const val DEBUG_RESUME_FIXTURE_SHA256 =
             "cb9d5fc3b83611af65032f73119285de4e97d4b2b9f7b2e9567443635358483a"
         private const val MIN_RKG_BYTES = 0x90L

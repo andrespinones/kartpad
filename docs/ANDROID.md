@@ -1138,6 +1138,11 @@ The editor round trip is also executed through its production controls on both
 layouts: Move Controls, real A selection, Hide, Show, selected size, and Back
 all pass, with Back reopening Touch Control Settings; evidence is in
 `docs/artifacts/2026-09-05/android/a4-touch-editor-flow.md`.
+Timed real-event replay now also proves the A acceleration lock on both layouts:
+it remains unlocked at 900 ms, is cyan and accessibility-locked at about 1.1
+seconds with one haptic request, remains locked after release, and returns
+neutral after the next tap; evidence is in
+`docs/artifacts/2026-09-05/android/a4-touch-gas-lock-replay.md`.
 
 Do not begin the touch-UI port until A2's controller-driven Original-mode proof
 passes. Physical Android hardware remains authoritative for vendor Vulkan and

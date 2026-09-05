@@ -101,6 +101,13 @@ Hide/Show changes and restores its persisted visibility, 1.25x selected sizing
 propagates, and the real Back button reopens Touch Control Settings. Evidence:
 `docs/artifacts/2026-09-05/android/a4-touch-editor-flow.md`.
 
+The one-second A acceleration lock now has timed real-event replay on both
+emulator families. The runs prove pre-threshold unlocked state, cyan locked
+state at about 1.1 seconds, one Android virtual-key haptic request, lock after
+release, and neutral after a second tap. Physical haptic feel remains open.
+Evidence:
+`docs/artifacts/2026-09-05/android/a4-touch-gas-lock-replay.md`.
+
 KartPad `v0.4.0-preview.2` is published from
 `e9fa6058ee09fff0b16481ebe4a78d61cea69c87`. It updates both Apple-platform
 artifacts for Retro Rewind 6.12.5, repairs the universal iPhone/iPad three-dot
