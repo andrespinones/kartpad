@@ -581,6 +581,14 @@ static NSString *DiagnosticsReport() {
   KartPadShowJoyCon2Pairing();
 }
 
+- (void)toggleSeparateOriginalJoyCons:(NSMenuItem *)sender {
+  NSUserDefaults *defaults = NSUserDefaults.standardUserDefaults;
+  const BOOL separate = ![defaults boolForKey:KartPadSeparateOriginalJoyConsDefaultsKey];
+  [defaults setBool:separate forKey:KartPadSeparateOriginalJoyConsDefaultsKey];
+  sender.state = separate ? NSControlStateValueOn : NSControlStateValueOff;
+  KartPadApplySeparateOriginalJoyConsPreference();
+}
+
 - (NSArray<NSMenuItem *> *)controlsMenuItems {
   for (NSMenuItem *item in NSApp.mainMenu.itemArray.firstObject.submenu.itemArray) {
     if ([item.title isEqualToString:@"Controls"] && item.submenu != nil) {
@@ -1119,6 +1127,14 @@ static void InstallMenu() {
       keyEquivalent:@""];
   pairJoyCon2.target = Controller();
   [controlsMenu addItem:pairJoyCon2];
+  NSMenuItem *separateOriginalJoyCons = [[NSMenuItem alloc]
+      initWithTitle:@"Original Joy-Con Pair as Two Players"
+             action:@selector(toggleSeparateOriginalJoyCons:) keyEquivalent:@""];
+  separateOriginalJoyCons.target = Controller();
+  separateOriginalJoyCons.state = [NSUserDefaults.standardUserDefaults
+      boolForKey:KartPadSeparateOriginalJoyConsDefaultsKey]
+      ? NSControlStateValueOn : NSControlStateValueOff;
+  [controlsMenu addItem:separateOriginalJoyCons];
   controlsMenuItem.submenu = controlsMenu;
   [appMenu insertItem:controlsMenuItem atIndex:insertIndex++];
 
@@ -1150,6 +1166,7 @@ bool KartPadMacShellPrepareGameData(void) {
             miiError.localizedDescription);
     }
     KartPadApplyExperimentalWiimotePreference();
+    KartPadApplySeparateOriginalJoyConsPreference();
     BeginSession();
     RuntimeConfigFile::EnsureConfigFile();
 

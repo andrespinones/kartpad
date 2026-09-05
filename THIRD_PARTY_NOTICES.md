@@ -15,6 +15,8 @@ notice files collected from the exact pinned sources and package build under
 | SDL 3 | `3.4.4` | zlib; platform and runtime support |
 | Minizip-NG | Dolphin-pinned source | zlib; tvOS Retro Rewind archive extraction |
 | WiimotePairPlus | `8e7f9b12db2da520e4f868305c4861cdf58fa15f` | GPL-2.0-or-later; experimental macOS Wii Remote Bluetooth pairing flow derived from Dolphin WiimotePair |
+| switch2-controllers | Nadeflore/switch2-controllers, protocol reference only | MIT; Switch 2 controller BLE advertisement, GATT, command, calibration, and pairing documentation used by the experimental macOS Joy-Con 2 bridge (no code copied) |
+| JoyCon2Mac | OZORDI/JoyCon2Mac, protocol reference only | MIT; Switch 2 Joy-Con 2 BLE startup and macOS pairing sequence cross-checked for the experimental Joy-Con 2 bridge (no code copied) |
 | Abseil, Dear ImGui, fmt, FreeType, libpng, Tracy, xxHash, zstd | exact package-build inputs | Their included upstream license files apply |
 
 The published repository and tag provide KartPad's integration source,

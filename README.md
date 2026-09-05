@@ -214,6 +214,12 @@ follow KartPad's port assignment. Choose the **Joy-Con 2 Sideways
 button accelerates, the right one brakes, SL/SR are L/R, the rail bumper is a
 trick button, and Plus/Capture pauses.
 
+Original Switch 1 Joy-Con reach KartPad through SDL's own driver after normal
+macOS Bluetooth pairing. SDL merges a left and right pair into one gamepad by
+default; **Controls → Original Joy-Con Pair as Two Players** keeps each half as
+its own sideways player instead, so mixed tables of Joy-Con 2 and original
+Joy-Con all follow the same one-player-per-half rule.
+
 KartPad stores this Mac's Bluetooth address on the Joy-Con so a later button
 press reconnects without `SYNC`. A Joy-Con still paired to a Switch 2 is
 ignored until you hold `SYNC`; hold `SYNC` on the Switch 2 again to move it

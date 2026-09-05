@@ -15,6 +15,7 @@
 #import <IOBluetooth/IOBluetooth.h>
 
 #include <SDL3/SDL_gamepad.h>
+#include <SDL3/SDL_hints.h>
 #include <SDL3/SDL_init.h>
 #include <SDL3/SDL_joystick.h>
 #include <SDL3/SDL_stdinc.h>
@@ -30,6 +31,8 @@ NSString *const KartPadExperimentalJoyCon2DefaultsKey =
     @"KartPadExperimentalJoyCon2Enabled";
 NSString *const KartPadJoyCon2RememberMacDefaultsKey =
     @"KartPadJoyCon2RememberMac";
+NSString *const KartPadSeparateOriginalJoyConsDefaultsKey =
+    @"KartPadSeparateOriginalJoyCons";
 
 namespace {
 
@@ -1237,4 +1240,11 @@ void KartPadApplyExperimentalJoyCon2Preference(void) {
   }
   [[KartPadJoyCon2Manager sharedManager]
       setEnabled:[defaults boolForKey:KartPadExperimentalJoyCon2DefaultsKey]];
+}
+
+void KartPadApplySeparateOriginalJoyConsPreference(void) {
+  const BOOL separate = [NSUserDefaults.standardUserDefaults
+      boolForKey:KartPadSeparateOriginalJoyConsDefaultsKey];
+  // SDL's default ("1") merges an original Joy-Con L/R pair into one gamepad.
+  SDL_SetHint(SDL_HINT_JOYSTICK_HIDAPI_COMBINE_JOY_CONS, separate ? "0" : "1");
 }

@@ -18,14 +18,27 @@ class ExperimentalJoyCon2ContractTests(unittest.TestCase):
         install = shell.index("void KartPadMacShellInstall(void)")
         self.assertGreater(shell.index("KartPadApplyExperimentalJoyCon2Preference();", install), install)
 
+    def test_original_joycon_separation_is_opt_in_and_applied_before_sdl(self) -> None:
+        shell = (REPO / "apple/macos/KartPadMacShell.mm").read_text()
+        bridge = (REPO / "apple/macos/KartPadJoyCon2.mm").read_text()
+        self.assertIn('initWithTitle:@"Original Joy-Con Pair as Two Players"', shell)
+        self.assertIn("KartPadApplySeparateOriginalJoyConsPreference();", shell)
+        # The HIDAPI hint must be applied during game-data preparation, before
+        # Aurora initializes SDL's joystick subsystem, and again on toggle.
+        prepare = shell.index("bool KartPadMacShellPrepareGameData(void)")
+        self.assertGreater(shell.index("KartPadApplySeparateOriginalJoyConsPreference();", prepare), prepare)
+        self.assertIn('SDL_SetHint(SDL_HINT_JOYSTICK_HIDAPI_COMBINE_JOY_CONS, separate ? "0" : "1")', bridge)
+
     def test_bridge_is_opt_in_and_uses_sdl_virtual_gamepads(self) -> None:
         bridge = (REPO / "apple/macos/KartPadJoyCon2.mm").read_text()
         self.assertIn('@"KartPadExperimentalJoyCon2Enabled"', bridge)
         self.assertIn("SDL_AttachVirtualJoystick(&desc)", bridge)
         self.assertIn("SDL_DetachVirtualJoystick(", bridge)
         self.assertIn("SDL_JOYSTICK_TYPE_GAMEPAD", bridge)
-        # One virtual gamepad per Joy-Con 2: no left/right merging.
-        self.assertNotIn("combine", bridge.lower())
+        # One virtual gamepad per Joy-Con 2: each device attaches itself and
+        # there is no left/right merging step.
+        self.assertIn("- (BOOL)attachToSDL", bridge)
+        self.assertNotIn("hasBothSides", bridge)
         # Known Switch 2 identities from public reverse engineering.
         self.assertIn("0x2066", bridge)
         self.assertIn("0x2067", bridge)

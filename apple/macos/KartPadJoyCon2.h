@@ -12,6 +12,15 @@
 
 FOUNDATION_EXPORT NSString *const KartPadExperimentalJoyCon2DefaultsKey;
 FOUNDATION_EXPORT NSString *const KartPadJoyCon2RememberMacDefaultsKey;
+FOUNDATION_EXPORT NSString *const KartPadSeparateOriginalJoyConsDefaultsKey;
+
+/* Original (Switch 1) Joy-Con pairs reach KartPad through SDL's HIDAPI
+ * driver, which combines a left and right half into one gamepad by default.
+ * This preference asks SDL to keep each half as its own sideways mini
+ * gamepad instead, matching the one-player-per-Joy-Con model used for
+ * Joy-Con 2. Safe to call before or after SDL initializes; SDL re-enumerates
+ * HIDAPI devices when the hint changes. */
+void KartPadApplySeparateOriginalJoyConsPreference(void);
 
 /* Opens the connection panel and starts scanning. */
 void KartPadShowJoyCon2Pairing(void);
