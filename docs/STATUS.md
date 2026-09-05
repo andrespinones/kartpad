@@ -15,8 +15,9 @@ Android acceptance remains open. Evidence:
 
 The three-dot menu also has a rendered reachability gate on Pixel 6 and Pixel
 Tablet. Both expose all 21 required rows across the top level, Controls,
-Display, and Game Data & Saves submenus, then pass 15 representative action
-routes into their intended dialogs/managers or Android DocumentsUI. Evidence:
+Display, and Game Data & Saves submenus, then pass 16 representative actions,
+including persisted FPS toggling and routes into dialogs, managers, or Android
+DocumentsUI. Evidence:
 [`docs/artifacts/2026-09-05/android/a4-menu-hierarchy-reachability.md`](artifacts/2026-09-05/android/a4-menu-hierarchy-reachability.md).
 
 ## Native Android work

@@ -387,7 +387,7 @@ class AndroidTouchOverlayContractTests(unittest.TestCase):
             self.assertIn(f'"{label}"', activity)
             self.assertIn(f'"{label}"', runner)
         self.assertIn("TEST_MENU", runner)
-        self.assertIn("top=8 controls=5 display=2 data=6 actions=15", runner)
+        self.assertIn("top=8 controls=5 display=2 data=6 actions=16", runner)
         self.assertIn('open_top_action "Multiplayer…"', runner)
         self.assertIn('open_top_action "Report a Problem…"', runner)
         self.assertIn('open_submenu_action "Controls" "Touch Control Settings…"', runner)
@@ -397,6 +397,8 @@ class AndroidTouchOverlayContractTests(unittest.TestCase):
         self.assertIn('open_submenu_action "Game Data & Saves" "Import or Reimport Wii Disc Image…"', runner)
         self.assertIn('open_submenu_action "Game Data & Saves" "Import from Extracted Folder…"', runner)
         self.assertIn("topResumedActivity=.*com.google.android.documentsui", runner)
+        self.assertIn('tap_label "Show FPS Counter"', runner)
+        self.assertIn('name="show_fps" value="false"', runner)
 
     def test_motion_steering_matches_ios_curve_and_merges_with_touch(self) -> None:
         motion = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadMotionSteering.kt").read_text()

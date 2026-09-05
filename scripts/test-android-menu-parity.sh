@@ -22,6 +22,7 @@ device_count="$("$adb" devices | sed -n '2,$p' | grep -c '[[:space:]]device$' ||
 "$repo_root/scripts/build-android-fixture.sh"
 apk="$repo_root/android/app/build/outputs/apk/debug/app-debug.apk"
 "$adb" install -r "$apk" >/dev/null
+"$adb" shell pm clear dev.kartpad.android >/dev/null
 "$adb" shell input keyevent KEYCODE_WAKEUP >/dev/null
 "$adb" shell wm dismiss-keyguard >/dev/null 2>&1 || true
 "$adb" shell settings put system accelerometer_rotation 0
@@ -164,6 +165,17 @@ assert_labels "Multiplayer" "SET UP RETRO REWIND" "BACK"
 open_top_action "Report a Problem…"
 assert_labels "Report a Problem" "SHARE REPORT…" "REPORT ON GITHUB" "CANCEL"
 
+start_menu
+tap_label "Show FPS Counter"
+sleep 1
+fps_preferences="$("$adb" exec-out run-as dev.kartpad.android \
+  cat shared_prefs/kartpad_touch_controls.xml)"
+grep -Eq '<boolean name="show_fps" value="false"[[:space:]]*/>' \
+  <<<"$fps_preferences" || {
+  echo "ERROR: Show FPS Counter did not persist the toggled-off state" >&2
+  exit 1
+}
+
 open_submenu_action "Controls" "Controller Button Mapping…"
 assert_labels "Controller Button Mapping" "A — A" "Z — LEFT SHOULDER"
 "$adb" shell input swipe \
@@ -217,4 +229,4 @@ assert_labels \
 open_submenu_action "Game Data & Saves" "Manage Retro Rewind…"
 assert_labels "KartPad" "Retro Rewind 6.12.5"
 
-echo "Android menu parity passed: lane=$lane top=8 controls=5 display=2 data=6 actions=15"
+echo "Android menu parity passed: lane=$lane top=8 controls=5 display=2 data=6 actions=16"
