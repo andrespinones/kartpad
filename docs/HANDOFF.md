@@ -108,6 +108,12 @@ release, and neutral after a second tap. Physical haptic feel remains open.
 Evidence:
 `docs/artifacts/2026-09-05/android/a4-touch-gas-lock-replay.md`.
 
+Android's nested Display menu now uses the exact iOS choice wording, including
+Original 4:3, explicit Experimental labels for both wider modes, and 1x Native
+through 4x render choices. The real Pixel 6 popup/dialog path was traversed and
+remained in bounds. Evidence:
+`docs/artifacts/2026-09-05/android/a4-display-menu-label-parity.md`.
+
 KartPad `v0.4.0-preview.2` is published from
 `e9fa6058ee09fff0b16481ebe4a78d61cea69c87`. It updates both Apple-platform
 artifacts for Retro Rewind 6.12.5, repairs the universal iPhone/iPad three-dot

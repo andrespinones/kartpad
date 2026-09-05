@@ -3513,3 +3513,19 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   state, and dispatch.** Physical haptic feel and touch-only races remain open.
   No package or private artifact was published. Evidence:
   `docs/artifacts/2026-09-05/android/a4-touch-gas-lock-replay.md`.
+
+## 2026-09-05 — Android A4 Display menu label parity
+
+- Replaced Android's generic aspect choices with the iOS-equivalent Original
+  4:3 and explicit Experimental labels for 16:9 and Fill Screen.
+- Replaced `Native (1x)`/ASCII scale rows with the iOS-equivalent `1× (Native)`
+  through `4×` labels without changing their setting indices.
+- Traversed the real Pixel 6 three-dot popup into Display, Aspect Ratio, and
+  Render Resolution. All exact rows were visible and bounded; 1x Native was
+  selected by default after clearing fixture preferences.
+- The complete translated runtime rebuilt locally at APK SHA-256
+  `3a14664a60a3f656a0f46e669ef575b9f2a67d0797c099fbb3e5f08bb9ce1934`.
+- Classification: **Pass for iOS-equivalent Display labels and real emulator
+  traversal.** Physical rendering/performance acceptance is unchanged. No
+  package or private artifact was published. Evidence:
+  `docs/artifacts/2026-09-05/android/a4-display-menu-label-parity.md`.

@@ -412,7 +412,11 @@ class KartPadActivity : SDLActivity() {
     }
 
     private fun showAspectRatioSettings() {
-        val labels = arrayOf("4:3", "16:9", "Fill Screen")
+        val labels = arrayOf(
+            "Original 4:3",
+            "16:9 (Experimental)",
+            "Fill Screen (Experimental)",
+        )
         AlertDialog.Builder(this)
             .setTitle("Aspect Ratio")
             .setSingleChoiceItems(labels, KartPadTouchSettings.aspectMode(this)) { dialog, which ->
@@ -425,7 +429,7 @@ class KartPadActivity : SDLActivity() {
     }
 
     private fun showResolutionSettings() {
-        val labels = arrayOf("Native (1x)", "2x", "3x", "4x")
+        val labels = arrayOf("1× (Native)", "2×", "3×", "4×")
         val scales = floatArrayOf(1f, 2f, 3f, 4f)
         val selected = scales.indexOfFirst {
             kotlin.math.abs(it - KartPadTouchSettings.resolutionScale(this)) < 0.01f

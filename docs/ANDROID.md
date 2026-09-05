@@ -1143,6 +1143,9 @@ it remains unlocked at 900 ms, is cyan and accessibility-locked at about 1.1
 seconds with one haptic request, remains locked after release, and returns
 neutral after the next tap; evidence is in
 `docs/artifacts/2026-09-05/android/a4-touch-gas-lock-replay.md`.
+Android's real nested Display popup now also uses the iOS labels for Original
+4:3, experimental wider modes, and 1x Native through 4x rendering; evidence is
+in `docs/artifacts/2026-09-05/android/a4-display-menu-label-parity.md`.
 
 Do not begin the touch-UI port until A2's controller-driven Original-mode proof
 passes. Physical Android hardware remains authoritative for vendor Vulkan and

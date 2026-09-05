@@ -763,6 +763,11 @@ disconnect states; a second sequence began with A cyan/locked and restored it
    virtual-key haptic request, release retains the lock, and the next tap
    returns neutral. The resulting translated APK SHA-256 is
    `f970b77c37030d2f0d4eb48ed770bb7309ccd866fbae18e4d7553465f510c505`.
+   The nested Display popup now uses iOS-equivalent choice labels: Original
+   4:3, both wider modes explicitly Experimental, and 1x Native through 4x.
+   Real Pixel 6 popup/dialog traversal passed. The resulting translated APK
+   SHA-256 is
+   `3a14664a60a3f656a0f46e669ef575b9f2a67d0797c099fbb3e5f08bb9ce1934`.
    Evidence:
 [`docs/artifacts/2026-09-04/android/a4-touch-settings-menu-checkpoint.md`](artifacts/2026-09-04/android/a4-touch-settings-menu-checkpoint.md).
 [`docs/artifacts/2026-09-04/android/a4-controller-mapping.md`](artifacts/2026-09-04/android/a4-controller-mapping.md).
@@ -783,6 +788,7 @@ disconnect states; a second sequence began with A cyan/locked and restored it
 [`docs/artifacts/2026-09-05/android/a4-touch-settings-visual-contract.md`](artifacts/2026-09-05/android/a4-touch-settings-visual-contract.md).
 [`docs/artifacts/2026-09-05/android/a4-touch-editor-flow.md`](artifacts/2026-09-05/android/a4-touch-editor-flow.md).
 [`docs/artifacts/2026-09-05/android/a4-touch-gas-lock-replay.md`](artifacts/2026-09-05/android/a4-touch-gas-lock-replay.md).
+[`docs/artifacts/2026-09-05/android/a4-display-menu-label-parity.md`](artifacts/2026-09-05/android/a4-display-menu-label-parity.md).
 Accepted evidence:
 [`docs/artifacts/2026-09-04/android/a4-touch-overlay-input.md`](artifacts/2026-09-04/android/a4-touch-overlay-input.md).
 [`docs/artifacts/2026-09-04/android/a4-controller-handoff.md`](artifacts/2026-09-04/android/a4-controller-handoff.md).

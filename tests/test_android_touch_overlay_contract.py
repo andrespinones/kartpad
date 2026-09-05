@@ -264,6 +264,23 @@ class AndroidTouchOverlayContractTests(unittest.TestCase):
         self.assertIn("ConfigureMkwMobileAspectMode", runtime_patch)
         self.assertIn("VISetFrameBufferScale", runtime_patch)
 
+    def test_display_choice_labels_match_ios_and_mark_experiments(self) -> None:
+        android = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadActivity.kt").read_text()
+        ios = (REPO / "apple/third_party/sunpad/SunPadGameOverlay.mm").read_text()
+        for label in (
+            "Original 4:3",
+            "16:9 (Experimental)",
+            "Fill Screen (Experimental)",
+            "1× (Native)",
+            "2×",
+            "3×",
+            "4×",
+        ):
+            self.assertIn(label, ios)
+            self.assertIn(label, android)
+        self.assertNotIn('arrayOf("4:3", "16:9", "Fill Screen")', android)
+        self.assertNotIn('arrayOf("Native (1x)", "2x", "3x", "4x")', android)
+
     def test_android_exposes_persistent_one_to_four_player_controller_setup(self) -> None:
         activity = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadActivity.kt").read_text()
         native = (REPO / "android/app/src/main/cpp/kartpad_controller_slots_jni.cpp").read_text()
