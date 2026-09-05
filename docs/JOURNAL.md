@@ -3859,3 +3859,21 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   physical-device migration, and publication remain open. No APK/AAB or
   private artifact was published. Evidence:
   `docs/artifacts/2026-09-05/android/a6-emulator-version-upgrade.md`.
+
+## 2026-09-05 — Android A6 emulator save-storage recovery
+
+- Added a debug-only save-storage fixture using deterministic, valid synthetic
+  RKSYS images entirely below an isolated app-cache root. It exercises the
+  production `KartPadSaveStorage` implementation without touching a user save.
+- The visible API 36 ARM64 Pixel Tablet proved exact size/magic/CRC validation,
+  export-read bytes, staged restore, atomic activation, one exact prior-save
+  backup, pending cleanup, and corrupt-checksum rejection.
+- The non-destructive runner verifies the approved app-private game fixture,
+  never clears storage, removes its cache fixture, and restores the production
+  selector. The exact audited and installed version-code 5 APK SHA-256 is
+  `67bc86e5c0e1ad5ea7fa9c93744a78279e046caba6a7336736fcd6d2e68cfd04`.
+- Classification: **Pass for emulator save-storage and recovery semantics.**
+  Android document-picker export/import, a real retail save, physical hardware,
+  signed release, and publication remain open. No APK/AAB or private artifact
+  was published. Evidence:
+  `docs/artifacts/2026-09-05/android/a6-emulator-save-storage.md`.

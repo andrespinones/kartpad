@@ -56,6 +56,14 @@ release, and physical migration remain open. Evidence:
 The installed version 4 migration fixture is
 `4efee32c73ba0f5832733d4059316d9c4389c7358f2ff71f8f15dea0e2118ed7`.
 
+The Android save-storage layer now has an emulator execution gate using only
+deterministic synthetic RKSYS images in isolated app cache. Production
+validation, export-read, staged restore, atomic replacement, prior-save backup,
+pending cleanup, and corrupt-checksum rejection pass. This is not the Android
+document-picker flow or a real retail-save result. The exact audited and
+installed version 5 fixture is `67bc86e5…`; the selector is visibly resumed.
+Evidence: `docs/artifacts/2026-09-05/android/a6-emulator-save-storage.md`.
+
 The `codex/iphone-touch-layout-editor` candidate captures the maintainer's
 current physical-iPhone control positions as the default for untouched iPhone
 installs only. Existing custom layouts and every iPad layout remain unchanged.

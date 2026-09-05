@@ -901,6 +901,13 @@ the wrong package identity, a non-increasing version code, or an installed
 version that does not match the requested APK. This override is test-only;
 normal builds retain the manifest's default version code.
 
+The non-destructive save-storage emulator lane is
+`scripts/test-android-save-storage-emulator.sh [APK]`. Its debug-only fixture
+uses deterministic valid RKSYS images under an isolated cache root to execute
+the production validation, export-read, staged restore, activation, backup,
+cleanup, and corrupt-input rejection paths. It does not substitute for the
+system document-picker round trip or a real user-save test.
+
 Before any tester receives an artifact, verify at minimum:
 
 - only intended ABIs are present;

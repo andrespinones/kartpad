@@ -50,10 +50,21 @@ product menu along with the complete private state aggregate. The runner
 requires the exact KartPad package identity, confirms each installed version,
 never clears data, and restores the selector. Retail-save, complete Retro,
 signed-release, and physical-device migration remain open. The installed
-version 4 migration fixture SHA-256 is
+version 4 migration fixture SHA-256 was
 `4efee32c73ba0f5832733d4059316d9c4389c7358f2ff71f8f15dea0e2118ed7`.
 Evidence:
 [`docs/artifacts/2026-09-05/android/a6-emulator-version-upgrade.md`](artifacts/2026-09-05/android/a6-emulator-version-upgrade.md).
+
+Android A6 now exercises the production save-storage implementation on the
+emulator with deterministic synthetic RKSYS images. Exact validation,
+export-read bytes, staged restore, atomic activation, prior-save backup,
+pending cleanup, and corrupt-checksum rejection pass in an isolated cache
+root. The runner never clears app data, verifies the approved game fixture,
+and restores the selector. The installed audited version 5 fixture SHA-256 is
+`67bc86e5c0e1ad5ea7fa9c93744a78279e046caba6a7336736fcd6d2e68cfd04`.
+Document-picker round trips, a real retail save, and physical acceptance remain
+open. Evidence:
+[`docs/artifacts/2026-09-05/android/a6-emulator-save-storage.md`](artifacts/2026-09-05/android/a6-emulator-save-storage.md).
 
 The latest Android A4 checkpoint fixes a real SDL lifecycle gap: KartPad now
 enables SDL activity recreation, so Android can rebuild `KartPadActivity`
