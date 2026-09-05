@@ -195,6 +195,16 @@ assert_labels "Render Resolution" "1× (Native)" "2×" "3×" "4×"
 open_submenu_action "Game Data & Saves" "Remove Stored Game Data…"
 assert_labels "Remove Stored Game Data?" "REMOVE" "CANCEL"
 
+open_submenu_action "Game Data & Saves" "Import or Reimport Wii Disc Image…"
+assert_labels "Game Data & Saves" "Disc-image import is unavailable in this build."
+
+open_submenu_action "Game Data & Saves" "Import from Extracted Folder…"
+if ! "$adb" shell dumpsys activity activities | grep -Eq \
+    'topResumedActivity=.*com.google.android.documentsui'; then
+  echo "ERROR: extracted-folder action did not reach Android DocumentsUI" >&2
+  exit 1
+fi
+
 open_submenu_action "Game Data & Saves" "Manage Saves…"
 assert_labels "Manage Saves" "EXPORT SAVE BACKUP…" "RESTORE SAVE BACKUP…" "DONE"
 
@@ -207,4 +217,4 @@ assert_labels \
 open_submenu_action "Game Data & Saves" "Manage Retro Rewind…"
 assert_labels "KartPad" "Retro Rewind 6.12.5"
 
-echo "Android menu parity passed: lane=$lane top=8 controls=5 display=2 data=6 actions=13"
+echo "Android menu parity passed: lane=$lane top=8 controls=5 display=2 data=6 actions=15"
