@@ -120,6 +120,14 @@ origin, then clear its origin and 1.25x size through the queued reset callback.
 Evidence:
 `docs/artifacts/2026-09-05/android/a4-touch-editor-drag-reset.md`.
 
+Global Touch Control Settings now also pass a real widget/process-restart flow
+on both canonical emulators, and Android's fresh aspect default is corrected
+from Fill Screen to iOS's Original 4:3. The selector now matches iOS's exact
+vertical spacing, card insets/height, upward offset, and centered symbol/label
+groups; stricter phone/tablet raw-frame gates and a real tablet card tap pass.
+Evidence:
+`docs/artifacts/2026-09-05/android/a4-touch-settings-state-selector-geometry.md`.
+
 KartPad `v0.4.0-preview.2` is published from
 `e9fa6058ee09fff0b16481ebe4a78d61cea69c87`. It updates both Apple-platform
 artifacts for Retro Rewind 6.12.5, repairs the universal iPhone/iPad three-dot

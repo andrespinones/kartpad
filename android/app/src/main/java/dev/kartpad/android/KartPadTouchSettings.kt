@@ -71,7 +71,7 @@ internal object KartPadTouchSettings {
     }
 
     fun aspectMode(context: Context): Int = preferences(context)
-        .getInt(ASPECT_MODE, 2).coerceIn(0, 2)
+        .getInt(ASPECT_MODE, 0).coerceIn(0, 2)
 
     fun setAspectMode(context: Context, value: Int) {
         preferences(context).edit().putInt(ASPECT_MODE, value.coerceIn(0, 2)).apply()

@@ -8,11 +8,6 @@ import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.StateListDrawable
 import android.os.Bundle
-import android.text.Spannable
-import android.text.SpannableString
-import android.text.style.AbsoluteSizeSpan
-import android.text.style.ForegroundColorSpan
-import android.text.style.StyleSpan
 import android.util.Log
 import android.view.Gravity
 import android.view.View
@@ -28,8 +23,8 @@ import java.util.concurrent.Executors
 /** Production owner for choosing the immutable runtime profile before SDL starts. */
 class KartPadLaunchActivity : Activity() {
     private lateinit var status: TextView
-    private lateinit var original: Button
-    private lateinit var retro: Button
+    private lateinit var original: ModeButton
+    private lateinit var retro: ModeButton
     private lateinit var progress: ProgressBar
     private val validator = Executors.newSingleThreadExecutor()
     private var validationGeneration = 0
@@ -170,26 +165,15 @@ class KartPadLaunchActivity : Activity() {
             addState(intArrayOf(-android.R.attr.state_enabled), fill(Color.rgb(62, 62, 72)))
             addState(intArrayOf(), fill(normal))
         }
-        fun styleModeButton(button: Button, color: Int, pressed: Int, icon: Int) {
+        fun styleModeButton(button: ModeButton, color: Int, pressed: Int, icon: Int) {
             button.apply {
-                isAllCaps = false
-                gravity = Gravity.START or Gravity.CENTER_VERTICAL
-                textAlignment = View.TEXT_ALIGNMENT_VIEW_START
-                includeFontPadding = false
-                minHeight = dp(88)
-                minimumHeight = dp(88)
-                setPadding(dp(28), dp(18), dp(28), dp(18))
+                minimumHeight = dp(96)
+                setPadding(dp(28), dp(24), dp(28), dp(24))
                 background = roundedButton(color, pressed)
                 backgroundTintList = null
-                setTextColor(Color.WHITE)
                 elevation = 0f
                 stateListAnimator = null
-                compoundDrawablePadding = dp(12)
-                val drawable = requireNotNull(getDrawable(icon)).mutate().apply {
-                    setTint(Color.WHITE)
-                    setBounds(0, 0, dp(30), dp(30))
-                }
-                setCompoundDrawablesRelative(drawable, null, null, null)
+                setIcon(icon, dp(20), dp(12))
             }
         }
 
@@ -204,7 +188,7 @@ class KartPadLaunchActivity : Activity() {
         val column = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER
-            setPadding(0, dp(12), 0, dp(12))
+            translationY = -dp(18).toFloat()
         }
         column.addView(ImageView(this).apply {
             setImageResource(R.drawable.ic_kartpad_steering_wheel)
@@ -213,28 +197,28 @@ class KartPadLaunchActivity : Activity() {
             scaleType = ImageView.ScaleType.CENTER_INSIDE
         }, LinearLayout.LayoutParams(dp(48), dp(48)).apply {
             gravity = Gravity.CENTER_HORIZONTAL
-            bottomMargin = dp(2)
+            bottomMargin = dp(12)
         })
         column.addView(label("KartPad", 34f, Color.WHITE).apply {
             setTypeface(typeface, Typeface.BOLD)
             includeFontPadding = false
-        }, layout(dp(4)))
+        }, layout(dp(12)))
         column.addView(
             label("Choose your way to race", 20f, Color.argb(224, 255, 255, 255)).apply {
                 setTypeface(typeface, Typeface.BOLD)
                 includeFontPadding = false
             },
-            layout(dp(8)),
+            layout(dp(12)),
         )
         column.addView(
             label(
                 "Your own RMCP01 disc image or extracted game data is required before play.",
-                16f,
+                17f,
                 Color.argb(158, 255, 255, 255),
             ),
             layout(dp(24)),
         )
-        original = Button(this).apply {
+        original = ModeButton(this).apply {
             id = R.id.kartpad_mode_original
             styleModeButton(
                 this,
@@ -244,7 +228,7 @@ class KartPadLaunchActivity : Activity() {
             )
             setModeText(this, "Mario Kart Wii", "Original game")
         }
-        retro = Button(this).apply {
+        retro = ModeButton(this).apply {
             id = R.id.kartpad_mode_retro_rewind
             styleModeButton(
                 this,
@@ -307,25 +291,8 @@ class KartPadLaunchActivity : Activity() {
         }
     }
 
-    private fun setModeText(button: Button, title: String, subtitle: String) {
-        val combined = "$title\n$subtitle"
-        button.text = SpannableString(combined).apply {
-            setSpan(StyleSpan(Typeface.BOLD), 0, title.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-            setSpan(AbsoluteSizeSpan(18, true), 0, title.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-            setSpan(
-                AbsoluteSizeSpan(14, true),
-                title.length + 1,
-                combined.length,
-                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE,
-            )
-            setSpan(
-                ForegroundColorSpan(Color.argb(205, 255, 255, 255)),
-                title.length + 1,
-                combined.length,
-                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE,
-            )
-        }
-        button.contentDescription = "$title\n$subtitle"
+    private fun setModeText(button: ModeButton, title: String, subtitle: String) {
+        button.setModeText(title, subtitle)
     }
 
     private fun showStatus(message: String) {
@@ -346,5 +313,53 @@ class KartPadLaunchActivity : Activity() {
         private const val EXTRA_DEBUG_GAME_DATA_VALID =
             "dev.kartpad.android.TEST_MODE_CHOOSER_GAME_DATA_VALID"
         private const val REQUEST_GAME_DATA = 4_303
+    }
+
+    /** Centers the icon and two-line label as one unit, matching UIButton.Configuration. */
+    private class ModeButton(context: android.content.Context) : LinearLayout(context) {
+        private val icon = ImageView(context)
+        private val title = TextView(context).apply {
+            textSize = 18f
+            setTextColor(Color.WHITE)
+            setTypeface(typeface, Typeface.BOLD)
+            includeFontPadding = false
+            gravity = Gravity.CENTER
+        }
+        private val subtitle = TextView(context).apply {
+            textSize = 14f
+            setTextColor(Color.argb(205, 255, 255, 255))
+            includeFontPadding = false
+            gravity = Gravity.CENTER
+        }
+        private val labels = LinearLayout(context).apply {
+            orientation = VERTICAL
+            gravity = Gravity.CENTER
+            addView(title, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT))
+            addView(subtitle, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT))
+        }
+
+        init {
+            orientation = HORIZONTAL
+            gravity = Gravity.CENTER
+            isClickable = true
+            isFocusable = true
+            importantForAccessibility = IMPORTANT_FOR_ACCESSIBILITY_YES
+            addView(icon)
+            addView(labels)
+        }
+
+        override fun getAccessibilityClassName(): CharSequence = Button::class.java.name
+
+        fun setIcon(resource: Int, size: Int, spacing: Int) {
+            icon.setImageResource(resource)
+            icon.imageTintList = ColorStateList.valueOf(Color.WHITE)
+            icon.layoutParams = LayoutParams(size, size).apply { marginEnd = spacing }
+        }
+
+        fun setModeText(title: String, subtitle: String) {
+            this.title.text = title
+            this.subtitle.text = subtitle
+            contentDescription = "$title\n$subtitle"
+        }
     }
 }

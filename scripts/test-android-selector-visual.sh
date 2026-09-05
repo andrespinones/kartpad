@@ -39,8 +39,8 @@ for _ in {1..20}; do
   if "$adb" shell uiautomator dump /sdcard/kartpad-selector-visual.xml >/dev/null \
       2>&1 &&
       "$adb" exec-out cat /sdcard/kartpad-selector-visual.xml >"$tree" &&
-      grep -Fq 'text="Mario Kart Wii' "$tree" &&
-      grep -Fq 'Download 6.12.5' "$tree"; then
+      grep -Fq 'content-desc="Mario Kart Wii' "$tree" &&
+      grep -Fq 'content-desc="Retro Rewind&#10;Download 6.12.5' "$tree"; then
     ready=1
     break
   fi

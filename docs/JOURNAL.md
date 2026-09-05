@@ -3548,3 +3548,28 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   device-layout reset.** Physical finger ergonomics and touch-only races remain
   open. No package or private artifact was published. Evidence:
   `docs/artifacts/2026-09-05/android/a4-touch-editor-drag-reset.md`.
+
+## 2026-09-05 — Android A4 settings state and selector geometry
+
+- Added a source-only real-widget fixture for render resolution, opacity,
+  global size, controller hiding, and Modern C-stick, followed by force-stop
+  and independent-process verification on Pixel 6 and Pixel Tablet.
+- The fixture's JNI receiver proved the selected 3x scale reached the native
+  display-setting boundary. The comparison also corrected Android's fresh
+  aspect default from Fill Screen to iOS's Original 4:3 without changing stored
+  user choices.
+- Replaced Android's edge-stranded compound card symbols with accessible
+  centered icon/label groups and matched iOS's exact stack gaps, card insets,
+  card height, body size, and upward offset.
+- Strengthened the selector verifier to check that geometry and content
+  centering. Both visible canonical emulator lanes pass, and a real tablet tap
+  selected the base profile.
+- The translated dual-runtime APK was installed and its production selector
+  rendered on the visible tablet. Its SHA-256 is
+  `a221911feec75a9eb295fa418980635f8811fa64524269e7b7f610cf56391abe`.
+  Android lint, 85 tests with one skip, strict audit, repository safety, shell
+  syntax, and whitespace pass.
+- Classification: **Pass for canonical emulator global-setting persistence and
+  iOS-derived selector geometry.** Physical rendering/touch/haptic acceptance
+  remains open. No package or private artifact was published. Evidence:
+  `docs/artifacts/2026-09-05/android/a4-touch-settings-state-selector-geometry.md`.

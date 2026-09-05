@@ -98,6 +98,7 @@ else()
     scheduler_fixture.cpp
     fiber_switch_android.S
     kartpad_controller_slots_fixture_jni.cpp
+    kartpad_runtime_settings_fixture_jni.cpp
     kartpad_touch_input_jni.cpp
     retro_rewind_archive_jni.cpp
     "${KARTPAD_REPO_ROOT}/runtime/src/android/touch_input.cpp"

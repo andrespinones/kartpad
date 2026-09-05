@@ -2,6 +2,17 @@
 
 Updated: 2026-09-05
 
+The latest Android A4 checkpoint gives global Touch Control Settings a real
+widget/process-restart gate on both canonical emulators and corrects the fresh
+aspect default to iOS's Original 4:3. It also tightens the Original/Retro
+selector to the iOS spacing, insets, card height, vertical offset, and centered
+symbol/label composition. Pixel 6 and Pixel Tablet raw-frame gates plus an
+actual tablet Original-card tap pass. The translated local APK SHA-256 is
+`a221911feec75a9eb295fa418980635f8811fa64524269e7b7f610cf56391abe`;
+85 tests with one skip, lint, strict audit, and safety checks pass. Physical
+Android acceptance remains open. Evidence:
+[`docs/artifacts/2026-09-05/android/a4-touch-settings-state-selector-geometry.md`](artifacts/2026-09-05/android/a4-touch-settings-state-selector-geometry.md).
+
 ## Native Android work
 
 Android A0 passes on the authorized second Apple Silicon host. The explicit

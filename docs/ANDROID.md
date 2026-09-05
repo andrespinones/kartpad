@@ -1150,6 +1150,12 @@ The editor replay now additionally persists a real down/move/up drag and then
 uses the real reset confirmation to clear the dragged origin and selected size
 on both layouts; evidence is in
 `docs/artifacts/2026-09-05/android/a4-touch-editor-drag-reset.md`.
+Global Touch Control Settings now also pass an actual widget-to-new-process
+round trip on both layouts. That check corrected Android's fresh aspect default
+to iOS's Original 4:3. The game selector now reproduces iOS's 12-point stack
+spacing, 24-point card gap/insets, 96-point card height, 17-point body text,
+18-point upward offset, and centered icon/label groups; evidence is in
+`docs/artifacts/2026-09-05/android/a4-touch-settings-state-selector-geometry.md`.
 
 Do not begin the touch-UI port until A2's controller-driven Original-mode proof
 passes. Physical Android hardware remains authoritative for vendor Vulkan and

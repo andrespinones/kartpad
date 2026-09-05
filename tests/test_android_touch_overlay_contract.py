@@ -169,6 +169,20 @@ class AndroidTouchOverlayContractTests(unittest.TestCase):
         self.assertIn("columns=left-sliders/right-actions", verifier)
         self.assertIn("TEST_TOUCH_SETTINGS", runner)
 
+    def test_touch_settings_widget_flow_persists_across_process_restart(self) -> None:
+        activity = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadActivity.kt").read_text()
+        runner = (REPO / "scripts/test-android-touch-settings-flow.sh").read_text()
+        self.assertIn("TEST_TOUCH_SETTINGS_FLOW", activity)
+        self.assertIn("render3.performClick()", activity)
+        self.assertIn("AccessibilityAction.ACTION_SET_PROGRESS.id", activity)
+        self.assertIn("setProgress(opacity, 39f)", activity)
+        self.assertIn("setProgress(size, 50f)", activity)
+        self.assertIn("hide.performClick()", activity)
+        self.assertIn("modernCStick.performClick()", activity)
+        self.assertIn('"verify" ->', activity)
+        self.assertIn("shell am force-stop dev.kartpad.android", runner)
+        self.assertIn("A4 touch settings flow passed", runner)
+
     def test_touch_editor_flow_exercises_hide_show_size_and_back(self) -> None:
         activity = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadActivity.kt").read_text()
         overlay = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadOverlayView.kt").read_text()
@@ -270,6 +284,7 @@ class AndroidTouchOverlayContractTests(unittest.TestCase):
 
     def test_display_choice_labels_match_ios_and_mark_experiments(self) -> None:
         android = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadActivity.kt").read_text()
+        settings = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadTouchSettings.kt").read_text()
         ios = (REPO / "apple/third_party/sunpad/SunPadGameOverlay.mm").read_text()
         for label in (
             "Original 4:3",
@@ -284,6 +299,8 @@ class AndroidTouchOverlayContractTests(unittest.TestCase):
             self.assertIn(label, android)
         self.assertNotIn('arrayOf("4:3", "16:9", "Fill Screen")', android)
         self.assertNotIn('arrayOf("Native (1x)", "2x", "3x", "4x")', android)
+        self.assertIn(".getInt(ASPECT_MODE, 0)", settings)
+        self.assertNotIn(".getInt(ASPECT_MODE, 2)", settings)
 
     def test_android_exposes_persistent_one_to_four_player_controller_setup(self) -> None:
         activity = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadActivity.kt").read_text()
@@ -336,6 +353,14 @@ class AndroidTouchOverlayContractTests(unittest.TestCase):
         self.assertIn("pendingProfile?.takeIf { gameDataReady }", activity)
         self.assertNotIn('text = "Manage Game Data…"', activity)
         self.assertNotIn('"Manage Game Data…",', verifier)
+        self.assertIn("translationY = -dp(18).toFloat()", activity)
+        self.assertIn("setPadding(dp(28), dp(24), dp(28), dp(24))", activity)
+        self.assertIn("bottomMargin = dp(12)", activity)
+        self.assertIn('17f,\n                Color.argb(158', activity)
+        self.assertIn("private class ModeButton", activity)
+        self.assertIn("gravity = Gravity.CENTER", activity)
+        self.assertIn("setIcon(icon, dp(20), dp(12))", activity)
+        self.assertIn("Button::class.java.name", activity)
 
     def test_motion_steering_matches_ios_curve_and_merges_with_touch(self) -> None:
         motion = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadMotionSteering.kt").read_text()

@@ -15,6 +15,7 @@ import android.view.Gravity
 import android.view.InputDevice
 import android.view.View
 import android.view.ViewGroup
+import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
@@ -105,6 +106,11 @@ class KartPadActivity : SDLActivity() {
         }
         val debugTouchSettings = BuildConfig.DEBUG && !BuildConfig.GAME_RUNTIME &&
             intent.getBooleanExtra(DEBUG_EXTRA_TOUCH_SETTINGS, false)
+        val debugTouchSettingsFlow = if (BuildConfig.DEBUG && !BuildConfig.GAME_RUNTIME) {
+            intent.getStringExtra(DEBUG_EXTRA_TOUCH_SETTINGS_FLOW)
+        } else {
+            null
+        }
         val debugTouchEditor = BuildConfig.DEBUG && !BuildConfig.GAME_RUNTIME &&
             intent.getBooleanExtra(DEBUG_EXTRA_TOUCH_EDITOR, false)
         val debugGasLock = BuildConfig.DEBUG && !BuildConfig.GAME_RUNTIME &&
@@ -112,7 +118,7 @@ class KartPadActivity : SDLActivity() {
         kartPadOverlay.visibility = if (
             BuildConfig.GAME_RUNTIME || debugTouchOverlay || debugModalClear ||
                 debugLifecycleClear || debugPersistence != null || debugTouchSettings ||
-                debugTouchEditor || debugGasLock
+                debugTouchEditor || debugGasLock || debugTouchSettingsFlow != null
         ) {
             android.view.View.VISIBLE
         } else {
@@ -151,6 +157,11 @@ class KartPadActivity : SDLActivity() {
             }
         } else if (debugTouchSettings) {
             kartPadOverlay.postDelayed({ showTouchControlSettings() }, 1_000L)
+        } else if (debugTouchSettingsFlow != null) {
+            kartPadOverlay.postDelayed(
+                { showTouchControlSettings(debugSettingsFlow = debugTouchSettingsFlow) },
+                1_000L,
+            )
         } else if (debugTouchEditor) {
             addMenuButton()
             addLayoutEditorBar()
@@ -1100,7 +1111,10 @@ class KartPadActivity : SDLActivity() {
     }
 
     @Suppress("SetTextI18n")
-    private fun showTouchControlSettings(debugEditorFlow: Boolean = false) {
+    private fun showTouchControlSettings(
+        debugEditorFlow: Boolean = false,
+        debugSettingsFlow: String? = null,
+    ) {
         val content = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             setPadding(dp(18), dp(4), dp(18), dp(4))
@@ -1250,7 +1264,76 @@ class KartPadActivity : SDLActivity() {
         }
         dialog.show()
         touchSettingsDialog = dialog
-        if (debugEditorFlow) {
+        if (debugSettingsFlow != null) {
+            render.post {
+                runCatching {
+                    val render3 = (0 until render.childCount)
+                        .map { render.getChildAt(it) as RadioButton }
+                        .first { it.tag == 3f }
+                    when (debugSettingsFlow) {
+                        "seed" -> {
+                            render3.performClick()
+                            check(render3.isChecked) { "3x render did not become checked" }
+                            fun setProgress(control: SeekBar, value: Float) {
+                                val arguments = Bundle().apply {
+                                    putFloat(
+                                        AccessibilityNodeInfo.ACTION_ARGUMENT_PROGRESS_VALUE,
+                                        value,
+                                    )
+                                }
+                                check(control.performAccessibilityAction(
+                                    AccessibilityNodeInfo.AccessibilityAction.ACTION_SET_PROGRESS.id,
+                                    arguments,
+                                )) { "${control.contentDescription} rejected accessibility progress" }
+                            }
+                            setProgress(opacity, 39f)
+                            setProgress(size, 50f)
+                            hide.performClick()
+                            modernCStick.performClick()
+                            check(!hide.isChecked && modernCStick.isChecked) {
+                                "touch settings switches did not toggle"
+                            }
+                            val savedRender = KartPadTouchSettings.resolutionScale(this)
+                            val savedOpacity = KartPadTouchSettings.opacity(this)
+                            val savedSize = KartPadTouchSettings.size(this)
+                            val savedHide = KartPadTouchSettings.hideOnController(this)
+                            val savedModern = KartPadTouchSettings.modernCStickHorizontal(this)
+                            check(savedRender == 3f && kotlin.math.abs(savedOpacity - 0.64f) < 0.001f &&
+                                kotlin.math.abs(savedSize - 1.20f) < 0.001f && !savedHide && savedModern
+                            ) {
+                                "touch settings seeded render=$savedRender opacity=$savedOpacity " +
+                                    "size=$savedSize hide=$savedHide modern=$savedModern"
+                            }
+                            check(nativeDebugDisplaySettings() ==
+                                "fps=true aspect=0 scale=3.0"
+                            ) { "3x render did not cross the source-fixture JNI bridge" }
+                            Log.i(
+                                TAG,
+                                "A4 touch settings flow seeded render=3x opacity=64 size=120 " +
+                                    "hide=false modern=true",
+                            )
+                        }
+                        "verify" -> {
+                            check(render3.isChecked && opacity.progress == 39 && size.progress == 50 &&
+                                opacityLabel.text == "Opacity: 64%" &&
+                                sizeLabel.text == "All sizes: 120%" &&
+                                !hide.isChecked && modernCStick.isChecked
+                            ) { "touch settings widgets did not reload persisted values" }
+                            KartPadTouchSettings.resetTouchControls(this)
+                            KartPadTouchSettings.setResolutionScale(this, 1f)
+                            KartPadTouchSettings.setHideOnController(this, true)
+                            KartPadTouchSettings.setModernCStickHorizontal(this, false)
+                            Log.i(
+                                TAG,
+                                "A4 touch settings flow passed render=3x opacity=64 size=120 " +
+                                    "hide=false modern=true",
+                            )
+                        }
+                        else -> error("unknown touch settings flow $debugSettingsFlow")
+                    }
+                }.onFailure { Log.e(TAG, "A4 touch settings flow failed", it) }
+            }
+        } else if (debugEditorFlow) {
             moveControls.post {
                 runCatching {
                     check(moveControls.performClick()) { "Move Controls did not accept click" }
@@ -1577,6 +1660,8 @@ class KartPadActivity : SDLActivity() {
         showFps: Boolean, aspectMode: Int, resolutionScale: Float,
     )
 
+    private external fun nativeDebugDisplaySettings(): String
+
     private external fun nativeApplyControllerMapping(mapping: IntArray)
     private external fun nativeControllerDevices(): Array<String>
     private external fun nativeAssignControllerPlayer(instance: Long, player: Int): Boolean
@@ -1644,6 +1729,8 @@ class KartPadActivity : SDLActivity() {
             "dev.kartpad.android.TEST_TOUCH_PERSISTENCE"
         private const val DEBUG_EXTRA_TOUCH_SETTINGS =
             "dev.kartpad.android.TEST_TOUCH_SETTINGS"
+        private const val DEBUG_EXTRA_TOUCH_SETTINGS_FLOW =
+            "dev.kartpad.android.TEST_TOUCH_SETTINGS_FLOW"
         private const val DEBUG_EXTRA_TOUCH_EDITOR =
             "dev.kartpad.android.TEST_TOUCH_EDITOR_FLOW"
         private const val DEBUG_EXTRA_GAS_LOCK =

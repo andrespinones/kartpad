@@ -40,21 +40,58 @@ def main() -> None:
         "KartPad",
         "Choose your way to race",
         "Your own RMCP01 disc image or extracted game data is required before play.",
-        "Mario Kart Wii\nOriginal game",
-        "Retro Rewind\nDownload 6.12.5 • Extra content + Retro WFC",
     )
     missing = [label for label in required_text if label not in by_text]
     if missing:
         raise SystemExit(f"ERROR: selector labels missing: {missing}")
-    if "KartPad" not in by_description:
-        raise SystemExit("ERROR: selector mark accessibility label missing")
+    original_label = "Mario Kart Wii\nOriginal game"
+    retro_label = "Retro Rewind\nDownload 6.12.5 • Extra content + Retro WFC"
+    missing_descriptions = [
+        label for label in ("KartPad", original_label, retro_label)
+        if label not in by_description
+    ]
+    if missing_descriptions:
+        raise SystemExit(
+            f"ERROR: selector accessibility labels missing: {missing_descriptions}"
+        )
 
-    original = parse_bounds(by_text[required_text[3]].attrib["bounds"])
-    retro = parse_bounds(by_text[required_text[4]].attrib["bounds"])
+    original = parse_bounds(by_description[original_label].attrib["bounds"])
+    retro = parse_bounds(by_description[retro_label].attrib["bounds"])
     mark = parse_bounds(by_description["KartPad"].attrib["bounds"])
-    # Accessibility bounds follow the compound icon/text content and can differ
-    # by a few density-rounded pixels even though the equal-weight card Views
-    # share one row.
+    title = parse_bounds(by_text["KartPad"].attrib["bounds"])
+    tagline = parse_bounds(by_text["Choose your way to race"].attrib["bounds"])
+    message = parse_bounds(by_text[required_text[2]].attrib["bounds"])
+    density = (mark[2] - mark[0]) / 48.0
+
+    def expect_dp(actual: float, expected: float, label: str, tolerance: float = 2.1) -> None:
+        target = expected * density
+        if abs(actual - target) > tolerance:
+            raise SystemExit(f"ERROR: {label} is {actual}px; expected {target}px")
+
+    expect_dp(title[1] - mark[3], 12, "mark/title spacing")
+    expect_dp(tagline[1] - title[3], 12, "title/tagline spacing")
+    expect_dp(message[1] - tagline[3], 12, "tagline/message spacing")
+    expect_dp(original[1] - message[3], 24, "message/card spacing")
+    expect_dp(original[3] - original[1], 96, "mode-card height")
+
+    for label, node, bounds in (
+        ("Original", by_description[original_label], original),
+        ("Retro Rewind", by_description[retro_label], retro),
+    ):
+        content_nodes = [
+            child for child in node.iter()
+            if child is not node and (
+                child.attrib.get("class") == "android.widget.ImageView" or
+                child.attrib.get("text")
+            )
+        ]
+        content_bounds = [parse_bounds(child.attrib["bounds"]) for child in content_nodes]
+        content_left = min(item[0] for item in content_bounds)
+        content_right = max(item[2] for item in content_bounds)
+        if abs((content_left + content_right) - (bounds[0] + bounds[2])) > 3:
+            raise SystemExit(f"ERROR: {label} icon/label group is not centered")
+    # The custom accessible button bounds can differ by a few density-rounded
+    # pixels even though the equal-weight card Views share one row.
     if abs(original[1] - retro[1]) > 4 or abs(original[3] - retro[3]) > 4:
         raise SystemExit(f"ERROR: mode cards are not vertically aligned: {original} {retro}")
     original_width = original[2] - original[0]
