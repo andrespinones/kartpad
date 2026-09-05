@@ -4063,3 +4063,22 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   vendor Vulkan/performance, hands-on audio/haptics/controller, signing, and
   publication remain open. No package or private artifact was published.
   Evidence: `docs/artifacts/2026-09-05/android/a6-product-16k-runtime.md`.
+
+## 2026-09-05 — Android A6 API 28 product-runtime probe
+
+- Created a disposable official API 28 `google_apis` ARM64 AVD and privately
+  verified all 4,185 restricted product-fixture files after staging.
+- Hardened page-size probing for Android 9's missing `getconf`, routed
+  app-private existence checks through the shell, and made early process loss
+  produce the runner's explicit bounded diagnostic.
+- The release selector, ARM64 `SDL_main`, SDL surface, and audio initialized,
+  but the image's Vulkan inventory was empty. Dawn returned
+  `VK_ERROR_INCOMPATIBLE_DRIVER` under default and explicit host-GPU modes;
+  Aurora then correctly stopped on its fatal null-renderer path.
+- Classification: **Blocked by this official emulator image's unusable Vulkan
+  implementation; not an API 28 pass and not a physical-device failure.** API
+  28 remains provisional pending Vulkan-capable physical hardware.
+- Restored debug version 5, deleted the temporary AVD, restricted transfer,
+  trace, and private log, then restarted the API 36 tablet on its selector. No
+  APK/AAB or private artifact was published. Evidence:
+  `docs/artifacts/2026-09-05/android/a6-api28-product-runtime-probe.md`.

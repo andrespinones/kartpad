@@ -72,7 +72,9 @@ cleanup() {
 trap cleanup EXIT
 
 remote_exists() {
-  "${adb_target[@]}" shell run-as "$package" test -e "$1"
+  local remote_path="$1"
+  "${adb_target[@]}" shell \
+    "run-as $package sh -c '[ -e \"$remote_path\" ]'"
 }
 
 file_digest() {
@@ -116,6 +118,20 @@ installed_version_code() {
   "${adb_target[@]}" shell dumpsys package "$package" |
     sed -n 's/^[[:space:]]*versionCode=\([0-9][0-9]*\).*/\1/p' |
     head -1 | tr -d '\r'
+}
+
+device_page_size() {
+  local page_size
+  page_size="$("${adb_target[@]}" shell getconf PAGE_SIZE 2>/dev/null |
+    tr -d '\r' || true)"
+  if [[ ! "$page_size" =~ ^[0-9]+$ ]]; then
+    page_size="$("${adb_target[@]}" shell \
+      "awk '/KernelPageSize:/{print \$2 * 1024; exit}' /proc/self/smaps" |
+      tr -d '\r')"
+  fi
+  [[ "$page_size" == 4096 || "$page_size" == 16384 ]] ||
+    fail "emulator page size is neither 4096 nor 16384"
+  printf '%s\n' "$page_size"
 }
 
 original_mode_bounds() {
@@ -180,7 +196,8 @@ exercise_original_runtime() {
   [[ "$runtime_started" == 1 ]] ||
     fail "bundle-derived release activity did not execute SDL_main from libmain.so"
   local initial_pid
-  initial_pid="$("${adb_target[@]}" shell pidof "$package" | tr -d '\r')"
+  initial_pid="$("${adb_target[@]}" shell pidof "$package" 2>/dev/null |
+    tr -d '\r' || true)"
   [[ "$initial_pid" =~ ^[0-9]+$ ]] ||
     fail "bundle-derived release runtime has no stable process"
   sleep "$runtime_stability_seconds"
@@ -391,4 +408,4 @@ fi
 restore_selector
 wait_for_selector
 
-echo "Android bundle-derived APK emulator test passed: aab_sha256=$bundle_sha256 derived_apk_sha256=$derived_apk_sha256 version_code=$derived_version page_size=$("${adb_target[@]}" shell getconf PAGE_SIZE | tr -d '\r') release_non_debuggable=yes universal_selector_visible=yes universal_runtime_stable=yes universal_frame_diverse=yes device_splits=4 split_signer_consistent=yes split_native_bytes_exact=yes split_selector_visible=yes split_runtime_stable=yes split_frame_diverse=yes debug_apk_restored=yes durable_state_preserved=yes"
+echo "Android bundle-derived APK emulator test passed: aab_sha256=$bundle_sha256 derived_apk_sha256=$derived_apk_sha256 version_code=$derived_version page_size=$(device_page_size) release_non_debuggable=yes universal_selector_visible=yes universal_runtime_stable=yes universal_frame_diverse=yes device_splits=4 split_signer_consistent=yes split_native_bytes_exact=yes split_selector_visible=yes split_runtime_stable=yes split_frame_diverse=yes debug_apk_restored=yes durable_state_preserved=yes"

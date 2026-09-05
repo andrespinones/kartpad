@@ -55,7 +55,11 @@ qemu="$(adb_shell getprop ro.kernel.qemu)"
 
 api="$(adb_shell getprop ro.build.version.sdk)"
 abi="$(adb_shell getprop ro.product.cpu.abi)"
-page_size="$(adb_shell getconf PAGE_SIZE)"
+page_size="$(adb_shell getconf PAGE_SIZE 2>/dev/null || true)"
+if [[ ! "$page_size" =~ ^[0-9]+$ ]]; then
+  page_size="$(adb_shell \
+    "awk '/KernelPageSize:/{print \$2 * 1024; exit}' /proc/self/smaps")"
+fi
 manufacturer="$(adb_shell getprop ro.product.manufacturer |
   tr '[:space:]' '_' | tr -cd '[:alnum:]_.-')"
 model="$(adb_shell getprop ro.product.model |

@@ -26,6 +26,14 @@
   controller and physical Android device; keep emulator and physical-device
   claims separate.
 
+The complete product's API 28 minimum remains provisional. A disposable
+official API 28 `google_apis` ARM64 AVD reached selector, SDL surface, and audio
+startup, but its advertised Vulkan implementation returned an empty inventory
+and `VK_ERROR_INCOMPATIBLE_DRIVER` under both default and host-GPU modes. That
+image cannot prove KartPad's Vulkan product runtime. A Vulkan-capable physical
+API 28 device, or a newer supported physical phone, is the next authority.
+See `docs/artifacts/2026-09-05/android/a6-api28-product-runtime-probe.md`.
+
 The next physical session starts with the read-only
 `scripts/check-android-physical-device.sh` intake gate. Its mocked contract
 covers twelve supported and rejected device states and proves that the ADB

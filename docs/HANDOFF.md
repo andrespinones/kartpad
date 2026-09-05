@@ -2,6 +2,17 @@
 
 ## Current state
 
+The complete product was also probed on a disposable official API 28 ARM64
+AVD. Selector, `SDL_main`, surface, and audio startup succeeded, but that image
+exposed no usable Vulkan adapter: `vkjson` was empty and Dawn returned
+`VK_ERROR_INCOMPATIBLE_DRIVER` under both default and host-GPU configurations.
+The result is classified as an emulator-image renderer limitation, not an API
+28 pass or phone failure. API 28 support remains provisional until tested on
+Vulkan-capable physical hardware. Older-shell page-size/existence probes and
+silent process-loss reporting were hardened. The AVD/private transfer were
+deleted and the persistent API 36 tablet is restored to version 5's selector.
+Evidence: `docs/artifacts/2026-09-05/android/a6-api28-product-runtime-probe.md`.
+
 KartPad `v0.4.0` is published as the second stable community release from
 `369159153bef0d045edf5cc1cf3b1b444b36a284`. The iPhone/iPad app 0.4.0 build
 15 IPA has SHA-256

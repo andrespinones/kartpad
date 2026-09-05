@@ -2,6 +2,19 @@
 
 Updated: 2026-09-05
 
+An explicit complete-product API 28 probe reached the production selector,
+installed ARM64 `SDL_main`, SDL surface creation, and audio, but the official
+Android 9 ARM64 emulator image could not create any Vulkan instance even after
+a host-GPU restart. Its Vulkan inventory was empty; Dawn returned
+`VK_ERROR_INCOMPATIBLE_DRIVER`, and Aurora intentionally stopped on its fatal
+null-renderer path. This is not an API 28 pass or a physical-device failure.
+Page-size and `run-as` probes now support the older shell, and runner process
+loss is diagnostic rather than silent. API 28 remains provisional pending a
+Vulkan-capable physical device; the existing preview can be tested now on a
+newer Vulkan-capable ARM64 phone. The disposable AVD and private transfer were
+deleted, and the API 36 tablet is visible on the selector. Evidence:
+[`docs/artifacts/2026-09-05/android/a6-api28-product-runtime-probe.md`](artifacts/2026-09-05/android/a6-api28-product-runtime-probe.md).
+
 Android A5 now exercises the product runtime's translated guest `/dev/net/ssl`
 IOCTLV handler, not only its Mbed TLS session wrapper. An opt-in emulator run
 constructed actual guest memory vectors and traversed `SSL_NEW`, guest DER root

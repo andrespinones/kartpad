@@ -30,6 +30,13 @@ class AndroidHardwarePreviewInstallContractTests(unittest.TestCase):
         self.assertIn("adb_serial=redacted", installer)
         self.assertIn("rm -rf -- \"$inspect_root\"", installer)
 
+    def test_physical_preflight_supports_android_9_page_size_probe(self) -> None:
+        preflight = (REPO / "scripts/check-android-physical-device.sh").read_text()
+
+        self.assertIn("getconf PAGE_SIZE", preflight)
+        self.assertIn("KernelPageSize", preflight)
+        self.assertIn("/proc/self/smaps", preflight)
+
 
 if __name__ == "__main__":
     unittest.main()
