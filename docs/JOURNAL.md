@@ -4007,3 +4007,27 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   signing, physical hardware, and publication remain open. No package, split,
   device spec, private artifact, or identifier was published. Evidence:
   `docs/artifacts/2026-09-05/android/a6-device-split-emulator.md`.
+
+## 2026-09-05 — Android A6 guarded physical-preview handoff
+
+- Added `scripts/install-android-hardware-preview.sh` to bind the exact audited
+  preview APK to the existing physical preflight and UID-scoped capture flow.
+- It refuses emulators or unsupported/ambiguous targets before mutation,
+  requires the approved digest, strict APK audit, installed preview metadata,
+  and visible two-game selector, then starts the physical capture marker.
+- Any different existing KartPad package requires explicit update opt-in. The
+  script never uninstalls, clears app data, or downgrades; a signing mismatch
+  fails without removing the prior package. Raw ADB failure output and the
+  target serial are suppressed.
+- A live negative run against the sole connected Pixel Tablet emulator failed
+  at the physical preflight as intended, emitted no serial, and left installed
+  version 5 unchanged. The source contract passed.
+- The 104-test suite with one intentional skip, strict AAB/preview-APK audits,
+  source/input verification, repository safety, shell syntax/lint, and
+  whitespace checks pass.
+- Classification: **Pass for guarded physical-preview installation handoff,
+  not physical execution.** No phone is attached; gameplay, performance,
+  touch, motion, audio, haptics, controller, thermal, lifecycle, and long-soak
+  hardware rows remain open. No package or private artifact was published.
+  Evidence:
+  `docs/artifacts/2026-09-05/android/a6-physical-preview-handoff.md`.

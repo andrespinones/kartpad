@@ -119,6 +119,17 @@ then restored unchanged. This closes local device-specific split execution,
 not actual Play service delivery, release-key signing, or physical hardware.
 Evidence: `docs/artifacts/2026-09-05/android/a6-device-split-emulator.md`.
 
+The phone handoff is now one guarded command:
+`scripts/install-android-hardware-preview.sh`. It verifies the exact preview
+hash and package audit, refuses emulators/unsupported devices before mutation,
+protects any different installed KartPad build behind explicit update opt-in,
+never clears/uninstalls/downgrades data, verifies installed preview metadata and
+the two-game selector, then starts the UID-scoped capture. Its live negative
+gate rejected the connected Pixel Tablet emulator without revealing the serial
+or changing installed version 5. Run it only after disconnecting/stopping the
+emulator and attaching one authorized physical phone. Evidence:
+`docs/artifacts/2026-09-05/android/a6-physical-preview-handoff.md`.
+
 The `codex/iphone-touch-layout-editor` candidate captures the maintainer's
 current physical-iPhone control positions as the default for untouched iPhone
 installs only. Existing custom layouts and every iPad layout remain unchanged.

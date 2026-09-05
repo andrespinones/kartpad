@@ -130,6 +130,17 @@ state unchanged. Actual Play service delivery, release-key signing, and
 physical-device acceptance remain open. Evidence:
 [`docs/artifacts/2026-09-05/android/a6-device-split-emulator.md`](artifacts/2026-09-05/android/a6-device-split-emulator.md).
 
+The retained hardware preview now has a guarded physical-session installer.
+It requires the exact audited APK, runs the API/ABI/page-size/free-space
+physical preflight before mutation, refuses emulators, and will not replace a
+different KartPad build without explicit update opt-in. It never uninstalls,
+clears, or downgrades package data; after install it requires version/name and
+the two-game selector, then starts the UID-scoped capture window. A live
+negative run rejected the sole Pixel Tablet emulator with the serial redacted
+and installed version 5 unchanged. No physical target is connected, so this is
+handoff hardening rather than physical acceptance. Evidence:
+[`docs/artifacts/2026-09-05/android/a6-physical-preview-handoff.md`](artifacts/2026-09-05/android/a6-physical-preview-handoff.md).
+
 The latest Android A4 checkpoint fixes a real SDL lifecycle gap: KartPad now
 enables SDL activity recreation, so Android can rebuild `KartPadActivity`
 without SDL terminating the process. Visible Pixel 6 and Pixel Tablet runs held

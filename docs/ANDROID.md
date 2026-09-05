@@ -954,6 +954,15 @@ processing, release signing, and physical delivery remain separate claims.
 Evidence is in
 `docs/artifacts/2026-09-05/android/a6-device-split-emulator.md`.
 
+For the first physical session, stop/disconnect every emulator, attach exactly
+one authorized phone, and run `scripts/install-android-hardware-preview.sh`.
+The installer binds the exact audited preview digest to the physical preflight,
+protects a different existing installation behind an explicit update opt-in,
+uses only non-destructive update installation, verifies the installed preview
+metadata and selector, and opens the UID-scoped capture window. It intentionally
+has no uninstall, data-clear, or downgrade path. Complete the manual matrix,
+then run `scripts/capture-android-a2-session.sh summarize`.
+
 The non-destructive save-storage emulator lane is
 `scripts/test-android-save-storage-emulator.sh [APK]`. Its debug-only fixture
 uses deterministic valid RKSYS images under an isolated cache root to execute
