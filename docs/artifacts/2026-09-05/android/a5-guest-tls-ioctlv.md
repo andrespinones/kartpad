@@ -12,7 +12,7 @@ connection interruption, public WFC, or physical-device networking.
 - Branch: `codex/android-a4-touch-settings`
 - Parent commit: `d8599c3375f648f31ddbb81296897095c7441331`
 - Product APK SHA-256:
-  `0b6f6e5afa00eca9eedf2ced99639d25c5b62e3dbe1e3e418f7f4a1549831778`
+  `08c016da3ceb7f2dada9880249d94aacce9e7e6351c7f9a4d813dd86d183aec9`
 - Target: visible API 36 ARM64 Pixel Tablet emulator
 - Private input boundary: pre-existing app-private, user-owned extracted game
   data; `sys/main.dol` was verified only by its approved SHA-256
@@ -39,6 +39,16 @@ Every exit closes the fixture session/socket and restores the snapshotted guest
 memory. A failed opt-in fixture is logged and does not abort normal product
 startup.
 
+Android no longer acknowledges `SETBUILTINROOTCA` without configuring a trust
+anchor. It reads `rootca.pem` only from the managed app-private Wii NAND,
+rejects empty or larger-than-64-KiB input, verifies the fixed Wii root-CA
+SHA-256 published by the pinned Dolphin reference with a full-digest comparison,
+and only then parses and installs it. Missing or wrong content returns guest
+`-1`. Android also returns failure for client-certificate commands it has not
+implemented instead of falsely reporting success. The clean emulator has no
+user-owned Wii root certificate, so this run proves the missing-file failure
+path; valid built-in root loading and mutual TLS remain unaccepted.
+
 `scripts/test-android-tls-ioctlv-emulator.sh` reinstalls the existing product
 APK with `-r`, refuses to proceed unless the private game-data hash matches,
 creates one-run CA/server keys in a host temporary directory, and copies only
@@ -52,9 +62,10 @@ production Original/Retro selector.
 The repeatable product run passed both cases:
 
 ```text
+[net] A5 guest TLS IOCTLV missing built-in root rejection passed result=-1
 [net] A5 guest TLS IOCTLV trusted exchange passed response_bytes=4797 peer_close=-6
 [net] A5 guest TLS IOCTLV hostname rejection passed result=-9
-Android product guest TLS IOCTLV emulator fixture passed: apk_sha256=0b6f6e5afa00eca9eedf2ced99639d25c5b62e3dbe1e3e418f7f4a1549831778 private_key_on_device=no game_data_preserved=yes
+Android product guest TLS IOCTLV emulator fixture passed: apk_sha256=08c016da3ceb7f2dada9880249d94aacce9e7e6351c7f9a4d813dd86d183aec9 private_key_on_device=no game_data_preserved=yes
 ```
 
 Afterward, the exact fixture directories were absent, the corrected app-private

@@ -52,6 +52,9 @@ installed_main_dol_sha256="$("${adb_target[@]}" shell \
   awk '{ print $1 }' | tr -d '\r')"
 [[ "$installed_main_dol_sha256" == "$expected_main_dol_sha256" ]] ||
   fail "app-private GameData is absent or its main.dol hash is not the approved fixture"
+"${adb_target[@]}" shell run-as "$package" test ! -e \
+  files/KartPad/NAND/rootca.pem ||
+  fail "the emulator has a user-owned built-in Wii root CA; use a clean fixture profile"
 
 openssl req -x509 -newkey rsa:2048 -nodes -days 1 \
   -keyout "$temporary_root/ca.key" -out "$temporary_root/ca.pem" \
@@ -90,6 +93,7 @@ put_fixture_text() {
 }
 put_fixture_text address 10.0.2.2
 put_fixture_text port "$port"
+put_fixture_text check_builtin_root_missing 1
 
 latest_transcript() {
   "${adb_target[@]}" shell \
@@ -101,6 +105,7 @@ run_case() {
   local hostname="$1"
   local expected="$2"
   local marker="$3"
+  local prerequisite_marker="${4:-}"
   local before_transcript
   local current_transcript=""
 
@@ -117,6 +122,16 @@ run_case() {
     if [[ -n "$current_transcript" && "$current_transcript" != "$before_transcript" ]] &&
         "${adb_target[@]}" exec-out run-as "$package" cat "$current_transcript" |
           grep -Fq "$marker"; then
+      if [[ -n "$prerequisite_marker" ]] &&
+          ! "${adb_target[@]}" exec-out run-as "$package" cat "$current_transcript" |
+            grep -Fq "$prerequisite_marker"; then
+        sleep 0.5
+        continue
+      fi
+      if [[ -n "$prerequisite_marker" ]]; then
+        "${adb_target[@]}" exec-out run-as "$package" cat "$current_transcript" |
+          grep -F "$prerequisite_marker" | tail -n 1
+      fi
       "${adb_target[@]}" exec-out run-as "$package" cat "$current_transcript" |
         grep -F "$marker" | tail -n 1
       "${adb_target[@]}" shell am force-stop "$package"
@@ -134,7 +149,8 @@ run_case() {
 }
 
 run_case kartpad.test 0 \
-  "A5 guest TLS IOCTLV trusted exchange passed response_bytes="
+  "A5 guest TLS IOCTLV trusted exchange passed response_bytes=" \
+  "A5 guest TLS IOCTLV missing built-in root rejection passed result=-1"
 run_case wrong.kartpad.test -9 \
   "A5 guest TLS IOCTLV hostname rejection passed result=-9"
 

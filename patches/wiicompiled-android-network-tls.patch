@@ -1,18 +1,19 @@
 --- a/src/hle/net/network_ssl.cpp
 +++ b/src/hle/net/network_ssl.cpp
-@@ -2,7 +2,11 @@
+@@ -2,7 +2,12 @@
  
  #ifdef __APPLE__
  #include <kartpad/network/apple_secure_transport.h>
 +#elif defined(__ANDROID__)
 +#include <kartpad/network/android_mbedtls.h>
++#include "nand_path.h"
  #endif
 +
 +#include <memory>
  
  namespace NetworkHle {
  
-@@ -62,6 +66,8 @@
+@@ -62,6 +67,8 @@
      SecPkgContext_StreamSizes sizes{};
  #elif defined(__APPLE__)
      SSLContextRef context = nullptr;
@@ -21,7 +22,7 @@
  #endif
  };
  
-@@ -682,7 +688,72 @@
+@@ -682,7 +689,72 @@
          return static_cast<int32_t>(processed);
      }
      return AppleSslResult(status, false);
@@ -94,7 +95,7 @@
  #else
  static void ClearSslSession(SslSession& ssl) {
      ssl = {};
-@@ -739,6 +810,15 @@
+@@ -739,6 +811,15 @@
                  ClearSslSession(g_sslSessions[i]);
                  g_sslSessions[i].active = true;
                  g_sslSessions[i].hostname = hostname;
@@ -110,7 +111,7 @@
                  WriteSslReturn(in, i + 1);
                  return 0;
              }
-@@ -782,6 +862,13 @@
+@@ -782,6 +863,13 @@
              ssl.native = socket->native;
              ssl.plaintextWfc = true;
          }
@@ -124,7 +125,7 @@
  #ifdef _WIN32
          const int timeoutMs = 15000;
          setsockopt(socket->native, SOL_SOCKET, SO_RCVTIMEO, reinterpret_cast<const char*>(&timeoutMs), sizeof(timeoutMs));
-@@ -795,6 +882,12 @@
+@@ -795,6 +883,12 @@
                     sizeof(timeout));
          setsockopt(socket->native, SOL_SOCKET, SO_SNDTIMEO, &timeout,
                     sizeof(timeout));
@@ -137,7 +138,7 @@
  #endif
          WriteSslReturn(in, SSL_OK);
          return 0;
-@@ -884,7 +977,21 @@
+@@ -884,7 +978,36 @@
      case IOCTLV_NET_SSL_SETBUILTINCLIENTCERT:
      case IOCTLV_NET_SSL_DISABLEVERIFYOPTIONFORDEBUG: {
          const int sslId = ReadSslId(out);
@@ -154,6 +155,21 @@
 +                result = g_sslSessions[sslId].context->SetRootCaDer(
 +                    certificate, out[1].size);
 +            }
++        } else if (result == SSL_OK && cmd == IOCTLV_NET_SSL_SETBUILTINROOTCA) {
++            if (!g_sslSessions[sslId].context) {
++                result = SSL_ERR_FAILED;
++            } else {
++                const std::filesystem::path rootCa =
++                    RuntimeNandPath::DiscoverNandRootPath() / "rootca.pem";
++                result = g_sslSessions[sslId].context->SetBuiltinRootCaFile(
++                    rootCa.string());
++            }
++        } else if (result == SSL_OK &&
++                   (cmd == IOCTLV_NET_SSL_SETCLIENTCERT ||
++                    cmd == IOCTLV_NET_SSL_SETBUILTINCLIENTCERT)) {
++            // Do not acknowledge a client certificate that Android has not
++            // actually configured. Mutual TLS support remains a separate gate.
++            result = SSL_ERR_FAILED;
 +        }
 +#endif
 +        WriteSslReturn(in, result);

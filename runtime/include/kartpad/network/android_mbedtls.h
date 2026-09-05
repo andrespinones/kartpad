@@ -32,6 +32,7 @@ class AndroidMbedTlsSession final {
 
   std::int32_t SetHostname(std::string_view hostname);
   std::int32_t SetRootCaDer(const std::uint8_t* data, std::size_t size);
+  std::int32_t SetBuiltinRootCaFile(std::string_view path);
   std::int32_t AttachSocket(int native_socket);
   std::int32_t Handshake();
   std::int32_t Read(std::uint8_t* data, std::size_t size);

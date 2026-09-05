@@ -3780,9 +3780,15 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   path. The private game-data hash was unchanged, no key
   reached the device, and the corrected relative `[paths]` configuration
   remained installed.
+- Replaced Android's false-success `SETBUILTINROOTCA` behavior with a
+  size-bounded loader for the exact fixed-hash Wii `rootca.pem` in managed
+  app-private NAND. Missing or wrong content now fails as guest `-1`, and
+  unimplemented client-certificate commands also fail instead of claiming
+  configuration. The clean emulator proves the missing-root path; valid
+  user-owned root loading and mutual TLS remain open.
 - A fresh runtime preparation reproduced the exact source. The product APK
   SHA-256 is
-  `0b6f6e5afa00eca9eedf2ced99639d25c5b62e3dbe1e3e418f7f4a1549831778`;
+  `08c016da3ceb7f2dada9880249d94aacce9e7e6351c7f9a4d813dd86d183aec9`;
   96 tests with one intentional skip, product-configured Android lint, strict
   package/privacy audit, repository safety, shell lint/syntax, and whitespace
   checks pass.

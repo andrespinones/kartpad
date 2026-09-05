@@ -58,9 +58,14 @@ class AndroidTlsContractTests(unittest.TestCase):
         self.assertIn("class AndroidMbedTlsSession final", header)
         self.assertIn("MBEDTLS_SSL_VERIFY_REQUIRED", source)
         self.assertIn("mbedtls_x509_crt_parse_der", source)
+        self.assertIn("SetBuiltinRootCaFile", source)
+        self.assertIn("kWiiBuiltinRootCaSha256", source)
+        self.assertIn("kMaximumCertificateBytes", source)
+        self.assertIn("psa_hash_compute(PSA_ALG_SHA_256", source)
         self.assertIn("mbedtls_ssl_set_hostname", source)
         self.assertIn("AndroidMbedTlsSession", patch)
         self.assertIn("SetRootCaDer", patch)
+        self.assertIn("SetBuiltinRootCaFile", patch)
         self.assertIn("AttachSocket", patch)
         self.assertIn("wiicompiled-android-network-tls.patch", prepare)
         self.assertIn('runtime/src/hle/net/android_mbedtls.cpp"', cmake)
@@ -79,6 +84,8 @@ class AndroidTlsContractTests(unittest.TestCase):
         self.assertIn('root + "/port"', fixture_patch)
         self.assertIn("terminalRead != SSL_ERR_ZERO", fixture_patch)
         self.assertIn("peer_close=%d", fixture_patch)
+        self.assertIn("IOCTLV_NET_SSL_SETBUILTINROOTCA", fixture_patch)
+        self.assertIn("missing built-in root rejection passed", fixture_patch)
         for command in (
             "IOCTLV_NET_SSL_NEW",
             "IOCTLV_NET_SSL_SETROOTCA",
@@ -101,6 +108,7 @@ class AndroidTlsContractTests(unittest.TestCase):
         self.assertNotIn("pm clear", runner)
         self.assertIn("files/KartPad/GameData/sys/main.dol", runner)
         self.assertIn("KartPadTlsIoctlvFixture", runner)
+        self.assertIn("files/KartPad/NAND/rootca.pem", runner)
         self.assertIn('"$fixture_root/ca.der"', runner)
         self.assertNotIn('"$fixture_root/ca.key"', runner)
         self.assertNotIn('"$fixture_root/server.key"', runner)

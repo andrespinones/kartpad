@@ -8,7 +8,10 @@ constructed actual guest memory vectors and traversed `SSL_NEW`, guest DER root
 CA loading, socket-table `CONNECT`, handshake, write, read, and shutdown. The
 visible ARM64 Pixel Tablet consumed the complete 4,797-byte encrypted HTTP
 response, observed orderly peer close as guest `-6`, and returned guest error
-`-9` for the wrong hostname. The repeatable runner preserves
+`-9` for the wrong hostname. Android now fails `SETBUILTINROOTCA` when the
+managed Wii NAND lacks the exact hash-verified `rootca.pem`, instead of
+acknowledging an unconfigured trust anchor; valid user-owned root loading and
+client certificates remain unaccepted. The repeatable runner preserves
 app-private game data, places no key on the device, cleans its public fixture,
 and returns to the production selector. Fresh runtime patch reproduction, 96
 tests with one skip, product-configured lint, and strict package/repository
@@ -16,7 +19,7 @@ audits pass. This remains an opt-in pre-guest product fixture, not a retail
 Mario Kart/WFC-initiated request. Built-in Wii CA/client certificates,
 local/public WFC, interruption recovery, and physical Android acceptance remain
 open. The installed dual-game APK SHA-256 is
-`0b6f6e5afa00eca9eedf2ced99639d25c5b62e3dbe1e3e418f7f4a1549831778`.
+`08c016da3ceb7f2dada9880249d94aacce9e7e6351c7f9a4d813dd86d183aec9`.
 Evidence:
 [`docs/artifacts/2026-09-05/android/a5-guest-tls-ioctlv.md`](artifacts/2026-09-05/android/a5-guest-tls-ioctlv.md).
 

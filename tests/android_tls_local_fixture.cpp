@@ -79,6 +79,7 @@ int main(int argc, char** argv) {
 
   AndroidMbedTlsSession tls;
   if (tls.SetHostname(hostname) != 0 ||
+      tls.SetBuiltinRootCaFile(argv[2]) != Code(AndroidTlsResult::kFailed) ||
       tls.SetRootCaDer(root.data(), root.size()) != 0 ||
       tls.AttachSocket(socket_fd) != 0) {
     close(socket_fd);

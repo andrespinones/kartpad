@@ -1,10 +1,13 @@
 #include <kartpad/network/android_mbedtls.h>
 
 #include <algorithm>
+#include <array>
 #include <cerrno>
 #include <climits>
 #include <cstring>
+#include <fstream>
 #include <string>
+#include <vector>
 
 #include <sys/socket.h>
 #include <unistd.h>
@@ -21,6 +24,13 @@ namespace {
 constexpr std::int32_t Code(AndroidTlsResult result) {
   return static_cast<std::int32_t>(result);
 }
+
+constexpr std::array<std::uint8_t, 32> kWiiBuiltinRootCaSha256 = {
+    0xc5, 0xb0, 0xf8, 0xdf, 0xce, 0xc6, 0xb9, 0xed,
+    0x2a, 0xc3, 0x8b, 0x8b, 0xc6, 0x9a, 0x4d, 0xb7,
+    0xc2, 0x09, 0xdc, 0x17, 0x7d, 0x24, 0x3c, 0x8d,
+    0xf2, 0xbd, 0xdf, 0x9e, 0x39, 0x17, 0x1e, 0x5f,
+};
 
 int SocketSend(void* context, const unsigned char* data, std::size_t size) {
   const int socket = *static_cast<const int*>(context);
@@ -163,6 +173,51 @@ std::int32_t AndroidMbedTlsSession::SetRootCaDer(const std::uint8_t* data,
   mbedtls_x509_crt_init(&impl_->roots);
   const int result = mbedtls_x509_crt_parse_der(&impl_->roots, data, size);
   if (result != 0) {
+    return Code(AndroidTlsResult::kServerCertificate);
+  }
+  mbedtls_ssl_conf_ca_chain(&impl_->config, &impl_->roots, nullptr);
+  return Code(AndroidTlsResult::kSuccess);
+}
+
+std::int32_t AndroidMbedTlsSession::SetBuiltinRootCaFile(
+    std::string_view path) {
+  if (!impl_->config_ready || impl_->ssl_ready || path.empty() ||
+      path.find('\0') != std::string_view::npos) {
+    return Code(AndroidTlsResult::kFailed);
+  }
+  std::ifstream input(std::string(path), std::ios::binary);
+  input.seekg(0, std::ios::end);
+  const std::streamoff file_size = input.tellg();
+  constexpr std::streamoff kMaximumCertificateBytes = 64 * 1024;
+  if (file_size <= 0 || file_size > kMaximumCertificateBytes) {
+    return Code(AndroidTlsResult::kFailed);
+  }
+  input.seekg(0, std::ios::beg);
+  std::vector<std::uint8_t> certificate(static_cast<std::size_t>(file_size));
+  input.read(reinterpret_cast<char*>(certificate.data()),
+             static_cast<std::streamsize>(certificate.size()));
+  if (!input) {
+    return Code(AndroidTlsResult::kFailed);
+  }
+  std::array<std::uint8_t, 32> digest{};
+  std::size_t digest_size = 0;
+  if (psa_hash_compute(PSA_ALG_SHA_256, certificate.data(), certificate.size(),
+                       digest.data(), digest.size(), &digest_size) != PSA_SUCCESS ||
+      digest_size != digest.size()) {
+    return Code(AndroidTlsResult::kFailed);
+  }
+  std::uint8_t difference = 0;
+  for (std::size_t index = 0; index < digest.size(); ++index) {
+    difference |= digest[index] ^ kWiiBuiltinRootCaSha256[index];
+  }
+  if (difference != 0) {
+    return Code(AndroidTlsResult::kFailed);
+  }
+
+  mbedtls_x509_crt_free(&impl_->roots);
+  mbedtls_x509_crt_init(&impl_->roots);
+  if (mbedtls_x509_crt_parse(&impl_->roots, certificate.data(),
+                             certificate.size()) != 0) {
     return Code(AndroidTlsResult::kServerCertificate);
   }
   mbedtls_ssl_conf_ca_chain(&impl_->config, &impl_->roots, nullptr);

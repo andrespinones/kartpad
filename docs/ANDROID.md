@@ -390,7 +390,10 @@ result contract. A deterministic ARM64 API 36 product fixture now constructs
 real guest memory vectors and traverses the production new-session, root-CA,
 socket-connect, handshake, write, read, and shutdown IOCTLV path. It completes
 encrypted HTTP traffic, maps orderly peer close to guest `-6`, and rejects a
-wrong hostname. The fixture is opt-in and
+wrong hostname. `SETBUILTINROOTCA` now loads only a size-bounded,
+fixed-hash-verified Wii `rootca.pem` from the managed app-private NAND and
+fails when it is missing or invalid; valid user-owned root loading and Android
+mutual TLS still require acceptance. The fixture is opt-in and
 runs before the translated guest starts; a retail Mario Kart/WFC-initiated
 request, built-in Wii CA/client-certificate handling, WFC, interruption
 recovery, and physical-device networking remain incomplete.

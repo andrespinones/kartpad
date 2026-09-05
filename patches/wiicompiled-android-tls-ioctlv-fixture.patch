@@ -26,10 +26,11 @@
          // Initialize Aurora (graphics backend)
 --- a/src/hle/net/network_ssl.cpp
 +++ b/src/hle/net/network_ssl.cpp
-@@ -4,8 +4,12 @@
+@@ -4,9 +4,13 @@
  #include <kartpad/network/apple_secure_transport.h>
  #elif defined(__ANDROID__)
  #include <kartpad/network/android_mbedtls.h>
+ #include "nand_path.h"
 +#include <arpa/inet.h>
  #endif
  
@@ -39,7 +40,7 @@
  #include <memory>
  
  namespace NetworkHle {
-@@ -1001,7 +1005,189 @@
+@@ -1017,7 +1021,205 @@
      default:
          WriteSslReturn(in, SSL_ERR_FAILED);
          return 0;
@@ -83,6 +84,8 @@
 +    const std::string addressText = readText(root + "/address");
 +    const std::string hostname = readText(root + "/hostname");
 +    const std::string expectedText = readText(root + "/expected");
++    const bool checkBuiltinRootMissing =
++        readText(root + "/check_builtin_root_missing") == "1";
 +    std::ifstream certificateInput(root + "/ca.der", std::ios::binary);
 +    const std::vector<uint8_t> certificate{
 +        std::istreambuf_iterator<char>(certificateInput),
@@ -129,6 +132,20 @@
 +    if (sslId <= 0) {
 +        NetFail("A5 guest TLS IOCTLV fixture SSL_NEW failed result=%d", sslId);
 +        return finish(false);
++    }
++
++    if (checkBuiltinRootMissing) {
++        Memory::Write32(kId, static_cast<uint32_t>(sslId));
++        (void)HandleSslIoctlv(IOCTLV_NET_SSL_SETBUILTINROOTCA,
++                              {{kReturn, 4u}}, {{kId, 4u}});
++        if (result() != SSL_ERR_FAILED) {
++            NetFail("A5 guest TLS IOCTLV missing built-in root returned=%d",
++                    result());
++            return finish(false);
++        }
++        RT_LOGF(RT_TAG_NET,
++                "A5 guest TLS IOCTLV missing built-in root rejection passed result=%d\n",
++                result());
 +    }
 +
 +    Memory::Write32(kId, static_cast<uint32_t>(sslId));
