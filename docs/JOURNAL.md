@@ -3838,3 +3838,24 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   authorization remain open. No APK/AAB or private artifact was published.
   Evidence:
   `docs/artifacts/2026-09-05/android/a6-emulator-update-in-place.md`.
+
+## 2026-09-05 — Android A6 forward-version emulator upgrade
+
+- Added a validated positive version-code override to the product builder while
+  retaining version code 1 for ordinary builds. Strengthened the replacement
+  runner to verify both APKs use the exact KartPad package, confirm each
+  installed version, and optionally require a strictly increasing version.
+- The visible API 36 ARM64 Pixel Tablet passed version code 1-to-2, 2-to-3,
+  and hardened 3-to-4 upgrades with no package-data clear. Before the second
+  upgrade, the actual product menu persisted `Show FPS Counter=false`; that
+  semantic preference and the full private state aggregate remained unchanged
+  afterward.
+- The exact version 4 fixture APK SHA-256 is
+  `4efee32c73ba0f5832733d4059316d9c4389c7358f2ff71f8f15dea0e2118ed7`.
+  It passed the strict package/privacy audit and remained installed with the
+  production selector visibly resumed.
+- Classification: **Pass for emulator forward-version and populated-preference
+  preservation.** Retail-save, full Retro installation, signed release,
+  physical-device migration, and publication remain open. No APK/AAB or
+  private artifact was published. Evidence:
+  `docs/artifacts/2026-09-05/android/a6-emulator-version-upgrade.md`.

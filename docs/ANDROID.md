@@ -893,6 +893,14 @@ Its clean profile result proves baseline state preservation only; repeat this
 gate with populated retail save, custom touch layout, installed Retro data, a
 real version-code transition, and physical hardware before release acceptance.
 
+For the local forward-version fixture, set a positive
+`KARTPAD_ANDROID_VERSION_CODE` while running
+`scripts/build-android-game-app.sh`, retain each APK separately, and invoke the
+replacement lane with `KARTPAD_REQUIRE_VERSION_UPGRADE=1`. The runner rejects
+the wrong package identity, a non-increasing version code, or an installed
+version that does not match the requested APK. This override is test-only;
+normal builds retain the manifest's default version code.
+
 Before any tester receives an artifact, verify at minimum:
 
 - only intended ABIs are present;

@@ -18,7 +18,7 @@ tests with one skip, product-configured lint, and strict package/repository
 audits pass. This remains an opt-in pre-guest product fixture, not a retail
 Mario Kart/WFC-initiated request. Built-in Wii CA/client certificates,
 local/public WFC, interruption recovery, and physical Android acceptance remain
-open. The installed dual-game APK SHA-256 is
+open. The clean reproducible dual-game baseline APK SHA-256 is
 `aa227e2b2232c2d36d86044f44a26caa310325f42ca9774216a1a62dde94df89`.
 Evidence:
 [`docs/artifacts/2026-09-05/android/a5-guest-tls-ioctlv.md`](artifacts/2026-09-05/android/a5-guest-tls-ioctlv.md).
@@ -39,9 +39,21 @@ without clearing package data. The approved `main.dol` and a private aggregate
 of configuration, managed NAND, saves, preferences, and Retro version state
 were unchanged, and the runner restored the visible production selector. The
 profile contained no retail save, custom touch preferences, or installed Retro
-version, so version-code migration and preservation of those populated states
-remain open alongside physical acceptance. Evidence:
+version, so preservation of those populated states remained open at that
+checkpoint alongside physical acceptance. Evidence:
 [`docs/artifacts/2026-09-05/android/a6-emulator-update-in-place.md`](artifacts/2026-09-05/android/a6-emulator-update-in-place.md).
+
+Android A6 now also passes a genuine forward version-code migration on the
+visible Pixel Tablet. Version 1 upgraded to 2, then 2-to-3 and hardened 3-to-4
+runs preserved a real `Show FPS Counter=false` preference created through the
+product menu along with the complete private state aggregate. The runner
+requires the exact KartPad package identity, confirms each installed version,
+never clears data, and restores the selector. Retail-save, complete Retro,
+signed-release, and physical-device migration remain open. The installed
+version 4 migration fixture SHA-256 is
+`4efee32c73ba0f5832733d4059316d9c4389c7358f2ff71f8f15dea0e2118ed7`.
+Evidence:
+[`docs/artifacts/2026-09-05/android/a6-emulator-version-upgrade.md`](artifacts/2026-09-05/android/a6-emulator-version-upgrade.md).
 
 The latest Android A4 checkpoint fixes a real SDL lifecycle gap: KartPad now
 enables SDL activity recreation, so Android can rebuild `KartPadActivity`

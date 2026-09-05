@@ -12,6 +12,12 @@ val gameRuntimeSource = providers.gradleProperty("kartpadGameRuntimeSource").orN
 val translatedShardManifest = providers.gradleProperty("kartpadTranslatedShardManifest").orNull
 val androidNativeTarget = providers.gradleProperty("kartpadAndroidNativeTarget").orNull
 val discIoJniRoot = providers.gradleProperty("kartpadDiscIoJniRoot").orNull
+val kartpadVersionCode = providers.gradleProperty("kartpadVersionCode")
+    .map { value ->
+        value.toIntOrNull()?.takeIf { it > 0 }
+            ?: error("kartpadVersionCode must be a positive integer")
+    }
+    .getOrElse(1)
 
 android {
     namespace = "dev.kartpad.android"
@@ -23,7 +29,7 @@ android {
         applicationId = "dev.kartpad.android"
         minSdk = 28
         targetSdk = 36
-        versionCode = 1
+        versionCode = kartpadVersionCode
         versionName = "0.0.1-a0"
         buildConfigField("boolean", "GAME_RUNTIME", (gameRuntimeSource != null).toString())
         buildConfigField("boolean", "DISC_IMAGE_IMPORT", (discIoJniRoot != null).toString())

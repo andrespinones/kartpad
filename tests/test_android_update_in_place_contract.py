@@ -22,6 +22,21 @@ class AndroidUpdateInPlaceContractTests(unittest.TestCase):
         self.assertIn("tree_digest shared_prefs", runner)
         self.assertIn("durable_state_preserved=yes", runner)
         self.assertIn(".KartPadLaunchActivity", runner)
+        self.assertIn("KARTPAD_REQUIRE_VERSION_UPGRADE", runner)
+        self.assertIn("after_version_code > before_version_code", runner)
+        self.assertIn('both APKs must use package $package', runner)
+        self.assertIn("installed_version_code", runner)
+        self.assertIn("installed package version does not match", runner)
+
+    def test_product_builder_supports_validated_version_code_override(self) -> None:
+        gradle = (REPO / "android/app/build.gradle.kts").read_text()
+        builder = (REPO / "scripts/build-android-game-app.sh").read_text()
+
+        self.assertIn('providers.gradleProperty("kartpadVersionCode")', gradle)
+        self.assertIn("versionCode = kartpadVersionCode", gradle)
+        self.assertIn("KARTPAD_ANDROID_VERSION_CODE", builder)
+        self.assertIn("-PkartpadVersionCode=$version_code_override", builder)
+        self.assertIn("must be a positive integer", builder)
 
 
 if __name__ == "__main__":

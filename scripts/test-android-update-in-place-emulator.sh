@@ -8,6 +8,7 @@ fi
 
 sdk_root="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-$HOME/Library/Android/sdk}}"
 adb="${KARTPAD_ADB:-$sdk_root/platform-tools/adb}"
+aapt2="${KARTPAD_AAPT2:-$sdk_root/build-tools/36.0.0/aapt2}"
 before_apk="$1"
 after_apk="$2"
 package="dev.kartpad.android"
@@ -19,6 +20,7 @@ fail() {
 }
 
 [[ -x "$adb" ]] || fail "adb is unavailable at $adb"
+[[ -x "$aapt2" ]] || fail "aapt2 is unavailable at $aapt2"
 [[ -f "$before_apk" ]] || fail "before APK is unavailable at $before_apk"
 [[ -f "$after_apk" ]] || fail "after APK is unavailable at $after_apk"
 
@@ -75,9 +77,28 @@ state_digest() {
   } | shasum -a 256 | awk '{ print $1 }'
 }
 
+apk_version_code() {
+  "$aapt2" dump badging "$1" |
+    sed -n "s/^package: .*versionCode='\([0-9][0-9]*\)'.*/\1/p"
+}
+
+apk_package_name() {
+  "$aapt2" dump badging "$1" |
+    sed -n "s/^package: name='\([^']*\)'.*/\1/p"
+}
+
+installed_version_code() {
+  "${adb_target[@]}" shell dumpsys package "$package" |
+    sed -n 's/^[[:space:]]*versionCode=\([0-9][0-9]*\).*/\1/p' |
+    head -1 | tr -d '\r'
+}
+
 install_and_validate_game_data() {
   local apk="$1"
+  local expected_version_code="$2"
   "${adb_target[@]}" install -r "$apk" >/dev/null
+  [[ "$(installed_version_code)" == "$expected_version_code" ]] ||
+    fail "installed package version does not match the requested APK"
   local installed_main_dol_sha256
   installed_main_dol_sha256="$(file_digest files/KartPad/GameData/sys/main.dol)"
   [[ "$installed_main_dol_sha256" == "$expected_main_dol_sha256" ]] ||
@@ -88,12 +109,27 @@ before_apk_sha256="$(shasum -a 256 "$before_apk" | awk '{ print $1 }')"
 after_apk_sha256="$(shasum -a 256 "$after_apk" | awk '{ print $1 }')"
 [[ "$before_apk_sha256" != "$after_apk_sha256" ]] ||
   fail "before and after APKs must have different bytes"
+before_version_code="$(apk_version_code "$before_apk")"
+after_version_code="$(apk_version_code "$after_apk")"
+[[ -n "$before_version_code" && -n "$after_version_code" ]] ||
+  fail "could not read both APK version codes"
+before_package="$(apk_package_name "$before_apk")"
+after_package="$(apk_package_name "$after_apk")"
+[[ "$before_package" == "$package" && "$after_package" == "$package" ]] ||
+  fail "both APKs must use package $package"
+require_version_upgrade="${KARTPAD_REQUIRE_VERSION_UPGRADE:-0}"
+[[ "$require_version_upgrade" == 0 || "$require_version_upgrade" == 1 ]] ||
+  fail "KARTPAD_REQUIRE_VERSION_UPGRADE must be 0 or 1"
+if [[ "$require_version_upgrade" == 1 ]]; then
+  ((after_version_code > before_version_code)) ||
+    fail "after APK version code must be greater than before APK version code"
+fi
 
-install_and_validate_game_data "$before_apk"
+install_and_validate_game_data "$before_apk" "$before_version_code"
 before_state="$(state_digest)"
-install_and_validate_game_data "$after_apk"
+install_and_validate_game_data "$after_apk" "$after_version_code"
 after_state="$(state_digest)"
 [[ "$before_state" == "$after_state" ]] ||
   fail "app-private durable state changed across update-in-place"
 
-echo "Android emulator update-in-place preservation passed: before_apk_sha256=$before_apk_sha256 after_apk_sha256=$after_apk_sha256 durable_state_preserved=yes game_data_preserved=yes"
+echo "Android emulator update-in-place preservation passed: before_apk_sha256=$before_apk_sha256 after_apk_sha256=$after_apk_sha256 before_version_code=$before_version_code after_version_code=$after_version_code durable_state_preserved=yes game_data_preserved=yes"

@@ -4,6 +4,12 @@ set -euo pipefail
 repo_root="$(git rev-parse --show-toplevel)"
 # shellcheck source=android-toolchain-versions.sh
 source "$repo_root/scripts/android-toolchain-versions.sh"
+version_code_override="${KARTPAD_ANDROID_VERSION_CODE:-}"
+if [[ -n "$version_code_override" &&
+    ! "$version_code_override" =~ ^[1-9][0-9]*$ ]]; then
+  echo "ERROR: KARTPAD_ANDROID_VERSION_CODE must be a positive integer" >&2
+  exit 64
+fi
 
 absolute_from_repo() {
   case "$1" in
@@ -65,11 +71,19 @@ export DAWN_ANDROID_ROOT="$dawn_root"
 export MINIZIP_ANDROID_ROOT="$minizip_root"
 export MBEDTLS_ANDROID_ROOT="$mbedtls_root"
 
-"$repo_root/android/gradlew" --project-dir "$repo_root/android" --no-daemon \
-  -PkartpadGameRuntimeSource="$runtime_source" \
-  -PkartpadTranslatedShardManifest="$translation_root/build_shards/shards.cmake" \
-  -PkartpadAndroidNativeTarget="$native_target" \
-  -PkartpadDiscIoJniRoot="$discio_jni_root" \
+gradle_args=(
+  --project-dir "$repo_root/android"
+  --no-daemon
+  -PkartpadGameRuntimeSource="$runtime_source"
+  -PkartpadTranslatedShardManifest="$translation_root/build_shards/shards.cmake"
+  -PkartpadAndroidNativeTarget="$native_target"
+  -PkartpadDiscIoJniRoot="$discio_jni_root"
+)
+if [[ -n "$version_code_override" ]]; then
+  gradle_args+=("-PkartpadVersionCode=$version_code_override")
+fi
+
+"$repo_root/android/gradlew" "${gradle_args[@]}" \
   :app:assembleDebug
 
 apk="$repo_root/android/app/build/outputs/apk/debug/app-debug.apk"

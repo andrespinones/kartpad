@@ -25,7 +25,7 @@ Wii root from app-private NAND. Valid root loading and mutual TLS remain open.
 The repeatable runner preserves private game data, never copies a key to the
 device, cleans its exact fixture, and restores the production selector. This is
 an opt-in pre-guest product fixture, not yet a retail Mario Kart/WFC-initiated
-exchange or physical-device acceptance. The exact audited and installed
+exchange or physical-device acceptance. The exact clean audited baseline
 dual-game APK SHA-256 is
 `aa227e2b2232c2d36d86044f44a26caa310325f42ca9774216a1a62dde94df89`.
 Evidence: `docs/artifacts/2026-09-05/android/a5-guest-tls-ioctlv.md`.
@@ -44,6 +44,17 @@ preferences, and Retro version state were unchanged. The clean profile did not
 contain a retail save, custom touch preferences, or an installed Retro version,
 so populated-state/version-code migration and physical acceptance remain open.
 Evidence: `docs/artifacts/2026-09-05/android/a6-emulator-update-in-place.md`.
+
+The stronger forward-version lane now passes too: the Pixel Tablet upgraded
+version code 1 to 2, 2 to 3, and 3 to 4, with the latter passes preserving an
+actual `Show FPS Counter=false` preference created through KartPad's product
+menu.
+The runner verifies the exact package and installed versions in addition to
+the private durable-state aggregate. Retail-save, complete Retro, signed
+release, and physical migration remain open. Evidence:
+`docs/artifacts/2026-09-05/android/a6-emulator-version-upgrade.md`.
+The installed version 4 migration fixture is
+`4efee32c73ba0f5832733d4059316d9c4389c7358f2ff71f8f15dea0e2118ed7`.
 
 The `codex/iphone-touch-layout-editor` candidate captures the maintainer's
 current physical-iPhone control positions as the default for untouched iPhone
