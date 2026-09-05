@@ -722,6 +722,12 @@ disconnect states; a second sequence began with A cyan/locked and restored it
    hook cannot bypass real game-data validation in a game-runtime build. The
    resulting audited dual APK SHA-256 is
    `2244ca5d1cf74d85d1b98279f36aa67a165e30dd3510c05612beb48a7b58da94`.
+   A production-gated source fixture now also replays two real Android pointer
+   IDs through the laid-out A/B controls. Both visible canonical lanes publish
+   the exact `A -> A+B -> B -> neutral` Classic masks while retaining B after A
+   lifts and emptying the owner table at completion. The resulting audited dual
+   APK SHA-256 is
+   `726cf06af9208fdcb3fe91b80a89046daf32adbf8b288d54a36d753f81a890ba`.
    Evidence:
 [`docs/artifacts/2026-09-04/android/a4-touch-settings-menu-checkpoint.md`](artifacts/2026-09-04/android/a4-touch-settings-menu-checkpoint.md).
 [`docs/artifacts/2026-09-04/android/a4-controller-mapping.md`](artifacts/2026-09-04/android/a4-controller-mapping.md).
@@ -735,6 +741,7 @@ disconnect states; a second sequence began with A cyan/locked and restored it
 [`docs/artifacts/2026-09-05/android/a4-controller-player-setup.md`](artifacts/2026-09-05/android/a4-controller-player-setup.md).
 [`docs/artifacts/2026-09-05/android/a4-selector-owned-icons.md`](artifacts/2026-09-05/android/a4-selector-owned-icons.md).
 [`docs/artifacts/2026-09-05/android/a4-selector-visual-contract.md`](artifacts/2026-09-05/android/a4-selector-visual-contract.md).
+[`docs/artifacts/2026-09-05/android/a4-multipointer-replay.md`](artifacts/2026-09-05/android/a4-multipointer-replay.md).
 Accepted evidence:
 [`docs/artifacts/2026-09-04/android/a4-touch-overlay-input.md`](artifacts/2026-09-04/android/a4-touch-overlay-input.md).
 [`docs/artifacts/2026-09-04/android/a4-controller-handoff.md`](artifacts/2026-09-04/android/a4-controller-handoff.md).

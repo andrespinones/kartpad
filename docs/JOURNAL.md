@@ -3373,3 +3373,20 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   emulator phone/tablet lanes.** Touch-overlay goldens and physical screens
   remain separate. No package or private artifact was published. Evidence:
   `docs/artifacts/2026-09-05/android/a4-selector-visual-contract.md`.
+
+## 2026-09-05 — Android A4 multi-pointer replay
+
+- Added a production-gated source fixture that sends real two-pointer Android
+  events through the laid-out A and B controls and checks the normal published
+  Classic mask after every transition.
+- The visible API 36 ARM64 Pixel 6 and Pixel Tablet both passed exact
+  `A=0x10`, `A+B=0x50`, `B=0x40`, and `neutral=0x0` states; lifting A retained
+  B and the final pointer-owner table was empty.
+- The complete translated dual-runtime APK rebuilt and passed strict audit at
+  SHA-256
+  `726cf06af9208fdcb3fe91b80a89046daf32adbf8b288d54a36d753f81a890ba`.
+  Android lint, 75 tests (one skipped), safety, syntax, and whitespace pass.
+- Classification: **Pass for automated two-pointer ownership on canonical
+  emulator phone/tablet lanes.** Physical touch/haptic feel and touch-only races
+  remain open. No package or private artifact was published. Evidence:
+  `docs/artifacts/2026-09-05/android/a4-multipointer-replay.md`.

@@ -1106,6 +1106,11 @@ canonical 2400x1080 phone and 2560x1600 tablet lanes. It verifies exact card
 palette, centered equal geometry, full mark, required labels, RGBA dimensions,
 and gradient direction without private data; evidence is in
 `docs/artifacts/2026-09-05/android/a4-selector-visual-contract.md`.
+The production touch overlay now also has a source-only two-pointer replay. On
+both canonical visible emulator lanes it publishes exact `A`, `A+B`, `B`, and
+neutral masks while preserving the second pointer after the first lifts;
+evidence is in
+`docs/artifacts/2026-09-05/android/a4-multipointer-replay.md`.
 
 Do not begin the touch-UI port until A2's controller-driven Original-mode proof
 passes. Physical Android hardware remains authoritative for vendor Vulkan and

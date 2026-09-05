@@ -11,7 +11,9 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import android.view.HapticFeedbackConstants
+import android.view.InputDevice
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowInsets
@@ -68,6 +70,7 @@ class KartPadOverlayView(context: Context) : View(context) {
     private var controllerConnected = false
     private var gasHoldGeneration = 0
     private var gasLocked = false
+    private var lastPublishedButtons = 0
     private var accessibilityButtons = 0
     private val accessibilityPulseGenerations = mutableMapOf<String, Int>()
     private var accessibilityFocusId = View.NO_ID
@@ -218,10 +221,83 @@ class KartPadOverlayView(context: Context) : View(context) {
         accessibilityButtons = 0
         accessibilityPulseGenerations.clear()
         gasLocked = false
+        lastPublishedButtons = 0
         gasHoldGeneration += 1
         updateGasAccessibility()
         nativeClearTouchState()
         invalidate()
+    }
+
+    fun runDebugMultiPointerFixture(): String {
+        check(isLaidOut && width > 0 && height > 0) { "touch overlay is not laid out" }
+        val a = controls.first { it.id == "A" }.frame.let { PointF(it.centerX(), it.centerY()) }
+        val b = controls.first { it.id == "B" }.frame.let { PointF(it.centerX(), it.centerY()) }
+        val downTime = SystemClock.uptimeMillis()
+
+        fun dispatch(action: Int, pointers: List<Pair<Int, PointF>>, offset: Long) {
+            val properties = Array(pointers.size) { index ->
+                MotionEvent.PointerProperties().apply {
+                    id = pointers[index].first
+                    toolType = MotionEvent.TOOL_TYPE_FINGER
+                }
+            }
+            val coordinates = Array(pointers.size) { index ->
+                MotionEvent.PointerCoords().apply {
+                    x = pointers[index].second.x
+                    y = pointers[index].second.y
+                    pressure = 1f
+                    size = 1f
+                }
+            }
+            val event = MotionEvent.obtain(
+                downTime,
+                downTime + offset,
+                action,
+                pointers.size,
+                properties,
+                coordinates,
+                0,
+                0,
+                1f,
+                1f,
+                0,
+                0,
+                InputDevice.SOURCE_TOUCHSCREEN,
+                0,
+            )
+            try {
+                check(onTouchEvent(event)) { "touch overlay rejected debug pointer event" }
+            } finally {
+                event.recycle()
+            }
+        }
+
+        clearTouchInput()
+        dispatch(MotionEvent.ACTION_DOWN, listOf(0 to a), 0)
+        val aOnly = lastPublishedButtons
+        dispatch(
+            MotionEvent.ACTION_POINTER_DOWN or
+                (1 shl MotionEvent.ACTION_POINTER_INDEX_SHIFT),
+            listOf(0 to a, 1 to b),
+            1,
+        )
+        val both = lastPublishedButtons
+        dispatch(
+            MotionEvent.ACTION_POINTER_UP,
+            listOf(0 to a, 1 to b),
+            2,
+        )
+        val bOnly = lastPublishedButtons
+        dispatch(MotionEvent.ACTION_UP, listOf(1 to b), 3)
+        val neutral = lastPublishedButtons
+        val actual = listOf(aOnly, both, bOnly, neutral)
+        val expected = listOf(BUTTON_A, BUTTON_A or BUTTON_B, BUTTON_B, 0)
+        check(actual == expected && pointerOwners.isEmpty()) {
+            "multi-pointer masks $actual != $expected owners=${pointerOwners.size}"
+        }
+        clearTouchInput()
+        return "a=0x${aOnly.toString(16)} both=0x${both.toString(16)} " +
+            "b=0x${bOnly.toString(16)} neutral=0x${neutral.toString(16)}"
     }
 
     fun setMotionSteering(value: Float) {
@@ -615,6 +691,7 @@ class KartPadOverlayView(context: Context) : View(context) {
         }
         val publishedRightX = if (modernCStickHorizontal) -rightX else rightX
         val publishedLeftX = if (abs(leftX) >= abs(motionSteeringX)) leftX else motionSteeringX
+        lastPublishedButtons = buttons
         nativePublishTouchState(
             buttons, publishedLeftX, leftY, publishedRightX, rightY, connected,
         )

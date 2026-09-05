@@ -57,6 +57,13 @@ cards, required labels, full-size mark, RGBA dimensions, and gradient direction;
 its bypass cannot activate in game-runtime builds. Evidence:
 `docs/artifacts/2026-09-05/android/a4-selector-visual-contract.md`.
 
+Android's production touch owner now has a debug/source-only real `MotionEvent`
+multi-pointer replay. Visible Pixel 6 and Pixel Tablet runs both passed exact
+`A -> A+B -> B -> neutral` publication, proving independent pointer ownership
+when the first finger lifts. The fixture is unreachable in a game-runtime build;
+the complete translated APK still builds, lints, and audits. Evidence:
+`docs/artifacts/2026-09-05/android/a4-multipointer-replay.md`.
+
 KartPad `v0.4.0-preview.2` is published from
 `e9fa6058ee09fff0b16481ebe4a78d61cea69c87`. It updates both Apple-platform
 artifacts for Retro Rewind 6.12.5, repairs the universal iPhone/iPad three-dot

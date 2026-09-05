@@ -73,6 +73,17 @@ class AndroidTouchOverlayContractTests(unittest.TestCase):
         self.assertIn("visibility = INVISIBLE", overlay)
         self.assertIn("visibility = VISIBLE", overlay)
 
+    def test_source_fixture_replays_two_independent_touch_pointers(self) -> None:
+        activity = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadActivity.kt").read_text()
+        overlay = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadOverlayView.kt").read_text()
+        self.assertIn("DEBUG_EXTRA_MULTI_POINTER", activity)
+        self.assertIn("runDebugMultiPointerFixture()", activity)
+        self.assertIn("MotionEvent.ACTION_POINTER_DOWN", overlay)
+        self.assertIn("MotionEvent.ACTION_POINTER_UP", overlay)
+        self.assertIn("listOf(0 to a, 1 to b)", overlay)
+        self.assertIn("listOf(BUTTON_A, BUTTON_A or BUTTON_B, BUTTON_B, 0)", overlay)
+        self.assertIn("actual == expected && pointerOwners.isEmpty()", overlay)
+
     def test_touch_presentation_settings_match_ios_ranges_and_defaults(self) -> None:
         settings = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadTouchSettings.kt").read_text()
         overlay = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadOverlayView.kt").read_text()

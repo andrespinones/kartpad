@@ -82,6 +82,8 @@ class KartPadActivity : SDLActivity() {
         }
         val debugTouchOverlay = BuildConfig.DEBUG &&
             intent.getBooleanExtra(DEBUG_EXTRA_TOUCH_OVERLAY, false)
+        val debugMultiPointer = BuildConfig.DEBUG && !BuildConfig.GAME_RUNTIME &&
+            intent.getBooleanExtra(DEBUG_EXTRA_MULTI_POINTER, false)
         val debugControllerSetup = BuildConfig.DEBUG && !BuildConfig.GAME_RUNTIME &&
             intent.getBooleanExtra(DEBUG_EXTRA_CONTROLLER_SETUP, false)
         kartPadOverlay.visibility = if (BuildConfig.GAME_RUNTIME || debugTouchOverlay) {
@@ -105,6 +107,13 @@ class KartPadActivity : SDLActivity() {
         } else if (debugControllerSetup) {
             addMenuButton()
             menuButton.postDelayed({ showControllerPlayers() }, 1_000L)
+        }
+        if (debugTouchOverlay && debugMultiPointer) {
+            kartPadOverlay.post {
+                runCatching { kartPadOverlay.runDebugMultiPointerFixture() }
+                    .onSuccess { Log.i(TAG, "A4 multi-pointer fixture passed $it") }
+                    .onFailure { Log.e(TAG, "A4 multi-pointer fixture failed", it) }
+            }
         }
         mLayout.bringChildToFront(kartPadOverlay)
         if (::menuButton.isInitialized) mLayout.bringChildToFront(menuButton)
@@ -1442,6 +1451,8 @@ class KartPadActivity : SDLActivity() {
             "dev.kartpad.android.TEST_RUNTIME_PROFILE"
         private const val DEBUG_EXTRA_TOUCH_OVERLAY =
             "dev.kartpad.android.TEST_TOUCH_OVERLAY"
+        private const val DEBUG_EXTRA_MULTI_POINTER =
+            "dev.kartpad.android.TEST_TOUCH_MULTI_POINTER"
         private const val DEBUG_EXTRA_CONTROLLER_SETUP =
             "dev.kartpad.android.TEST_CONTROLLER_SETUP"
         private const val DEBUG_RESUME_FIXTURE_SHA256 =
