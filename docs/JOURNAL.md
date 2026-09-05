@@ -3251,3 +3251,18 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   checks pass; private game/save/Mii hashes stayed exact. No package or private
   artifact was published. Evidence:
   `docs/artifacts/2026-09-04/android/a4-touch-settings-visibility.md`.
+
+## 2026-09-04 — Android A4 reporting parity
+
+- Replaced the empty Android diagnostic template with iOS-equivalent problem,
+  context, and frequency fields. Share output now includes a bounded report ID
+  and technical summary; GitHub output safely pre-fills the same answers and
+  platform metadata through encoded query parameters.
+- The API 36 emulator displayed all fields and actions with accessible bounds.
+  The flow was canceled, so no chooser, browser, report, issue, or message was
+  opened or sent. Private game/save/Mii hashes stayed exact.
+- The exact local dual APK is
+  `539d9bf73e617c052b4439db0c017d1d5bc425288d2852a7fec6146241e78577`.
+  Compilation, lint, strict package/privacy audit, 49 contracts, and whitespace
+  checks pass. No package or private artifact was published. Evidence:
+  `docs/artifacts/2026-09-04/android/a4-reporting-parity.md`.

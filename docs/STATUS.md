@@ -682,6 +682,11 @@ disconnect states; a second sequence began with A cyan/locked and restored it
    controller-hiding and C-stick preferences. The emulator exercised 2x and
    restored 1x; the exact audited dual APK is
    `0217707c7410afe19923ae868bcc058dd14d9449cf8f03b2fb4c1b60f8db931f`.
+   Report a Problem now collects problem, context, and frequency answers and
+   includes them in bounded share text or an encoded GitHub issue prefill. The
+   emulator exposed every field/action; the test canceled without sending or
+   opening anything. The exact audited dual APK is
+   `539d9bf73e617c052b4439db0c017d1d5bc425288d2852a7fec6146241e78577`.
    Evidence:
 [`docs/artifacts/2026-09-04/android/a4-touch-settings-menu-checkpoint.md`](artifacts/2026-09-04/android/a4-touch-settings-menu-checkpoint.md).
 [`docs/artifacts/2026-09-04/android/a4-controller-mapping.md`](artifacts/2026-09-04/android/a4-controller-mapping.md).
@@ -689,6 +694,7 @@ disconnect states; a second sequence began with A cyan/locked and restored it
 [`docs/artifacts/2026-09-04/android/a4-game-data-save-parity.md`](artifacts/2026-09-04/android/a4-game-data-save-parity.md).
 [`docs/artifacts/2026-09-04/android/a4-touch-accessibility.md`](artifacts/2026-09-04/android/a4-touch-accessibility.md).
 [`docs/artifacts/2026-09-04/android/a4-touch-settings-visibility.md`](artifacts/2026-09-04/android/a4-touch-settings-visibility.md).
+[`docs/artifacts/2026-09-04/android/a4-reporting-parity.md`](artifacts/2026-09-04/android/a4-reporting-parity.md).
 Accepted evidence:
 [`docs/artifacts/2026-09-04/android/a4-touch-overlay-input.md`](artifacts/2026-09-04/android/a4-touch-overlay-input.md).
 [`docs/artifacts/2026-09-04/android/a4-controller-handoff.md`](artifacts/2026-09-04/android/a4-controller-handoff.md).

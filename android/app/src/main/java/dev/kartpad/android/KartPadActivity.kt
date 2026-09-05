@@ -15,6 +15,7 @@ import android.view.InputDevice
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.PopupMenu
 import android.widget.RadioButton
@@ -30,6 +31,7 @@ import java.io.FileOutputStream
 import java.nio.file.Files
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
+import java.util.UUID
 import kotlin.math.roundToInt
 import org.libsdl.app.SDLActivity
 import org.libsdl.app.SDLSurface
@@ -775,8 +777,35 @@ class KartPadActivity : SDLActivity() {
         }
 
     private fun showReportProblem() {
-        val report = buildString {
+        val fields = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(24), dp(4), dp(24), 0)
+        }
+        val problem = EditText(this).apply {
+            hint = "What went wrong?"
+            contentDescription = "What went wrong"
+            isSingleLine = false
+            minLines = 2
+            maxLines = 4
+        }
+        val area = EditText(this).apply {
+            hint = "Area and what you were doing (optional)"
+            contentDescription = "Area and what you were doing"
+            isSingleLine = true
+        }
+        val frequency = EditText(this).apply {
+            hint = "Every time, sometimes, once, or not sure?"
+            contentDescription = "How often the problem happens"
+            isSingleLine = true
+        }
+        fields.addView(problem)
+        fields.addView(area)
+        fields.addView(frequency)
+
+        fun reportId() = "KP-${UUID.randomUUID().toString().take(8).uppercase()}"
+        fun diagnosticReport(id: String) = buildString {
             appendLine("KartPad Android diagnostic report")
+            appendLine("Report ID: $id")
             appendLine("Version: ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})")
             appendLine("Android: ${android.os.Build.VERSION.RELEASE} (API ${android.os.Build.VERSION.SDK_INT})")
             appendLine("Device: ${android.os.Build.MANUFACTURER} ${android.os.Build.MODEL}")
@@ -784,21 +813,44 @@ class KartPadActivity : SDLActivity() {
             appendLine("Retro Rewind release: ${RetroRewindRelease.VERSION}")
             appendLine()
             appendLine("What went wrong:")
+            appendLine(problem.text.toString().trim().ifBlank { "Not provided" })
+            appendLine()
+            appendLine("Area and what you were doing:")
+            appendLine(area.text.toString().trim().ifBlank { "Not provided" })
+            appendLine()
+            appendLine("Frequency:")
+            appendLine(frequency.text.toString().trim().ifBlank { "Not provided" })
         }
         AlertDialog.Builder(this)
             .setTitle("Report a Problem")
-            .setMessage("KartPad can share a bounded technical summary. It excludes game data, saves, credentials, controller inputs, and local file paths.")
+            .setMessage("Answer briefly and KartPad will add a bounded technical summary. It excludes game data, saves, credentials, controller inputs, and local file paths. GitHub reports are public.")
+            .setView(fields)
             .setPositiveButton("Share Report…") { _, _ ->
+                val id = reportId()
                 startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).apply {
                     type = "text/plain"
-                    putExtra(Intent.EXTRA_SUBJECT, "KartPad Android problem")
-                    putExtra(Intent.EXTRA_TEXT, report)
+                    putExtra(Intent.EXTRA_SUBJECT, "KartPad Android problem $id")
+                    putExtra(Intent.EXTRA_TEXT, diagnosticReport(id))
                 }, "Share KartPad report"))
             }
             .setNeutralButton("Report on GitHub") { _, _ ->
-                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(
-                    "https://github.com/chrissotraidis/kartpad/issues/new?template=bug_report.yml",
-                )))
+                val id = reportId()
+                val summary = problem.text.toString().trim().ifBlank { "KartPad problem" }
+                val url = Uri.parse("https://github.com/chrissotraidis/kartpad/issues/new")
+                    .buildUpon()
+                    .appendQueryParameter("template", "bug_report.yml")
+                    .appendQueryParameter("title", "[Bug]: ${summary.take(100)}")
+                    .appendQueryParameter("report-id", id)
+                    .appendQueryParameter(
+                        "revision", "${BuildConfig.VERSION_NAME} (build ${BuildConfig.VERSION_CODE})",
+                    )
+                    .appendQueryParameter("platform", "Android ${android.os.Build.VERSION.RELEASE}")
+                    .appendQueryParameter("performance-profile", runtimeProfile)
+                    .appendQueryParameter("summary", problem.text.toString().trim())
+                    .appendQueryParameter("context", area.text.toString().trim())
+                    .appendQueryParameter("frequency", frequency.text.toString().trim())
+                    .build()
+                startActivity(Intent(Intent.ACTION_VIEW, url))
             }
             .setNegativeButton("Cancel", null)
             .show()

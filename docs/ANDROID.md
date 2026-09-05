@@ -1068,6 +1068,9 @@ open. Evidence is in
 The touch-settings panel also now matches iOS's live render selector and keeps
 every setting visible in two landscape columns; evidence is in
 `docs/artifacts/2026-09-04/android/a4-touch-settings-visibility.md`.
+Android's Report a Problem action now also collects the same three user answers
+as iOS and builds bounded share/GitHub-prefill output; evidence is in
+`docs/artifacts/2026-09-04/android/a4-reporting-parity.md`.
 
 Do not begin the touch-UI port until A2's controller-driven Original-mode proof
 passes. Physical Android hardware remains authoritative for vendor Vulkan and
