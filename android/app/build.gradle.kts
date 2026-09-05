@@ -18,6 +18,14 @@ val kartpadVersionCode = providers.gradleProperty("kartpadVersionCode")
             ?: error("kartpadVersionCode must be a positive integer")
     }
     .getOrElse(1)
+val kartpadVersionName = providers.gradleProperty("kartpadVersionName")
+    .map { value ->
+        require(Regex("[0-9A-Za-z][0-9A-Za-z._-]{0,63}").matches(value)) {
+            "kartpadVersionName must be 1-64 portable version characters"
+        }
+        value
+    }
+    .getOrElse("0.4.0-android-preview.1")
 
 android {
     namespace = "dev.kartpad.android"
@@ -30,7 +38,7 @@ android {
         minSdk = 28
         targetSdk = 36
         versionCode = kartpadVersionCode
-        versionName = "0.0.1-a0"
+        versionName = kartpadVersionName
         buildConfigField("boolean", "GAME_RUNTIME", (gameRuntimeSource != null).toString())
         buildConfigField("boolean", "DISC_IMAGE_IMPORT", (discIoJniRoot != null).toString())
 

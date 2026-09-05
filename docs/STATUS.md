@@ -103,6 +103,22 @@ release-candidate signing, physical acceptance, and publication remain open.
 Evidence:
 [`docs/artifacts/2026-09-05/android/a6-bundle-derived-apk-emulator.md`](artifacts/2026-09-05/android/a6-bundle-derived-apk-emulator.md).
 
+The current Android hardware-preview identity is now
+`0.4.0-android-preview.1` version code 6, replacing the stale A0 shell label.
+Both metadata inputs are validated, and strict APK/AAB audits require the
+expected name. Two independent scoped clean builds produced identical unsigned
+AAB bytes at SHA-256
+`eaf16573290b5e27c161e47ede4641944545d7e8deb07c20671c185df7996110`.
+The exact derived non-debuggable APK upgraded the populated emulator from
+version 5 to 6, executed the native runtime, and preserved durable state before
+the debug fixture was restored. Its SHA-256 is
+`24e977d497d5c587eb79771d09e3176932633fe0671f6e5444ddca335bc8bd92`,
+and the audited 90,477,735-byte local hardware preview is retained ignored
+under `.android-bootstrap/hardware-preview/`. Physical testing is now the next
+authority; this local debug-signed preview is not a release-key candidate and
+was not published. Evidence:
+[`docs/artifacts/2026-09-05/android/a6-versioned-hardware-preview.md`](artifacts/2026-09-05/android/a6-versioned-hardware-preview.md).
+
 The latest Android A4 checkpoint fixes a real SDL lifecycle gap: KartPad now
 enables SDL activity recreation, so Android can rebuild `KartPadActivity`
 without SDL terminating the process. Visible Pixel 6 and Pixel Tablet runs held

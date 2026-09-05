@@ -44,6 +44,7 @@ temp_root="$(mktemp -d "$repo_root/.android-bootstrap/bundle-derived.XXXXXX")"
   fail "temporary directory escaped the guarded Android bootstrap root"
 restore_apk="$temp_root/installed-debug.apk"
 restore_required=0
+restore_install_args=(-r)
 
 restore_selector() {
   "${adb_target[@]}" shell am force-stop "$package" >/dev/null 2>&1 || true
@@ -54,7 +55,8 @@ restore_selector() {
 cleanup() {
   local status=$?
   if [[ "$restore_required" == 1 && -f "$restore_apk" ]]; then
-    "${adb_target[@]}" install -r "$restore_apk" >/dev/null 2>&1 || true
+    "${adb_target[@]}" install "${restore_install_args[@]}" \
+      "$restore_apk" >/dev/null 2>&1 || true
   fi
   restore_selector
   rm -rf -- "$temp_root"
@@ -185,8 +187,11 @@ derived_badging="$("$aapt2" dump badging "$derived_apk")"
   fail "bundle-derived release APK is unexpectedly debuggable"
 derived_version="$(printf '%s\n' "$derived_badging" |
   sed -n "s/^package: .*versionCode='\([0-9][0-9]*\)'.*/\1/p")"
-[[ "$derived_version" == "$restore_version" ]] ||
-  fail "bundle-derived APK and recoverable installed APK have different versions"
+((derived_version >= restore_version)) ||
+  fail "bundle-derived APK would downgrade the recoverable installed APK"
+if ((derived_version > restore_version)); then
+  restore_install_args=(-r -d)
+fi
 "$repo_root/scripts/audit-android-package.sh" "$derived_apk" >/dev/null
 derived_apk_sha256="$(shasum -a 256 "$derived_apk" | awk '{ print $1 }')"
 
@@ -215,7 +220,7 @@ done
   fail "bundle-derived release activity did not execute SDL_main from libmain.so"
 "${adb_target[@]}" shell am force-stop "$package"
 
-"${adb_target[@]}" install -r "$restore_apk" >/dev/null
+"${adb_target[@]}" install "${restore_install_args[@]}" "$restore_apk" >/dev/null
 restore_required=0
 [[ "$(installed_version_code)" == "$restore_version" ]] ||
   fail "recoverable debug APK version was not restored"

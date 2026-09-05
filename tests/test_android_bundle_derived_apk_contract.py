@@ -18,7 +18,7 @@ class AndroidBundleDerivedApkContractTests(unittest.TestCase):
         self.assertIn("--mode=universal", runner)
         self.assertIn("audit-android-package.sh", runner)
         self.assertIn('pull "$installed_path" "$restore_apk"', runner)
-        self.assertGreaterEqual(runner.count('install -r'), 2)
+        self.assertGreaterEqual(runner.count('"${adb_target[@]}" install'), 3)
         self.assertNotIn("pm clear", runner)
         self.assertIn("application-debuggable", runner)
         self.assertIn("Running main function SDL_main", runner)
@@ -31,6 +31,8 @@ class AndroidBundleDerivedApkContractTests(unittest.TestCase):
         self.assertIn("tree_digest shared_prefs", runner)
         self.assertIn("durable_state_preserved=yes", runner)
         self.assertIn("debug_apk_restored=yes", runner)
+        self.assertIn("derived_version >= restore_version", runner)
+        self.assertIn("restore_install_args=(-r -d)", runner)
         self.assertIn(".KartPadLaunchActivity", runner)
         self.assertIn("rm -rf -- \"$temp_root\"", runner)
 
@@ -40,6 +42,8 @@ class AndroidBundleDerivedApkContractTests(unittest.TestCase):
         self.assertIn("assets/dexopt/baseline.prof", audit)
         self.assertIn("assets/dexopt/baseline.profm", audit)
         self.assertIn("Require the complete,", audit)
+        self.assertIn("KARTPAD_ANDROID_EXPECTED_VERSION_NAME", audit)
+        self.assertIn("0.4.0-android-preview.1", audit)
 
 
 if __name__ == "__main__":

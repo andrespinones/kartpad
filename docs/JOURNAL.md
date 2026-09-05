@@ -3954,3 +3954,32 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   split delivery, release-candidate signing, physical hardware, and publication
   remain open. No package or private artifact was published. Evidence:
   `docs/artifacts/2026-09-05/android/a6-bundle-derived-apk-emulator.md`.
+
+## 2026-09-05 — Android A6 versioned local hardware preview
+
+- Replaced the stale `0.0.1-a0` Android version name with the explicit
+  `0.4.0-android-preview.1` default and added validated version-name overrides
+  to Gradle and the product builder. Strict APK/AAB audits now require the
+  expected name.
+- Built version code 6, forward from the populated emulator's installed version
+  5. Two independent scoped cleans and release bundle builds matched exactly at
+  SHA-256
+  `eaf16573290b5e27c161e47ede4641944545d7e8deb07c20671c185df7996110`.
+- The bundle-derived gate performed the real version 5-to-6 update, confirmed a
+  non-debuggable package, traversed the enabled production selector, and
+  executed `SDL_main` from installed ARM64 `libmain.so`. It restored version 5
+  and proved the private durable-state aggregate unchanged.
+- Retained the exact audited 90,477,735-byte, locally debug-signed ARM64/API-28+
+  hardware-preview APK outside Git at
+  `.android-bootstrap/hardware-preview/KartPad-0.4.0-android-preview.1-v6-arm64.apk`.
+  Its SHA-256 is
+  `24e977d497d5c587eb79771d09e3176932633fe0671f6e5444ddca335bc8bd92`.
+- The 103-test suite with one intentional skip, strict AAB and retained-APK
+  audits, pinned-source/input verification, repository safety, shell
+  syntax/lint, and whitespace checks pass.
+- Classification: **Pass for versioned clean AAB reproducibility, local preview
+  derivation, and forward emulator upgrade/runtime preservation.** Physical
+  hardware, release-key signing, Play split delivery, and publication remain
+  open. The preview contains no game data and no package or private artifact
+  was published. Evidence:
+  `docs/artifacts/2026-09-05/android/a6-versioned-hardware-preview.md`.

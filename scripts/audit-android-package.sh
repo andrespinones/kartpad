@@ -16,7 +16,12 @@ for tool in "$aapt2" "$zipalign" "$readelf"; do
 done
 
 badging="$("$aapt2" dump badging "$apk")"
+expected_version_name="${KARTPAD_ANDROID_EXPECTED_VERSION_NAME:-0.4.0-android-preview.1}"
 [[ "$badging" == *"package: name='dev.kartpad.android'"* ]]
+[[ "$badging" == *"versionName='$expected_version_name'"* ]] || {
+  echo "ERROR: APK version name is not $expected_version_name" >&2
+  exit 1
+}
 [[ "$badging" == *"compileSdkVersion='36'"* ]]
 [[ "$badging" == *"minSdkVersion:'28'"* ]]
 [[ "$badging" == *"targetSdkVersion:'36'"* ]]

@@ -912,6 +912,14 @@ the wrong package identity, a non-increasing version code, or an installed
 version that does not match the requested APK. This override is test-only;
 normal builds retain the manifest's default version code.
 
+Android's default user-visible version is `0.4.0-android-preview.1`. Override
+it only for a deliberately named preview with
+`KARTPAD_ANDROID_VERSION_NAME`; the builder and Gradle property both reject
+empty, over-64-character, or non-portable values. Strict APK/AAB audits require
+the expected default unless `KARTPAD_ANDROID_EXPECTED_VERSION_NAME` is supplied
+for that deliberate build. Version code 6 is the current hardware-preview
+line and must not be decreased for distributed test upgrades.
+
 The product builder emits a debug APK by default. Set
 `KARTPAD_ANDROID_PACKAGE_FORMAT=aab` to run the unsigned `bundleRelease` path
 and produce the local, unpublished `app-release.aab`. Release bundles exclude
@@ -925,6 +933,15 @@ decoded manifest, rejects a signature or unintended ABI/asset/permission,
 checks 16 KiB ELF and export/dependency boundaries, and scans the complete AAB
 for local paths, private-data names, and unexpected key markers. Candidate AAB
 hashes must come from independent scoped clean builds, not a cached task.
+
+The current local hardware-preview APK is derived from two byte-identical clean
+version-code 6 AAB builds, is non-debuggable, and has SHA-256
+`24e977d497d5c587eb79771d09e3176932633fe0671f6e5444ddca335bc8bd92`.
+It is retained ignored under `.android-bootstrap/hardware-preview/` for the
+first physical session. Its local debug signature is test-only and cannot be
+updated in place by a future release-key package; export test saves before any
+signing-identity transition. Evidence is in
+`docs/artifacts/2026-09-05/android/a6-versioned-hardware-preview.md`.
 
 The non-destructive save-storage emulator lane is
 `scripts/test-android-save-storage-emulator.sh [APK]`. Its debug-only fixture

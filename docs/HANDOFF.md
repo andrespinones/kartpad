@@ -96,6 +96,19 @@ Play device-split delivery, release signing, physical-device acceptance, and
 publication remain open. Evidence:
 `docs/artifacts/2026-09-05/android/a6-bundle-derived-apk-emulator.md`.
 
+The current hardware preview is now honestly labeled
+`0.4.0-android-preview.1` at version code 6 rather than the A0 bootstrap name.
+Two clean unsigned AABs match at `eaf16573…`; the derived, non-debuggable APK
+at `24e977d…` passed a real version 5-to-6 emulator upgrade, selector/native
+runtime execution, and durable-state preservation before the debug fixture was
+restored. The exact audited 90,477,735-byte ARM64/API-28+ APK is retained
+locally and ignored at
+`.android-bootstrap/hardware-preview/KartPad-0.4.0-android-preview.1-v6-arm64.apk`.
+It uses only the local debug identity, contains no game data, is not a
+release-key candidate, and was not published. Physical-device execution is the
+next authority. Evidence:
+`docs/artifacts/2026-09-05/android/a6-versioned-hardware-preview.md`.
+
 The `codex/iphone-touch-layout-editor` candidate captures the maintainer's
 current physical-iPhone control positions as the default for untouched iPhone
 installs only. Existing custom layouts and every iPad layout remain unchanged.

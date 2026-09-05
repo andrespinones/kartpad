@@ -5,6 +5,7 @@ repo_root="$(git rev-parse --show-toplevel)"
 # shellcheck source=android-toolchain-versions.sh
 source "$repo_root/scripts/android-toolchain-versions.sh"
 version_code_override="${KARTPAD_ANDROID_VERSION_CODE:-}"
+version_name_override="${KARTPAD_ANDROID_VERSION_NAME:-}"
 package_format="${KARTPAD_ANDROID_PACKAGE_FORMAT:-apk}"
 case "$package_format" in
   apk) package_task=assembleDebug; package_kind=APK ;;
@@ -17,6 +18,11 @@ esac
 if [[ -n "$version_code_override" &&
     ! "$version_code_override" =~ ^[1-9][0-9]*$ ]]; then
   echo "ERROR: KARTPAD_ANDROID_VERSION_CODE must be a positive integer" >&2
+  exit 64
+fi
+if [[ -n "$version_name_override" &&
+    ! "$version_name_override" =~ ^[0-9A-Za-z][0-9A-Za-z._-]{0,63}$ ]]; then
+  echo "ERROR: KARTPAD_ANDROID_VERSION_NAME must contain 1-64 portable version characters" >&2
   exit 64
 fi
 
@@ -90,6 +96,9 @@ gradle_args=(
 )
 if [[ -n "$version_code_override" ]]; then
   gradle_args+=("-PkartpadVersionCode=$version_code_override")
+fi
+if [[ -n "$version_name_override" ]]; then
+  gradle_args+=("-PkartpadVersionName=$version_name_override")
 fi
 
 "$repo_root/android/gradlew" "${gradle_args[@]}" \

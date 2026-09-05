@@ -27,7 +27,12 @@ done
 
 "$java" -jar "$bundletool" validate --bundle="$bundle" >/dev/null
 manifest="$($java -jar "$bundletool" dump manifest --bundle="$bundle")"
+expected_version_name="${KARTPAD_ANDROID_EXPECTED_VERSION_NAME:-0.4.0-android-preview.1}"
 [[ "$manifest" == *'package="dev.kartpad.android"'* ]]
+[[ "$manifest" == *"android:versionName=\"$expected_version_name\""* ]] || {
+  echo "ERROR: AAB version name is not $expected_version_name" >&2
+  exit 1
+}
 [[ "$manifest" == *'android:compileSdkVersion="36"'* ]]
 [[ "$manifest" == *'<uses-sdk android:minSdkVersion="28" android:targetSdkVersion="36"/>'* ]]
 permission_names="$(printf '%s\n' "$manifest" |
