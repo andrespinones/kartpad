@@ -119,6 +119,17 @@ authority; this local debug-signed preview is not a release-key candidate and
 was not published. Evidence:
 [`docs/artifacts/2026-09-05/android/a6-versioned-hardware-preview.md`](artifacts/2026-09-05/android/a6-versioned-hardware-preview.md).
 
+Local Play-style device targeting now passes too. Pinned bundletool queried the
+Pixel Tablet device spec and emitted exactly four APKs: base, ARM64, English,
+and xhdpi. The runner verified one signer across all splits, 16 KiB-aware
+alignment, preview package/version/non-debug state, and byte identity between
+every split native library and the audited AAB. Package Manager reported the
+four expected installed components; the production selector and installed
+ARM64 `SDL_main` then ran before the debug fixture was restored with durable
+state unchanged. Actual Play service delivery, release-key signing, and
+physical-device acceptance remain open. Evidence:
+[`docs/artifacts/2026-09-05/android/a6-device-split-emulator.md`](artifacts/2026-09-05/android/a6-device-split-emulator.md).
+
 The latest Android A4 checkpoint fixes a real SDL lifecycle gap: KartPad now
 enables SDL activity recreation, so Android can rebuild `KartPadActivity`
 without SDL terminating the process. Visible Pixel 6 and Pixel Tablet runs held

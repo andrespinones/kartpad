@@ -109,6 +109,16 @@ release-key candidate, and was not published. Physical-device execution is the
 next authority. Evidence:
 `docs/artifacts/2026-09-05/android/a6-versioned-hardware-preview.md`.
 
+Pinned bundletool's device-targeted path now passes on the Pixel Tablet as
+well. It generated exactly base, ARM64, English, and xhdpi APKs. Every split is
+aligned and shares one signer, all four native libraries are byte-identical to
+the strict-audited AAB entries, and Package Manager installed exactly those
+four components. The split form showed the selector and executed installed
+ARM64 `SDL_main`; debug version 5 and the private durable-state aggregate were
+then restored unchanged. This closes local device-specific split execution,
+not actual Play service delivery, release-key signing, or physical hardware.
+Evidence: `docs/artifacts/2026-09-05/android/a6-device-split-emulator.md`.
+
 The `codex/iphone-touch-layout-editor` candidate captures the maintainer's
 current physical-iPhone control positions as the default for untouched iPhone
 installs only. Existing custom layouts and every iPad layout remain unchanged.

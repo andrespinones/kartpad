@@ -943,6 +943,17 @@ updated in place by a future release-key package; export test saves before any
 signing-identity transition. Evidence is in
 `docs/artifacts/2026-09-05/android/a6-versioned-hardware-preview.md`.
 
+The same guarded bundle-derived runner also exercises the device-specific form.
+It obtains a temporary device spec with pinned bundletool, requires the exact
+base/ARM64/English/one-density split set, verifies a single signer and each
+APK's alignment, and compares every split native library byte-for-byte with the
+audited AAB. After bundletool installation, Package Manager must expose all
+four components before the selector and installed `SDL_main` gates run. This
+is local Play-style selection only; Play service transport, account/store
+processing, release signing, and physical delivery remain separate claims.
+Evidence is in
+`docs/artifacts/2026-09-05/android/a6-device-split-emulator.md`.
+
 The non-destructive save-storage emulator lane is
 `scripts/test-android-save-storage-emulator.sh [APK]`. Its debug-only fixture
 uses deterministic valid RKSYS images under an isolated cache root to execute

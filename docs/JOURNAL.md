@@ -3983,3 +3983,27 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   open. The preview contains no game data and no package or private artifact
   was published. Evidence:
   `docs/artifacts/2026-09-05/android/a6-versioned-hardware-preview.md`.
+
+## 2026-09-05 — Android A6 device-specific split APK execution
+
+- Extended the guarded bundle-derived runner to query the connected emulator's
+  real device specification and produce a targeted APK set with pinned
+  bundletool after the universal release path passes.
+- The Pixel Tablet set contained exactly base, ARM64, English, and xhdpi APKs.
+  All four passed signature and 16 KiB-aware alignment checks, shared one
+  signer, and the ABI split's four native libraries matched the audited AAB
+  bytes exactly.
+- Package Manager installed exactly four components. The production selector
+  showed both games, Original launched through its enabled card, and SDL
+  executed the installed ARM64 `libmain.so` from the split form.
+- The runner suppressed tool-internal temporary paths, restored debug version
+  5 and the visible selector, removed its exact device spec/APK set/splits, and
+  proved the private durable-state aggregate unchanged.
+- The 103-test suite with one intentional skip, strict AAB/preview-APK audits,
+  pinned-source/input verification, repository safety, shell syntax/lint, and
+  whitespace checks pass.
+- Classification: **Pass for local device-specific split selection, audit,
+  install, and native execution.** Actual Play service delivery, release-key
+  signing, physical hardware, and publication remain open. No package, split,
+  device spec, private artifact, or identifier was published. Evidence:
+  `docs/artifacts/2026-09-05/android/a6-device-split-emulator.md`.

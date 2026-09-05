@@ -9,6 +9,8 @@ bundle="${1:-$repo_root/android/app/build/outputs/bundle/release/app-release.aab
 sdk_root="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-$HOME/Library/Android/sdk}}"
 adb="${KARTPAD_ADB:-$sdk_root/platform-tools/adb}"
 aapt2="$sdk_root/build-tools/$KARTPAD_ANDROID_BUILD_TOOLS/aapt2"
+apksigner="$sdk_root/build-tools/$KARTPAD_ANDROID_BUILD_TOOLS/apksigner"
+zipalign="$sdk_root/build-tools/$KARTPAD_ANDROID_BUILD_TOOLS/zipalign"
 java="$repo_root/.android-bootstrap/jdk-$KARTPAD_ANDROID_JDK_VERSION/Contents/Home/bin/java"
 python="${KARTPAD_PYTHON:-python3}"
 bundletool="$repo_root/.android-bootstrap/dependencies/bundletool-all-1.18.1.jar"
@@ -21,7 +23,7 @@ fail() {
   exit 1
 }
 
-for tool in "$adb" "$aapt2" "$java"; do
+for tool in "$adb" "$aapt2" "$apksigner" "$zipalign" "$java"; do
   [[ -x "$tool" ]] || fail "required executable is unavailable: $tool"
 done
 command -v "$python" >/dev/null || fail "Python is unavailable: $python"
@@ -153,13 +155,33 @@ tap_original_mode() {
     "$(((left + right) / 2))" "$(((top + bottom) / 2))"
 }
 
+exercise_original_runtime() {
+  "${adb_target[@]}" logcat -c
+  tap_original_mode
+  local runtime_started=0
+  for _ in {1..30}; do
+    if "${adb_target[@]}" logcat -d -s SDL:V '*:S' |
+        grep -Eq 'Running main function SDL_main from library .*/lib/arm64/libmain\.so'; then
+      runtime_started=1
+      break
+    fi
+    sleep 1
+  done
+  [[ "$runtime_started" == 1 ]] ||
+    fail "bundle-derived release activity did not execute SDL_main from libmain.so"
+  "${adb_target[@]}" shell am force-stop "$package"
+}
+
 "$repo_root/scripts/audit-android-bundle.sh" "$bundle" >/dev/null
 bundle_sha256="$(shasum -a 256 "$bundle" | awk '{ print $1 }')"
 
 installed_path="$("${adb_target[@]}" shell pm path "$package" |
   sed -n 's/^package://p' | head -1 | tr -d '\r')"
 [[ -n "$installed_path" ]] || fail "KartPad is not installed on the emulator"
-"${adb_target[@]}" pull "$installed_path" "$restore_apk" >/dev/null
+if ! "${adb_target[@]}" pull "$installed_path" "$restore_apk" \
+    >/dev/null 2>&1; then
+  fail "could not preserve the installed debug APK for recovery"
+fi
 [[ "$("$aapt2" dump badging "$restore_apk")" == *"package: name='$package'"* ]] ||
   fail "the recoverable installed APK has the wrong package identity"
 restore_version="$(installed_version_code)"
@@ -187,6 +209,9 @@ derived_badging="$("$aapt2" dump badging "$derived_apk")"
   fail "bundle-derived release APK is unexpectedly debuggable"
 derived_version="$(printf '%s\n' "$derived_badging" |
   sed -n "s/^package: .*versionCode='\([0-9][0-9]*\)'.*/\1/p")"
+derived_version_name="$(printf '%s\n' "$derived_badging" |
+  sed -n "s/^package: .*versionName='\([^']*\)'.*/\1/p")"
+[[ -n "$derived_version_name" ]] || fail "bundle-derived APK has no version name"
 ((derived_version >= restore_version)) ||
   fail "bundle-derived APK would downgrade the recoverable installed APK"
 if ((derived_version > restore_version)); then
@@ -204,21 +229,95 @@ restore_required=1
 "${adb_target[@]}" shell wm dismiss-keyguard >/dev/null 2>&1 || true
 restore_selector
 wait_for_selector
+exercise_original_runtime
 
-"${adb_target[@]}" logcat -c
-tap_original_mode
-runtime_started=0
-for _ in {1..30}; do
-  if "${adb_target[@]}" logcat -d -s SDL:V '*:S' |
-      grep -Eq 'Running main function SDL_main from library .*/lib/arm64/libmain\.so'; then
-    runtime_started=1
-    break
+device_spec="$temp_root/device-spec.json"
+device_apks="$temp_root/device.apks"
+"$java" -jar "$bundletool" get-device-spec \
+  --output="$device_spec" --adb="$adb" --device-id="$serial" >/dev/null
+"$java" -jar "$bundletool" build-apks \
+  --bundle="$bundle" \
+  --output="$device_apks" \
+  --device-spec="$device_spec" \
+  --ks="$debug_keystore" \
+  --ks-pass=pass:android \
+  --ks-key-alias=androiddebugkey \
+  --key-pass=pass:android >/dev/null
+
+split_members="$(unzip -Z1 "$device_apks" | sort)"
+fixed_split_members="$(printf '%s\n' \
+  splits/base-arm64_v8a.apk \
+  splits/base-en.apk \
+  splits/base-master.apk \
+  toc.pb | sort)"
+density_split="$(printf '%s\n' "$split_members" |
+  grep -E '^splits/base-(ldpi|mdpi|hdpi|xhdpi|xxhdpi|xxxhdpi)\.apk$' || true)"
+[[ "$(printf '%s\n' "$density_split" | grep -c .)" == 1 ]] ||
+  fail "device APK set does not contain exactly one recognized density split"
+expected_split_members="$(printf '%s\n' "$fixed_split_members" "$density_split" | sort)"
+[[ "$split_members" == "$expected_split_members" ]] ||
+  fail "device APK set differs from the exact base/ARM64/English/density contract"
+
+split_root="$temp_root/device-splits"
+mkdir -p "$split_root"
+unzip -q "$device_apks" 'splits/*.apk' -d "$split_root"
+master_apk="$split_root/splits/base-master.apk"
+master_badging="$("$aapt2" dump badging "$master_apk")"
+[[ "$master_badging" == *"package: name='$package'"* &&
+   "$master_badging" == *"versionCode='$derived_version'"* &&
+   "$master_badging" == *"versionName='$derived_version_name'"* ]] ||
+  fail "device base split has the wrong package or version identity"
+[[ "$master_badging" != *"application-debuggable"* ]] ||
+  fail "device base split is unexpectedly debuggable"
+
+split_signer=""
+for split_apk in "$split_root"/splits/*.apk; do
+  JAVA_HOME="$(dirname "$(dirname "$java")")" \
+    "$apksigner" verify --verbose "$split_apk" >/dev/null
+  "$zipalign" -c -P 16 -v 4 "$split_apk" >/dev/null
+  current_signer="$(JAVA_HOME="$(dirname "$(dirname "$java")")" \
+    "$apksigner" verify --print-certs "$split_apk" |
+    sed -n 's/^Signer #1 certificate SHA-256 digest: //p')"
+  [[ -n "$current_signer" ]] || fail "device split has no signer certificate digest"
+  if [[ -z "$split_signer" ]]; then
+    split_signer="$current_signer"
+  else
+    [[ "$current_signer" == "$split_signer" ]] ||
+      fail "device APK splits do not share one signer certificate"
   fi
-  sleep 1
 done
-[[ "$runtime_started" == 1 ]] ||
-  fail "bundle-derived release activity did not execute SDL_main from libmain.so"
-"${adb_target[@]}" shell am force-stop "$package"
+
+abi_split="$split_root/splits/base-arm64_v8a.apk"
+for library in libSDL3.so libc++_shared.so libkartpad_discio.so libmain.so; do
+  unzip -p "$bundle" "base/lib/arm64-v8a/$library" \
+    >"$temp_root/bundle-$library"
+  unzip -p "$abi_split" "lib/arm64-v8a/$library" \
+    >"$temp_root/split-$library"
+  cmp -s "$temp_root/bundle-$library" "$temp_root/split-$library" ||
+    fail "device split changed $library bytes from the audited AAB"
+done
+if unzip -p "$device_apks" | strings |
+    grep -Eq '/Users/|Mario Kart Wii\.(iso|wbfs)'; then
+  fail "device APK set contains a private path or game-data name"
+fi
+
+if ! "$java" -jar "$bundletool" install-apks \
+    --apks="$device_apks" --adb="$adb" --device-id="$serial" \
+    >/dev/null 2>&1; then
+  fail "bundletool could not install the device APK set"
+fi
+[[ "$(installed_version_code)" == "$derived_version" ]] ||
+  fail "installed device APK set version does not match"
+installed_paths="$("${adb_target[@]}" shell pm path "$package" | tr -d '\r')"
+[[ "$(printf '%s\n' "$installed_paths" | grep -c '^package:')" == 4 &&
+   "$installed_paths" == *'/base.apk'* &&
+   "$installed_paths" == *'/split_config.arm64_v8a.apk'* &&
+   "$installed_paths" == *'/split_config.en.apk'* &&
+   "$installed_paths" == *'/split_config.'*'dpi.apk'* ]] ||
+  fail "installed package is not the expected four-part device split set"
+restore_selector
+wait_for_selector
+exercise_original_runtime
 
 "${adb_target[@]}" install "${restore_install_args[@]}" "$restore_apk" >/dev/null
 restore_required=0
@@ -230,4 +329,4 @@ after_state="$(state_digest)"
 restore_selector
 wait_for_selector
 
-echo "Android bundle-derived APK emulator test passed: aab_sha256=$bundle_sha256 derived_apk_sha256=$derived_apk_sha256 version_code=$derived_version release_non_debuggable=yes selector_visible=yes sdl_main_executed=yes debug_apk_restored=yes durable_state_preserved=yes"
+echo "Android bundle-derived APK emulator test passed: aab_sha256=$bundle_sha256 derived_apk_sha256=$derived_apk_sha256 version_code=$derived_version release_non_debuggable=yes universal_selector_visible=yes universal_sdl_main_executed=yes device_splits=4 split_signer_consistent=yes split_native_bytes_exact=yes split_selector_visible=yes split_sdl_main_executed=yes debug_apk_restored=yes durable_state_preserved=yes"
