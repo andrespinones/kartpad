@@ -64,6 +64,15 @@ document-picker flow or a real retail-save result. The exact audited and
 installed version 5 fixture is `67bc86e5…`; the selector is visibly resumed.
 Evidence: `docs/artifacts/2026-09-05/android/a6-emulator-save-storage.md`.
 
+The real Android DocumentsUI save path now passes on the Pixel Tablet too. The
+production menu exported the initialized emulator RKSYS, re-imported the exact
+document, staged it, restarted through the selector, applied it before SDL,
+and retained an exact automatic prior-save backup. The guarded runner proved
+exact byte equality privately, removed its precise recovery/public/test-backup
+artifacts, retained the active save, and restored the visible selector.
+Physical provider/device acceptance remains open. Evidence:
+`docs/artifacts/2026-09-05/android/a6-emulator-save-document-picker.md`.
+
 The `codex/iphone-touch-layout-editor` candidate captures the maintainer's
 current physical-iPhone control positions as the default for untouched iPhone
 installs only. Existing custom layouts and every iPad layout remain unchanged.

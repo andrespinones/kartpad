@@ -66,6 +66,17 @@ Document-picker round trips, a real retail save, and physical acceptance remain
 open. Evidence:
 [`docs/artifacts/2026-09-05/android/a6-emulator-save-storage.md`](artifacts/2026-09-05/android/a6-emulator-save-storage.md).
 
+Android A6 now also passes the actual system document-picker save flow. The
+visible Pixel Tablet exported its initialized RKSYS through DocumentsUI,
+verified exact bytes privately, re-imported that document through DocumentsUI,
+staged it, restarted through the selector, applied it before SDL startup, and
+proved both the active restore and KartPad's automatic prior-save backup exact.
+The guarded runner retained recovery copies on interrupted attempts and, after
+the passing run, removed only its exact private/public fixtures while leaving
+the active save and visible selector intact. Physical provider/device
+acceptance remains open. Evidence:
+[`docs/artifacts/2026-09-05/android/a6-emulator-save-document-picker.md`](artifacts/2026-09-05/android/a6-emulator-save-document-picker.md).
+
 The latest Android A4 checkpoint fixes a real SDL lifecycle gap: KartPad now
 enables SDL activity recreation, so Android can rebuild `KartPadActivity`
 without SDL terminating the process. Visible Pixel 6 and Pixel Tablet runs held

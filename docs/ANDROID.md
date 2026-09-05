@@ -908,6 +908,15 @@ the production validation, export-read, staged restore, activation, backup,
 cleanup, and corrupt-input rejection paths. It does not substitute for the
 system document-picker round trip or a real user-save test.
 
+For an initialized emulator save, the guarded end-to-end picker lane is
+`scripts/test-android-save-document-picker-emulator.sh [APK]`. It refuses
+pre-existing pending/recovery/export collisions, protects the active save in
+app-private storage, traverses the product menu plus Android DocumentsUI for
+both export and import, applies the staged restore through a runtime restart,
+and privately proves the active/export/backup bytes. Interrupted runs retain
+the recovery copy; successful runs remove only exact test artifacts and restore
+the selector. This is still not physical-provider acceptance.
+
 Before any tester receives an artifact, verify at minimum:
 
 - only intended ABIs are present;

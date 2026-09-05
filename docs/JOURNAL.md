@@ -3877,3 +3877,25 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   signed release, and publication remain open. No APK/AAB or private artifact
   was published. Evidence:
   `docs/artifacts/2026-09-05/android/a6-emulator-save-storage.md`.
+
+## 2026-09-05 — Android A6 system document-picker save round trip
+
+- Added a guarded emulator runner for the production KartPad menu and Android
+  DocumentsUI export/import path. It requires an initialized active save,
+  refuses pending/recovery/public-path collisions, installs without clearing
+  data, and verifies the approved app-private game fixture.
+- Before UI work it creates and verifies an app-private recovery copy. Failed
+  attempts retain that recovery while removing the exact public export; the
+  passing run identifies and removes only its new automatic backup and exact
+  recovery/public/UI artifacts.
+- The visible API 36 ARM64 Pixel Tablet exported its initialized RKSYS through
+  `ACTION_CREATE_DOCUMENT`, re-imported it through `ACTION_OPEN_DOCUMENT`,
+  staged the validated bytes, restarted through the selector, and applied the
+  pending restore before SDL startup. The export, restored active save, and
+  automatic prior-save backup matched the protected original byte-for-byte.
+- Classification: **Pass for end-to-end emulator DocumentsUI save
+  export/import/restart recovery.** The active save remained, no private hash or
+  bytes were printed, and the production selector was visibly restored.
+  Physical provider/device acceptance, signed release, and publication remain
+  open. No APK/AAB, save, or private artifact was published. Evidence:
+  `docs/artifacts/2026-09-05/android/a6-emulator-save-document-picker.md`.
