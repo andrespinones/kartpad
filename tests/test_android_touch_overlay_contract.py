@@ -66,6 +66,19 @@ class AndroidTouchOverlayContractTests(unittest.TestCase):
         self.assertIn("ACTION_TOGGLE_GAS_LOCK", source)
         self.assertIn("TYPE_VIEW_ACCESSIBILITY_FOCUSED", source)
 
+    def test_accessibility_actions_have_repeatable_emulator_coverage(self) -> None:
+        activity = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadActivity.kt").read_text()
+        overlay = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadOverlayView.kt").read_text()
+        runner = (REPO / "scripts/test-android-touch-accessibility-actions.sh").read_text()
+        self.assertIn("DEBUG_EXTRA_ACCESSIBILITY_ACTIONS", activity)
+        self.assertIn("runDebugAccessibilityActionsFixture", activity)
+        self.assertIn("virtualNodeProvider.performAction", overlay)
+        self.assertIn("ACTION_STICK_RIGHT", overlay)
+        self.assertIn('lockedNode.stateDescription == "Acceleration locked"', overlay)
+        self.assertIn('unlockedNode.stateDescription == "Unlocked"', overlay)
+        self.assertIn("TEST_TOUCH_ACCESSIBILITY_ACTIONS", runner)
+        self.assertIn("focus=A b=pulse move=right lock=on click=unlock", runner)
+
     def test_r_is_the_same_compact_digital_pill_as_l(self) -> None:
         source = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadOverlayView.kt").read_text()
         self.assertIn('button("L", "L", BUTTON_L, 94f, 46f', source)

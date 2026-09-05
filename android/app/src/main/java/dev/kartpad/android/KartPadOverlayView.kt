@@ -396,6 +396,109 @@ class KartPadOverlayView(context: Context) : View(context) {
         return "centers=${controls.size} edges=${controls.size} outside=passed"
     }
 
+    fun runDebugAccessibilityActionsFixture(
+        onSuccess: (String) -> Unit,
+        onFailure: (Throwable) -> Unit,
+    ) {
+        runCatching {
+            check(isLaidOut && width > 0 && height > 0) { "touch overlay is not laid out" }
+            clearTouchInput()
+            debugVirtualKeyHapticCount = 0
+            layoutControls()
+            val aId = controls.indexOfFirst { it.id == "A" }
+            val bId = controls.indexOfFirst { it.id == "B" }
+            val moveId = controls.indexOfFirst { it.id == "move" }
+            check(aId >= 0 && bId >= 0 && moveId >= 0)
+
+            val aNode = virtualNodeProvider.createAccessibilityNodeInfo(aId)
+                ?: error("A accessibility node missing")
+            val moveNode = virtualNodeProvider.createAccessibilityNodeInfo(moveId)
+                ?: error("move accessibility node missing")
+            check(aNode.contentDescription == "A button" && aNode.isClickable)
+            check(aNode.actionList.any { it.id == ACTION_TOGGLE_GAS_LOCK })
+            check(moveNode.contentDescription == "Move stick" && !moveNode.isClickable)
+            check(moveNode.actionList.any { it.id == ACTION_STICK_RIGHT })
+            check(virtualNodeProvider.performAction(
+                aId, AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS, null,
+            )) { "A accessibility focus was rejected" }
+            check(virtualNodeProvider.findFocus(
+                AccessibilityNodeInfo.FOCUS_ACCESSIBILITY,
+            ) != null) { "A accessibility focus was not retained" }
+            check(virtualNodeProvider.performAction(
+                bId, AccessibilityNodeInfo.ACTION_CLICK, null,
+            )) { "B accessibility click was rejected" }
+            check(lastPublishedButtons == BUTTON_B && debugVirtualKeyHapticCount == 1) {
+                "B pulse buttons=0x${lastPublishedButtons.toString(16)} " +
+                    "haptics=$debugVirtualKeyHapticCount"
+            }
+            Triple(aId, bId, moveId)
+        }.onSuccess { (aId, _, moveId) ->
+            mainHandler.postDelayed({
+                runCatching {
+                    check(lastPublishedButtons == 0) { "B accessibility pulse did not clear" }
+                    check(virtualNodeProvider.performAction(
+                        moveId, ACTION_STICK_RIGHT, null,
+                    )) { "move-right accessibility action was rejected" }
+                    check(abs(leftX - 1f) < 0.001f && abs(leftY) < 0.001f &&
+                        debugVirtualKeyHapticCount == 2
+                    ) { "move-right axes=($leftX,$leftY) haptics=$debugVirtualKeyHapticCount" }
+                }.onFailure {
+                    clearTouchInput()
+                    onFailure(it)
+                    return@postDelayed
+                }
+                mainHandler.postDelayed({
+                    runCatching {
+                        check(leftX == 0f && leftY == 0f) {
+                            "move-right accessibility pulse did not clear"
+                        }
+                        check(virtualNodeProvider.performAction(
+                            aId, ACTION_TOGGLE_GAS_LOCK, null,
+                        )) { "A lock accessibility action was rejected" }
+                        val lockedNode = virtualNodeProvider.createAccessibilityNodeInfo(aId)
+                            ?: error("locked A accessibility node missing")
+                        check(gasLocked && lastPublishedButtons == BUTTON_A &&
+                            (Build.VERSION.SDK_INT < Build.VERSION_CODES.R ||
+                                lockedNode.stateDescription == "Acceleration locked") &&
+                            debugVirtualKeyHapticCount == 3
+                        ) { "A accessibility lock state was incomplete" }
+                        check(virtualNodeProvider.performAction(
+                            aId, AccessibilityNodeInfo.ACTION_CLICK, null,
+                        )) { "locked A accessibility click was rejected" }
+                        val unlockedNode = virtualNodeProvider.createAccessibilityNodeInfo(aId)
+                            ?: error("unlocked A accessibility node missing")
+                        check(!gasLocked && lastPublishedButtons == BUTTON_A &&
+                            (Build.VERSION.SDK_INT < Build.VERSION_CODES.R ||
+                                unlockedNode.stateDescription == "Unlocked") &&
+                            debugVirtualKeyHapticCount == 4
+                        ) { "A accessibility click did not unlock and pulse" }
+                    }.onFailure {
+                        clearTouchInput()
+                        onFailure(it)
+                        return@postDelayed
+                    }
+                    mainHandler.postDelayed({
+                        runCatching {
+                            check(lastPublishedButtons == 0 && !gasLocked) {
+                                "A accessibility pulse did not return neutral"
+                            }
+                            check(virtualNodeProvider.performAction(
+                                aId, AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS, null,
+                            )) { "A accessibility focus clear was rejected" }
+                            check(virtualNodeProvider.findFocus(
+                                AccessibilityNodeInfo.FOCUS_ACCESSIBILITY,
+                            ) == null) { "A accessibility focus remained after clear" }
+                            "focus=A b=pulse move=right lock=on click=unlock haptics=4 neutral=true"
+                        }.onSuccess(onSuccess).onFailure {
+                            clearTouchInput()
+                            onFailure(it)
+                        }
+                    }, ACCESSIBILITY_PULSE_MS + 60L)
+                }, ACCESSIBILITY_STICK_PULSE_MS + 60L)
+            }, ACCESSIBILITY_PULSE_MS + 60L)
+        }.onFailure(onFailure)
+    }
+
     fun runDebugHoldAForModalFixture(): String {
         check(isLaidOut && width > 0 && height > 0) { "touch overlay is not laid out" }
         val a = controls.first { it.id == "A" }.frame

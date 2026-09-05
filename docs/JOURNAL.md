@@ -3392,6 +3392,24 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   touch-only races remain open. No package or private artifact was published. Evidence:
   `docs/artifacts/2026-09-05/android/a4-multipointer-replay.md`.
 
+## 2026-09-05 — Android A4 repeatable accessibility actions
+
+- Added a debug/source-only fixture that calls the production virtual
+  `AccessibilityNodeProvider` rather than relying on a temporary external jar.
+- Visible Pixel 6 and Pixel Tablet runs focus A, pulse B, move the left stick
+  right and wait for neutral, lock A, verify its accessibility state, unlock
+  through the normal A click, clear focus, and finish neutral.
+- Each lane reports four virtual-key haptic dispatches and the exact marker
+  `focus=A b=pulse move=right lock=on click=unlock haptics=4 neutral=true`.
+- The translated runtime rebuilt at APK SHA-256
+  `40907268f2b4047e93e8e0e7e7affacc0d02e5f84fa75a7461f81ab9b21d44b9`;
+  strict package/privacy audit, Android lint, and 88 tests with one intentional
+  skip passed.
+- Classification: **Pass for repeatable canonical emulator accessibility-node
+  actions.** Physical screen-reader usability and tactile haptic feel remain
+  open. No package or private artifact was published. Evidence:
+  `docs/artifacts/2026-09-04/android/a4-touch-accessibility.md`.
+
 ## 2026-09-05 — Android A4 touch hit map
 
 - Added a debug/source-only real-event fixture that resolves every one of 14

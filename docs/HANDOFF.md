@@ -71,6 +71,12 @@ to the intended control, while a real touch in empty gameplay space passes
 through without creating an owner or button state. Evidence:
 `docs/artifacts/2026-09-05/android/a4-touch-hit-map.md`.
 
+Virtual accessibility actions are now repeatable on both canonical emulators:
+A focus, B pulse, Move Right plus timeout, A lock/state, normal-click unlock,
+four haptic dispatches, focus clear, and final neutral state all pass through
+the production node provider. Evidence:
+`docs/artifacts/2026-09-04/android/a4-touch-accessibility.md`.
+
 Android's selector now follows the iOS two-card interaction rather than adding
 a separate recovery button: choosing Original or Retro without game data opens
 the shared importer and retains that choice. The visible Pixel Tablet also

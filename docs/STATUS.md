@@ -764,6 +764,11 @@ disconnect states; a second sequence began with A cyan/locked and restored it
    gameplay space remains unconsumed with neutral ownership/state. The final
    audited translated APK SHA-256 is
    `7edb51da87682525093db9cedcd80d1eab795572371443d4aa4a8f857f16ac6e`.
+   Virtual accessibility actions now also have repeatable phone/tablet proof:
+   focus, B pulse, Move Right and timeout, A lock/state, normal-click unlock,
+   four haptic dispatches, focus clear, and final neutral state pass through
+   the production node provider. The final audited translated APK SHA-256 is
+   `40907268f2b4047e93e8e0e7e7affacc0d02e5f84fa75a7461f81ab9b21d44b9`.
    The selector now also matches iOS's two-choice interaction: it has no
    Android-only recovery button, both cards remain actionable without game
    data, and the chosen profile resumes after the shared import flow. The

@@ -47,14 +47,33 @@ physical-device screen-reader, touch, and haptic acceptance remain open.
   - `708c7a040e0cfe6cd815690e63f46d1678f17899bce0e786f7480030830f1d13`
   - `6212cbf744e28d8e0687c9e8a7d8b22343ef37291b8dc5c031f04f1c45e5b3b7`
 
+A later repeatable source-only fixture now calls the production virtual
+`AccessibilityNodeProvider` directly on both canonical layouts. It verifies A
+and Move node semantics/action inventories, focuses A, pulses B and observes
+its exact Classic mask and neutral timeout, invokes Move Right and observes
+the full analog value and neutral timeout, locks A with the dedicated action,
+checks the Android 11+ `Acceleration locked` state, then uses the normal A
+accessibility click to unlock and pulse before clearing focus. The sequence
+issues four virtual-key haptic requests and finishes neutral:
+
+```text
+A4 accessibility actions passed focus=A b=pulse move=right lock=on click=unlock haptics=4 neutral=true
+```
+
+This repeatable path supersedes the temporary one-action jar as the primary
+emulator action evidence. The fixture is gated to debug source builds with
+`GAME_RUNTIME=false`.
+
 ## Verification
 
-- Exact local-only APK SHA-256:
-  `35ca72fab4c2c3737f373b25e6374daa7edfc13607d23afeaa8091e09b8c3fdf`.
+- Final local-only translated APK SHA-256:
+  `40907268f2b4047e93e8e0e7e7affacc0d02e5f84fa75a7461f81ab9b21d44b9`.
 - Kotlin compilation and Android lint: pass.
 - Strict APK/package/privacy audit: pass.
-- Forty-nine Android/iOS source contract tests: pass.
-- UI Automator virtual-node discovery and direct A-lock custom action: pass.
+- Eighty-eight Android/iOS source contract tests with one intentional skip:
+  pass.
+- Repeatable phone/tablet focus, button, stick, A-lock/unlock, haptic-dispatch,
+  and neutral-timeout actions: pass.
 - Repository whitespace check: pass.
 
 No APK, AAB, game data, save, Mii database, log, test jar, or screenshot was

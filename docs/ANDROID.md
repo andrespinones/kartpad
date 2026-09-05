@@ -1115,6 +1115,11 @@ A separate real-event hit-map fixture verifies the center and near-edge point
 of all 14 controls plus unconsumed empty gameplay space on both layouts;
 evidence is in
 `docs/artifacts/2026-09-05/android/a4-touch-hit-map.md`.
+The virtual accessibility nodes also have a repeatable phone/tablet action
+fixture covering focus, B pulse, Move Right and timeout, acceleration
+lock/state, normal-click unlock, four haptic requests, focus clear, and final
+neutral state; evidence is in
+`docs/artifacts/2026-09-04/android/a4-touch-accessibility.md`.
 The selector now removes the Android-only recovery control and follows iOS's
 two-choice import interaction: either enabled game card opens game-data setup
 when required and retains its pending profile. The consolidated three-dot menu
