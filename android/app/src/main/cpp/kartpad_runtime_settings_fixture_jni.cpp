@@ -2,6 +2,7 @@
 
 #include <atomic>
 #include <cstdio>
+#include <SDL3/SDL_hints.h>
 
 namespace {
 
@@ -10,6 +11,12 @@ std::atomic<int> g_aspect_mode{-1};
 std::atomic<int> g_resolution_milli{-1};
 
 }  // namespace
+
+extern "C" JNIEXPORT void JNICALL
+Java_dev_kartpad_android_KartPadActivity_nativeEnableActivityRecreation(
+    JNIEnv*, jobject) {
+  SDL_SetHint(SDL_HINT_ANDROID_ALLOW_RECREATE_ACTIVITY, "1");
+}
 
 extern "C" JNIEXPORT void JNICALL
 Java_dev_kartpad_android_KartPadActivity_nativeApplyDisplaySettings(

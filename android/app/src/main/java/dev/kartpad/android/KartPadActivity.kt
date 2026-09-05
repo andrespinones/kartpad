@@ -55,6 +55,7 @@ class KartPadActivity : SDLActivity() {
     private lateinit var motionSteering: KartPadMotionSteering
     private var inputListenerRegistered = false
     private var debugLifecycleClearArmed = false
+    private var debugActivityRecreateRequested = false
     private val inputDeviceListener = object : InputManager.InputDeviceListener {
         override fun onInputDeviceAdded(deviceId: Int) = refreshControllerHandoff()
         override fun onInputDeviceRemoved(deviceId: Int) = refreshControllerHandoff()
@@ -80,6 +81,7 @@ class KartPadActivity : SDLActivity() {
             configureDebugStateTrace()
         }
         super.onCreate(savedInstanceState)
+        nativeEnableActivityRecreation()
         inputManager = getSystemService(InputManager::class.java)
         runDebugRetroRewindExtractionFixture()
         runDebugRetroRewindWorkerFixture()
@@ -123,6 +125,10 @@ class KartPadActivity : SDLActivity() {
             intent.getBooleanExtra(DEBUG_EXTRA_MODAL_CLEAR, false)
         val debugLifecycleClear = BuildConfig.DEBUG && !BuildConfig.GAME_RUNTIME &&
             intent.getBooleanExtra(DEBUG_EXTRA_LIFECYCLE_CLEAR, false)
+        val debugActivityRecreate = BuildConfig.DEBUG && !BuildConfig.GAME_RUNTIME &&
+            intent.getBooleanExtra(DEBUG_EXTRA_ACTIVITY_RECREATE, false)
+        val debugActivityRecreateRestored = debugActivityRecreate &&
+            savedInstanceState?.getBoolean(DEBUG_STATE_ACTIVITY_RECREATE) == true
         val debugPersistence = if (BuildConfig.DEBUG && !BuildConfig.GAME_RUNTIME) {
             intent.getStringExtra(DEBUG_EXTRA_TOUCH_PERSISTENCE)
         } else {
@@ -141,7 +147,7 @@ class KartPadActivity : SDLActivity() {
             intent.getBooleanExtra(DEBUG_EXTRA_GAS_LOCK, false)
         kartPadOverlay.visibility = if (
             BuildConfig.GAME_RUNTIME || debugTouchOverlay || debugModalClear ||
-                debugLifecycleClear || debugPersistence != null || debugTouchSettings ||
+                debugLifecycleClear || debugActivityRecreate || debugPersistence != null || debugTouchSettings ||
                 debugTouchEditor || debugGasLock || debugHitMap || debugAccessibilityActions ||
                 debugMotionSensorMode != null || debugTouchSettingsFlow != null
         ) {
@@ -230,6 +236,43 @@ class KartPadActivity : SDLActivity() {
                 }.onFailure { Log.e(TAG, "A4 lifecycle clear fixture failed", it) }
             }
         }
+        if (debugActivityRecreate) {
+            kartPadOverlay.post {
+                if (debugActivityRecreateRestored) {
+                    runCatching {
+                        check(kartPadOverlay.debugTouchStateIsNeutral()) {
+                            "recreated touch overlay did not start neutral"
+                        }
+                        val persisted = kartPadOverlay.runDebugPersistenceFixture()
+                        "new=neutral $persisted"
+                    }.onSuccess {
+                        KartPadTouchSettings.resetTouchControls(this)
+                        Log.i(TAG, "A4 activity recreation fixture passed $it")
+                    }.onFailure {
+                        KartPadTouchSettings.resetTouchControls(this)
+                        Log.e(TAG, "A4 activity recreation fixture failed", it)
+                    }
+                } else {
+                    runCatching {
+                        KartPadTouchSettings.resetTouchControls(this)
+                        KartPadTouchSettings.setOrigin(
+                            this,
+                            "A",
+                            android.graphics.PointF(0.55f, 0.55f),
+                        )
+                        KartPadTouchSettings.setControlSize(this, "A", 1.25f)
+                        KartPadTouchSettings.setHidden(this, "B", true)
+                        val held = kartPadOverlay.runDebugHoldAForModalFixture()
+                        debugActivityRecreateRequested = true
+                        Log.i(TAG, "A4 activity recreation fixture armed $held")
+                        recreate()
+                    }.onFailure {
+                        KartPadTouchSettings.resetTouchControls(this)
+                        Log.e(TAG, "A4 activity recreation fixture failed", it)
+                    }
+                }
+            }
+        }
         when (debugPersistence) {
             "seed" -> {
                 KartPadTouchSettings.resetTouchControls(this)
@@ -274,9 +317,22 @@ class KartPadActivity : SDLActivity() {
         if (::kartPadOverlay.isInitialized) {
             kartPadOverlay.clearTouchInput()
             verifyDebugLifecycleClear("pause")
+            if (debugActivityRecreateRequested) {
+                check(kartPadOverlay.debugTouchStateIsNeutral()) {
+                    "touch state remained active while recreating activity"
+                }
+                Log.i(TAG, "A4 activity recreation fixture outgoing old=neutral")
+            }
         }
         if (::motionSteering.isInitialized) motionSteering.stop()
         super.onPause()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        if (debugActivityRecreateRequested) {
+            outState.putBoolean(DEBUG_STATE_ACTIVITY_RECREATE, true)
+        }
+        super.onSaveInstanceState(outState)
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
@@ -1700,6 +1756,8 @@ class KartPadActivity : SDLActivity() {
         showFps: Boolean, aspectMode: Int, resolutionScale: Float,
     )
 
+    private external fun nativeEnableActivityRecreation()
+
     private external fun nativeDebugDisplaySettings(): String
 
     private external fun nativeApplyControllerMapping(mapping: IntArray)
@@ -1771,6 +1829,10 @@ class KartPadActivity : SDLActivity() {
             "dev.kartpad.android.TEST_TOUCH_MODAL_CLEAR"
         private const val DEBUG_EXTRA_LIFECYCLE_CLEAR =
             "dev.kartpad.android.TEST_TOUCH_LIFECYCLE_CLEAR"
+        private const val DEBUG_EXTRA_ACTIVITY_RECREATE =
+            "dev.kartpad.android.TEST_TOUCH_ACTIVITY_RECREATE"
+        private const val DEBUG_STATE_ACTIVITY_RECREATE =
+            "dev.kartpad.android.STATE_TOUCH_ACTIVITY_RECREATE"
         private const val DEBUG_EXTRA_TOUCH_PERSISTENCE =
             "dev.kartpad.android.TEST_TOUCH_PERSISTENCE"
         private const val DEBUG_EXTRA_TOUCH_SETTINGS =

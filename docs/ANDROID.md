@@ -1057,6 +1057,10 @@ Canvas overlay now exposes all 14 classic controls as bounded virtual
 accessibility nodes. Buttons use native mask pulses, sticks provide directional
 custom actions, and A provides a state-reporting acceleration-lock action. The
 API 36 emulator hierarchy and a direct UI Automator node action both pass.
+KartPad also opts into SDL activity recreation: canonical phone and tablet runs
+prove that a held A input clears from the outgoing activity, the replacement
+overlay starts neutral in the same process, and customized touch geometry and
+visibility reload correctly.
 Android now also builds a narrow JNI DiscIO bridge from pinned Dolphin source
 and accepts raw RMCP01 revision-zero ISO/WBFS documents through the system
 picker. Imports use app-private same-volume staging, validate before activation,

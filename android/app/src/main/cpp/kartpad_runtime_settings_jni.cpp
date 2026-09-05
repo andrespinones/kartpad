@@ -1,7 +1,14 @@
 #include <jni.h>
+#include <SDL3/SDL_hints.h>
 
 #include "kartpad/android/controller_mapping.hpp"
 #include "kartpad/android/runtime_settings.hpp"
+
+extern "C" JNIEXPORT void JNICALL
+Java_dev_kartpad_android_KartPadActivity_nativeEnableActivityRecreation(
+    JNIEnv*, jobject) {
+  SDL_SetHint(SDL_HINT_ANDROID_ALLOW_RECREATE_ACTIVITY, "1");
+}
 
 extern "C" JNIEXPORT void JNICALL
 Java_dev_kartpad_android_KartPadActivity_nativeApplyDisplaySettings(

@@ -2,6 +2,17 @@
 
 Updated: 2026-09-05
 
+The latest Android A4 checkpoint fixes a real SDL lifecycle gap: KartPad now
+enables SDL activity recreation, so Android can rebuild `KartPadActivity`
+without SDL terminating the process. Visible Pixel 6 and Pixel Tablet runs held
+A through a real `Activity.recreate()` request, proved the outgoing overlay
+became neutral, then proved the new overlay started neutral and restored edited
+A geometry plus hidden B state. The complete translated APK SHA-256 is
+`7e85ffc806a14db2e0954f4da8481f9e8ab9f1728c3e64e2cd74203c82af87d1`;
+89 tests with one skip, lint, strict audit, and safety checks pass. Physical
+Android acceptance remains open. Evidence:
+[`docs/artifacts/2026-09-05/android/a4-touch-activity-recreation.md`](artifacts/2026-09-05/android/a4-touch-activity-recreation.md).
+
 The latest Android A4 checkpoint gives global Touch Control Settings a real
 widget/process-restart gate on both canonical emulators and corrects the fresh
 aspect default to iOS's Original 4:3. It also tightens the Original/Retro

@@ -99,6 +99,12 @@ opens on both canonical emulator layouts and when the Pixel 6 receives Home and
 that build still compiles, lints, and audits. Evidence:
 `docs/artifacts/2026-09-05/android/a4-touch-modal-lifecycle-clearing.md`.
 
+SDL activity recreation now works instead of hitting SDL's default process-exit
+guard. Real `Activity.recreate()` runs on Pixel 6 and Pixel Tablet clear held A
+in the outgoing instance, create a neutral replacement overlay in the same PID,
+and restore edited A geometry plus hidden B state. Evidence:
+`docs/artifacts/2026-09-05/android/a4-touch-activity-recreation.md`.
+
 Android per-control touch persistence now has real process-boundary evidence on
 both canonical emulator layouts. A reloads at normalized `(0.55,0.55)` and
 1.25x size after force-stop, while hidden B is absent from the independently

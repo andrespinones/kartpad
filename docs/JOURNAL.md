@@ -3679,3 +3679,25 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   parity.** Platform-native popup styling and physical-device acceptance remain
   distinct. No package or private artifact was published. Evidence:
   `docs/artifacts/2026-09-05/android/a4-menu-hierarchy-reachability.md`.
+
+## 2026-09-05 — Android A4 touch activity recreation
+
+- Added a source-only real `Activity.recreate()` fixture that arms held A,
+  requires neutral state from the outgoing overlay, and requires the recreated
+  overlay to start neutral.
+- The first run exposed SDL 3's default recreation guard: after the old
+  activity cleared input, SDL rejected the second activity and exited the
+  process. KartPad now sets `SDL_HINT_ANDROID_ALLOW_RECREATE_ACTIVITY` through
+  its linked native runtime before recreation can occur.
+- The replacement overlay also reloads normalized A position, 1.25x selected
+  size, and hidden B state, proving settings restoration across the new view.
+- Visible Pixel 6 and Pixel Tablet runs passed in one PID per lane. The complete
+  translated runtime rebuilt at APK SHA-256
+  `7e85ffc806a14db2e0954f4da8481f9e8ab9f1728c3e64e2cd74203c82af87d1`.
+- Android lint, 89 tests with one intentional skip, strict package/privacy
+  audit, repository safety, shell syntax, and whitespace passed.
+- Classification: **Pass for canonical-emulator same-process SDL activity
+  recreation and touch-state/settings restoration.** Physical interruption and
+  process-death acceptance remain open. No package or private artifact was
+  published. Evidence:
+  `docs/artifacts/2026-09-05/android/a4-touch-activity-recreation.md`.
