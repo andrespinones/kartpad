@@ -753,6 +753,11 @@ disconnect states; a second sequence began with A cyan/locked and restored it
    default, and preserve the landscape left-slider/right-action composition.
    The resulting translated APK SHA-256 is
    `188c235d9a324a84e0fee38cc37ec192687741da4273616f83028a9ab5b8ff93`.
+   A second source-only flow now executes the real Move Controls action, selects
+   rendered A with a touch event, verifies its Hide/Show transition, propagates
+   a 1.25x selected size, and requires Back to reopen Touch Control Settings on
+   both canonical emulator layouts. The resulting translated APK SHA-256 is
+   `8d4bf7f24fd411edfa1a957dada33dfd425de495bbf6a53e2ce9570493c66c40`.
    Evidence:
 [`docs/artifacts/2026-09-04/android/a4-touch-settings-menu-checkpoint.md`](artifacts/2026-09-04/android/a4-touch-settings-menu-checkpoint.md).
 [`docs/artifacts/2026-09-04/android/a4-controller-mapping.md`](artifacts/2026-09-04/android/a4-controller-mapping.md).
@@ -771,6 +776,7 @@ disconnect states; a second sequence began with A cyan/locked and restored it
 [`docs/artifacts/2026-09-05/android/a4-touch-modal-lifecycle-clearing.md`](artifacts/2026-09-05/android/a4-touch-modal-lifecycle-clearing.md).
 [`docs/artifacts/2026-09-05/android/a4-touch-state-persistence.md`](artifacts/2026-09-05/android/a4-touch-state-persistence.md).
 [`docs/artifacts/2026-09-05/android/a4-touch-settings-visual-contract.md`](artifacts/2026-09-05/android/a4-touch-settings-visual-contract.md).
+[`docs/artifacts/2026-09-05/android/a4-touch-editor-flow.md`](artifacts/2026-09-05/android/a4-touch-editor-flow.md).
 Accepted evidence:
 [`docs/artifacts/2026-09-04/android/a4-touch-overlay-input.md`](artifacts/2026-09-04/android/a4-touch-overlay-input.md).
 [`docs/artifacts/2026-09-04/android/a4-controller-handoff.md`](artifacts/2026-09-04/android/a4-controller-handoff.md).

@@ -44,7 +44,9 @@ class KartPadActivity : SDLActivity() {
     private lateinit var editorLabel: TextView
     private lateinit var editorSize: SeekBar
     private lateinit var editorVisibility: Button
+    private lateinit var editorBack: Button
     private var updatingEditorControls = false
+    private var touchSettingsDialog: AlertDialog? = null
     private var runtimeProfile = "base"
     private lateinit var inputManager: InputManager
     private lateinit var motionSteering: KartPadMotionSteering
@@ -101,9 +103,12 @@ class KartPadActivity : SDLActivity() {
         }
         val debugTouchSettings = BuildConfig.DEBUG && !BuildConfig.GAME_RUNTIME &&
             intent.getBooleanExtra(DEBUG_EXTRA_TOUCH_SETTINGS, false)
+        val debugTouchEditor = BuildConfig.DEBUG && !BuildConfig.GAME_RUNTIME &&
+            intent.getBooleanExtra(DEBUG_EXTRA_TOUCH_EDITOR, false)
         kartPadOverlay.visibility = if (
             BuildConfig.GAME_RUNTIME || debugTouchOverlay || debugModalClear ||
-                debugLifecycleClear || debugPersistence != null || debugTouchSettings
+                debugLifecycleClear || debugPersistence != null || debugTouchSettings ||
+                debugTouchEditor
         ) {
             android.view.View.VISIBLE
         } else {
@@ -142,6 +147,10 @@ class KartPadActivity : SDLActivity() {
             }
         } else if (debugTouchSettings) {
             kartPadOverlay.postDelayed({ showTouchControlSettings() }, 1_000L)
+        } else if (debugTouchEditor) {
+            addMenuButton()
+            addLayoutEditorBar()
+            kartPadOverlay.postDelayed({ showTouchControlSettings(debugEditorFlow = true) }, 1_000L)
         }
         if (debugTouchOverlay && debugMultiPointer) {
             kartPadOverlay.post {
@@ -1076,7 +1085,7 @@ class KartPadActivity : SDLActivity() {
     }
 
     @Suppress("SetTextI18n")
-    private fun showTouchControlSettings() {
+    private fun showTouchControlSettings(debugEditorFlow: Boolean = false) {
         val content = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             setPadding(dp(18), dp(4), dp(18), dp(4))
@@ -1212,13 +1221,49 @@ class KartPadActivity : SDLActivity() {
             .setTitle("Touch Control Settings")
             .setView(scroll)
             .setNegativeButton("Done", null)
-            .setOnDismissListener { kartPadOverlay.clearTouchInput() }
+            .setOnDismissListener {
+                touchSettingsDialog = null
+                kartPadOverlay.clearTouchInput()
+            }
             .create()
         moveControls.setOnClickListener {
             dialog.dismiss()
             beginLayoutEditing()
         }
         dialog.show()
+        touchSettingsDialog = dialog
+        if (debugEditorFlow) {
+            moveControls.post {
+                runCatching {
+                    check(moveControls.performClick()) { "Move Controls did not accept click" }
+                    val selected = kartPadOverlay.runDebugSelectAForEditorFixture()
+                    check(editorLabel.text == "A size" && editorSize.isEnabled &&
+                        editorVisibility.isEnabled && editorVisibility.text == "Hide"
+                    ) { "editor did not expose selected A controls" }
+                    check(editorVisibility.performClick()) { "Hide did not accept click" }
+                    check(KartPadTouchSettings.isHidden(this, "A") &&
+                        editorVisibility.text == "Show"
+                    ) { "selected A did not enter hidden state" }
+                    check(editorVisibility.performClick()) { "Show did not accept click" }
+                    check(!KartPadTouchSettings.isHidden(this, "A") &&
+                        editorVisibility.text == "Hide"
+                    ) { "selected A did not return to shown state" }
+                    kartPadOverlay.setSelectedControlSize(1.25f)
+                    check(editorSize.progress == 65) { "selected A size did not refresh" }
+                    check(editorBack.performClick()) { "Back did not accept click" }
+                    check(editorBar.visibility == View.GONE && menuButton.visibility == View.VISIBLE &&
+                        touchSettingsDialog?.isShowing == true
+                    ) { "Back did not return to Touch Control Settings" }
+                    KartPadTouchSettings.resetTouchControls(this)
+                    kartPadOverlay.reloadPresentationSettings()
+                    Log.i(
+                        TAG,
+                        "A4 touch editor fixture passed $selected hide=shown size=1.25 " +
+                            "back=settings",
+                    )
+                }.onFailure { Log.e(TAG, "A4 touch editor fixture failed", it) }
+            }
+        }
     }
 
     private fun addLayoutEditorBar() {
@@ -1240,7 +1285,7 @@ class KartPadActivity : SDLActivity() {
             contentDescription = "Hide selected control"
             setOnClickListener { kartPadOverlay.toggleSelectedControlVisibility() }
         }
-        val back = Button(this).apply {
+        editorBack = Button(this).apply {
             text = "Back"
             contentDescription = "Back to Touch Control Settings"
             setOnClickListener { finishLayoutEditing(returnToSettings = true) }
@@ -1255,7 +1300,7 @@ class KartPadActivity : SDLActivity() {
                 setStroke(dp(2), Color.rgb(255, 199, 51))
             }
             visibility = View.GONE
-            addView(back, LinearLayout.LayoutParams(dp(100), dp(52)))
+            addView(editorBack, LinearLayout.LayoutParams(dp(100), dp(52)))
             addView(editorLabel, LinearLayout.LayoutParams(dp(250), dp(52)))
             addView(editorSize, LinearLayout.LayoutParams(dp(340), dp(52)))
             addView(editorVisibility, LinearLayout.LayoutParams(dp(110), dp(52)))
@@ -1559,6 +1604,8 @@ class KartPadActivity : SDLActivity() {
             "dev.kartpad.android.TEST_TOUCH_PERSISTENCE"
         private const val DEBUG_EXTRA_TOUCH_SETTINGS =
             "dev.kartpad.android.TEST_TOUCH_SETTINGS"
+        private const val DEBUG_EXTRA_TOUCH_EDITOR =
+            "dev.kartpad.android.TEST_TOUCH_EDITOR_FLOW"
         private const val DEBUG_RESUME_FIXTURE_SHA256 =
             "cb9d5fc3b83611af65032f73119285de4e97d4b2b9f7b2e9567443635358483a"
         private const val MIN_RKG_BYTES = 0x90L

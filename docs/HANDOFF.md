@@ -95,6 +95,12 @@ the verifier also locks the default 1x selection and landscape two-column
 composition. Evidence:
 `docs/artifacts/2026-09-05/android/a4-touch-settings-visual-contract.md`.
 
+The layout editor's complete control round trip now executes on both emulator
+families. The real Move Controls action enters editing, a real touch selects A,
+Hide/Show changes and restores its persisted visibility, 1.25x selected sizing
+propagates, and the real Back button reopens Touch Control Settings. Evidence:
+`docs/artifacts/2026-09-05/android/a4-touch-editor-flow.md`.
+
 KartPad `v0.4.0-preview.2` is published from
 `e9fa6058ee09fff0b16481ebe4a78d61cea69c87`. It updates both Apple-platform
 artifacts for Retro Rewind 6.12.5, repairs the universal iPhone/iPad three-dot

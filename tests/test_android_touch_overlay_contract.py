@@ -155,6 +155,20 @@ class AndroidTouchOverlayContractTests(unittest.TestCase):
         self.assertIn("columns=left-sliders/right-actions", verifier)
         self.assertIn("TEST_TOUCH_SETTINGS", runner)
 
+    def test_touch_editor_flow_exercises_hide_show_size_and_back(self) -> None:
+        activity = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadActivity.kt").read_text()
+        overlay = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadOverlayView.kt").read_text()
+        runner = (REPO / "scripts/test-android-touch-editor-flow.sh").read_text()
+        self.assertIn("TEST_TOUCH_EDITOR_FLOW", activity)
+        self.assertIn("runDebugSelectAForEditorFixture", activity)
+        self.assertIn('editorVisibility.text == "Show"', activity)
+        self.assertIn('editorVisibility.text == "Hide"', activity)
+        self.assertIn("editorBack.performClick()", activity)
+        self.assertIn("touchSettingsDialog?.isShowing == true", activity)
+        self.assertIn("MotionEvent.ACTION_DOWN", overlay)
+        self.assertIn("MotionEvent.ACTION_UP", overlay)
+        self.assertIn("A4 touch editor fixture passed", runner)
+
     def test_touch_presentation_settings_match_ios_ranges_and_defaults(self) -> None:
         settings = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadTouchSettings.kt").read_text()
         overlay = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadOverlayView.kt").read_text()

@@ -3478,3 +3478,21 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   touch feel, and editor ergonomics remain open. No package or private artifact
   was published. Evidence:
   `docs/artifacts/2026-09-05/android/a4-touch-settings-visual-contract.md`.
+
+## 2026-09-05 — Android A4 touch layout editor flow
+
+- Added a debug/source-only end-to-end fixture for the production touch layout
+  editor controls.
+- The real Move Controls button enters editing, a real Android down/up event on
+  rendered A selects it, Hide/Show updates and restores its persisted state,
+  selected sizing propagates to 1.25x, and the real Back button must reopen
+  Touch Control Settings.
+- The visible Pixel 6 and Pixel Tablet both passed the exact
+  `selected=A hide=shown size=1.25 back=settings` sequence. Disposable fixture
+  preferences reset after success.
+- The complete translated runtime rebuilt locally at APK SHA-256
+  `8d4bf7f24fd411edfa1a957dada33dfd425de495bbf6a53e2ce9570493c66c40`.
+- Classification: **Pass for the canonical emulator editor control round
+  trip.** Physical finger-drag ergonomics and touch-only races remain open. No
+  package or private artifact was published. Evidence:
+  `docs/artifacts/2026-09-05/android/a4-touch-editor-flow.md`.

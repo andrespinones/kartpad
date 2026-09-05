@@ -352,6 +352,31 @@ class KartPadOverlayView(context: Context) : View(context) {
             "a_size=1.25 b=hidden"
     }
 
+    fun runDebugSelectAForEditorFixture(): String {
+        check(editingLayout && isLaidOut && width > 0 && height > 0) {
+            "touch layout editor is not ready"
+        }
+        layoutControls()
+        val a = controls.first { it.id == "A" }.frame
+        val downTime = SystemClock.uptimeMillis()
+        val down = MotionEvent.obtain(
+            downTime, downTime, MotionEvent.ACTION_DOWN, a.centerX(), a.centerY(), 0,
+        ).apply { source = InputDevice.SOURCE_TOUCHSCREEN }
+        val up = MotionEvent.obtain(
+            downTime, downTime + 1, MotionEvent.ACTION_UP, a.centerX(), a.centerY(), 0,
+        ).apply { source = InputDevice.SOURCE_TOUCHSCREEN }
+        try {
+            check(onTouchEvent(down) && onTouchEvent(up)) {
+                "touch layout editor rejected A selection"
+            }
+        } finally {
+            down.recycle()
+            up.recycle()
+        }
+        check(selectedControlId == "A") { "touch layout editor selected $selectedControlId" }
+        return "selected=A"
+    }
+
     fun setMotionSteering(value: Float) {
         motionSteeringX = if (controllerConnected) 0f else value.coerceIn(-1f, 1f)
         publishState(connected = true)
