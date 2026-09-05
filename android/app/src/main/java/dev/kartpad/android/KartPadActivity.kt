@@ -80,7 +80,9 @@ class KartPadActivity : SDLActivity() {
         motionSteering = KartPadMotionSteering(this) { value ->
             kartPadOverlay.post { kartPadOverlay.setMotionSteering(value) }
         }
-        kartPadOverlay.visibility = if (BuildConfig.GAME_RUNTIME) {
+        val debugTouchOverlay = BuildConfig.DEBUG &&
+            intent.getBooleanExtra(DEBUG_EXTRA_TOUCH_OVERLAY, false)
+        kartPadOverlay.visibility = if (BuildConfig.GAME_RUNTIME || debugTouchOverlay) {
             android.view.View.VISIBLE
         } else {
             android.view.View.GONE
@@ -1333,6 +1335,8 @@ class KartPadActivity : SDLActivity() {
             "dev.kartpad.android.TEST_RETRO_REWIND_WORKER"
         private const val DEBUG_EXTRA_RUNTIME_PROFILE =
             "dev.kartpad.android.TEST_RUNTIME_PROFILE"
+        private const val DEBUG_EXTRA_TOUCH_OVERLAY =
+            "dev.kartpad.android.TEST_TOUCH_OVERLAY"
         private const val DEBUG_RESUME_FIXTURE_SHA256 =
             "cb9d5fc3b83611af65032f73119285de4e97d4b2b9f7b2e9567443635358483a"
         private const val MIN_RKG_BYTES = 0x90L

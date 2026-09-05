@@ -3294,3 +3294,27 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   owned source image was available. No package or private artifact was
   published. Evidence:
   `docs/artifacts/2026-09-05/android/a4-disc-image-selector-menu-parity.md`.
+
+## 2026-09-05 — Android A4 Pixel Tablet overlay parity
+
+- Added a reproducibly pinned API 36 ARM64 Pixel Tablet AVD and made the common
+  fixture runner understand its naturally different orientation sensor axis.
+- Replaced stretched phone controls on large Android tablets with the accepted
+  iPad sizes and normalized centers. Final frames are safe-area bounded, so the
+  280 dp R trigger remains completely operable on the narrower Pixel Tablet.
+- A visible 2560x1600 source-only render matched the iPad control family. UI
+  Automator exposed all 14 named targets; R measured exactly 560 px at 320 dpi
+  with bounds `[2000,950][2560,1075]`.
+- The real chooser also passed a visible Pixel Tablet inspection: its two-column
+  Original/Retro composition, title hierarchy, and recovery action remained
+  centered and unclipped at 2560x1600.
+- The full tablet cold-boot fixture passed guarded 4 GiB memory, scheduler and
+  controller contracts, Dawn/Vulkan readback/presentation, reverse-landscape
+  recreation, three background/foreground cycles, and the new hit-map gate.
+  The source-only APK SHA-256 is
+  `25890fbfc3e43a247dc6ebfc6165db37a8ba857e374040229178f5c56219ae62`.
+- Classification: **Pass for canonical tablet geometry and emulator hit-map/
+  lifecycle coverage.** Physical tablet ergonomics and a touch-only race remain
+  open. No package, private content, save, raw log, UI dump, or screenshot was
+  published. Evidence:
+  `docs/artifacts/2026-09-05/android/a4-tablet-overlay-parity.md`.

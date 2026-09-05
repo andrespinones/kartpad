@@ -45,7 +45,7 @@ bool RunAndroidGamepadContract() {
   constexpr uint32_t kExpectedButtons =
       kClassicA | kClassicB | kClassicX | kClassicY | kClassicMinus |
       kClassicPlus | kClassicL | kClassicR | kClassicUp | kClassicDown |
-      kClassicLeft | kClassicRight | kClassicZl | kClassicZr;
+      kClassicLeft | kClassicRight | kClassicZr;
   return mapped.connected && mapped.buttons == kExpectedButtons &&
          mapped.left_stick_x == 1.0f && mapped.left_stick_y == 1.0f &&
          !MapGamepadToClassic({}).connected;

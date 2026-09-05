@@ -1063,14 +1063,21 @@ picker. Imports use app-private same-volume staging, validate before activation,
 and preserve the installed data on failure. The final APK showed both Original
 and installed Retro choices after reinstall; an invalid disc document failed
 cleanly without crashing or leaving staging residue. A positive multi-gigabyte
-disc import remains open because no owned source image was available. Tablet/
-physical touch, multi-controller setup parity, and physical-device acceptance
-are also still open. Evidence is in
+disc import remains open because no owned source image was available. A pinned
+API 36 ARM64 Pixel Tablet lane now uses the accepted iPad sizes and normalized
+centers rather than phone defaults, keeps every final rectangle in the safe
+frame, and verifies all 14 accessibility targets. Its complete source-only
+fixture passes at 2560x1600, including Dawn/Vulkan presentation, opposite-
+landscape recreation, three foreground cycles, and a full-width 280 dp R hit
+target. Physical tablet touch/ergonomics, multi-controller setup parity, and
+physical-device acceptance are still open. Evidence is in
 `docs/artifacts/2026-09-04/android/a4-touch-settings-menu-checkpoint.md` and
 `docs/artifacts/2026-09-04/android/a4-controller-mapping.md` and
 `docs/artifacts/2026-09-04/android/a4-mii-management.md` and
 `docs/artifacts/2026-09-04/android/a4-game-data-save-parity.md` and
 `docs/artifacts/2026-09-04/android/a4-touch-accessibility.md`.
+Tablet layout and hit-map evidence is in
+`docs/artifacts/2026-09-05/android/a4-tablet-overlay-parity.md`.
 The touch-settings panel also now matches iOS's live render selector and keeps
 every setting visible in two landscape columns; evidence is in
 `docs/artifacts/2026-09-04/android/a4-touch-settings-visibility.md`.

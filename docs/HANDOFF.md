@@ -26,6 +26,14 @@ Retro Rewind launch, per-control hiding, and the editor's Back path on the
 physical iPhone. These results clear the iPhone gate for the stable 0.4.0
 release; physical Apple TV acceptance remains open.
 
+The Android A4 candidate now has a pinned API 36 ARM64 Pixel Tablet lane and a
+real tablet overlay branch copied from the accepted iPad defaults. Its
+source-only 2560x1600 fixture passes guarded guest memory, scheduler/controller,
+Dawn/Vulkan, orientation, three foreground cycles, all 14 accessibility hit
+targets, and safe-frame containment of the full 280 dp R trigger. Physical
+tablet touch-only racing and ergonomics remain open. Evidence:
+`docs/artifacts/2026-09-05/android/a4-tablet-overlay-parity.md`.
+
 KartPad `v0.4.0-preview.2` is published from
 `e9fa6058ee09fff0b16481ebe4a78d61cea69c87`. It updates both Apple-platform
 artifacts for Retro Rewind 6.12.5, repairs the universal iPhone/iPad three-dot

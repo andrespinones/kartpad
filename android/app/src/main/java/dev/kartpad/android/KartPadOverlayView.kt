@@ -25,7 +25,7 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
 
-/** Canvas-owned gameplay controls using KartPad's accepted phone geometry. */
+/** Canvas-owned gameplay controls using KartPad's accepted phone and tablet geometry. */
 class KartPadOverlayView(context: Context) : View(context) {
     private enum class Kind { BUTTON, LEFT_STICK, RIGHT_STICK }
 
@@ -347,19 +347,30 @@ class KartPadOverlayView(context: Context) : View(context) {
 
     private fun layoutControls() {
         val safe = safeFrame()
-        val baseScale = min(1f, min(safe.width() / dp(800f), safe.height() / dp(380f)))
+        val tabletDefaults = resources.configuration.smallestScreenWidthDp >= 600 &&
+            safe.width() / resources.displayMetrics.density >= 1000f
+        val baseScale = if (tabletDefaults) {
+            1f
+        } else {
+            min(1f, min(safe.width() / dp(800f), safe.height() / dp(380f)))
+        }
         controls.forEach { control ->
             val identifier = editableIdentifier(control)
             val individualScale = KartPadTouchSettings.controlSize(context, identifier)
             val combinedScale = baseScale * controlSizeScale * individualScale
-            val controlWidth = dp(control.width) * combinedScale
-            val controlHeight = dp(control.height) * combinedScale
+            val tabletSize = if (tabletDefaults) tabletControlSize(control.id) else null
+            val controlWidth = dp(tabletSize?.x ?: control.width) * combinedScale
+            val controlHeight = dp(tabletSize?.y ?: control.height) * combinedScale
             val centerX: Float
             val centerY: Float
             val customOrigin = customOrigins[identifier]
             if (customOrigin != null) {
                 centerX = safe.left + customOrigin.x * safe.width()
                 centerY = safe.top + customOrigin.y * safe.height()
+            } else if (tabletDefaults) {
+                val center = tabletControlCenter(control.id)
+                centerX = safe.left + center.x * safe.width()
+                centerY = safe.top + center.y * safe.height()
             } else if (control.id == "A") {
                 val margin = max(dp(8f), dp(18f) * baseScale)
                 val cameraScale = KartPadTouchSettings.controlSize(context, "c")
@@ -370,13 +381,21 @@ class KartPadOverlayView(context: Context) : View(context) {
                 centerX = safe.left + control.centerX * safe.width()
                 centerY = safe.top + control.centerY * safe.height()
             }
-            val dpadCell = dp(36f) * combinedScale
-            val adjustedCenterX = centerX + when (control.id) {
+            val boundedCenterX = centerX.coerceIn(
+                safe.left + controlWidth * 0.5f,
+                safe.right - controlWidth * 0.5f,
+            )
+            val boundedCenterY = centerY.coerceIn(
+                safe.top + controlHeight * 0.5f,
+                safe.bottom - controlHeight * 0.5f,
+            )
+            val dpadCell = dp(if (tabletDefaults) 48f else 36f) * combinedScale
+            val adjustedCenterX = boundedCenterX + when (control.id) {
                 "DpadLeft" -> -dpadCell
                 "DpadRight" -> dpadCell
                 else -> 0f
             }
-            val adjustedCenterY = centerY + when (control.id) {
+            val adjustedCenterY = boundedCenterY + when (control.id) {
                 "DpadUp" -> -dpadCell
                 "DpadDown" -> dpadCell
                 else -> 0f
@@ -388,6 +407,32 @@ class KartPadOverlayView(context: Context) : View(context) {
                 adjustedCenterY + controlHeight * 0.5f,
             )
         }
+    }
+
+    private fun tabletControlSize(id: String): PointF = when (id) {
+        "move" -> PointF(172f, 172f)
+        "c" -> PointF(112f, 112f)
+        "A" -> PointF(104f, 104f)
+        "B" -> PointF(76f, 76f)
+        "L" -> PointF(132f, 62f)
+        "R" -> PointF(280f, 62f)
+        "Start" -> PointF(116f, 62f)
+        "DpadUp", "DpadDown", "DpadLeft", "DpadRight" -> PointF(48f, 48f)
+        else -> PointF(62f, 62f)
+    }
+
+    private fun tabletControlCenter(id: String): PointF = when (id) {
+        "move" -> PointF(0.13103953f, 0.79058945f)
+        "c" -> PointF(0.9062958f, 0.8583247f)
+        "A" -> PointF(0.8916545f, 0.7409514f)
+        "B" -> PointF(0.83601755f, 0.80920374f)
+        "X" -> PointF(0.95937043f, 0.71561533f)
+        "Y" -> PointF(0.95424595f, 0.786970f)
+        "L" -> PointF(0.12811127f, 0.66339195f)
+        "R" -> PointF(0.8960469f, 0.647880f)
+        "Z" -> PointF(0.8275988f, 0.721303f)
+        "Start" -> PointF(0.89677894f, 0.57807654f)
+        else -> PointF(0.26866764f, 0.79472595f)
     }
 
     private fun safeFrame() = RectF(

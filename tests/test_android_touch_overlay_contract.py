@@ -151,6 +151,19 @@ class AndroidTouchOverlayContractTests(unittest.TestCase):
         source = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadOverlayView.kt").read_text()
         self.assertIn('0.969f, 0.410f, Color.argb(240, 97, 46, 148)', source)
 
+    def test_touch_overlay_preserves_ipad_default_geometry_on_tablets(self) -> None:
+        source = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadOverlayView.kt").read_text()
+        activity = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadActivity.kt").read_text()
+        self.assertIn("smallestScreenWidthDp >= 600", source)
+        self.assertIn('"move" -> PointF(172f, 172f)', source)
+        self.assertIn('"R" -> PointF(280f, 62f)', source)
+        self.assertIn('"Start" -> PointF(116f, 62f)', source)
+        self.assertIn('"move" -> PointF(0.13103953f, 0.79058945f)', source)
+        self.assertIn('"Z" -> PointF(0.8275988f, 0.721303f)', source)
+        self.assertIn('else -> PointF(0.26866764f, 0.79472595f)', source)
+        self.assertIn("DEBUG_EXTRA_TOUCH_OVERLAY", activity)
+        self.assertIn("BuildConfig.GAME_RUNTIME || debugTouchOverlay", activity)
+
     def test_motion_steering_matches_ios_curve_and_merges_with_touch(self) -> None:
         motion = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadMotionSteering.kt").read_text()
         activity = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadActivity.kt").read_text()
@@ -185,8 +198,12 @@ class AndroidTouchOverlayContractTests(unittest.TestCase):
         self.assertIn("IsValidControllerButtonMapping", native)
         self.assertIn("ApplyControllerButtonMapping", patch)
         gamepad = (REPO / "runtime/include/kartpad/android/gamepad_contract.h").read_text()
+        fixture = (REPO / "android/app/src/main/cpp/fixture_main.cpp").read_text()
         self.assertIn("map(kGamepadLeftShoulder, kClassicZr)", gamepad)
         self.assertIn("output.buttons |= kClassicL", gamepad)
+        expected = fixture.split("constexpr uint32_t kExpectedButtons =", 1)[1].split(";", 1)[0]
+        self.assertIn("kClassicZr", expected)
+        self.assertNotIn("kClassicZl", expected)
 
     def test_mii_manager_stages_validated_changes_for_restart(self) -> None:
         activity = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadActivity.kt").read_text()

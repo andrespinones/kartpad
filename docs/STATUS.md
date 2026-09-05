@@ -697,6 +697,12 @@ disconnect states; a second sequence began with A cyan/locked and restored it
    and equal rounded blue Original and pink Retro cards. The final combined
    selector/disc-import APK SHA-256 is
    `09cdb68124a1e346a003b7c3e42b75b3f6b5f9fa2dcd1a7461500f5e57fd3204`.
+   The pinned API 36 ARM64 Pixel Tablet now uses the accepted iPad sizes and
+   normalized centers instead of stretching the phone defaults. A source-only
+   2560x1600 run exposed all 14 accessible hit targets, kept the 280 dp R pill
+   fully in bounds, and passed Vulkan, reverse-landscape, and three lifecycle
+   recreations. The fixture APK SHA-256 is
+   `25890fbfc3e43a247dc6ebfc6165db37a8ba857e374040229178f5c56219ae62`.
    Evidence:
 [`docs/artifacts/2026-09-04/android/a4-touch-settings-menu-checkpoint.md`](artifacts/2026-09-04/android/a4-touch-settings-menu-checkpoint.md).
 [`docs/artifacts/2026-09-04/android/a4-controller-mapping.md`](artifacts/2026-09-04/android/a4-controller-mapping.md).
@@ -706,6 +712,7 @@ disconnect states; a second sequence began with A cyan/locked and restored it
 [`docs/artifacts/2026-09-04/android/a4-touch-settings-visibility.md`](artifacts/2026-09-04/android/a4-touch-settings-visibility.md).
 [`docs/artifacts/2026-09-04/android/a4-reporting-parity.md`](artifacts/2026-09-04/android/a4-reporting-parity.md).
 [`docs/artifacts/2026-09-05/android/a4-disc-image-selector-menu-parity.md`](artifacts/2026-09-05/android/a4-disc-image-selector-menu-parity.md).
+[`docs/artifacts/2026-09-05/android/a4-tablet-overlay-parity.md`](artifacts/2026-09-05/android/a4-tablet-overlay-parity.md).
 Accepted evidence:
 [`docs/artifacts/2026-09-04/android/a4-touch-overlay-input.md`](artifacts/2026-09-04/android/a4-touch-overlay-input.md).
 [`docs/artifacts/2026-09-04/android/a4-controller-handoff.md`](artifacts/2026-09-04/android/a4-controller-handoff.md).
