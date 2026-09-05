@@ -1156,6 +1156,10 @@ to iOS's Original 4:3. The game selector now reproduces iOS's 12-point stack
 spacing, 24-point card gap/insets, 96-point card height, 17-point body text,
 18-point upward offset, and centered icon/label groups; evidence is in
 `docs/artifacts/2026-09-05/android/a4-touch-settings-state-selector-geometry.md`.
+The three-dot hierarchy is additionally exercised as rendered UI on both
+canonical emulators. All 8 top-level rows and the complete 5-row Controls,
+2-row Display, and 6-row Game Data & Saves submenus are reachable; evidence is
+in `docs/artifacts/2026-09-05/android/a4-menu-hierarchy-reachability.md`.
 
 Do not begin the touch-UI port until A2's controller-driven Original-mode proof
 passes. Physical Android hardware remains authoritative for vendor Vulkan and

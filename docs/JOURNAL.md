@@ -3573,3 +3573,13 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   iOS-derived selector geometry.** Physical rendering/touch/haptic acceptance
   remains open. No package or private artifact was published. Evidence:
   `docs/artifacts/2026-09-05/android/a4-touch-settings-state-selector-geometry.md`.
+
+## 2026-09-05 — Android A4 menu hierarchy reachability
+
+- Added a source-only emulator gate that opens the real three-dot menu and
+  traverses Controls, Display, and Game Data & Saves independently.
+- Both visible canonical emulators expose the full 21-row hierarchy: 8 top,
+  5 Controls, 2 Display, and 6 Game Data & Saves rows.
+- Classification: **Pass for rendered hierarchy reachability on Pixel 6 and
+  Pixel Tablet.** Physical-device actions remain open. Evidence:
+  `docs/artifacts/2026-09-05/android/a4-menu-hierarchy-reachability.md`.

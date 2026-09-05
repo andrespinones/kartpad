@@ -13,6 +13,11 @@ actual tablet Original-card tap pass. The translated local APK SHA-256 is
 Android acceptance remains open. Evidence:
 [`docs/artifacts/2026-09-05/android/a4-touch-settings-state-selector-geometry.md`](artifacts/2026-09-05/android/a4-touch-settings-state-selector-geometry.md).
 
+The three-dot menu also has a rendered reachability gate on Pixel 6 and Pixel
+Tablet. Both expose all 21 required rows across the top level, Controls,
+Display, and Game Data & Saves submenus. Evidence:
+[`docs/artifacts/2026-09-05/android/a4-menu-hierarchy-reachability.md`](artifacts/2026-09-05/android/a4-menu-hierarchy-reachability.md).
+
 ## Native Android work
 
 Android A0 passes on the authorized second Apple Silicon host. The explicit

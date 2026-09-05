@@ -362,6 +362,33 @@ class AndroidTouchOverlayContractTests(unittest.TestCase):
         self.assertIn("setIcon(icon, dp(20), dp(12))", activity)
         self.assertIn("Button::class.java.name", activity)
 
+    def test_consolidated_menu_has_real_emulator_hierarchy_gate(self) -> None:
+        activity = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadActivity.kt").read_text()
+        runner = (REPO / "scripts/test-android-menu-parity.sh").read_text()
+        for label in (
+            "Switch Game Version…",
+            "Multiplayer…",
+            "Show FPS Counter",
+            "Controller Player Setup…",
+            "Controller Button Mapping…",
+            "Touch Control Settings…",
+            "Motion Steering…",
+            "Experimental Wii Remote + Nunchuk…",
+            "Aspect Ratio…",
+            "Render Resolution…",
+            "Import or Reimport Wii Disc Image…",
+            "Import from Extracted Folder…",
+            "Remove Stored Game Data…",
+            "Manage Retro Rewind…",
+            "Manage Saves…",
+            "Manage Miis…",
+            "Report a Problem…",
+        ):
+            self.assertIn(f'"{label}"', activity)
+            self.assertIn(f'"{label}"', runner)
+        self.assertIn("TEST_MENU", runner)
+        self.assertIn("top=8 controls=5 display=2 data=6", runner)
+
     def test_motion_steering_matches_ios_curve_and_merges_with_touch(self) -> None:
         motion = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadMotionSteering.kt").read_text()
         activity = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadActivity.kt").read_text()
