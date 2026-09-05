@@ -1129,6 +1129,11 @@ boundary on both canonical layouts. The new overlay reloads A's normalized
 position and 1.25x size and keeps hidden B out of its accessibility tree;
 evidence is in
 `docs/artifacts/2026-09-05/android/a4-touch-state-persistence.md`.
+The complete Touch Control Settings dialog now has a raw-frame/accessibility
+contract on both canonical layouts. It keeps every iOS-parity setting and
+action in the viewport, verifies the default 1x render selection, and protects
+the landscape slider/action columns; evidence is in
+`docs/artifacts/2026-09-05/android/a4-touch-settings-visual-contract.md`.
 
 Do not begin the touch-UI port until A2's controller-driven Original-mode proof
 passes. Physical Android hardware remains authoritative for vendor Vulkan and

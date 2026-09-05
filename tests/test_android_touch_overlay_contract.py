@@ -139,6 +139,22 @@ class AndroidTouchOverlayContractTests(unittest.TestCase):
         self.assertIn('phone) user_rotation=1', runner)
         self.assertIn('tablet) user_rotation=0', runner)
 
+    def test_touch_settings_visual_contract_covers_every_ios_parity_control(self) -> None:
+        activity = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadActivity.kt").read_text()
+        verifier = (REPO / "scripts/check-android-touch-settings-visual.py").read_text()
+        runner = (REPO / "scripts/test-android-touch-settings-visual.sh").read_text()
+        self.assertIn("DEBUG_EXTRA_TOUCH_SETTINGS", activity)
+        self.assertIn("showTouchControlSettings()", activity)
+        for label in (
+            '"Touch Control Settings"', '"1×"', '"4×"',
+            '"Opacity: 82%"', '"All sizes: 100%"',
+            '"Hide on controller"', '"Modern C-stick L/R"',
+            '"MOVE CONTROLS"', '"RESET THIS DEVICE LAYOUT"', '"DONE"',
+        ):
+            self.assertIn(label, verifier)
+        self.assertIn("columns=left-sliders/right-actions", verifier)
+        self.assertIn("TEST_TOUCH_SETTINGS", runner)
+
     def test_touch_presentation_settings_match_ios_ranges_and_defaults(self) -> None:
         settings = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadTouchSettings.kt").read_text()
         overlay = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadOverlayView.kt").read_text()

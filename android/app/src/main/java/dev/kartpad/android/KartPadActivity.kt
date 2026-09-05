@@ -99,9 +99,11 @@ class KartPadActivity : SDLActivity() {
         } else {
             null
         }
+        val debugTouchSettings = BuildConfig.DEBUG && !BuildConfig.GAME_RUNTIME &&
+            intent.getBooleanExtra(DEBUG_EXTRA_TOUCH_SETTINGS, false)
         kartPadOverlay.visibility = if (
             BuildConfig.GAME_RUNTIME || debugTouchOverlay || debugModalClear ||
-                debugLifecycleClear || debugPersistence != null
+                debugLifecycleClear || debugPersistence != null || debugTouchSettings
         ) {
             android.view.View.VISIBLE
         } else {
@@ -138,6 +140,8 @@ class KartPadActivity : SDLActivity() {
                     Log.i(TAG, "A4 modal clear fixture passed $held neutral=0x0 owners=0")
                 }.onFailure { Log.e(TAG, "A4 modal clear fixture failed", it) }
             }
+        } else if (debugTouchSettings) {
+            kartPadOverlay.postDelayed({ showTouchControlSettings() }, 1_000L)
         }
         if (debugTouchOverlay && debugMultiPointer) {
             kartPadOverlay.post {
@@ -1553,6 +1557,8 @@ class KartPadActivity : SDLActivity() {
             "dev.kartpad.android.TEST_TOUCH_LIFECYCLE_CLEAR"
         private const val DEBUG_EXTRA_TOUCH_PERSISTENCE =
             "dev.kartpad.android.TEST_TOUCH_PERSISTENCE"
+        private const val DEBUG_EXTRA_TOUCH_SETTINGS =
+            "dev.kartpad.android.TEST_TOUCH_SETTINGS"
         private const val DEBUG_RESUME_FIXTURE_SHA256 =
             "cb9d5fc3b83611af65032f73119285de4e97d4b2b9f7b2e9567443635358483a"
         private const val MIN_RKG_BYTES = 0x90L

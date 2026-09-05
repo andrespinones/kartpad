@@ -87,6 +87,14 @@ rebuilt accessibility tree. The source fixture restores defaults after the
 check. Evidence:
 `docs/artifacts/2026-09-05/android/a4-touch-state-persistence.md`.
 
+The full Android Touch Control Settings dialog now has a repeatable visual and
+accessibility gate on both canonical emulator layouts. Pixel 6 at 2400x1080 and
+Pixel Tablet at 2560x1600 expose all iOS-parity render, opacity, size,
+controller-hiding, C-stick, move, reset, and Done controls without clipping;
+the verifier also locks the default 1x selection and landscape two-column
+composition. Evidence:
+`docs/artifacts/2026-09-05/android/a4-touch-settings-visual-contract.md`.
+
 KartPad `v0.4.0-preview.2` is published from
 `e9fa6058ee09fff0b16481ebe4a78d61cea69c87`. It updates both Apple-platform
 artifacts for Retro Rewind 6.12.5, repairs the universal iPhone/iPad three-dot

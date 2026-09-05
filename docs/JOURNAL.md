@@ -3459,3 +3459,22 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   physical-device persistence remain separate gates. No package or private
   artifact was published. Evidence:
   `docs/artifacts/2026-09-05/android/a4-touch-state-persistence.md`.
+
+## 2026-09-05 — Android A4 Touch Control Settings visual contract
+
+- Added a debug/source-only launcher fixture for the real Touch Control
+  Settings dialog plus a standard-library accessibility/raw-frame verifier.
+- The gate requires all iOS-parity render, opacity, size, controller-hiding,
+  C-stick, move, reset, and Done controls in the viewport; it also checks the
+  default 1x selection and the landscape two-column composition.
+- The visible Pixel Tablet passed at 2560x1600 and the visible Pixel 6 passed at
+  2400x1080. A first tablet attempt exposed an API 36 UiAutomation registration
+  collision from rapid dumps; bounded three-second retries resolved the test
+  harness failure without changing the product dialog.
+- The complete translated runtime rebuilt locally at APK SHA-256
+  `188c235d9a324a84e0fee38cc37ec192687741da4273616f83028a9ab5b8ff93`.
+- Classification: **Pass for canonical emulator dialog visibility,
+  accessibility, containment, and composition.** Physical-device rendering,
+  touch feel, and editor ergonomics remain open. No package or private artifact
+  was published. Evidence:
+  `docs/artifacts/2026-09-05/android/a4-touch-settings-visual-contract.md`.

@@ -747,6 +747,12 @@ disconnect states; a second sequence began with A cyan/locked and restored it
    size while hidden B remains absent from the virtual accessibility tree. The
    resulting audited translated APK SHA-256 is
    `254b2614f7ae17d24a1547563b77f543bafd996f0f7030a7d3cad3266d70df61`.
+   The complete Touch Control Settings surface now also has a repeatable
+   raw-frame/accessibility contract. Visible Pixel 6 and Pixel Tablet runs keep
+   all 13 required labels and seven actions in bounds, retain native 1x as the
+   default, and preserve the landscape left-slider/right-action composition.
+   The resulting translated APK SHA-256 is
+   `188c235d9a324a84e0fee38cc37ec192687741da4273616f83028a9ab5b8ff93`.
    Evidence:
 [`docs/artifacts/2026-09-04/android/a4-touch-settings-menu-checkpoint.md`](artifacts/2026-09-04/android/a4-touch-settings-menu-checkpoint.md).
 [`docs/artifacts/2026-09-04/android/a4-controller-mapping.md`](artifacts/2026-09-04/android/a4-controller-mapping.md).
@@ -764,6 +770,7 @@ disconnect states; a second sequence began with A cyan/locked and restored it
 [`docs/artifacts/2026-09-05/android/a4-selector-menu-touch-visual-parity.md`](artifacts/2026-09-05/android/a4-selector-menu-touch-visual-parity.md).
 [`docs/artifacts/2026-09-05/android/a4-touch-modal-lifecycle-clearing.md`](artifacts/2026-09-05/android/a4-touch-modal-lifecycle-clearing.md).
 [`docs/artifacts/2026-09-05/android/a4-touch-state-persistence.md`](artifacts/2026-09-05/android/a4-touch-state-persistence.md).
+[`docs/artifacts/2026-09-05/android/a4-touch-settings-visual-contract.md`](artifacts/2026-09-05/android/a4-touch-settings-visual-contract.md).
 Accepted evidence:
 [`docs/artifacts/2026-09-04/android/a4-touch-overlay-input.md`](artifacts/2026-09-04/android/a4-touch-overlay-input.md).
 [`docs/artifacts/2026-09-04/android/a4-controller-handoff.md`](artifacts/2026-09-04/android/a4-controller-handoff.md).
