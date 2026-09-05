@@ -389,6 +389,12 @@ class AndroidTouchOverlayContractTests(unittest.TestCase):
             self.assertIn(f'"{label}"', runner)
         self.assertIn("TEST_MENU", runner)
         self.assertIn("top=8 controls=5 display=2 data=6 actions=16", runner)
+        self.assertIn("assert_icon_count 7", runner)
+        self.assertIn("assert_icon_count 5", runner)
+        self.assertIn("assert_icon_count 2", runner)
+        self.assertIn("assert_icon_count 6", runner)
+        for icon in ("hand", "gyroscope", "antenna", "refresh", "trash", "mii"):
+            self.assertIn(f"R.drawable.ic_kartpad_{icon}", activity)
         self.assertIn('open_top_action "Multiplayer…"', runner)
         self.assertIn('open_top_action "Report a Problem…"', runner)
         self.assertIn('open_submenu_action "Controls" "Touch Control Settings…"', runner)

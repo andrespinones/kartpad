@@ -133,7 +133,9 @@ than a source-only inventory. Pixel 6 and Pixel Tablet each expose all 8
 top-level, 5 Controls, 2 Display, and 6 Game Data & Saves rows through actual
 rendered submenus, then exercise 16 representative actions, including persisted
 FPS toggling, the bounded source-build disc-import state, and real DocumentsUI
-folder handoff. Evidence:
+folder handoff. Its touch, motion, Wii Remote, import, removal, and Mii rows now
+use distinct KartPad-owned equivalents of the corresponding iOS symbols, and
+the gate requires every actionable icon to render. Evidence:
 `docs/artifacts/2026-09-05/android/a4-menu-hierarchy-reachability.md`.
 
 The untouched Android phone layout now gives X and Z a 49 px rendered gap on

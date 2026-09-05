@@ -17,7 +17,11 @@ The three-dot menu also has a rendered reachability gate on Pixel 6 and Pixel
 Tablet. Both expose all 21 required rows across the top level, Controls,
 Display, and Game Data & Saves submenus, then pass 16 representative actions,
 including persisted FPS toggling and routes into dialogs, managers, or Android
-DocumentsUI. Evidence:
+DocumentsUI. Distinct KartPad-owned hand, gyroscope, antenna, refresh, trash,
+and Mii symbols now mirror the current iOS menu semantics; the emulator gate
+also requires all 20 actionable icons to render. The translated APK SHA-256 is
+`a5310650f970ea45ea26d7414392215fb7912915bc601401df162c9c23d4093f`.
+Evidence:
 [`docs/artifacts/2026-09-05/android/a4-menu-hierarchy-reachability.md`](artifacts/2026-09-05/android/a4-menu-hierarchy-reachability.md).
 
 The untouched phone touch layout now increases the rendered X/Z gap from 32

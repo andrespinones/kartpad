@@ -33,6 +33,13 @@ The FPS row is activated from a cleared preference store and must persist
 `show_fps=false`, proving that the checkmark is wired to state rather than only
 drawn.
 
+The menu now also uses KartPad-owned semantic equivalents of the current iOS
+symbols instead of recycling unrelated icons: hand for touch settings,
+gyroscope for motion steering, antenna for Wii Remote, circular arrows for
+game-data import, trash for removal, and person-plus for Mii management. The
+gate requires all 7 actionable top-level icons plus 5 Controls, 2 Display, and
+6 data-submenu icons to exist in the rendered hierarchy.
+
 ## Emulator evidence
 
 The visible API 36 Pixel Tablet and Pixel 6 both passed the complete real-menu
@@ -44,9 +51,14 @@ This is 21 reachable rows across the consolidated hierarchy plus 16 routed
 destinations. The fixture is gated out of translated game-runtime builds and
 uses no private data.
 
+The complete translated runtime rebuilt at APK SHA-256
+`a5310650f970ea45ea26d7414392215fb7912915bc601401df162c9c23d4093f`.
+The strict package/privacy audit, Android lint, and 86-test suite with one
+intentional skip pass.
+
 ## Classification
 
-**Pass for rendered menu hierarchy reachability and 16 representative action
-routes on the canonical emulator phone/tablet lanes.** The gate does not claim
-that physical-device dialogs, external Android pickers, controllers, or haptics
-have been accepted.
+**Pass for rendered menu hierarchy/icon reachability and 16 representative
+action routes on the canonical emulator phone/tablet lanes.** The gate does
+not claim that physical-device dialogs, external Android pickers, controllers,
+or haptics have been accepted.

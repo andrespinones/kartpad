@@ -74,6 +74,25 @@ if missing:
 PY
 }
 
+assert_icon_count() {
+  local expected="$1"
+  local actual
+  actual="$(python3 - "$tree" <<'PY'
+import sys
+import xml.etree.ElementTree as ET
+
+print(sum(
+    node.attrib.get("resource-id") == "android:id/icon"
+    for node in ET.parse(sys.argv[1]).getroot().iter("node")
+))
+PY
+)"
+  [[ "$actual" == "$expected" ]] || {
+    echo "ERROR: visible menu icon count $actual != $expected" >&2
+    exit 1
+  }
+}
+
 tap_label() {
   local label="$1"
   local coordinates
@@ -126,6 +145,7 @@ top=(
 
 start_menu
 assert_labels "${top[@]}"
+assert_icon_count 7
 
 start_menu
 tap_label "Controls"
@@ -137,12 +157,14 @@ assert_labels \
   "Touch Control Settings…" \
   "Motion Steering…" \
   "Experimental Wii Remote + Nunchuk…"
+assert_icon_count 5
 
 start_menu
 tap_label "Display"
 sleep 1
 dump_tree
 assert_labels "Aspect Ratio…" "Render Resolution…"
+assert_icon_count 2
 
 start_menu
 tap_label "Game Data & Saves"
@@ -155,6 +177,7 @@ assert_labels \
   "Manage Retro Rewind…" \
   "Manage Saves…" \
   "Manage Miis…"
+assert_icon_count 6
 
 open_top_action "Switch Game Version…"
 assert_labels "Switch Game Version" "RESTART TO SELECTOR" "CANCEL"

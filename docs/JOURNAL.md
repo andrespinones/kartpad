@@ -3607,3 +3607,21 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   regression coverage.** Physical ergonomics remain open. No package or
   private artifact was published. Evidence:
   `docs/artifacts/2026-09-05/android/a4-phone-xz-spacing.md`.
+
+## 2026-09-05 — Android A4 menu semantic icons
+
+- Replaced reused generic row art with KartPad-owned hand, gyroscope, antenna,
+  refresh, trash, and Mii vectors matching the current iOS symbol meanings.
+- Strengthened the real menu traversal to require 7 top-level, 5 Controls, 2
+  Display, and 6 data-submenu icons in addition to its 21 rows and 16 action
+  destinations.
+- Visible Pixel 6 and Pixel Tablet menu passes remained green with the narrower
+  phone submenus fully reachable.
+- The translated runtime rebuilt at APK SHA-256
+  `a5310650f970ea45ea26d7414392215fb7912915bc601401df162c9c23d4093f`;
+  strict package/privacy audit, Android lint, and 86 tests with one intentional
+  skip passed.
+- Classification: **Pass for canonical emulator semantic icon and menu-action
+  parity.** Platform-native popup styling and physical-device acceptance remain
+  distinct. No package or private artifact was published. Evidence:
+  `docs/artifacts/2026-09-05/android/a4-menu-hierarchy-reachability.md`.
