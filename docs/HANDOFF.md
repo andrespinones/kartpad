@@ -80,8 +80,21 @@ independent clean release bundles match byte-for-byte at
 `f1c107a7b2cf853f77ef245164821fa46e3502a83be8a3881d794edca7cf9e3e`.
 Pinned bundletool structural/manifest validation and the strict ARM64/ELF/
 permission/asset/privacy audit pass. The bundle remains local and unpublished;
-signing, store-derived APK execution, and physical acceptance remain open.
+signing, Play-generated device-split execution, and physical acceptance remain
+open.
 Evidence: `docs/artifacts/2026-09-05/android/a6-clean-unsigned-aab.md`.
+
+Store-derived APK execution now passes locally as well. Pinned bundletool
+generated a non-debuggable universal APK from that exact AAB, the strict APK
+audit accepted only its exact two-file baseline-profile materialization, and
+the Pixel Tablet showed the production Original/Retro selector before
+executing `SDL_main` from installed ARM64 `libmain.so`. The guarded runner
+restored the prior debug package and selector and privately proved the full
+durable-state aggregate unchanged. Its temporary APK SHA-256 was
+`ebfcbd0c8fc1471451e72b226480b3792c0a217938b482b705790311e143ac2e`.
+Play device-split delivery, release signing, physical-device acceptance, and
+publication remain open. Evidence:
+`docs/artifacts/2026-09-05/android/a6-bundle-derived-apk-emulator.md`.
 
 The `codex/iphone-touch-layout-editor` candidate captures the maintainer's
 current physical-iPhone control positions as the default for untouched iPhone

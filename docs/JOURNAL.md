@@ -3922,3 +3922,35 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   audit.** Signing, store-derived APK execution, physical acceptance, and
   publication remain open. No APK/AAB or private artifact was published.
   Evidence: `docs/artifacts/2026-09-05/android/a6-clean-unsigned-aab.md`.
+
+## 2026-09-05 — Android A6 bundle-derived release APK execution
+
+- Added a guarded emulator runner that audits the exact unsigned AAB, preserves
+  a recoverable copy of the installed debug package, uses pinned bundletool to
+  make a locally debug-signed universal APK, verifies that APK is
+  non-debuggable, and audits it before installation.
+- The first gate rejected bundletool's two generated `assets/dexopt` baseline-
+  profile files. They map exactly to the AAB's two AGP profile metadata entries;
+  the APK audit now accepts the complete exact pair if either appears and no
+  additional asset.
+- Release correctly denied ADB direct access to its non-exported gameplay
+  activity. The final runner enters through the exported KartPad selector,
+  locates the real Original-card bounds, waits for asynchronous validation to
+  enable it, and taps it as a user would.
+- The visible Pixel Tablet presented both game cards and SDL reported execution
+  of `SDL_main` from the installed ARM64 `libmain.so`. The exact derived APK
+  SHA-256 is
+  `ebfcbd0c8fc1471451e72b226480b3792c0a217938b482b705790311e143ac2e`;
+  its source AAB remains
+  `f1c107a7b2cf853f77ef245164821fa46e3502a83be8a3881d794edca7cf9e3e`.
+- The runner restored the prior version-code 5 debug APK, proved the private
+  durable-state aggregate unchanged, removed its exact temporary output, and
+  restored the production selector.
+- The focused contract, 103-test Python suite with one intentional skip,
+  strict AAB audit, source/input verification, repository safety, shell
+  syntax/lint, and whitespace checks pass.
+- Classification: **Pass for locally signed, bundle-derived, non-debuggable
+  universal APK execution and update preservation on the emulator.** Play
+  split delivery, release-candidate signing, physical hardware, and publication
+  remain open. No package or private artifact was published. Evidence:
+  `docs/artifacts/2026-09-05/android/a6-bundle-derived-apk-emulator.md`.

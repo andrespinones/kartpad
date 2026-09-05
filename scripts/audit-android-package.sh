@@ -102,6 +102,14 @@ if [[ -n "$asset_members" ]]; then
     assets/wii/shared2/wc24/nwc24msg.cbk \
     assets/wii/shared2/wc24/nwc24msg.cfg | sort)"
   fi
+  if printf '%s\n' "$asset_members" | grep -Eq '^assets/dexopt/baseline\.profm?$'; then
+    # bundletool materializes AGP's two audited BUNDLE-METADATA baseline-profile
+    # entries under assets/dexopt in store-derived APKs. Require the complete,
+    # exact pair if either member is present.
+    expected_asset_members="$(printf '%s\n' "$expected_asset_members" \
+      assets/dexopt/baseline.prof \
+      assets/dexopt/baseline.profm | sort)"
+  fi
   [[ "$asset_members" == "$expected_asset_members" ]] || {
     echo "ERROR: APK asset set differs from the public runtime-resource allowlist" >&2
     exit 1

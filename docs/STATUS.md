@@ -84,10 +84,24 @@ metadata; two independent clean builds are byte-identical at SHA-256
 `f1c107a7b2cf853f77ef245164821fa46e3502a83be8a3881d794edca7cf9e3e`.
 Pinned bundletool validation and the new strict bundle audit pass package/SDK/
 permission identity, unsigned state, exact ARM64 libraries/assets, 16 KiB ELF
-alignment, dependencies/exports, parser-marker cardinality, and private-path/
-data exclusion. Signing, store-derived APK testing, physical acceptance, and
-publication remain open. Evidence:
+  alignment, dependencies/exports, parser-marker cardinality, and private-path/
+data exclusion. Signing, Play-generated device-split testing, physical
+acceptance, and publication remain open. Evidence:
 [`docs/artifacts/2026-09-05/android/a6-clean-unsigned-aab.md`](artifacts/2026-09-05/android/a6-clean-unsigned-aab.md).
+
+The exact release AAB now also passes a store-derived execution gate. Pinned
+bundletool generated a locally debug-signed universal APK at SHA-256
+`ebfcbd0c8fc1471451e72b226480b3792c0a217938b482b705790311e143ac2e`.
+The independent APK audit accepts only bundletool's exact two-file baseline-
+profile materialization, confirms the package is non-debuggable, and retains
+the complete existing package/ABI/ELF/asset/privacy checks. On the visible
+Pixel Tablet, the APK presented the two-game production selector, entered
+Original through its enabled card, and executed `SDL_main` from the installed
+ARM64 `libmain.so`. The runner then restored the prior debug APK and proved the
+private durable-state aggregate unchanged. Play-generated device splits,
+release-candidate signing, physical acceptance, and publication remain open.
+Evidence:
+[`docs/artifacts/2026-09-05/android/a6-bundle-derived-apk-emulator.md`](artifacts/2026-09-05/android/a6-bundle-derived-apk-emulator.md).
 
 The latest Android A4 checkpoint fixes a real SDL lifecycle gap: KartPad now
 enables SDL activity recreation, so Android can rebuild `KartPadActivity`
