@@ -2,18 +2,19 @@
 
 Updated: 2026-09-05
 
-An explicit complete-product API 28 probe reached the production selector,
-installed ARM64 `SDL_main`, SDL surface creation, and audio, but the official
-Android 9 ARM64 emulator image could not create any Vulkan instance even after
-a host-GPU restart. Its Vulkan inventory was empty; Dawn returned
-`VK_ERROR_INCOMPATIBLE_DRIVER`, and Aurora intentionally stopped on its fatal
-null-renderer path. This is not an API 28 pass or a physical-device failure.
-Page-size and `run-as` probes now support the older shell, and runner process
-loss is diagnostic rather than silent. API 28 remains provisional pending a
-Vulkan-capable physical device; the existing preview can be tested now on a
-newer Vulkan-capable ARM64 phone. The disposable AVD and private transfer were
-deleted, and the API 36 tablet is visible on the selector. Evidence:
-[`docs/artifacts/2026-09-05/android/a6-api28-product-runtime-probe.md`](artifacts/2026-09-05/android/a6-api28-product-runtime-probe.md).
+The complete release product now passes on the official API 29 / Android 10
+ARM64 emulator as well as the pinned API 36 tablet and API 35 16 KiB lane.
+Android 10's Goldfish Vulkan transport deadlocked when Aurora raced pipeline
+creation with submission; serializing only the priority pipeline-worker pool
+on API 29 and lower fixed the stall while retaining asynchronous frame and
+presentation workers. Both universal and four-part device-split version 7
+packages sustained the runtime, exposed the menu, rendered diverse frames,
+and preserved durable state on API 29, then the same exact AAB passed again on
+API 36. The local preview is now `0.4.0-android-preview.2`; API 28 remains
+provisional because its official emulator exposes no usable Vulkan adapter.
+Physical vendor-driver, performance, touch/audio/haptics/controller, thermal,
+and lifecycle acceptance remain open. Evidence:
+[`docs/artifacts/2026-09-05/android/a6-api29-product-runtime.md`](artifacts/2026-09-05/android/a6-api29-product-runtime.md).
 
 Android A5 now exercises the product runtime's translated guest `/dev/net/ssl`
 IOCTLV handler, not only its Mbed TLS session wrapper. An opt-in emulator run
@@ -117,20 +118,21 @@ Evidence:
 [`docs/artifacts/2026-09-05/android/a6-bundle-derived-apk-emulator.md`](artifacts/2026-09-05/android/a6-bundle-derived-apk-emulator.md).
 
 The current Android hardware-preview identity is now
-`0.4.0-android-preview.1` version code 6, replacing the stale A0 shell label.
+`0.4.0-android-preview.2` version code 7, carrying the API 29 Vulkan
+compatibility correction.
 Both metadata inputs are validated, and strict APK/AAB audits require the
 expected name. Two independent scoped clean builds produced identical unsigned
 AAB bytes at SHA-256
-`eaf16573290b5e27c161e47ede4641944545d7e8deb07c20671c185df7996110`.
-The exact derived non-debuggable APK upgraded the populated emulator from
-version 5 to 6, executed the native runtime, and preserved durable state before
+`d03f1791989142e109f2a3101a3bca629e80d3b8b1fdde54269b17b21d554f4a`.
+The exact derived non-debuggable APK upgraded the populated emulators from
+version 5 to 7, executed the native runtime, and preserved durable state before
 the debug fixture was restored. Its SHA-256 is
-`24e977d497d5c587eb79771d09e3176932633fe0671f6e5444ddca335bc8bd92`,
+`cfb32065650a15e9d3ddab9aa2705ea62e9930626445c7e568e1ef29b8e53420`,
 and the audited 90,477,735-byte local hardware preview is retained ignored
 under `.android-bootstrap/hardware-preview/`. Physical testing is now the next
 authority; this local debug-signed preview is not a release-key candidate and
 was not published. Evidence:
-[`docs/artifacts/2026-09-05/android/a6-versioned-hardware-preview.md`](artifacts/2026-09-05/android/a6-versioned-hardware-preview.md).
+[`docs/artifacts/2026-09-05/android/a6-api29-product-runtime.md`](artifacts/2026-09-05/android/a6-api29-product-runtime.md).
 
 Local Play-style device targeting now passes too. Pinned bundletool queried the
 Pixel Tablet device spec and emitted exactly four APKs: base, ARM64, English,

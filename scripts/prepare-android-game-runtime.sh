@@ -35,6 +35,8 @@ KARTPAD_PREPARE_ONLY=1 "$repo_root/scripts/prepare-ios-game-runtime.sh" \
 patch --batch -p1 -d "$runtime_source/aurora-main" < \
   "$repo_root/patches/aurora-android-public-sdl-surface-lock.patch"
 patch --batch -p1 -d "$runtime_source/aurora-main" < \
+  "$repo_root/patches/aurora-android-api29-serialized-vulkan.patch"
+patch --batch -p1 -d "$runtime_source/aurora-main" < \
   "$repo_root/patches/aurora-android-gamepad-snapshot.patch"
 patch --batch -p1 -d "$runtime_source/aurora-main" < \
   "$repo_root/patches/aurora-android-gamepad-rumble.patch"

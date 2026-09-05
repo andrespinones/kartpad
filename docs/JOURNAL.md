@@ -4082,3 +4082,34 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   trace, and private log, then restarted the API 36 tablet on its selector. No
   APK/AAB or private artifact was published. Evidence:
   `docs/artifacts/2026-09-05/android/a6-api28-product-runtime-probe.md`.
+
+## 2026-09-05 — Android A6 API 29 Vulkan compatibility and preview 2
+
+- The official API 29 ARM64 image exposed a usable Vulkan adapter, but the
+  existing product stalled on a nearly black frame. Native stacks localized a
+  deadlock to concurrent Dawn pipeline creation and submission in Goldfish's
+  Vulkan handle mapping.
+- Serializing both pipeline and frame work avoided the deadlock but overflowed
+  SDL's small native thread during synchronous compilation, so that broad
+  workaround was rejected. The final patch disables only Aurora's priority
+  pipeline-worker pool on API 29 and lower; asynchronous frame submission and
+  presentation remain enabled, and API 30+ behavior is unchanged.
+- Fresh preparation reproduced the patch. The corrected API 29 runtime stayed
+  alive, rendered diverse frames through 60 seconds, completed 1,214-pipeline
+  prewarm, and reached later telemetry near 60 FPS without a bounded fatal
+  signature.
+- Promoted the local preview to `0.4.0-android-preview.2`, version code 7. Two
+  scoped clean release builds produced byte-identical AABs at SHA-256
+  `d03f1791989142e109f2a3101a3bca629e80d3b8b1fdde54269b17b21d554f4a`.
+  The retained 90,477,735-byte non-debuggable universal APK is
+  `cfb32065650a15e9d3ddab9aa2705ea62e9930626445c7e568e1ef29b8e53420`.
+- Universal and exact four-part device-split installs passed stable runtime,
+  diverse-frame, signer/native-byte, upgrade, and durable-state gates on API
+  29. The identical AAB passed the complete gate again on API 36 and restored
+  debug version 5 plus the visible selector.
+- Deleted the disposable API 29 AVD, restricted 2.7 GB transfer, raw logs and
+  frames, and temporary AAB/preparation copies. Classification: **Pass for the
+  complete release product on the Android 10 emulator, with modern regression
+  retained.** API 28 and every physical-device acceptance row remain open. No
+  APK/AAB or private artifact was published. Evidence:
+  `docs/artifacts/2026-09-05/android/a6-api29-product-runtime.md`.

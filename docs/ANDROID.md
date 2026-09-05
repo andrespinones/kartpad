@@ -34,6 +34,16 @@ image cannot prove KartPad's Vulkan product runtime. A Vulkan-capable physical
 API 28 device, or a newer supported physical phone, is the next authority.
 See `docs/artifacts/2026-09-05/android/a6-api28-product-runtime-probe.md`.
 
+The next official ARM64 lane, API 29 / Android 10, now passes the complete
+release product. Its Goldfish Vulkan transport could deadlock when priority
+pipeline creation raced submission; Android runtime preparation now disables
+only that priority pool through API 29 while retaining asynchronous frame
+submission and presentation. Universal and four-part device-split version 7
+packages pass sustained runtime/frame/state gates on API 29, and the identical
+AAB passes again on API 36. This establishes the emulator-tested floor at
+Android 10, not a physical API 29 or vendor-GPU claim. Evidence is in
+`docs/artifacts/2026-09-05/android/a6-api29-product-runtime.md`.
+
 The next physical session starts with the read-only
 `scripts/check-android-physical-device.sh` intake gate. Its mocked contract
 covers twelve supported and rejected device states and proves that the ADB
@@ -920,12 +930,12 @@ the wrong package identity, a non-increasing version code, or an installed
 version that does not match the requested APK. This override is test-only;
 normal builds retain the manifest's default version code.
 
-Android's default user-visible version is `0.4.0-android-preview.1`. Override
+Android's default user-visible version is `0.4.0-android-preview.2`. Override
 it only for a deliberately named preview with
 `KARTPAD_ANDROID_VERSION_NAME`; the builder and Gradle property both reject
 empty, over-64-character, or non-portable values. Strict APK/AAB audits require
 the expected default unless `KARTPAD_ANDROID_EXPECTED_VERSION_NAME` is supplied
-for that deliberate build. Version code 6 is the current hardware-preview
+for that deliberate build. Version code 7 is the current hardware-preview
 line and must not be decreased for distributed test upgrades.
 
 The product builder emits a debug APK by default. Set
@@ -943,13 +953,13 @@ for local paths, private-data names, and unexpected key markers. Candidate AAB
 hashes must come from independent scoped clean builds, not a cached task.
 
 The current local hardware-preview APK is derived from two byte-identical clean
-version-code 6 AAB builds, is non-debuggable, and has SHA-256
-`24e977d497d5c587eb79771d09e3176932633fe0671f6e5444ddca335bc8bd92`.
+version-code 7 AAB builds, is non-debuggable, and has SHA-256
+`cfb32065650a15e9d3ddab9aa2705ea62e9930626445c7e568e1ef29b8e53420`.
 It is retained ignored under `.android-bootstrap/hardware-preview/` for the
 first physical session. Its local debug signature is test-only and cannot be
 updated in place by a future release-key package; export test saves before any
 signing-identity transition. Evidence is in
-`docs/artifacts/2026-09-05/android/a6-versioned-hardware-preview.md`.
+`docs/artifacts/2026-09-05/android/a6-api29-product-runtime.md`.
 
 The same guarded bundle-derived runner also exercises the device-specific form.
 It obtains a temporary device spec with pinned bundletool, requires the exact

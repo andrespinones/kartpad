@@ -2,16 +2,18 @@
 
 ## Current state
 
-The complete product was also probed on a disposable official API 28 ARM64
-AVD. Selector, `SDL_main`, surface, and audio startup succeeded, but that image
-exposed no usable Vulkan adapter: `vkjson` was empty and Dawn returned
-`VK_ERROR_INCOMPATIBLE_DRIVER` under both default and host-GPU configurations.
-The result is classified as an emulator-image renderer limitation, not an API
-28 pass or phone failure. API 28 support remains provisional until tested on
-Vulkan-capable physical hardware. Older-shell page-size/existence probes and
-silent process-loss reporting were hardened. The AVD/private transfer were
-deleted and the persistent API 36 tablet is restored to version 5's selector.
-Evidence: `docs/artifacts/2026-09-05/android/a6-api28-product-runtime-probe.md`.
+The complete product now passes the guarded release-bundle runtime gate on the
+official API 29 / Android 10 ARM64 emulator. Android 10 Goldfish could deadlock
+when priority pipeline compilation raced Vulkan submission; API 29 and lower
+now serialize only that pipeline pool while keeping asynchronous frame and
+presentation workers. Universal and four-part device-split version 7 packages
+sustained the process, initialized surface/audio, exposed the menu, rendered
+diverse frames, and preserved durable state. The same exact AAB passed again on
+the API 36 Pixel Tablet. API 28 remains provisional because its official ARM64
+emulator has an empty Vulkan inventory. The disposable API 29 AVD and all
+restricted data/log/frame copies were deleted; API 36 is visible on the
+restored version 5 selector. Evidence:
+`docs/artifacts/2026-09-05/android/a6-api29-product-runtime.md`.
 
 KartPad `v0.4.0` is published as the second stable community release from
 `369159153bef0d045edf5cc1cf3b1b444b36a284`. The iPhone/iPad app 0.4.0 build
@@ -107,18 +109,17 @@ Play device-split delivery, release signing, physical-device acceptance, and
 publication remain open. Evidence:
 `docs/artifacts/2026-09-05/android/a6-bundle-derived-apk-emulator.md`.
 
-The current hardware preview is now honestly labeled
-`0.4.0-android-preview.1` at version code 6 rather than the A0 bootstrap name.
-Two clean unsigned AABs match at `eaf16573…`; the derived, non-debuggable APK
-at `24e977d…` passed a real version 5-to-6 emulator upgrade, selector/native
+The current hardware preview is `0.4.0-android-preview.2` at version code 7.
+Two clean unsigned AABs match at `d03f1791…`; the derived, non-debuggable APK
+at `cfb32065…` passed real version 5-to-7 emulator upgrades, selector/native
 runtime execution, and durable-state preservation before the debug fixture was
 restored. The exact audited 90,477,735-byte ARM64/API-28+ APK is retained
 locally and ignored at
-`.android-bootstrap/hardware-preview/KartPad-0.4.0-android-preview.1-v6-arm64.apk`.
+`.android-bootstrap/hardware-preview/KartPad-0.4.0-android-preview.2-v7-arm64.apk`.
 It uses only the local debug identity, contains no game data, is not a
 release-key candidate, and was not published. Physical-device execution is the
 next authority. Evidence:
-`docs/artifacts/2026-09-05/android/a6-versioned-hardware-preview.md`.
+`docs/artifacts/2026-09-05/android/a6-api29-product-runtime.md`.
 
 Pinned bundletool's device-targeted path now passes on the Pixel Tablet as
 well. It generated exactly base, ARM64, English, and xhdpi APKs. Every split is

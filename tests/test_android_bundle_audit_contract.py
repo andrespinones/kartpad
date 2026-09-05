@@ -16,7 +16,7 @@ class AndroidBundleAuditContractTests(unittest.TestCase):
         self.assertIn("validate --bundle", audit)
         self.assertIn('package="dev.kartpad.android"', audit)
         self.assertIn("KARTPAD_ANDROID_EXPECTED_VERSION_NAME", audit)
-        self.assertIn("0.4.0-android-preview.1", audit)
+        self.assertIn("0.4.0-android-preview.2", audit)
         self.assertIn("AAB is signed", audit)
         self.assertIn("base/lib/arm64-v8a/libmain.so", audit)
         self.assertIn("LOAD", audit)

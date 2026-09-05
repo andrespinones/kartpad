@@ -65,7 +65,7 @@ class AndroidBundleDerivedApkContractTests(unittest.TestCase):
         self.assertIn("assets/dexopt/baseline.profm", audit)
         self.assertIn("Require the complete,", audit)
         self.assertIn("KARTPAD_ANDROID_EXPECTED_VERSION_NAME", audit)
-        self.assertIn("0.4.0-android-preview.1", audit)
+        self.assertIn("0.4.0-android-preview.2", audit)
 
 
 if __name__ == "__main__":
