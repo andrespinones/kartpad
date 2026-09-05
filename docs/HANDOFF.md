@@ -114,6 +114,12 @@ through 4x render choices. The real Pixel 6 popup/dialog path was traversed and
 remained in bounds. Evidence:
 `docs/artifacts/2026-09-05/android/a4-display-menu-label-parity.md`.
 
+The touch editor replay now also performs a real down/move/up drag and the real
+confirmed per-device reset. Pixel 6 and Pixel Tablet both persist the dragged A
+origin, then clear its origin and 1.25x size through the queued reset callback.
+Evidence:
+`docs/artifacts/2026-09-05/android/a4-touch-editor-drag-reset.md`.
+
 KartPad `v0.4.0-preview.2` is published from
 `e9fa6058ee09fff0b16481ebe4a78d61cea69c87`. It updates both Apple-platform
 artifacts for Retro Rewind 6.12.5, repairs the universal iPhone/iPad three-dot

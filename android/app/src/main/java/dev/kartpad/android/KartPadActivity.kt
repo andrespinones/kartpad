@@ -45,8 +45,10 @@ class KartPadActivity : SDLActivity() {
     private lateinit var editorSize: SeekBar
     private lateinit var editorVisibility: Button
     private lateinit var editorBack: Button
+    private lateinit var resetTouchLayoutButton: Button
     private var updatingEditorControls = false
     private var touchSettingsDialog: AlertDialog? = null
+    private var resetTouchLayoutDialog: AlertDialog? = null
     private var runtimeProfile = "base"
     private lateinit var inputManager: InputManager
     private lateinit var motionSteering: KartPadMotionSteering
@@ -1186,11 +1188,11 @@ class KartPadActivity : SDLActivity() {
             text = "Move controls"
             contentDescription = "Edit touch control layout"
         }
-        val reset = Button(this).apply {
+        resetTouchLayoutButton = Button(this).apply {
             text = "Reset This Device Layout"
             contentDescription = "Reset touch control layout"
             setOnClickListener {
-                AlertDialog.Builder(this@KartPadActivity)
+                val confirm = AlertDialog.Builder(this@KartPadActivity)
                     .setTitle("Reset Touch Control Layout?")
                     .setMessage(
                         "All control positions and sizes return to their defaults.",
@@ -1202,7 +1204,10 @@ class KartPadActivity : SDLActivity() {
                         kartPadOverlay.resetLayoutSettings()
                         refreshControllerHandoff()
                     }
-                    .show()
+                    .create()
+                confirm.setOnDismissListener { resetTouchLayoutDialog = null }
+                confirm.show()
+                resetTouchLayoutDialog = confirm
             }
         }
         val leftColumn = LinearLayout(this).apply {
@@ -1221,7 +1226,7 @@ class KartPadActivity : SDLActivity() {
             addView(hide)
             addView(modernCStick)
             addView(moveControls)
-            addView(reset)
+            addView(resetTouchLayoutButton)
         }
         content.addView(leftColumn, LinearLayout.LayoutParams(
             0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f,
@@ -1261,19 +1266,41 @@ class KartPadActivity : SDLActivity() {
                     check(!KartPadTouchSettings.isHidden(this, "A") &&
                         editorVisibility.text == "Hide"
                     ) { "selected A did not return to shown state" }
+                    val dragged = kartPadOverlay.runDebugDragSelectedAForEditorFixture()
                     kartPadOverlay.setSelectedControlSize(1.25f)
                     check(editorSize.progress == 65) { "selected A size did not refresh" }
                     check(editorBack.performClick()) { "Back did not accept click" }
                     check(editorBar.visibility == View.GONE && menuButton.visibility == View.VISIBLE &&
                         touchSettingsDialog?.isShowing == true
                     ) { "Back did not return to Touch Control Settings" }
-                    KartPadTouchSettings.resetTouchControls(this)
-                    kartPadOverlay.reloadPresentationSettings()
-                    Log.i(
-                        TAG,
-                        "A4 touch editor fixture passed $selected hide=shown size=1.25 " +
-                            "back=settings",
-                    )
+                    check(resetTouchLayoutButton.performClick()) {
+                        "Reset This Device Layout did not accept click"
+                    }
+                    val resetDialog = checkNotNull(resetTouchLayoutDialog) {
+                        "reset confirmation did not open"
+                    }
+                    check(resetDialog.isShowing) { "reset confirmation is not showing" }
+                    check(resetDialog.getButton(AlertDialog.BUTTON_POSITIVE).performClick()) {
+                        "reset confirmation did not accept click"
+                    }
+                    resetTouchLayoutButton.post {
+                        runCatching {
+                            val resetOrigin = KartPadTouchSettings.origin(this, "A")
+                            val resetSize = KartPadTouchSettings.controlSize(this, "A")
+                            val resetHidden = KartPadTouchSettings.isHidden(this, "A")
+                            check(resetOrigin == null &&
+                                kotlin.math.abs(resetSize - 1f) < 0.001f && !resetHidden
+                            ) {
+                                "confirmed reset left origin=$resetOrigin size=$resetSize " +
+                                    "hidden=$resetHidden"
+                            }
+                            Log.i(
+                                TAG,
+                                "A4 touch editor fixture passed $selected $dragged hide=shown " +
+                                    "size=1.25 back=settings reset=defaults",
+                            )
+                        }.onFailure { Log.e(TAG, "A4 touch editor fixture failed", it) }
+                    }
                 }.onFailure { Log.e(TAG, "A4 touch editor fixture failed", it) }
             }
         }

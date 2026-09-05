@@ -768,6 +768,11 @@ disconnect states; a second sequence began with A cyan/locked and restored it
    Real Pixel 6 popup/dialog traversal passed. The resulting translated APK
    SHA-256 is
    `3a14664a60a3f656a0f46e669ef575b9f2a67d0797c099fbb3e5f08bb9ce1934`.
+   The editor replay now also sends real down/move/up events, requires the
+   normalized A origin to persist, and invokes the real reset confirmation.
+   Pixel 6 and Pixel Tablet both clear the dragged origin and 1.25x selected
+   size back to device defaults. The resulting translated APK SHA-256 is
+   `8cc43a1f0ab1889caaeee4010322e48295bc5b599f36658d52d9e2b12c6cab33`.
    Evidence:
 [`docs/artifacts/2026-09-04/android/a4-touch-settings-menu-checkpoint.md`](artifacts/2026-09-04/android/a4-touch-settings-menu-checkpoint.md).
 [`docs/artifacts/2026-09-04/android/a4-controller-mapping.md`](artifacts/2026-09-04/android/a4-controller-mapping.md).
@@ -789,6 +794,7 @@ disconnect states; a second sequence began with A cyan/locked and restored it
 [`docs/artifacts/2026-09-05/android/a4-touch-editor-flow.md`](artifacts/2026-09-05/android/a4-touch-editor-flow.md).
 [`docs/artifacts/2026-09-05/android/a4-touch-gas-lock-replay.md`](artifacts/2026-09-05/android/a4-touch-gas-lock-replay.md).
 [`docs/artifacts/2026-09-05/android/a4-display-menu-label-parity.md`](artifacts/2026-09-05/android/a4-display-menu-label-parity.md).
+[`docs/artifacts/2026-09-05/android/a4-touch-editor-drag-reset.md`](artifacts/2026-09-05/android/a4-touch-editor-drag-reset.md).
 Accepted evidence:
 [`docs/artifacts/2026-09-04/android/a4-touch-overlay-input.md`](artifacts/2026-09-04/android/a4-touch-overlay-input.md).
 [`docs/artifacts/2026-09-04/android/a4-controller-handoff.md`](artifacts/2026-09-04/android/a4-controller-handoff.md).

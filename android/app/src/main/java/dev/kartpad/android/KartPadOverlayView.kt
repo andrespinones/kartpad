@@ -378,6 +378,42 @@ class KartPadOverlayView(context: Context) : View(context) {
         return "selected=A"
     }
 
+    fun runDebugDragSelectedAForEditorFixture(): String {
+        check(editingLayout && selectedControlId == "A") {
+            "A must be selected before the drag fixture"
+        }
+        layoutControls()
+        val a = controls.first { it.id == "A" }
+        val startX = a.frame.centerX()
+        val startY = a.frame.centerY()
+        val safe = safeFrame()
+        val targetX = startX - safe.width() * 0.04f
+        val targetY = startY - safe.height() * 0.05f
+        val downTime = SystemClock.uptimeMillis()
+        dispatchTouchAt(startX, startY, MotionEvent.ACTION_DOWN, downTime, downTime)
+        dispatchTouchAt(
+            targetX, targetY, MotionEvent.ACTION_MOVE, downTime,
+            SystemClock.uptimeMillis(),
+        )
+        dispatchTouchAt(
+            targetX, targetY, MotionEvent.ACTION_UP, downTime,
+            SystemClock.uptimeMillis(),
+        )
+        layoutControls()
+        val saved = KartPadTouchSettings.origin(context, "A")
+            ?: error("A drag did not persist an origin")
+        check(abs(a.frame.centerX() - targetX) <= 2f && abs(a.frame.centerY() - targetY) <= 2f) {
+            "A drag rendered at ${a.frame.centerX()},${a.frame.centerY()} " +
+                "instead of $targetX,$targetY"
+        }
+        val expectedX = (targetX - safe.left) / safe.width()
+        val expectedY = (targetY - safe.top) / safe.height()
+        check(abs(saved.x - expectedX) < 0.002f && abs(saved.y - expectedY) < 0.002f) {
+            "A drag saved $saved instead of $expectedX,$expectedY"
+        }
+        return "dragged=A"
+    }
+
     fun runDebugGasLockFixture(
         onSuccess: (String) -> Unit,
         onFailure: (Throwable) -> Unit,
@@ -835,11 +871,23 @@ class KartPadOverlayView(context: Context) : View(context) {
         downTime: Long,
         eventTime: Long,
     ) {
+        dispatchTouchAt(
+            control.frame.centerX(), control.frame.centerY(), action, downTime, eventTime,
+        )
+    }
+
+    private fun dispatchTouchAt(
+        x: Float,
+        y: Float,
+        action: Int,
+        downTime: Long,
+        eventTime: Long,
+    ) {
         val event = MotionEvent.obtain(
-            downTime, eventTime, action, control.frame.centerX(), control.frame.centerY(), 0,
+            downTime, eventTime, action, x, y, 0,
         ).apply { source = InputDevice.SOURCE_TOUCHSCREEN }
         try {
-            check(onTouchEvent(event)) { "touch overlay rejected ${control.id} action=$action" }
+            check(onTouchEvent(event)) { "touch overlay rejected action=$action at $x,$y" }
         } finally {
             event.recycle()
         }

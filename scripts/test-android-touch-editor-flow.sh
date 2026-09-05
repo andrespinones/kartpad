@@ -31,7 +31,7 @@ apk="$repo_root/android/app/build/outputs/apk/debug/app-debug.apk"
 "$adb" shell am start -W -n dev.kartpad.android/.KartPadActivity \
   --ez dev.kartpad.android.TEST_TOUCH_EDITOR_FLOW true >/dev/null
 
-expected="A4 touch editor fixture passed selected=A hide=shown size=1.25 back=settings"
+expected="A4 touch editor fixture passed selected=A dragged=A hide=shown size=1.25 back=settings reset=defaults"
 for _ in {1..30}; do
   output="$("$adb" logcat -d -v brief KartPadFixture:I AndroidRuntime:E '*:S')"
   if grep -Fq "$expected" <<<"$output"; then

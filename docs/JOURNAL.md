@@ -3529,3 +3529,22 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   traversal.** Physical rendering/performance acceptance is unchanged. No
   package or private artifact was published. Evidence:
   `docs/artifacts/2026-09-05/android/a4-display-menu-label-parity.md`.
+
+## 2026-09-05 — Android A4 touch editor drag and reset
+
+- Strengthened the real editor flow with an A-button down/move/up drag that
+  requires both rendered position and normalized persisted origin to match.
+- The same flow now activates Reset This Device Layout and its real positive
+  confirmation, then requires A's dragged origin and 1.25x size to return to
+  defaults while remaining shown.
+- An initial Pixel 6 check ran before Android's queued dialog callback and
+  correctly saw the pre-reset values. Moving verification to the next main-loop
+  turn models the real callback ordering; Pixel 6 and Pixel Tablet then passed
+  the exact `selected=A dragged=A hide=shown size=1.25 back=settings
+  reset=defaults` sequence.
+- The complete translated runtime rebuilt locally at APK SHA-256
+  `8cc43a1f0ab1889caaeee4010322e48295bc5b599f36658d52d9e2b12c6cab33`.
+- Classification: **Pass for canonical emulator drag persistence and confirmed
+  device-layout reset.** Physical finger ergonomics and touch-only races remain
+  open. No package or private artifact was published. Evidence:
+  `docs/artifacts/2026-09-05/android/a4-touch-editor-drag-reset.md`.
