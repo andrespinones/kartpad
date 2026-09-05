@@ -386,9 +386,12 @@ Android A5 pins the official maintained Mbed TLS 4.1.1 release and now connects
 that engine to translated guest `/dev/net/ssl` sessions. The backend consumes
 the guest-provided DER root CA, requires peer and hostname verification, and
 maps nonblocking reads/writes and certificate failures to the existing guest
-result contract. A deterministic host fixture and the ARM64 API 36 emulator
-both complete encrypted HTTP traffic and reject a wrong hostname. Live guest
-IOCTLV traffic, built-in Wii CA/client-certificate handling, WFC, interruption
+result contract. A deterministic ARM64 API 36 product fixture now constructs
+real guest memory vectors and traverses the production new-session, root-CA,
+socket-connect, handshake, write, read, and shutdown IOCTLV path. It completes
+encrypted HTTP traffic and rejects a wrong hostname. The fixture is opt-in and
+runs before the translated guest starts; a retail Mario Kart/WFC-initiated
+request, built-in Wii CA/client-certificate handling, WFC, interruption
 recovery, and physical-device networking remain incomplete.
 
 Android HTTPS used by the application shell for the version manifest and pack

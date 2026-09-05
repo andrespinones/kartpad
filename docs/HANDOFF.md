@@ -13,17 +13,18 @@ anonymous downloads match the local bytes, checksums, provenance, and audits.
 GitHub marks this non-prerelease as **Latest**. Physical Apple TV acceptance
 remains open.
 
-Android A5 now has a translated guest TLS backend, not only a context primitive.
-The pinned Mbed TLS 4.1.1 path consumes a guest DER root CA, verifies the peer
-and requested hostname, and maps nonblocking results back to `/dev/net/ssl`.
-Both a host-local fixture and the visible ARM64 Pixel Tablet completed encrypted
-HTTP traffic and rejected a wrong hostname as guest error `-9`. The exact
-runtime patch reproduces and the complete dual product compiles. This is not
-yet live guest IOCTLV/WFC or physical-device acceptance. The exact audited and
-installed dual-game APK SHA-256 is
-`c978ef4619cb59756854460f992c19a2c4da99ebcb6e080eba96b4905eedc9f2`.
-Evidence:
-`docs/artifacts/2026-09-05/android/a5-guest-tls-backend.md`.
+Android A5 now proves the product runtime's translated guest TLS IOCTLV path,
+not only the Mbed TLS wrapper. The visible ARM64 Pixel Tablet used real guest
+memory vectors and the runtime socket table for new-session, guest DER root CA,
+connect, handshake, write, read, and shutdown. It completed a 4,096-byte
+encrypted HTTP read and rejected a wrong hostname as guest error `-9`. The
+repeatable runner preserves private game data, never copies a key to the
+device, cleans its exact fixture, and restores the production selector. This is
+an opt-in pre-guest product fixture, not yet a retail Mario Kart/WFC-initiated
+exchange or physical-device acceptance. The exact audited and installed
+dual-game APK SHA-256 is
+`0eacd4f8310a8ac6ad1d2d7de49c4db9a969e5373875c0670c42babe46df665b`.
+Evidence: `docs/artifacts/2026-09-05/android/a5-guest-tls-ioctlv.md`.
 
 The `codex/iphone-touch-layout-editor` candidate captures the maintainer's
 current physical-iPhone control positions as the default for untouched iPhone

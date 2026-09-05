@@ -66,6 +66,44 @@ class AndroidTlsContractTests(unittest.TestCase):
         self.assertIn('runtime/src/hle/net/android_mbedtls.cpp"', cmake)
         self.assertIn("MINIZIP::minizip mbedtls", cmake)
 
+    def test_guest_ioctlv_fixture_exercises_the_product_handler(self) -> None:
+        fixture_patch = (
+            REPO / "patches/wiicompiled-android-tls-ioctlv-fixture.patch"
+        ).read_text()
+        prepare = (REPO / "scripts/prepare-android-game-runtime.sh").read_text()
+
+        self.assertIn("wiicompiled-android-tls-ioctlv-fixture.patch", prepare)
+        self.assertIn("RunAndroidTlsIoctlvFixture()", fixture_patch)
+        self.assertIn("std::memcpy(saved.data(), scratch, saved.size())", fixture_patch)
+        self.assertIn("std::memcpy(scratch, saved.data(), saved.size())", fixture_patch)
+        self.assertIn('root + "/port"', fixture_patch)
+        for command in (
+            "IOCTLV_NET_SSL_NEW",
+            "IOCTLV_NET_SSL_SETROOTCA",
+            "IOCTLV_NET_SSL_CONNECT",
+            "IOCTLV_NET_SSL_DOHANDSHAKE",
+            "IOCTLV_NET_SSL_WRITE",
+            "IOCTLV_NET_SSL_READ",
+            "IOCTLV_NET_SSL_SHUTDOWN",
+        ):
+            self.assertIn(f"HandleSslIoctlv({command}", fixture_patch)
+
+    def test_product_ioctlv_emulator_runner_preserves_private_state(self) -> None:
+        runner = (
+            REPO / "scripts/test-android-tls-ioctlv-emulator.sh"
+        ).read_text()
+
+        self.assertIn("mktemp -d", runner)
+        self.assertIn("trap cleanup EXIT", runner)
+        self.assertIn('install -r "$apk"', runner)
+        self.assertNotIn("pm clear", runner)
+        self.assertIn("files/KartPad/GameData/sys/main.dol", runner)
+        self.assertIn("KartPadTlsIoctlvFixture", runner)
+        self.assertIn('"$fixture_root/ca.der"', runner)
+        self.assertNotIn('"$fixture_root/ca.key"', runner)
+        self.assertNotIn('"$fixture_root/server.key"', runner)
+        self.assertIn(".KartPadLaunchActivity", runner)
+
     def test_tls_fixtures_use_only_ephemeral_private_keys(self) -> None:
         script = (REPO / "scripts/test-android-tls-local.sh").read_text()
         emulator_script = (

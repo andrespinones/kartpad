@@ -3764,3 +3764,30 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   hardware acceptance. No APK/AAB, key, or private artifact was published.
   Evidence:
   `docs/artifacts/2026-09-05/android/a5-guest-tls-backend.md`.
+
+## 2026-09-05 — Android A5 translated guest TLS IOCTLV path
+
+- Added an opt-in product-runtime fixture that snapshots a guarded guest-memory
+  window and invokes the real translated SSL handler with guest vectors for
+  new-session, DER root CA, runtime socket connect, handshake, write, read, and
+  shutdown.
+- Added a non-destructive emulator runner. It requires the exact approved
+  app-private `main.dol` hash, reinstalls without clearing storage, generates
+  one-run host certificates, copies only the public DER CA to the emulator,
+  removes the exact fixture afterward, and restores the production selector.
+- The visible Pixel Tablet passed the trusted 4,096-byte encrypted read and
+  wrong-host `-9` paths. The private game-data hash was unchanged, no key
+  reached the device, and the corrected relative `[paths]` configuration
+  remained installed.
+- A fresh runtime preparation reproduced the exact source. The product APK
+  SHA-256 is
+  `0eacd4f8310a8ac6ad1d2d7de49c4db9a969e5373875c0670c42babe46df665b`;
+  96 tests with one intentional skip, product-configured Android lint, strict
+  package/privacy audit, repository safety, shell lint/syntax, and whitespace
+  checks pass.
+- Classification: **Pass for actual product guest-memory IOCTLV translation
+  and socket-table/TLS execution on the emulator.** The fixture runs before the
+  guest and is not retail Mario Kart/WFC-initiated traffic. Built-in Wii
+  certificates, local/public WFC, interruption, and physical-device networking
+  remain open. No APK/AAB, key, or private artifact was published. Evidence:
+  `docs/artifacts/2026-09-05/android/a5-guest-tls-ioctlv.md`.

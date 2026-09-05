@@ -2,18 +2,22 @@
 
 Updated: 2026-09-05
 
-Android A5 now routes translated guest `/dev/net/ssl` sessions through the
-pinned Mbed TLS 4.1.1 backend. It loads the guest-provided DER root CA, requires
-peer verification, applies hostname verification, and preserves nonblocking
-guest results. A host-local fixture and the visible ARM64 Pixel Tablet both
-completed encrypted HTTP traffic with the trusted hostname and returned guest
-error `-9` for the wrong hostname. Fresh runtime patch reproduction, translated
-product compilation, and strict source/package audits pass. Built-in Wii
-CA/client-certificate handling, local/public WFC, interruption recovery, and
-physical Android acceptance remain open. The installed dual-game APK SHA-256 is
-`c978ef4619cb59756854460f992c19a2c4da99ebcb6e080eba96b4905eedc9f2`.
+Android A5 now exercises the product runtime's translated guest `/dev/net/ssl`
+IOCTLV handler, not only its Mbed TLS session wrapper. An opt-in emulator run
+constructed actual guest memory vectors and traversed `SSL_NEW`, guest DER root
+CA loading, socket-table `CONNECT`, handshake, write, read, and shutdown. The
+visible ARM64 Pixel Tablet completed a 4,096-byte encrypted HTTP read and
+returned guest error `-9` for the wrong hostname. The repeatable runner preserves
+app-private game data, places no key on the device, cleans its public fixture,
+and returns to the production selector. Fresh runtime patch reproduction, 96
+tests with one skip, product-configured lint, and strict package/repository
+audits pass. This remains an opt-in pre-guest product fixture, not a retail
+Mario Kart/WFC-initiated request. Built-in Wii CA/client certificates,
+local/public WFC, interruption recovery, and physical Android acceptance remain
+open. The installed dual-game APK SHA-256 is
+`0eacd4f8310a8ac6ad1d2d7de49c4db9a969e5373875c0670c42babe46df665b`.
 Evidence:
-[`docs/artifacts/2026-09-05/android/a5-guest-tls-backend.md`](artifacts/2026-09-05/android/a5-guest-tls-backend.md).
+[`docs/artifacts/2026-09-05/android/a5-guest-tls-ioctlv.md`](artifacts/2026-09-05/android/a5-guest-tls-ioctlv.md).
 
 The latest Android A4 checkpoint fixes a real SDL lifecycle gap: KartPad now
 enables SDL activity recreation, so Android can rebuild `KartPadActivity`
