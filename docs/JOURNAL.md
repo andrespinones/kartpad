@@ -3788,7 +3788,7 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   user-owned root loading and mutual TLS remain open.
 - A fresh runtime preparation reproduced the exact source. The product APK
   SHA-256 is
-  `08c016da3ceb7f2dada9880249d94aacce9e7e6351c7f9a4d813dd86d183aec9`;
+  `aa227e2b2232c2d36d86044f44a26caa310325f42ca9774216a1a62dde94df89`;
   96 tests with one intentional skip, product-configured Android lint, strict
   package/privacy audit, repository safety, shell lint/syntax, and whitespace
   checks pass.
