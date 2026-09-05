@@ -640,7 +640,7 @@ disconnect states; a second sequence began with A cyan/locked and restored it
    calibration, dead-zone, inversion, and sensitivity behavior. Emulator
    injection proved neutral, opposite signed tilts, inversion, and preference
    restoration across process restart. The exact local dual APK SHA-256 is
-   `cfcd6da4d833992be9dac514f2d6352d793df69691c8cfe0e947b033a88f7935`.
+   `ae96d3e2bcd340b64d9b76cb6a05059bef99b90b24ac7111d159b7d4e05f51e5`.
    This accepts only this emulator A4 slice. Virtual accessibility nodes,
    physical haptic feel, tablet and physical touch, custom controller mapping,
    game-data/save and Mii management, direct Wii Remote support, complete menu-

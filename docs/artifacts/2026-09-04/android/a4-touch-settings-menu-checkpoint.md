@@ -53,7 +53,9 @@ final reset-preservation correction. They do not accept the current tree.
 ## Accepted emulator evidence
 
 - The exact local `KartPadDual` APK built successfully with SHA-256
-  `cfcd6da4d833992be9dac514f2d6352d793df69691c8cfe0e947b033a88f7935`.
+  `ae96d3e2bcd340b64d9b76cb6a05059bef99b90b24ac7111d159b7d4e05f51e5`.
+  It came from a fresh runtime preparation and new CMake directory; the dual
+  build completed in 25m46s.
 - The production selector displayed both Original and installed Retro Rewind
   6.12.5. Retro selection reached the branded title with separated X/Z buttons
   and the full top-level menu; the in-game switch returned to the selector.
@@ -65,6 +67,10 @@ final reset-preservation correction. They do not accept the current tree.
   neutral `0.0`, opposite values near `-0.30` and `+0.30`, and an inverted value
   near `+0.30` for the original negative tilt. Enabled/inverted/2.0x restored
   after a full process restart. The test left Off/standard/1.0x and neutral.
+- The fresh artifact's own smoke repeated selector-to-Retro launch, opened the
+  full motion sheet, registered gravity type 9, and produced approximately
+  `-0.302` for an injected tilt without a fatal signal. It was again left Off
+  with neutral gravity.
 - Focused Android and Apple touch contracts passed: 18 tests. Android lint,
   the strict APK package/privacy audit, repository safety, all 462 unified-diff
   hunks across 53 patches, pinned sources/input, the unchanged iOS overlay

@@ -3118,7 +3118,10 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   near `+0.30` after inversion. On/inverted/2.0x restored after a full process
   restart; the emulator was returned to Off/standard/1.0x and neutral.
 - The exact local dual APK SHA-256 is
-  `cfcd6da4d833992be9dac514f2d6352d793df69691c8cfe0e947b033a88f7935`.
+  `ae96d3e2bcd340b64d9b76cb6a05059bef99b90b24ac7111d159b7d4e05f51e5`.
+  A fresh runtime preparation applied the full patch stack and a new CMake
+  directory completed the dual build in 25m46s. That fresh artifact passed the
+  strict audit and its own selector/Retro/menu/motion emulator smoke.
   Android/Apple focused contracts pass 18 tests; lint, the strict package/privacy
   audit, repository safety, all 462 patch hunks, pinned sources/input, the iOS
   overlay snapshot, and diff whitespace pass.
