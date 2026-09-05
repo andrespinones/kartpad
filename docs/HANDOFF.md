@@ -13,12 +13,17 @@ anonymous downloads match the local bytes, checksums, provenance, and audits.
 GitHub marks this non-prerelease as **Latest**. Physical Apple TV acceptance
 remains open.
 
-Android A5 has begun with a maintained native TLS primitive. The official Mbed
-TLS 4.1.1 release is byte/hash locked and its ARM64 Android fixture initializes
-PSA entropy, requires peer verification, creates a client context, and assigns
-a hostname on the visible Pixel Tablet. Guest SSL integration and actual TLS
-traffic remain open. Evidence:
-`docs/artifacts/2026-09-05/android/a5-native-tls-primitive.md`.
+Android A5 now has a translated guest TLS backend, not only a context primitive.
+The pinned Mbed TLS 4.1.1 path consumes a guest DER root CA, verifies the peer
+and requested hostname, and maps nonblocking results back to `/dev/net/ssl`.
+Both a host-local fixture and the visible ARM64 Pixel Tablet completed encrypted
+HTTP traffic and rejected a wrong hostname as guest error `-9`. The exact
+runtime patch reproduces and the complete dual product compiles. This is not
+yet live guest IOCTLV/WFC or physical-device acceptance. The exact audited and
+installed dual-game APK SHA-256 is
+`c978ef4619cb59756854460f992c19a2c4da99ebcb6e080eba96b4905eedc9f2`.
+Evidence:
+`docs/artifacts/2026-09-05/android/a5-guest-tls-backend.md`.
 
 The `codex/iphone-touch-layout-editor` candidate captures the maintainer's
 current physical-iPhone control positions as the default for untouched iPhone

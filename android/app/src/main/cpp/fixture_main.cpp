@@ -2,6 +2,7 @@
 #include <SDL3/SDL_main.h>
 
 #include "android_tls_fixture.h"
+#include "android_tls_loopback_fixture.h"
 #include <SDL3/SDL_vulkan.h>
 #include <android/log.h>
 #include <jni.h>
@@ -344,6 +345,10 @@ extern "C" __attribute__((visibility("default"))) int SDL_main(int, char**) {
   if (!RunAndroidTlsFixture()) {
     SDL_Quit();
     return 11;
+  }
+  if (!RunAndroidTlsLoopbackFixture()) {
+    SDL_Quit();
+    return 12;
   }
   if (!RunSchedulerFixture()) {
     SDL_Quit();

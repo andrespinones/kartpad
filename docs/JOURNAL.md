@@ -3729,3 +3729,38 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   hostname-failure fixtures, and WFC connectivity remain open. No APK/AAB or
   private artifact was published. Evidence:
   `docs/artifacts/2026-09-05/android/a5-native-tls-primitive.md`.
+
+## 2026-09-05 — Android A5 guest TLS backend
+
+- Replaced Android's translated `/dev/net/ssl` unsupported branch with a
+  KartPad-owned Mbed TLS 4 session wrapper. Android sessions now bind the guest
+  hostname, parse the guest-provided DER root CA, attach the existing native
+  socket, require peer verification, and map read/write, close, socket, date,
+  trust-chain, and hostname outcomes to Wii SSL result values.
+- Added the change as a reproducible WiiCompiled patch and required every fresh
+  Android runtime preparation to apply it. A fresh prepared tree reproduced the
+  exact working `network_ssl.cpp`, and the complete translated dual product
+  compiled and linked the backend.
+- The first host-local exchange exposed Mbed TLS 1.3's post-handshake new-session
+  ticket result. Classifying that continuation correctly produced a complete
+  encrypted HTTP exchange and retained the wrong-hostname `-9` result.
+- Added a dormant source-only ARM64 loopback fixture and repeatable runner. It
+  creates one-run certificates outside the repository, copies only the public
+  DER CA into app-private storage, and connects to the host through emulator
+  alias `10.0.2.2`. The visible Pixel Tablet passed both exact markers:
+  `trusted handshake passed response_bytes=4096` and
+  `hostname rejection passed result=-9`.
+- The exact source-fixture APK SHA-256 is
+  `2deb2e52d1c980680285c910f43187c117a9bb05a880f5ef97f14efb7e56564b`.
+  Its strict audit, the host TLS fixture, 94 tests with one intentional skip,
+  shell syntax/lint, and whitespace checks pass. The clean translated product
+  rebuild and strict audit pass at APK SHA-256
+  `c978ef4619cb59756854460f992c19a2c4da99ebcb6e080eba96b4905eedc9f2`;
+  that exact APK was installed and left on the visible production selector.
+- Classification: **Pass for the Android guest TLS backend, deterministic
+  local encrypted traffic, CA/hostname verification, failure mapping, and ARM64
+  emulator execution.** This is not yet retail guest IOCTLV/WFC, built-in Wii
+  CA/client certificates, interruption recovery, public service, or physical
+  hardware acceptance. No APK/AAB, key, or private artifact was published.
+  Evidence:
+  `docs/artifacts/2026-09-05/android/a5-guest-tls-backend.md`.

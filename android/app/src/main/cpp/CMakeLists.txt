@@ -98,24 +98,28 @@ if(KARTPAD_GAME_RUNTIME_SOURCE)
     "${KARTPAD_REPO_ROOT}/runtime/src/android/touch_input.cpp"
     "${KARTPAD_REPO_ROOT}/runtime/src/android/runtime_settings.cpp"
     "${KARTPAD_REPO_ROOT}/runtime/src/android/controller_mapping.cpp"
+    "${KARTPAD_REPO_ROOT}/runtime/src/hle/net/android_mbedtls.cpp"
     "${KARTPAD_REPO_ROOT}/runtime/src/retro_rewind/archive_extract.cpp"
     "${KARTPAD_REPO_ROOT}/runtime/src/retro_rewind/archive_path.cpp"
     "${KARTPAD_REPO_ROOT}/runtime/src/retro_rewind/archive_scan.cpp")
   target_include_directories(${KARTPAD_GAME_RUNTIME_TARGET} PRIVATE
     "${KARTPAD_REPO_ROOT}/runtime/include")
-  target_link_libraries(${KARTPAD_GAME_RUNTIME_TARGET} PRIVATE MINIZIP::minizip)
+  target_link_libraries(${KARTPAD_GAME_RUNTIME_TARGET} PRIVATE
+    MINIZIP::minizip mbedtls)
 else()
   add_library(main SHARED
     fixture_main.cpp
     guest_memory_fixture.cpp
     scheduler_fixture.cpp
     android_tls_fixture.cpp
+    android_tls_loopback_fixture.cpp
     fiber_switch_android.S
     kartpad_controller_slots_fixture_jni.cpp
     kartpad_runtime_settings_fixture_jni.cpp
     kartpad_touch_input_jni.cpp
     retro_rewind_archive_jni.cpp
     "${KARTPAD_REPO_ROOT}/runtime/src/android/touch_input.cpp"
+    "${KARTPAD_REPO_ROOT}/runtime/src/hle/net/android_mbedtls.cpp"
     "${KARTPAD_REPO_ROOT}/runtime/src/scheduler/guest_scheduler.cpp"
     "${KARTPAD_REPO_ROOT}/runtime/src/retro_rewind/archive_extract.cpp"
     "${KARTPAD_REPO_ROOT}/runtime/src/retro_rewind/archive_path.cpp"

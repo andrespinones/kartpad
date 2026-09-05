@@ -186,20 +186,14 @@ if grep -Eq '/Users/|Mario Kart Wii\.(iso|wbfs)' "$audit_root/apk.strings"; then
   echo "ERROR: APK contains a private path or game-data name" >&2
   exit 1
 fi
-has_mbedtls=0
-if grep -Fq 'Mbed TLS 4.1.1' "$audit_root/apk.strings"; then
-  has_mbedtls=1
-fi
 key_markers="$(grep -E -- '-----(BEGIN|END) (RSA |EC |OPENSSH )?PRIVATE KEY-----' \
   "$audit_root/apk.strings" | sort || true)"
 expected_key_markers=""
-key_marker_repetitions=0
+# Every Android target links KartPad's pinned Mbed TLS 4 parser archives.
+key_marker_repetitions=2
 if [[ "$has_discio" == 1 ]]; then
+  # Product APKs additionally carry Dolphin DiscIO's historical parser.
   key_marker_repetitions=$((key_marker_repetitions + 1))
-fi
-if [[ "$has_mbedtls" == 1 ]]; then
-  # Mbed TLS 4's split PSA/TLS archives each retain the parser delimiters.
-  key_marker_repetitions=$((key_marker_repetitions + 2))
 fi
 if (( key_marker_repetitions > 0 )); then
   # mbedTLS's PEM parser contains these six format delimiters as code strings;

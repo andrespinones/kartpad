@@ -2,14 +2,18 @@
 
 Updated: 2026-09-05
 
-Android A5 now has its first native TLS primitive. The official maintained Mbed
-TLS 4.1.1 archive is byte/hash locked, builds under the pinned NDK, and passes a
-visible Pixel Tablet fixture that initializes PSA-backed native entropy,
-requires certificate verification, creates a client SSL context, and assigns a
-verification hostname. The source APK also passes the strict path/key audit.
-Guest `/dev/net/ssl`, CA loading, actual handshakes, and WFC remain open.
+Android A5 now routes translated guest `/dev/net/ssl` sessions through the
+pinned Mbed TLS 4.1.1 backend. It loads the guest-provided DER root CA, requires
+peer verification, applies hostname verification, and preserves nonblocking
+guest results. A host-local fixture and the visible ARM64 Pixel Tablet both
+completed encrypted HTTP traffic with the trusted hostname and returned guest
+error `-9` for the wrong hostname. Fresh runtime patch reproduction, translated
+product compilation, and strict source/package audits pass. Built-in Wii
+CA/client-certificate handling, local/public WFC, interruption recovery, and
+physical Android acceptance remain open. The installed dual-game APK SHA-256 is
+`c978ef4619cb59756854460f992c19a2c4da99ebcb6e080eba96b4905eedc9f2`.
 Evidence:
-[`docs/artifacts/2026-09-05/android/a5-native-tls-primitive.md`](artifacts/2026-09-05/android/a5-native-tls-primitive.md).
+[`docs/artifacts/2026-09-05/android/a5-guest-tls-backend.md`](artifacts/2026-09-05/android/a5-guest-tls-backend.md).
 
 The latest Android A4 checkpoint fixes a real SDL lifecycle gap: KartPad now
 enables SDL activity recreation, so Android can rebuild `KartPadActivity`

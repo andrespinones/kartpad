@@ -65,6 +65,8 @@ class KartPadActivity : SDLActivity() {
     override fun createSDLSurface(context: Context): SDLSurface = KartPadSurface(context)
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        Os.setenv("KARTPAD_ANDROID_FILES_DIR", filesDir.absolutePath, true)
+        Os.setenv("KARTPAD_ANDROID_CACHE_DIR", cacheDir.absolutePath, true)
         if (BuildConfig.GAME_RUNTIME) {
             RetroRewindInstallStorage.recover(filesDir)
             KartPadSaveStorage.applyPending(filesDir)?.let { error ->
@@ -74,8 +76,6 @@ class KartPadActivity : SDLActivity() {
                 Log.e(TAG, error)
             }
             KartPadRuntimeResources.install(this)
-            Os.setenv("KARTPAD_ANDROID_FILES_DIR", filesDir.absolutePath, true)
-            Os.setenv("KARTPAD_ANDROID_CACHE_DIR", cacheDir.absolutePath, true)
             configureRuntimeProfile()
             configureDebugRkgInput()
             configureDebugStateTrace()
