@@ -19,6 +19,7 @@ class KartPadLaunchActivity : Activity() {
     private lateinit var status: TextView
     private lateinit var original: Button
     private lateinit var retro: Button
+    private lateinit var manageGameData: Button
     private lateinit var progress: ProgressBar
     private val validator = Executors.newSingleThreadExecutor()
     private var validationGeneration = 0
@@ -34,6 +35,9 @@ class KartPadLaunchActivity : Activity() {
             } else {
                 startActivity(Intent(this, RetroRewindInstallActivity::class.java))
             }
+        }
+        manageGameData.setOnClickListener {
+            startActivity(Intent(this, KartPadGameDataActivity::class.java))
         }
     }
 
@@ -53,10 +57,14 @@ class KartPadLaunchActivity : Activity() {
         val forceNotInstalled = BuildConfig.DEBUG &&
             intent.getBooleanExtra(EXTRA_DEBUG_RETRO_NOT_INSTALLED, false)
         retroInstalled = false
-        status.text = "Checking Retro Rewind ${RetroRewindRelease.VERSION}…"
+        status.text = "Checking game data and Retro Rewind ${RetroRewindRelease.VERSION}…"
         progress.visibility = View.VISIBLE
+        original.isEnabled = false
         retro.isEnabled = false
         validator.execute {
+            val removalError = KartPadGameDataStorage.applyScheduledRemoval(filesDir)
+            val gameDataValid = removalError == null &&
+                KartPadGameDataStorage.validationError(filesDir) == null
             val valid = !forceNotInstalled && runCatching {
                 RetroRewindInstallStorage.recover(filesDir)
                 RetroRewindInstallValidator.validate(
@@ -71,12 +79,17 @@ class KartPadLaunchActivity : Activity() {
                 }
                 retroInstalled = valid
                 progress.visibility = View.GONE
-                retro.isEnabled = true
-                if (valid) {
-                    status.text = "Retro Rewind ${RetroRewindRelease.VERSION} is ready"
+                original.isEnabled = gameDataValid
+                retro.isEnabled = gameDataValid
+                if (removalError != null) {
+                    status.text = removalError
+                } else if (!gameDataValid) {
+                    status.text = "Import your extracted RMCP01 game data to race"
+                } else if (valid) {
+                    status.text = "Original and Retro Rewind ${RetroRewindRelease.VERSION} are ready"
                     retro.text = "Retro Rewind\nInstalled ${RetroRewindRelease.VERSION} • Extra content + Retro WFC"
                 } else {
-                    status.text = "Retro Rewind is optional"
+                    status.text = "Original is ready; Retro Rewind is optional"
                     retro.text = "Retro Rewind\nDownload ${RetroRewindRelease.VERSION} • Extra content + Retro WFC"
                 }
                 retro.contentDescription = retro.text
@@ -158,6 +171,12 @@ class KartPadLaunchActivity : Activity() {
             )
         }
         column.addView(choices, layout(dp(6)))
+        manageGameData = Button(this).apply {
+            id = R.id.kartpad_manage_game_data
+            text = "Manage Game Data…"
+            contentDescription = "Import, reimport, or remove private game data"
+        }
+        column.addView(manageGameData, layout(dp(6)))
         progress = ProgressBar(this).apply {
             isIndeterminate = true
         }

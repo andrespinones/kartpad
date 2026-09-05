@@ -3190,3 +3190,30 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   physical controllers/devices, and full A4 parity remain open. No APK, AAB,
   private data, save, log, or screenshot was published. Evidence:
   `docs/artifacts/2026-09-04/android/a4-mii-management.md`.
+
+## 2026-09-04 — Android A4 game-data, save, and selector parity
+
+- Replaced the remaining Game Data & Saves placeholder with direct import,
+  save-preserving removal, Retro management, save backup/restore, and Mii
+  actions. The isolated chooser now validates game data, blocks both profiles
+  from launching without it, and provides Manage Game Data as the recovery path.
+- Added bounded SAF extracted-folder traversal, RMCP01/revision/header and pinned
+  main-DOL validation, same-volume staging, rollback-safe activation, atomic
+  removal markers, and a narrow deletion allowlist that excludes NAND and saves.
+- Added exact RKSYS export and restore with size, `RKSD0006`, and CRC-32 checks.
+  Restores are staged while playing, backed up, and atomically applied before SDL.
+- On the API 36 ARM64 emulator, DocumentsUI opened for both game data and saves.
+  An invalid folder failed closed without changing the exact installed game data.
+  The active 2,867,200-byte save exported byte-identically at SHA-256 `708c7a...`,
+  restored through a selector restart, retained an exact backup, and returned to
+  the Retro runtime. Removal schedule/Undo preserved both game data and save.
+  Switching through the visible chooser then selected `base` and reached the
+  Original attract scene.
+- The exact local-only APK SHA-256 is
+  `6aa904883b174940f728b672bee971a6367dc6008d7c9837eeb7cf684e043203`.
+  Build, lint, strict APK/privacy audit, 24 focused contracts, native/portable
+  contracts, repository safety, pinned inputs, all 464 patch hunks, the SunPad
+  snapshot, and whitespace checks pass. ISO/WBFS extraction and a positive
+  multi-gigabyte import run remain open. All temporary emulator files and the
+  test backup were removed; no private content or package was published.
+  Evidence: `docs/artifacts/2026-09-04/android/a4-game-data-save-parity.md`.

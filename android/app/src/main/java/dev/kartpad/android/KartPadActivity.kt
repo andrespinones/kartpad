@@ -55,6 +55,9 @@ class KartPadActivity : SDLActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         if (BuildConfig.GAME_RUNTIME) {
             RetroRewindInstallStorage.recover(filesDir)
+            KartPadSaveStorage.applyPending(filesDir)?.let { error ->
+                Log.e(TAG, error)
+            }
             KartPadMiiStorage.applyPending(filesDir)?.let { error ->
                 Log.e(TAG, error)
             }
@@ -191,9 +194,11 @@ class KartPadActivity : SDLActivity() {
                 add(0, MENU_RENDER_RESOLUTION, 1, "Render Resolution…")
             }
             menu.addSubMenu(0, MENU_DATA_GROUP, 6, "Game Data & Saves").apply {
-                add(0, MENU_GAME_DATA, 0, "Game Data Status…")
-                add(0, MENU_RETRO_REWIND, 1, "Manage Retro Rewind…")
-                add(0, MENU_MIIS, 2, "Manage Miis…")
+                add(0, MENU_IMPORT_GAME_DATA, 0, "Import or Reimport Game Data…")
+                add(0, MENU_REMOVE_GAME_DATA, 1, "Remove Stored Game Data…")
+                add(0, MENU_RETRO_REWIND, 2, "Manage Retro Rewind…")
+                add(0, MENU_SAVES, 3, "Manage Saves…")
+                add(0, MENU_MIIS, 4, "Manage Miis…")
             }
             menu.add(0, MENU_REPORT_PROBLEM, 7, "Report a Problem…")
             setOnMenuItemClickListener { item ->
@@ -210,11 +215,13 @@ class KartPadActivity : SDLActivity() {
                     )
                     MENU_ASPECT_RATIO -> showAspectRatioSettings()
                     MENU_RENDER_RESOLUTION -> showResolutionSettings()
-                    MENU_GAME_DATA -> showGameDataStatus()
+                    MENU_IMPORT_GAME_DATA -> openGameDataManager(KartPadGameDataActivity.ACTION_IMPORT)
+                    MENU_REMOVE_GAME_DATA -> openGameDataManager(KartPadGameDataActivity.ACTION_REMOVE)
                     MENU_RETRO_REWIND -> startActivity(
                         Intent(this@KartPadActivity, RetroRewindInstallActivity::class.java),
                     )
                     MENU_MIIS -> showMiiManager()
+                    MENU_SAVES -> showSaveManager()
                     MENU_REPORT_PROBLEM -> showReportProblem()
                     else -> return@setOnMenuItemClickListener false
                 }
@@ -247,6 +254,14 @@ class KartPadActivity : SDLActivity() {
         }
         startActivity(chooser)
         menuButton.postDelayed({ kotlin.system.exitProcess(0) }, SELECTOR_RESTART_DELAY_MS)
+    }
+
+    private fun openGameDataManager(action: String) {
+        startActivityForResult(
+            Intent(this, KartPadGameDataActivity::class.java)
+                .putExtra(KartPadGameDataActivity.EXTRA_ACTION, action),
+            REQUEST_MANAGE_GAME_DATA,
+        )
     }
 
     private fun applyDisplaySettings() {
@@ -466,22 +481,6 @@ class KartPadActivity : SDLActivity() {
         dialog.show()
     }
 
-    private fun showGameDataStatus() {
-        val retroRoot = RetroRewindInstallStorage.installedRoot(filesDir)
-            .resolve(RetroRewindRelease.ROOT)
-        val retroReady = runCatching {
-            RetroRewindInstallValidator.validate(
-                retroRoot, RetroRewindInstallValidator.productionContract(),
-            ).isValid
-        }.getOrDefault(false)
-        showParityBoundary(
-            "Game Data & Saves",
-            "Active game: ${if (runtimeProfile == "retro_rewind") "Retro Rewind" else "Original Mario Kart Wii"}\n" +
-                "Retro Rewind ${RetroRewindRelease.VERSION}: ${if (retroReady) "Installed" else "Not installed"}\n\n" +
-                "Android game-data import and save management are still being ported. This screen does not expose private file paths.",
-        )
-    }
-
     private fun showMiiManager() {
         kartPadOverlay.clearTouchInput()
         val database = runCatching { KartPadMiiStorage.readWorking(filesDir) }
@@ -557,6 +556,59 @@ class KartPadActivity : SDLActivity() {
         dialog.show()
     }
 
+    private fun showSaveManager() {
+        kartPadOverlay.clearTouchInput()
+        val validSave = runCatching { KartPadSaveStorage.readActive(filesDir) }.isSuccess
+        val pending = KartPadSaveStorage.hasPending(filesDir)
+        val content = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(24), dp(4), dp(24), dp(8))
+        }
+        lateinit var dialog: AlertDialog
+        content.addView(settingsLabel(when {
+            pending -> "A validated save restore is staged for the next game restart."
+            validSave -> "A validated Mario Kart Wii save is available for backup."
+            else -> "No initialized Mario Kart Wii save exists yet. Create a license in the game first."
+        }))
+        content.addView(Button(this).apply {
+            text = "Export Save Backup…"
+            contentDescription = "Export Mario Kart Wii save backup"
+            isEnabled = validSave
+            setOnClickListener {
+                startActivityForResult(
+                    Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                        addCategory(Intent.CATEGORY_OPENABLE)
+                        type = "application/octet-stream"
+                        putExtra(Intent.EXTRA_TITLE, "KartPad-RMCP01-rksys.dat")
+                    },
+                    REQUEST_EXPORT_SAVE,
+                )
+            }
+        })
+        content.addView(Button(this).apply {
+            text = "Restore Save Backup…"
+            contentDescription = "Restore Mario Kart Wii save backup"
+            setOnClickListener {
+                startActivityForResult(
+                    Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                        addCategory(Intent.CATEGORY_OPENABLE)
+                        type = "application/octet-stream"
+                    },
+                    REQUEST_IMPORT_SAVE,
+                )
+            }
+        })
+        content.addView(Button(this).apply {
+            text = "Done"
+            setOnClickListener { dialog.dismiss() }
+        })
+        dialog = AlertDialog.Builder(this)
+            .setTitle("Manage Saves")
+            .setView(ScrollView(this).apply { addView(content) })
+            .create()
+        dialog.show()
+    }
+
     private fun showMiiRemoval(records: List<MiiRecord>) {
         if (records.isEmpty()) return
         val labels = records.map { record ->
@@ -597,6 +649,66 @@ class KartPadActivity : SDLActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_MANAGE_GAME_DATA && resultCode == RESULT_OK) {
+            AlertDialog.Builder(this)
+                .setTitle("Game Data Changed")
+                .setMessage("Restart KartPad to apply the game-data change and choose Original Mario Kart Wii or Retro Rewind.")
+                .setPositiveButton("Restart to Selector") { _, _ -> restartToGameSelector() }
+                .setNegativeButton("Later", null)
+                .show()
+            return
+        }
+        if (requestCode == REQUEST_EXPORT_SAVE && resultCode == RESULT_OK) {
+            val uri = data?.data ?: return
+            runCatching {
+                val save = KartPadSaveStorage.readActive(filesDir)
+                contentResolver.openOutputStream(uri, "wt")
+                    ?.use { it.write(save) } ?: error("The selected destination could not be opened.")
+            }.onSuccess {
+                showParityBoundary("Save Backup Exported", "The validated RKSYS save backup was exported.")
+            }.onFailure {
+                showParityBoundary("Save Export Failed", "The save backup could not be exported.")
+            }
+            return
+        }
+        if (requestCode == REQUEST_IMPORT_SAVE && resultCode == RESULT_OK) {
+            val uri = data?.data ?: return
+            runCatching {
+                val input = contentResolver.openInputStream(uri)
+                    ?: error("The selected save could not be opened.")
+                val save = input.use { stream ->
+                    val buffer = ByteArray(KartPadSaveStorage.SAVE_BYTES + 1)
+                    var count = 0
+                    while (count < buffer.size) {
+                        val read = stream.read(buffer, count, buffer.size - count)
+                        if (read < 0) break
+                        count += read
+                    }
+                    require(count == KartPadSaveStorage.SAVE_BYTES) {
+                        "A Mario Kart Wii save must be exactly ${KartPadSaveStorage.SAVE_BYTES} bytes."
+                    }
+                    buffer.copyOf(count)
+                }
+                KartPadSaveStorage.writePending(filesDir, save)
+            }.onSuccess {
+                AlertDialog.Builder(this)
+                    .setTitle("Save Restore Scheduled")
+                    .setMessage("The validated save will replace the current save after restarting. KartPad will retain a backup of the current save automatically.")
+                    .setPositiveButton("Restart Now") { _, _ -> restartToGameSelector() }
+                    .setNegativeButton("Later", null)
+                    .show()
+            }.onFailure { error ->
+                showParityBoundary(
+                    "Save Restore Failed",
+                    if (error is IllegalArgumentException && !error.message.isNullOrBlank()) {
+                        error.message!!
+                    } else {
+                        "The selected save could not be validated."
+                    },
+                )
+            }
+            return
+        }
         if (requestCode != REQUEST_IMPORT_MII || resultCode != RESULT_OK) return
         val uri = data?.data ?: return
         runCatching {
@@ -1095,15 +1207,20 @@ class KartPadActivity : SDLActivity() {
         private const val MENU_WIIMOTE = 106
         private const val MENU_ASPECT_RATIO = 107
         private const val MENU_RENDER_RESOLUTION = 108
-        private const val MENU_GAME_DATA = 109
+        private const val MENU_IMPORT_GAME_DATA = 109
         private const val MENU_RETRO_REWIND = 110
         private const val MENU_MIIS = 111
         private const val MENU_REPORT_PROBLEM = 112
         private const val MENU_CONTROLS_GROUP = 113
         private const val MENU_DISPLAY_GROUP = 114
         private const val MENU_DATA_GROUP = 115
+        private const val MENU_REMOVE_GAME_DATA = 116
+        private const val MENU_SAVES = 117
         private const val SELECTOR_RESTART_DELAY_MS = 250L
         private const val REQUEST_IMPORT_MII = 4_301
+        private const val REQUEST_MANAGE_GAME_DATA = 4_302
+        private const val REQUEST_EXPORT_SAVE = 4_303
+        private const val REQUEST_IMPORT_SAVE = 4_304
         private const val MII_FILE_BYTES = 74
         const val EXTRA_RUNTIME_PROFILE = "dev.kartpad.android.RUNTIME_PROFILE"
         private const val TAG = "KartPadFixture"

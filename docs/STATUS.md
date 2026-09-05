@@ -659,10 +659,23 @@ disconnect states; a second sequence began with A cyan/locked and restored it
    byte-for-byte to its original SHA-256. The exact clean local APK for this
    follow-up is
    `24dbe0768dc07fa3d3cf8a27c7fcd163bff5cd53615dce5cddfc51207b580545`.
+   The disclosure-only Android game-data/save row is now replaced by direct
+   extracted-folder import/reimport, save-preserving removal, Retro management,
+   exact RKSYS export/restore, and Mii actions. The isolated launcher validates
+   RMCP01 data and presents both Original and installed Retro choices when ready.
+   The emulator proved the expanded submenu, real folder picker and invalid-tree
+   rejection, removal schedule/Undo, byte-identical save export plus staged
+   restore/backup/restart, and Retro-to-selector-to-Original switching. The exact
+   local-only APK is
+   `6aa904883b174940f728b672bee971a6367dc6008d7c9837eeb7cf684e043203`.
+   ISO/WBFS extraction and positive multi-gigabyte folder-import evidence remain
+   open along with accessibility, multi-controller, tablet/physical touch, and
+   physical-device acceptance.
    Evidence:
 [`docs/artifacts/2026-09-04/android/a4-touch-settings-menu-checkpoint.md`](artifacts/2026-09-04/android/a4-touch-settings-menu-checkpoint.md).
 [`docs/artifacts/2026-09-04/android/a4-controller-mapping.md`](artifacts/2026-09-04/android/a4-controller-mapping.md).
 [`docs/artifacts/2026-09-04/android/a4-mii-management.md`](artifacts/2026-09-04/android/a4-mii-management.md).
+[`docs/artifacts/2026-09-04/android/a4-game-data-save-parity.md`](artifacts/2026-09-04/android/a4-game-data-save-parity.md).
 Accepted evidence:
 [`docs/artifacts/2026-09-04/android/a4-touch-overlay-input.md`](artifacts/2026-09-04/android/a4-touch-overlay-input.md).
 [`docs/artifacts/2026-09-04/android/a4-controller-handoff.md`](artifacts/2026-09-04/android/a4-controller-handoff.md).

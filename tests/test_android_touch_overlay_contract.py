@@ -98,6 +98,8 @@ class AndroidTouchOverlayContractTests(unittest.TestCase):
             '"Touch Control Settings…"', '"Motion Steering…"',
             '"Experimental Wii Remote + Nunchuk…"', '"Aspect Ratio…"',
             '"Render Resolution…"', '"Manage Retro Rewind…"', '"Manage Miis…"',
+            '"Import or Reimport Game Data…"', '"Remove Stored Game Data…"',
+            '"Manage Saves…"',
             '"Report a Problem…"',
         ):
             self.assertIn(title, activity)

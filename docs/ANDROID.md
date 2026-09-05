@@ -1048,12 +1048,18 @@ Android Mii management now lists the validated live or staged database, imports
 bounded standard 74-byte `.mii` documents through the system picker, stages
 removals, applies a CRC-validated database before SDL starts, retains backups,
 and refuses to remove the last Mii. Native Mii creation remains unavailable,
-matching the iOS product boundary. Complete Android game-data/save management,
-accessibility nodes, tablet/physical touch, multi-controller setup parity, and
-physical-device acceptance are still open. Evidence is in
+matching the iOS product boundary. The Game Data & Saves submenu now exposes
+real extracted-folder import/reimport, save-preserving removal, Retro management,
+exact RKSYS backup/restore, and Mii management. The isolated launcher validates
+RMCP01 data, remains usable as the recovery/import surface when data is absent,
+and shows both Original and installed Retro choices when ready. ISO/WBFS
+extraction, positive multi-gigabyte import evidence, accessibility nodes,
+tablet/physical touch, multi-controller setup parity, and physical-device
+acceptance are still open. Evidence is in
 `docs/artifacts/2026-09-04/android/a4-touch-settings-menu-checkpoint.md` and
 `docs/artifacts/2026-09-04/android/a4-controller-mapping.md` and
-`docs/artifacts/2026-09-04/android/a4-mii-management.md`.
+`docs/artifacts/2026-09-04/android/a4-mii-management.md` and
+`docs/artifacts/2026-09-04/android/a4-game-data-save-parity.md`.
 
 Do not begin the touch-UI port until A2's controller-driven Original-mode proof
 passes. Physical Android hardware remains authoritative for vendor Vulkan and
