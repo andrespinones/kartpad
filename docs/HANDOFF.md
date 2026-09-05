@@ -80,6 +80,13 @@ opens on both canonical emulator layouts and when the Pixel 6 receives Home and
 that build still compiles, lints, and audits. Evidence:
 `docs/artifacts/2026-09-05/android/a4-touch-modal-lifecycle-clearing.md`.
 
+Android per-control touch persistence now has real process-boundary evidence on
+both canonical emulator layouts. A reloads at normalized `(0.55,0.55)` and
+1.25x size after force-stop, while hidden B is absent from the independently
+rebuilt accessibility tree. The source fixture restores defaults after the
+check. Evidence:
+`docs/artifacts/2026-09-05/android/a4-touch-state-persistence.md`.
+
 KartPad `v0.4.0-preview.2` is published from
 `e9fa6058ee09fff0b16481ebe4a78d61cea69c87`. It updates both Apple-platform
 artifacts for Retro Rewind 6.12.5, repairs the universal iPhone/iPad three-dot

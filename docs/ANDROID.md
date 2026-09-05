@@ -1124,6 +1124,11 @@ than relying on source inspection: the menu path passes on the canonical phone
 and tablet, and Home/`onPause` passes on the phone. Each starts with Classic A
 and one pointer owner and ends neutral with no owner; evidence is in
 `docs/artifacts/2026-09-05/android/a4-touch-modal-lifecycle-clearing.md`.
+Per-control persistence is also exercised across a real force-stop/new-process
+boundary on both canonical layouts. The new overlay reloads A's normalized
+position and 1.25x size and keeps hidden B out of its accessibility tree;
+evidence is in
+`docs/artifacts/2026-09-05/android/a4-touch-state-persistence.md`.
 
 Do not begin the touch-UI port until A2's controller-driven Original-mode proof
 passes. Physical Android hardware remains authoritative for vendor Vulkan and

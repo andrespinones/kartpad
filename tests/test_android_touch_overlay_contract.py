@@ -110,6 +110,20 @@ class AndroidTouchOverlayContractTests(unittest.TestCase):
         self.assertIn("input keyevent KEYCODE_HOME", runner)
         self.assertIn("neutral=0x0 owners=0", runner)
 
+    def test_source_fixture_persists_position_size_and_visibility_across_processes(self) -> None:
+        activity = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadActivity.kt").read_text()
+        overlay = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadOverlayView.kt").read_text()
+        runner = (REPO / "scripts/test-android-touch-persistence.sh").read_text()
+        self.assertIn("DEBUG_EXTRA_TOUCH_PERSISTENCE", activity)
+        self.assertIn('KartPadTouchSettings.setOrigin(this, "A"', activity)
+        self.assertIn('KartPadTouchSettings.setControlSize(this, "A", 1.25f)', activity)
+        self.assertIn('KartPadTouchSettings.setHidden(this, "B", true)', activity)
+        self.assertIn("runDebugPersistenceFixture()", activity)
+        self.assertIn("visibleAccessibilityControls().any", overlay)
+        self.assertIn('KartPadTouchSettings.isHidden(context, "B")', overlay)
+        self.assertIn("am force-stop dev.kartpad.android", runner)
+        self.assertIn("TEST_TOUCH_PERSISTENCE verify", runner)
+
     def test_touch_visual_contract_covers_phone_tablet_geometry_and_palette(self) -> None:
         verifier = (REPO / "scripts/check-android-touch-visual.py").read_text()
         runner = (REPO / "scripts/test-android-touch-visual.sh").read_text()

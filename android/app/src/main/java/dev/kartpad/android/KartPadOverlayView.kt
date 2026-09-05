@@ -328,6 +328,30 @@ class KartPadOverlayView(context: Context) : View(context) {
     fun debugTouchStateIsNeutral(): Boolean =
         lastPublishedButtons == 0 && pointerOwners.isEmpty() && !gasLocked
 
+    fun runDebugPersistenceFixture(): String {
+        check(isLaidOut && width > 0 && height > 0) { "touch overlay is not laid out" }
+        layoutControls()
+        val savedOrigin = KartPadTouchSettings.origin(context, "A")
+        val savedSize = KartPadTouchSettings.controlSize(context, "A")
+        check(savedOrigin != null && abs(savedOrigin.x - 0.55f) < 0.001f &&
+            abs(savedOrigin.y - 0.55f) < 0.001f
+        ) { "persisted A origin is $savedOrigin" }
+        check(abs(savedSize - 1.25f) < 0.001f) { "persisted A size is $savedSize" }
+        check(KartPadTouchSettings.isHidden(context, "B")) { "persisted B visibility is shown" }
+
+        val safe = safeFrame()
+        val a = controls.first { it.id == "A" }.frame
+        val expectedX = safe.left + safe.width() * 0.55f
+        val expectedY = safe.top + safe.height() * 0.55f
+        check(abs(a.centerX() - expectedX) <= 2f && abs(a.centerY() - expectedY) <= 2f) {
+            "rendered A center=(${a.centerX()},${a.centerY()}) expected=($expectedX,$expectedY)"
+        }
+        val bVisible = visibleAccessibilityControls().any { it.second.id == "B" }
+        check(!bVisible) { "hidden B remains in the accessibility tree" }
+        return "a_center=${a.centerX().roundToInt()},${a.centerY().roundToInt()} " +
+            "a_size=1.25 b=hidden"
+    }
+
     fun setMotionSteering(value: Float) {
         motionSteeringX = if (controllerConnected) 0f else value.coerceIn(-1f, 1f)
         publishState(connected = true)

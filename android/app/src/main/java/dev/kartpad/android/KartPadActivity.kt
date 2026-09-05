@@ -94,9 +94,14 @@ class KartPadActivity : SDLActivity() {
             intent.getBooleanExtra(DEBUG_EXTRA_MODAL_CLEAR, false)
         val debugLifecycleClear = BuildConfig.DEBUG && !BuildConfig.GAME_RUNTIME &&
             intent.getBooleanExtra(DEBUG_EXTRA_LIFECYCLE_CLEAR, false)
+        val debugPersistence = if (BuildConfig.DEBUG && !BuildConfig.GAME_RUNTIME) {
+            intent.getStringExtra(DEBUG_EXTRA_TOUCH_PERSISTENCE)
+        } else {
+            null
+        }
         kartPadOverlay.visibility = if (
             BuildConfig.GAME_RUNTIME || debugTouchOverlay || debugModalClear ||
-                debugLifecycleClear
+                debugLifecycleClear || debugPersistence != null
         ) {
             android.view.View.VISIBLE
         } else {
@@ -148,6 +153,23 @@ class KartPadActivity : SDLActivity() {
                     debugLifecycleClearArmed = true
                     Log.i(TAG, "A4 lifecycle clear fixture armed $held")
                 }.onFailure { Log.e(TAG, "A4 lifecycle clear fixture failed", it) }
+            }
+        }
+        when (debugPersistence) {
+            "seed" -> {
+                KartPadTouchSettings.resetTouchControls(this)
+                KartPadTouchSettings.setOrigin(this, "A", android.graphics.PointF(0.55f, 0.55f))
+                KartPadTouchSettings.setControlSize(this, "A", 1.25f)
+                KartPadTouchSettings.setHidden(this, "B", true)
+                Log.i(TAG, "A4 touch persistence fixture seeded a=0.55,0.55 size=1.25 b=hidden")
+            }
+            "verify" -> kartPadOverlay.post {
+                runCatching { kartPadOverlay.runDebugPersistenceFixture() }
+                    .onSuccess {
+                        Log.i(TAG, "A4 touch persistence fixture passed $it")
+                        KartPadTouchSettings.resetTouchControls(this)
+                    }
+                    .onFailure { Log.e(TAG, "A4 touch persistence fixture failed", it) }
             }
         }
         mLayout.bringChildToFront(kartPadOverlay)
@@ -1529,6 +1551,8 @@ class KartPadActivity : SDLActivity() {
             "dev.kartpad.android.TEST_TOUCH_MODAL_CLEAR"
         private const val DEBUG_EXTRA_LIFECYCLE_CLEAR =
             "dev.kartpad.android.TEST_TOUCH_LIFECYCLE_CLEAR"
+        private const val DEBUG_EXTRA_TOUCH_PERSISTENCE =
+            "dev.kartpad.android.TEST_TOUCH_PERSISTENCE"
         private const val DEBUG_RESUME_FIXTURE_SHA256 =
             "cb9d5fc3b83611af65032f73119285de4e97d4b2b9f7b2e9567443635358483a"
         private const val MIN_RKG_BYTES = 0x90L

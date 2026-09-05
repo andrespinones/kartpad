@@ -3439,3 +3439,23 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   physical-device gates. No package or private artifact was published.
   Evidence:
   `docs/artifacts/2026-09-05/android/a4-touch-modal-lifecycle-clearing.md`.
+
+## 2026-09-05 — Android A4 touch state persistence
+
+- Added a production-gated source fixture that writes A position `(0.55,0.55)`,
+  A size `1.25`, and B hidden through the normal touch-settings owner, then
+  force-stops the app before a separate verification process starts.
+- The new process refuses to pass unless it reloads all three settings, places
+  A at the corresponding safe-frame center, and omits B from the virtual
+  accessibility tree. Fixture preferences reset after verification.
+- The visible Pixel 6 passed with A center `1378,588`; the visible Pixel Tablet
+  passed with A center `1408,866`. Both retained A size 1.25 and hidden B.
+- The complete translated runtime rebuilt. Android lint, 80 tests with one
+  intentional skip, strict package/privacy audit, repository safety, shell
+  syntax, and whitespace checks pass. The local-only APK SHA-256 is
+  `254b2614f7ae17d24a1547563b77f543bafd996f0f7030a7d3cad3266d70df61`.
+- Classification: **Pass for per-control position, size, and visibility across
+  process restart on canonical phone/tablet emulators.** Update-in-place and
+  physical-device persistence remain separate gates. No package or private
+  artifact was published. Evidence:
+  `docs/artifacts/2026-09-05/android/a4-touch-state-persistence.md`.
