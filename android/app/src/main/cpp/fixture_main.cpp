@@ -1,5 +1,7 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
+
+#include "android_tls_fixture.h"
 #include <SDL3/SDL_vulkan.h>
 #include <android/log.h>
 #include <jni.h>
@@ -338,6 +340,10 @@ extern "C" __attribute__((visibility("default"))) int SDL_main(int, char**) {
   if (!RunGuestMemoryFixture()) {
     SDL_Quit();
     return 2;
+  }
+  if (!RunAndroidTlsFixture()) {
+    SDL_Quit();
+    return 11;
   }
   if (!RunSchedulerFixture()) {
     SDL_Quit();

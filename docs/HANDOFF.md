@@ -13,6 +13,13 @@ anonymous downloads match the local bytes, checksums, provenance, and audits.
 GitHub marks this non-prerelease as **Latest**. Physical Apple TV acceptance
 remains open.
 
+Android A5 has begun with a maintained native TLS primitive. The official Mbed
+TLS 4.1.1 release is byte/hash locked and its ARM64 Android fixture initializes
+PSA entropy, requires peer verification, creates a client context, and assigns
+a hostname on the visible Pixel Tablet. Guest SSL integration and actual TLS
+traffic remain open. Evidence:
+`docs/artifacts/2026-09-05/android/a5-native-tls-primitive.md`.
+
 The `codex/iphone-touch-layout-editor` candidate captures the maintainer's
 current physical-iPhone control positions as the default for untouched iPhone
 installs only. Existing custom layouts and every iPad layout remain unchanged.

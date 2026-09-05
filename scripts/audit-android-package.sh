@@ -81,9 +81,11 @@ fi
 asset_members="$(printf '%s\n' "$members" | grep '^assets/.' | sort || true)"
 if [[ -n "$asset_members" ]]; then
   expected_asset_members="$(printf '%s\n' \
+    assets/ThirdPartyLicenses/Mbed-TLS.txt \
     assets/ThirdPartyLicenses/Minizip-NG.txt | sort)"
   if printf '%s\n' "$asset_members" | grep -Fxq assets/dsp/dsp_coef.bin; then
     expected_asset_members="$(printf '%s\n' \
+    assets/ThirdPartyLicenses/Mbed-TLS.txt \
     assets/ThirdPartyLicenses/Minizip-NG.txt \
     assets/dsp/dsp_coef.bin \
     assets/pipeline/initial_pipeline_cache.db \
@@ -184,20 +186,36 @@ if grep -Eq '/Users/|Mario Kart Wii\.(iso|wbfs)' "$audit_root/apk.strings"; then
   echo "ERROR: APK contains a private path or game-data name" >&2
   exit 1
 fi
+has_mbedtls=0
+if grep -Fq 'Mbed TLS 4.1.1' "$audit_root/apk.strings"; then
+  has_mbedtls=1
+fi
 key_markers="$(grep -E -- '-----(BEGIN|END) (RSA |EC |OPENSSH )?PRIVATE KEY-----' \
   "$audit_root/apk.strings" | sort || true)"
 expected_key_markers=""
+key_marker_repetitions=0
 if [[ "$has_discio" == 1 ]]; then
+  key_marker_repetitions=$((key_marker_repetitions + 1))
+fi
+if [[ "$has_mbedtls" == 1 ]]; then
+  # Mbed TLS 4's split PSA/TLS archives each retain the parser delimiters.
+  key_marker_repetitions=$((key_marker_repetitions + 2))
+fi
+if (( key_marker_repetitions > 0 )); then
   # mbedTLS's PEM parser contains these six format delimiters as code strings;
   # exact cardinality prevents an actual packaged PEM block from hiding there.
   private_key_suffix='PRIVATE KEY-----'
-  expected_key_markers="$(printf '%s\n' \
-    "-----BEGIN EC $private_key_suffix" \
-    "-----BEGIN $private_key_suffix" \
-    "-----BEGIN RSA $private_key_suffix" \
-    "-----END EC $private_key_suffix" \
-    "-----END $private_key_suffix" \
-    "-----END RSA $private_key_suffix" | sort)"
+  expected_key_markers="$(
+    for ((index = 0; index < key_marker_repetitions; ++index)); do
+      printf '%s\n' \
+        "-----BEGIN EC $private_key_suffix" \
+        "-----BEGIN $private_key_suffix" \
+        "-----BEGIN RSA $private_key_suffix" \
+        "-----END EC $private_key_suffix" \
+        "-----END $private_key_suffix" \
+        "-----END RSA $private_key_suffix"
+    done | sort
+  )"
 fi
 if [[ "$key_markers" != "$expected_key_markers" ]]; then
   echo "ERROR: APK contains an unexpected private-key marker" >&2

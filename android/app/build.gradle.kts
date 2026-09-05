@@ -7,6 +7,7 @@ plugins {
 
 val dawnAndroidRoot = providers.environmentVariable("DAWN_ANDROID_ROOT")
 val minizipAndroidRoot = providers.environmentVariable("MINIZIP_ANDROID_ROOT")
+val mbedtlsAndroidRoot = providers.environmentVariable("MBEDTLS_ANDROID_ROOT")
 val gameRuntimeSource = providers.gradleProperty("kartpadGameRuntimeSource").orNull
 val translatedShardManifest = providers.gradleProperty("kartpadTranslatedShardManifest").orNull
 val androidNativeTarget = providers.gradleProperty("kartpadAndroidNativeTarget").orNull
@@ -36,6 +37,7 @@ android {
                     "-DANDROID_STL=c++_shared",
                     "-DDAWN_ANDROID_ROOT=${dawnAndroidRoot.get()}",
                     "-DMINIZIP_ANDROID_ROOT=${minizipAndroidRoot.get()}",
+                    "-DMBEDTLS_ANDROID_ROOT=${mbedtlsAndroidRoot.get()}",
                 )
                 if (gameRuntimeSource != null || translatedShardManifest != null) {
                     require(gameRuntimeSource != null && translatedShardManifest != null) {

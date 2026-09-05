@@ -131,6 +131,17 @@
       "role": "Pinned ZIP directory and decompression implementation for the bounded Android Retro Rewind installer"
     },
     {
+      "name": "Mbed TLS Android",
+      "repository": "https://github.com/Mbed-TLS/mbedtls",
+      "version": "4.1.1",
+      "artifact": "mbedtls-4.1.1.tar.bz2",
+      "url": "https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-4.1.1/mbedtls-4.1.1.tar.bz2",
+      "bytes": 7099934,
+      "sha256": "3359a349e23db3d5536fcee032ae7b2ecbfc08972fab643089b5cbf2a375c98c",
+      "license": "Apache-2.0 OR GPL-2.0-or-later",
+      "role": "Pinned maintained native TLS engine for Android guest networking"
+    },
+    {
       "name": "AndroidX WorkManager",
       "repository": "https://android.googlesource.com/platform/frameworks/support",
       "version": "2.11.1",

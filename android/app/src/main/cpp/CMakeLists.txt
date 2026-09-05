@@ -11,6 +11,10 @@ if(NOT DEFINED MINIZIP_ANDROID_ROOT OR MINIZIP_ANDROID_ROOT STREQUAL "" OR
    NOT EXISTS "${MINIZIP_ANDROID_ROOT}/CMakeLists.txt")
   message(FATAL_ERROR "MINIZIP_ANDROID_ROOT must name the prepared pinned minizip-ng source")
 endif()
+if(NOT DEFINED MBEDTLS_ANDROID_ROOT OR MBEDTLS_ANDROID_ROOT STREQUAL "" OR
+   NOT EXISTS "${MBEDTLS_ANDROID_ROOT}/CMakeLists.txt")
+  message(FATAL_ERROR "MBEDTLS_ANDROID_ROOT must name the prepared pinned Mbed TLS source")
+endif()
 
 find_package(Threads REQUIRED)
 find_package(SDL3 REQUIRED CONFIG)
@@ -42,6 +46,15 @@ set(MZ_ICONV OFF CACHE BOOL "" FORCE)
 set(MZ_DECOMPRESS_ONLY ON CACHE BOOL "" FORCE)
 set(SKIP_INSTALL_ALL ON CACHE BOOL "" FORCE)
 add_subdirectory("${MINIZIP_ANDROID_ROOT}" minizip-ng EXCLUDE_FROM_ALL)
+set(ENABLE_PROGRAMS OFF CACHE BOOL "" FORCE)
+set(ENABLE_TESTING OFF CACHE BOOL "" FORCE)
+set(USE_SHARED_MBEDTLS_LIBRARY OFF CACHE BOOL "" FORCE)
+set(USE_STATIC_MBEDTLS_LIBRARY ON CACHE BOOL "" FORCE)
+set(MBEDTLS_FATAL_WARNINGS OFF CACHE BOOL "" FORCE)
+add_compile_options(
+  "-ffile-prefix-map=${MBEDTLS_ANDROID_ROOT}=mbedtls-4.1.1"
+  "-fmacro-prefix-map=${MBEDTLS_ANDROID_ROOT}=mbedtls-4.1.1")
+add_subdirectory("${MBEDTLS_ANDROID_ROOT}" mbedtls EXCLUDE_FROM_ALL)
 
 set(KARTPAD_GAME_RUNTIME_SOURCE "" CACHE PATH
   "Prepared private WiiCompiled source; empty builds the source-only fixture")
@@ -96,6 +109,7 @@ else()
     fixture_main.cpp
     guest_memory_fixture.cpp
     scheduler_fixture.cpp
+    android_tls_fixture.cpp
     fiber_switch_android.S
     kartpad_controller_slots_fixture_jni.cpp
     kartpad_runtime_settings_fixture_jni.cpp
@@ -111,7 +125,7 @@ else()
   target_include_directories(main PRIVATE
     "${KARTPAD_REPO_ROOT}/runtime/include")
   target_link_libraries(main PRIVATE SDL3::SDL3 dawn::webgpu_dawn
-    MINIZIP::minizip android log dl)
+    MINIZIP::minizip mbedtls android log dl)
 
   set_target_properties(main PROPERTIES
     CXX_VISIBILITY_PRESET hidden

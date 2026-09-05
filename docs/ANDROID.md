@@ -382,6 +382,12 @@ providing a backend. Add a pinned native TLS implementation behind the existing
 nonblocking session interface. A small mbedTLS integration is preferable to
 routing synchronous guest calls through Java networking.
 
+The first Android A5 primitive now pins the official maintained Mbed TLS 4.1.1
+release and proves ARM64 native entropy plus construction of a hostname-bound,
+certificate-verifying client context on the API 36 emulator. The existing guest
+SSL fallback is deliberately still classified incomplete until its session
+interface consumes that engine and passes local handshake/failure fixtures.
+
 Android HTTPS used by the application shell for the version manifest and pack
 download is separate from guest networking. Both layers must enforce HTTPS,
 certificate validation, bounded redirects, timeouts, and cancellation.

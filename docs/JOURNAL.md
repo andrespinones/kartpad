@@ -3701,3 +3701,31 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   process-death acceptance remain open. No package or private artifact was
   published. Evidence:
   `docs/artifacts/2026-09-05/android/a4-touch-activity-recreation.md`.
+
+## 2026-09-05 — Android A5 native TLS primitive
+
+- Reviewed the current prepared runtime and confirmed Android still selects the
+  unsupported `SSL_ERR_FAILED` branch while Windows and Apple own native TLS
+  implementations.
+- Selected the official Mbed TLS 4.1.1 LTS release, supported through at least
+  March 2029, rather than Dolphin's historical 2.28.0 snapshot. Locked its
+  7,099,934-byte official archive at SHA-256
+  `3359a349e23db3d5536fcee032ae7b2ecbfc08972fab643089b5cbf2a375c98c`.
+- Added the dependency to the shared Android preparation/build path and a native
+  ARM64 fixture requiring PSA initialization, 32 bytes of nonconstant entropy,
+  `MBEDTLS_SSL_VERIFY_REQUIRED`, SSL context setup, and hostname assignment.
+- The visible Pixel Tablet passed with `Mbed TLS 4.1.1`, 32 entropy bytes, and
+  required verification. The exact source APK SHA-256 is
+  `37e2ec9876a3e27d1914f2f8a9bdd527683dff057eb862ac2353d500d0a7983d`.
+- The first fixture audit rejected Mbed TLS build paths embedded in debug
+  strings. File/macro prefix mapping removed the local checkout, and the audit
+  now also accounts for the exact TLS parser-delimiter multiplicity without
+  allowing an additional private key block.
+- The complete translated product rebuild and audit pass at SHA-256
+  `56fd0ea5760f83df6240248ebb4c1a53bdf2d7e0d507fad4486d5627dd7986c0`; Android lint, 92 tests with one intentional skip,
+  repository safety, shell syntax, and whitespace pass.
+- Classification: **Pass for the maintained Android TLS dependency and native
+  client-context primitive.** Guest SSL sessions, CA parsing, handshake and
+  hostname-failure fixtures, and WFC connectivity remain open. No APK/AAB or
+  private artifact was published. Evidence:
+  `docs/artifacts/2026-09-05/android/a5-native-tls-primitive.md`.

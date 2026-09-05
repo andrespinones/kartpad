@@ -2,6 +2,15 @@
 
 Updated: 2026-09-05
 
+Android A5 now has its first native TLS primitive. The official maintained Mbed
+TLS 4.1.1 archive is byte/hash locked, builds under the pinned NDK, and passes a
+visible Pixel Tablet fixture that initializes PSA-backed native entropy,
+requires certificate verification, creates a client SSL context, and assigns a
+verification hostname. The source APK also passes the strict path/key audit.
+Guest `/dev/net/ssl`, CA loading, actual handshakes, and WFC remain open.
+Evidence:
+[`docs/artifacts/2026-09-05/android/a5-native-tls-primitive.md`](artifacts/2026-09-05/android/a5-native-tls-primitive.md).
+
 The latest Android A4 checkpoint fixes a real SDL lifecycle gap: KartPad now
 enables SDL activity recreation, so Android can rebuild `KartPadActivity`
 without SDL terminating the process. Visible Pixel 6 and Pixel Tablet runs held
