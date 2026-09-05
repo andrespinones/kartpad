@@ -728,6 +728,14 @@ disconnect states; a second sequence began with A cyan/locked and restored it
    lifts and emptying the owner table at completion. The resulting audited dual
    APK SHA-256 is
    `726cf06af9208fdcb3fe91b80a89046daf32adbf8b288d54a36d753f81a890ba`.
+   The selector now also matches iOS's two-choice interaction: it has no
+   Android-only recovery button, both cards remain actionable without game
+   data, and the chosen profile resumes after the shared import flow. The
+   three-dot hierarchy has owned action/section symbols on Android 10+, and a
+   source-only raw-frame contract now protects all 14 touch targets, accepted
+   phone/tablet X/Z ordering, tablet R width, D-pad geometry, and palette. The
+   final audited translated APK SHA-256 is
+   `5c0554814023e3cd80c035a5b2c21c882e2bfce511e2c780c817e6e53279eaf9`.
    Evidence:
 [`docs/artifacts/2026-09-04/android/a4-touch-settings-menu-checkpoint.md`](artifacts/2026-09-04/android/a4-touch-settings-menu-checkpoint.md).
 [`docs/artifacts/2026-09-04/android/a4-controller-mapping.md`](artifacts/2026-09-04/android/a4-controller-mapping.md).
@@ -742,6 +750,7 @@ disconnect states; a second sequence began with A cyan/locked and restored it
 [`docs/artifacts/2026-09-05/android/a4-selector-owned-icons.md`](artifacts/2026-09-05/android/a4-selector-owned-icons.md).
 [`docs/artifacts/2026-09-05/android/a4-selector-visual-contract.md`](artifacts/2026-09-05/android/a4-selector-visual-contract.md).
 [`docs/artifacts/2026-09-05/android/a4-multipointer-replay.md`](artifacts/2026-09-05/android/a4-multipointer-replay.md).
+[`docs/artifacts/2026-09-05/android/a4-selector-menu-touch-visual-parity.md`](artifacts/2026-09-05/android/a4-selector-menu-touch-visual-parity.md).
 Accepted evidence:
 [`docs/artifacts/2026-09-04/android/a4-touch-overlay-input.md`](artifacts/2026-09-04/android/a4-touch-overlay-input.md).
 [`docs/artifacts/2026-09-04/android/a4-controller-handoff.md`](artifacts/2026-09-04/android/a4-controller-handoff.md).

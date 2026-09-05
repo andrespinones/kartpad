@@ -64,6 +64,15 @@ when the first finger lifts. The fixture is unreachable in a game-runtime build;
 the complete translated APK still builds, lints, and audits. Evidence:
 `docs/artifacts/2026-09-05/android/a4-multipointer-replay.md`.
 
+Android's selector now follows the iOS two-card interaction rather than adding
+a separate recovery button: choosing Original or Retro without game data opens
+the shared importer and retains that choice. The visible Pixel Tablet also
+shows KartPad-owned symbols throughout the consolidated three-dot hierarchy.
+A new raw-frame touch visual gate passes the accepted phone and tablet layouts,
+including their intentionally different X/Z ordering. The final translated APK
+build, lint, 77-test suite, and strict audit pass. Evidence:
+`docs/artifacts/2026-09-05/android/a4-selector-menu-touch-visual-parity.md`.
+
 KartPad `v0.4.0-preview.2` is published from
 `e9fa6058ee09fff0b16481ebe4a78d61cea69c87`. It updates both Apple-platform
 artifacts for Retro Rewind 6.12.5, repairs the universal iPhone/iPad three-dot

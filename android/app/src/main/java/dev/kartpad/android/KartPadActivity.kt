@@ -1,6 +1,7 @@
 package dev.kartpad.android
 
 import android.app.AlertDialog
+import android.os.Build
 import android.os.Bundle
 import android.content.Context
 import android.content.Intent
@@ -86,6 +87,8 @@ class KartPadActivity : SDLActivity() {
             intent.getBooleanExtra(DEBUG_EXTRA_MULTI_POINTER, false)
         val debugControllerSetup = BuildConfig.DEBUG && !BuildConfig.GAME_RUNTIME &&
             intent.getBooleanExtra(DEBUG_EXTRA_CONTROLLER_SETUP, false)
+        val debugMenu = BuildConfig.DEBUG && !BuildConfig.GAME_RUNTIME &&
+            intent.getBooleanExtra(DEBUG_EXTRA_MENU, false)
         kartPadOverlay.visibility = if (BuildConfig.GAME_RUNTIME || debugTouchOverlay) {
             android.view.View.VISIBLE
         } else {
@@ -107,6 +110,9 @@ class KartPadActivity : SDLActivity() {
         } else if (debugControllerSetup) {
             addMenuButton()
             menuButton.postDelayed({ showControllerPlayers() }, 1_000L)
+        } else if (debugMenu) {
+            addMenuButton()
+            menuButton.postDelayed({ showKartPadMenu() }, 1_000L)
         }
         if (debugTouchOverlay && debugMultiPointer) {
             kartPadOverlay.post {
@@ -198,31 +204,54 @@ class KartPadActivity : SDLActivity() {
         PopupMenu(this, menuButton).apply {
             menu.add(0, MENU_TITLE, 0, "KartPad").isEnabled = false
             menu.add(0, MENU_SWITCH_GAME, 1, "Switch Game Version…")
+                .setIcon(R.drawable.ic_kartpad_gobackward)
             menu.add(0, MENU_MULTIPLAYER, 2, "Multiplayer…")
+                .setIcon(R.drawable.ic_kartpad_multiplayer)
             menu.add(0, MENU_FPS, 3, "Show FPS Counter").apply {
                 isCheckable = true
                 isChecked = KartPadTouchSettings.showFps(this@KartPadActivity)
+                setIcon(R.drawable.ic_kartpad_speedometer)
             }
             menu.addSubMenu(0, MENU_CONTROLS_GROUP, 4, "Controls").apply {
+                item.setIcon(R.drawable.ic_kartpad_gamecontroller)
                 add(0, MENU_CONTROLLER_PLAYERS, 0, "Controller Player Setup…")
+                    .setIcon(R.drawable.ic_kartpad_gamecontroller)
                 add(0, MENU_CONTROLLER_MAPPING, 1, "Controller Button Mapping…")
+                    .setIcon(R.drawable.ic_kartpad_gamecontroller)
                 add(0, MENU_TOUCH_CONTROLS, 2, "Touch Control Settings…")
+                    .setIcon(R.drawable.ic_kartpad_steering_wheel)
                 add(0, MENU_MOTION_STEERING, 3, "Motion Steering…")
+                    .setIcon(R.drawable.ic_kartpad_steering_wheel)
                 add(0, MENU_WIIMOTE, 4, "Experimental Wii Remote + Nunchuk…")
+                    .setIcon(R.drawable.ic_kartpad_multiplayer)
             }
             menu.addSubMenu(0, MENU_DISPLAY_GROUP, 5, "Display").apply {
+                item.setIcon(R.drawable.ic_kartpad_display)
                 add(0, MENU_ASPECT_RATIO, 0, "Aspect Ratio…")
+                    .setIcon(R.drawable.ic_kartpad_display)
                 add(0, MENU_RENDER_RESOLUTION, 1, "Render Resolution…")
+                    .setIcon(R.drawable.ic_kartpad_display)
             }
             menu.addSubMenu(0, MENU_DATA_GROUP, 6, "Game Data & Saves").apply {
+                item.setIcon(R.drawable.ic_kartpad_folder)
                 add(0, MENU_IMPORT_GAME_DATA, 0, "Import or Reimport Wii Disc Image…")
+                    .setIcon(R.drawable.ic_kartpad_gobackward)
                 add(0, MENU_IMPORT_GAME_DATA_FOLDER, 1, "Import from Extracted Folder…")
+                    .setIcon(R.drawable.ic_kartpad_folder)
                 add(0, MENU_REMOVE_GAME_DATA, 2, "Remove Stored Game Data…")
+                    .setIcon(R.drawable.ic_kartpad_report)
                 add(0, MENU_RETRO_REWIND, 3, "Manage Retro Rewind…")
+                    .setIcon(R.drawable.ic_kartpad_gobackward)
                 add(0, MENU_SAVES, 4, "Manage Saves…")
+                    .setIcon(R.drawable.ic_kartpad_folder)
                 add(0, MENU_MIIS, 5, "Manage Miis…")
+                    .setIcon(R.drawable.ic_kartpad_multiplayer)
             }
             menu.add(0, MENU_REPORT_PROBLEM, 7, "Report a Problem…")
+                .setIcon(R.drawable.ic_kartpad_report)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                setForceShowIcon(true)
+            }
             setOnMenuItemClickListener { item ->
                 when (item.itemId) {
                     MENU_SWITCH_GAME -> confirmSwitchGameVersion()
@@ -1455,6 +1484,7 @@ class KartPadActivity : SDLActivity() {
             "dev.kartpad.android.TEST_TOUCH_MULTI_POINTER"
         private const val DEBUG_EXTRA_CONTROLLER_SETUP =
             "dev.kartpad.android.TEST_CONTROLLER_SETUP"
+        private const val DEBUG_EXTRA_MENU = "dev.kartpad.android.TEST_MENU"
         private const val DEBUG_RESUME_FIXTURE_SHA256 =
             "cb9d5fc3b83611af65032f73119285de4e97d4b2b9f7b2e9567443635358483a"
         private const val MIN_RKG_BYTES = 0x90L

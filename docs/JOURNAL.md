@@ -3390,3 +3390,33 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   emulator phone/tablet lanes.** Physical touch/haptic feel and touch-only races
   remain open. No package or private artifact was published. Evidence:
   `docs/artifacts/2026-09-05/android/a4-multipointer-replay.md`.
+
+## 2026-09-05 — Android A4 selector, menu, and touch visual parity
+
+- Removed the Android-only Manage Game Data control from the mode chooser and
+  made both iOS-equivalent cards actionable without installed data. A selected
+  profile now enters the shared importer and is retained for a successful
+  return; the no-data selector still settles its Retro Rewind version subtitle.
+- Added six KartPad-owned menu vectors and applied symbols to switching,
+  multiplayer, FPS, Controls, Display, Game Data & Saves, reporting, and their
+  submenu actions. API 29+ forces symbols visible; API 28 retains the complete
+  functional text hierarchy.
+- Added a source-only raw RGBA/accessibility verifier for the touch overlay.
+  The visible Pixel 6 passed all 14 targets, a 32 px X/Z gap, equal 237 px L/R
+  pills, and palette checks. The visible Pixel Tablet passed all 14 targets, its
+  iOS-derived reversed X/Z ordering with a 212 px gap, the exact 560 px R pill,
+  grouped D-pad geometry, and palette checks.
+- On the visible Pixel Tablet, the selector contract passed at 2560x1600; an
+  empty-data card tap opened Game Data & Saves. The iconized top menu rendered
+  all seven destinations/sections, and opening Controls exposed all five
+  control routes.
+- The complete translated runtime rebuilt. Android lint, 77 tests with one
+  intentional skip, repository safety, strict package/privacy audit, and
+  whitespace checks pass. That final APK's settled selector was also visibly
+  rechecked after installation on the same Pixel Tablet. Its SHA-256 is
+  `5c0554814023e3cd80c035a5b2c21c882e2bfce511e2c780c817e6e53279eaf9`.
+- Classification: **Pass for canonical emulator selector interaction, iconized
+  consolidated menu, and phone/tablet touch visual contracts.** Physical touch,
+  haptics, vendor rendering, and touch-only race acceptance remain open. No
+  package or private artifact was published. Evidence:
+  `docs/artifacts/2026-09-05/android/a4-selector-menu-touch-visual-parity.md`.

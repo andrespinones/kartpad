@@ -1111,6 +1111,14 @@ both canonical visible emulator lanes it publishes exact `A`, `A+B`, `B`, and
 neutral masks while preserving the second pointer after the first lifts;
 evidence is in
 `docs/artifacts/2026-09-05/android/a4-multipointer-replay.md`.
+The selector now removes the Android-only recovery control and follows iOS's
+two-choice import interaction: either enabled game card opens game-data setup
+when required and retains its pending profile. The consolidated three-dot menu
+uses owned symbols for immediate section recognition on Android 10+, with the
+same complete text hierarchy retained on Android 9. A separate touch raw-frame
+gate covers the accepted phone/tablet defaults, palette, safe containment,
+grouped D-pad, and R geometry; evidence is in
+`docs/artifacts/2026-09-05/android/a4-selector-menu-touch-visual-parity.md`.
 
 Do not begin the touch-UI port until A2's controller-driven Original-mode proof
 passes. Physical Android hardware remains authoritative for vendor Vulkan and

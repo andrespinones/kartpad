@@ -84,6 +84,21 @@ class AndroidTouchOverlayContractTests(unittest.TestCase):
         self.assertIn("listOf(BUTTON_A, BUTTON_A or BUTTON_B, BUTTON_B, 0)", overlay)
         self.assertIn("actual == expected && pointerOwners.isEmpty()", overlay)
 
+    def test_touch_visual_contract_covers_phone_tablet_geometry_and_palette(self) -> None:
+        verifier = (REPO / "scripts/check-android-touch-visual.py").read_text()
+        runner = (REPO / "scripts/test-android-touch-visual.sh").read_text()
+        self.assertIn('"Move stick"', verifier)
+        self.assertIn('"Z button"', verifier)
+        self.assertIn("max(z[0] - x[2], x[0] - z[2])", verifier)
+        self.assertIn("x_z_gap < 16", verifier)
+        self.assertIn("r_width != 560", verifier)
+        self.assertIn('"A button": (18, 120, 71)', verifier)
+        self.assertIn('"B button": (153, 32, 40)', verifier)
+        self.assertIn('"Z button": (78, 47, 128)', verifier)
+        self.assertIn("TEST_TOUCH_OVERLAY", runner)
+        self.assertIn('phone) user_rotation=1', runner)
+        self.assertIn('tablet) user_rotation=0', runner)
+
     def test_touch_presentation_settings_match_ios_ranges_and_defaults(self) -> None:
         settings = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadTouchSettings.kt").read_text()
         overlay = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadOverlayView.kt").read_text()
@@ -152,6 +167,12 @@ class AndroidTouchOverlayContractTests(unittest.TestCase):
         self.assertIn('hint = "Every time, sometimes, once, or not sure?"', activity)
         self.assertIn('appendQueryParameter("report-id", id)', activity)
         self.assertIn('appendQueryParameter("summary", problem.text.toString().trim())', activity)
+        self.assertIn("setForceShowIcon(true)", activity)
+        self.assertIn("R.drawable.ic_kartpad_gamecontroller", activity)
+        self.assertIn("R.drawable.ic_kartpad_display", activity)
+        self.assertIn("R.drawable.ic_kartpad_folder", activity)
+        self.assertIn("R.drawable.ic_kartpad_report", activity)
+        self.assertIn("DEBUG_EXTRA_MENU", activity)
         runtime_patch = (REPO / "patches/wiicompiled-android-runtime-settings.patch").read_text()
         self.assertIn("PublishDisplaySettings", native)
         self.assertNotIn("AuroraGetSurfaceSize", native)
@@ -198,6 +219,18 @@ class AndroidTouchOverlayContractTests(unittest.TestCase):
         self.assertIn('else -> PointF(0.26866764f, 0.79472595f)', source)
         self.assertIn("DEBUG_EXTRA_TOUCH_OVERLAY", activity)
         self.assertIn("BuildConfig.GAME_RUNTIME || debugTouchOverlay", activity)
+
+    def test_selector_matches_ios_two_choice_import_flow(self) -> None:
+        activity = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadLaunchActivity.kt").read_text()
+        verifier = (REPO / "scripts/check-android-selector-visual.py").read_text()
+        self.assertIn('original.setOnClickListener { selectMode("base") }', activity)
+        self.assertIn('retro.setOnClickListener { selectMode("retro_rewind") }', activity)
+        self.assertIn("if (!gameDataReady)", activity)
+        self.assertIn("pendingProfile = profile", activity)
+        self.assertIn("startActivityForResult(", activity)
+        self.assertIn("pendingProfile?.takeIf { gameDataReady }", activity)
+        self.assertNotIn('text = "Manage Game Data…"', activity)
+        self.assertNotIn('"Manage Game Data…",', verifier)
 
     def test_motion_steering_matches_ios_curve_and_merges_with_touch(self) -> None:
         motion = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadMotionSteering.kt").read_text()

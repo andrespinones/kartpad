@@ -42,7 +42,6 @@ def main() -> None:
         "Your own RMCP01 disc image or extracted game data is required before play.",
         "Mario Kart Wii\nOriginal game",
         "Retro Rewind\nDownload 6.12.5 • Extra content + Retro WFC",
-        "Manage Game Data…",
     )
     missing = [label for label in required_text if label not in by_text]
     if missing:

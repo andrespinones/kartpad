@@ -30,26 +30,18 @@ class KartPadLaunchActivity : Activity() {
     private lateinit var status: TextView
     private lateinit var original: Button
     private lateinit var retro: Button
-    private lateinit var manageGameData: Button
     private lateinit var progress: ProgressBar
     private val validator = Executors.newSingleThreadExecutor()
     private var validationGeneration = 0
     private var retroInstalled = false
+    private var gameDataReady = false
+    private var pendingProfile: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(buildContent())
-        original.setOnClickListener { launch("base") }
-        retro.setOnClickListener {
-            if (retroInstalled) {
-                launch("retro_rewind")
-            } else {
-                startActivity(Intent(this, RetroRewindInstallActivity::class.java))
-            }
-        }
-        manageGameData.setOnClickListener {
-            startActivity(Intent(this, KartPadGameDataActivity::class.java))
-        }
+        original.setOnClickListener { selectMode("base") }
+        retro.setOnClickListener { selectMode("retro_rewind") }
     }
 
     override fun onResume() {
@@ -92,29 +84,53 @@ class KartPadLaunchActivity : Activity() {
                 }
                 retroInstalled = valid
                 progress.visibility = View.GONE
-                original.isEnabled = gameDataValid
-                retro.isEnabled = gameDataValid
+                gameDataReady = gameDataValid
+                original.isEnabled = true
+                retro.isEnabled = true
+                setModeText(
+                    retro,
+                    "Retro Rewind",
+                    if (valid) {
+                        "Installed ${RetroRewindRelease.VERSION} • Extra content + Retro WFC"
+                    } else {
+                        "Download ${RetroRewindRelease.VERSION} • Extra content + Retro WFC"
+                    },
+                )
                 if (removalError != null) {
                     showStatus(removalError)
                 } else if (!gameDataValid) {
-                    showStatus("Import your RMCP01 disc image or extracted game data to race")
+                    hideStatus("Game data is required. Choose a mode to import it.")
                 } else if (valid) {
                     hideStatus("Original and Retro Rewind ${RetroRewindRelease.VERSION} are ready")
-                    setModeText(
-                        retro,
-                        "Retro Rewind",
-                        "Installed ${RetroRewindRelease.VERSION} • Extra content + Retro WFC",
-                    )
                 } else {
                     hideStatus("Original is ready; Retro Rewind is optional")
-                    setModeText(
-                        retro,
-                        "Retro Rewind",
-                        "Download ${RetroRewindRelease.VERSION} • Extra content + Retro WFC",
-                    )
                 }
                 Log.i(LOG_TAG, "A3 mode chooser retro-installed=$valid")
+                pendingProfile?.takeIf { gameDataReady }?.let { profile ->
+                    pendingProfile = null
+                    continueSelectedMode(profile)
+                }
             }
+        }
+    }
+
+    private fun selectMode(profile: String) {
+        if (!gameDataReady) {
+            pendingProfile = profile
+            startActivityForResult(
+                Intent(this, KartPadGameDataActivity::class.java),
+                REQUEST_GAME_DATA,
+            )
+            return
+        }
+        continueSelectedMode(profile)
+    }
+
+    private fun continueSelectedMode(profile: String) {
+        if (profile == "retro_rewind" && !retroInstalled) {
+            startActivity(Intent(this, RetroRewindInstallActivity::class.java))
+        } else {
+            launch(profile)
         }
     }
 
@@ -254,28 +270,6 @@ class KartPadLaunchActivity : Activity() {
             )
         }
         column.addView(choices, layout(dp(10)))
-        manageGameData = Button(this).apply {
-            id = R.id.kartpad_manage_game_data
-            text = "Manage Game Data…"
-            contentDescription = "Import, reimport, or remove private game data"
-            isAllCaps = false
-            textSize = 15f
-            setTextColor(Color.argb(224, 255, 255, 255))
-            backgroundTintList = ColorStateList.valueOf(Color.argb(52, 255, 255, 255))
-            minHeight = dp(42)
-            minimumHeight = dp(42)
-            setPadding(dp(20), 0, dp(20), 0)
-        }
-        column.addView(
-            manageGameData,
-            LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-            ).apply {
-                gravity = Gravity.CENTER_HORIZONTAL
-                bottomMargin = dp(4)
-            },
-        )
         progress = ProgressBar(this).apply {
             isIndeterminate = true
         }
@@ -351,5 +345,6 @@ class KartPadLaunchActivity : Activity() {
             "dev.kartpad.android.TEST_MODE_CHOOSER_RETRO_NOT_INSTALLED"
         private const val EXTRA_DEBUG_GAME_DATA_VALID =
             "dev.kartpad.android.TEST_MODE_CHOOSER_GAME_DATA_VALID"
+        private const val REQUEST_GAME_DATA = 4_303
     }
 }
