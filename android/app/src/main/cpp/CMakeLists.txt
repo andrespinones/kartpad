@@ -79,6 +79,7 @@ if(KARTPAD_GAME_RUNTIME_SOURCE)
   target_sources(${KARTPAD_GAME_RUNTIME_TARGET} PRIVATE
     kartpad_touch_input_jni.cpp
     kartpad_runtime_settings_jni.cpp
+    kartpad_controller_slots_jni.cpp
     kartpad_mii_jni.cpp
     retro_rewind_archive_jni.cpp
     "${KARTPAD_REPO_ROOT}/runtime/src/android/touch_input.cpp"
@@ -96,6 +97,7 @@ else()
     guest_memory_fixture.cpp
     scheduler_fixture.cpp
     fiber_switch_android.S
+    kartpad_controller_slots_fixture_jni.cpp
     kartpad_touch_input_jni.cpp
     retro_rewind_archive_jni.cpp
     "${KARTPAD_REPO_ROOT}/runtime/src/android/touch_input.cpp"

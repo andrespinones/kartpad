@@ -34,6 +34,15 @@ targets, and safe-frame containment of the full 280 dp R trigger. Physical
 tablet touch-only racing and ergonomics remain open. Evidence:
 `docs/artifacts/2026-09-05/android/a4-tablet-overlay-parity.md`.
 
+The Android A4 Controls menu now includes persistent Player 1--4 controller
+setup backed by Aurora's existing identity store. On the visible Pixel Tablet
+emulator, a two-controller source fixture proved separate assignments,
+occupied-slot replacement with old-slot clearing, and explicit clearing through
+the real accessible dialogs. A fresh patch preparation, complete translated
+dual-runtime build, lint, 74-test suite, and package/privacy audit pass. Physical
+multi-controller/reconnect/rumble behavior remains open. Evidence:
+`docs/artifacts/2026-09-05/android/a4-controller-player-setup.md`.
+
 KartPad `v0.4.0-preview.2` is published from
 `e9fa6058ee09fff0b16481ebe4a78d61cea69c87`. It updates both Apple-platform
 artifacts for Retro Rewind 6.12.5, repairs the universal iPhone/iPad three-dot

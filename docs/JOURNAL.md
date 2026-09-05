@@ -3318,3 +3318,23 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   open. No package, private content, save, raw log, UI dump, or screenshot was
   published. Evidence:
   `docs/artifacts/2026-09-05/android/a4-tablet-overlay-parity.md`.
+
+## 2026-09-05 — Android A4 controller player setup
+
+- Added Controller Player Setup to Android's Controls submenu and exposed a
+  bounded production Aurora/JNI bridge for connected-controller enumeration,
+  persistent Player 1--4 assignment, occupied-slot replacement, and clearing.
+- Added a source-only two-controller fixture rather than representing emulator
+  devices as physical hardware. On the visible API 36 ARM64 Pixel Tablet, the
+  accessible dialog assigned distinct P1/P2 controllers, moved P1 into occupied
+  P2 while clearing the old slot, and explicitly cleared P2.
+- A fresh dual-runtime preparation reproduced the patch. The complete translated
+  runtime compiled and linked; its strict-audited local APK SHA-256 is
+  `b41b7b3b33a9c3eec2e8a66d0a9d11e8f96d71a4be6d05e727a57fc83ca5a14c`.
+  Android lint, 17 focused contracts, the 74-test suite (one skipped), repository
+  safety, privacy/package, and whitespace checks pass.
+- Classification: **Pass for emulator Player 1--4 setup UI and assignment
+  semantics.** Physical multi-controller input, reconnect identity, handoff,
+  rumble, and physical-device acceptance remain open. No package or private
+  artifact was published. Evidence:
+  `docs/artifacts/2026-09-05/android/a4-controller-player-setup.md`.

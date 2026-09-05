@@ -95,7 +95,7 @@ class AndroidTouchOverlayContractTests(unittest.TestCase):
         self.assertIn("fun setSelectedControlSize", overlay)
         self.assertIn("fun toggleSelectedControlVisibility", overlay)
         self.assertIn("if (modernCStickHorizontal) -rightX else rightX", overlay)
-        self.assertIn('add(0, MENU_TOUCH_CONTROLS, 1, "Touch Control Settings…")', activity)
+        self.assertIn('add(0, MENU_TOUCH_CONTROLS, 2, "Touch Control Settings…")', activity)
         self.assertIn('.setTitle("Touch Control Settings")', activity)
         self.assertIn('text = "Reset This Device Layout"', activity)
         self.assertIn('text = "Move controls"', activity)
@@ -118,7 +118,8 @@ class AndroidTouchOverlayContractTests(unittest.TestCase):
         for title in (
             '"KartPad"', '"Switch Game Version…"', '"Multiplayer…"',
             '"Show FPS Counter"', '"Controls"', '"Display"',
-            '"Game Data & Saves"', '"Controller Button Mapping…"',
+            '"Game Data & Saves"', '"Controller Player Setup…"',
+            '"Controller Button Mapping…"',
             '"Touch Control Settings…"', '"Motion Steering…"',
             '"Experimental Wii Remote + Nunchuk…"', '"Aspect Ratio…"',
             '"Render Resolution…"', '"Manage Retro Rewind…"', '"Manage Miis…"',
@@ -146,6 +147,29 @@ class AndroidTouchOverlayContractTests(unittest.TestCase):
         self.assertIn("ConsumeDisplaySettings", runtime_patch)
         self.assertIn("ConfigureMkwMobileAspectMode", runtime_patch)
         self.assertIn("VISetFrameBufferScale", runtime_patch)
+
+    def test_android_exposes_persistent_one_to_four_player_controller_setup(self) -> None:
+        activity = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadActivity.kt").read_text()
+        native = (REPO / "android/app/src/main/cpp/kartpad_controller_slots_jni.cpp").read_text()
+        fixture = (REPO / "android/app/src/main/cpp/kartpad_controller_slots_fixture_jni.cpp").read_text()
+        patch = (REPO / "patches/aurora-android-gamepad-assignment.patch").read_text()
+        prepare = (REPO / "scripts/prepare-android-game-runtime.sh").read_text()
+        self.assertIn("for (player in 0 until 4)", activity)
+        self.assertIn('"Player ${player + 1}', activity)
+        self.assertIn("nativeControllerDevices()", activity)
+        self.assertIn("nativeAssignControllerPlayer", activity)
+        self.assertIn("nativeClearControllerPlayer", activity)
+        self.assertIn("list_standard_gamepads", native)
+        self.assertIn("assign_standard_gamepad", native)
+        self.assertIn("clear_standard_gamepad_player", native)
+        self.assertIn('"KartPad Virtual One"', fixture)
+        self.assertIn("g_players[index] = -1", fixture)
+        self.assertIn("DEBUG_EXTRA_CONTROLLER_SETUP", activity)
+        self.assertIn(
+            "g_portPreferences[player].identity = controller_identity(selected)", patch,
+        )
+        self.assertIn("assign_player_index(controller, -1)", patch)
+        self.assertIn("aurora-android-gamepad-assignment.patch", prepare)
 
     def test_z_has_clear_vertical_spacing_from_x(self) -> None:
         source = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadOverlayView.kt").read_text()

@@ -82,6 +82,8 @@ class KartPadActivity : SDLActivity() {
         }
         val debugTouchOverlay = BuildConfig.DEBUG &&
             intent.getBooleanExtra(DEBUG_EXTRA_TOUCH_OVERLAY, false)
+        val debugControllerSetup = BuildConfig.DEBUG && !BuildConfig.GAME_RUNTIME &&
+            intent.getBooleanExtra(DEBUG_EXTRA_CONTROLLER_SETUP, false)
         kartPadOverlay.visibility = if (BuildConfig.GAME_RUNTIME || debugTouchOverlay) {
             android.view.View.VISIBLE
         } else {
@@ -100,6 +102,9 @@ class KartPadActivity : SDLActivity() {
             applyControllerMapping()
             applyDisplaySettings()
             kartPadOverlay.postDelayed({ applyDisplaySettings() }, 1_000L)
+        } else if (debugControllerSetup) {
+            addMenuButton()
+            menuButton.postDelayed({ showControllerPlayers() }, 1_000L)
         }
         mLayout.bringChildToFront(kartPadOverlay)
         if (::menuButton.isInitialized) mLayout.bringChildToFront(menuButton)
@@ -190,10 +195,11 @@ class KartPadActivity : SDLActivity() {
                 isChecked = KartPadTouchSettings.showFps(this@KartPadActivity)
             }
             menu.addSubMenu(0, MENU_CONTROLS_GROUP, 4, "Controls").apply {
-                add(0, MENU_CONTROLLER_MAPPING, 0, "Controller Button Mapping…")
-                add(0, MENU_TOUCH_CONTROLS, 1, "Touch Control Settings…")
-                add(0, MENU_MOTION_STEERING, 2, "Motion Steering…")
-                add(0, MENU_WIIMOTE, 3, "Experimental Wii Remote + Nunchuk…")
+                add(0, MENU_CONTROLLER_PLAYERS, 0, "Controller Player Setup…")
+                add(0, MENU_CONTROLLER_MAPPING, 1, "Controller Button Mapping…")
+                add(0, MENU_TOUCH_CONTROLS, 2, "Touch Control Settings…")
+                add(0, MENU_MOTION_STEERING, 3, "Motion Steering…")
+                add(0, MENU_WIIMOTE, 4, "Experimental Wii Remote + Nunchuk…")
             }
             menu.addSubMenu(0, MENU_DISPLAY_GROUP, 5, "Display").apply {
                 add(0, MENU_ASPECT_RATIO, 0, "Aspect Ratio…")
@@ -213,6 +219,7 @@ class KartPadActivity : SDLActivity() {
                     MENU_SWITCH_GAME -> confirmSwitchGameVersion()
                     MENU_MULTIPLAYER -> showMultiplayer()
                     MENU_FPS -> setShowFps(!item.isChecked)
+                    MENU_CONTROLLER_PLAYERS -> showControllerPlayers()
                     MENU_CONTROLLER_MAPPING -> showControllerMapping()
                     MENU_TOUCH_CONTROLS -> showTouchControlSettings()
                     MENU_MOTION_STEERING -> showMotionSteering()
@@ -329,6 +336,100 @@ class KartPadActivity : SDLActivity() {
             }
             .setNegativeButton("Back", null)
             .show()
+    }
+
+    private fun nativeControllers(): List<NativeController> =
+        nativeControllerDevices().mapNotNull { row ->
+            val parts = row.split('\t', limit = 3)
+            if (parts.size != 3) return@mapNotNull null
+            val instance = parts[0].toLongOrNull() ?: return@mapNotNull null
+            val player = parts[1].toIntOrNull() ?: return@mapNotNull null
+            NativeController(instance, player, parts[2].ifBlank { "Controller" })
+        }
+
+    private fun showControllerPlayers() {
+        kartPadOverlay.clearTouchInput()
+        val controllers = nativeControllers()
+        val content = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(24), dp(4), dp(24), dp(8))
+        }
+        content.addView(settingsLabel(if (controllers.isEmpty()) {
+            "No SDL game controller is connected. Connect an Android-supported Bluetooth or USB controller, then reopen this screen."
+        } else {
+            "Assign each connected controller to one player. Assignments follow the controller when it reconnects. Moving a controller clears its old player; choosing an occupied player safely replaces that assignment."
+        }))
+        lateinit var dialog: AlertDialog
+        for (player in 0 until 4) {
+            val assigned = controllers.firstOrNull { it.player == player }
+            content.addView(Button(this).apply {
+                text = "Player ${player + 1} — ${assigned?.name ?: playerEmptyLabel(player)}"
+                contentDescription =
+                    "Player ${player + 1}, ${assigned?.name ?: playerEmptyLabel(player)}"
+                setOnClickListener {
+                    dialog.dismiss()
+                    showControllerPlayerChoices(player)
+                }
+            })
+        }
+        content.addView(Button(this).apply {
+            text = "Done"
+            contentDescription = "Close controller player setup"
+            setOnClickListener { dialog.dismiss() }
+        })
+        dialog = AlertDialog.Builder(this)
+            .setTitle("Controller Player Setup")
+            .setView(ScrollView(this).apply { addView(content) })
+            .create()
+        dialog.show()
+    }
+
+    private fun showControllerPlayerChoices(player: Int) {
+        val controllers = nativeControllers()
+        val labels = ArrayList<String>().apply {
+            add(playerEmptyLabel(player))
+            controllers.forEach { controller ->
+                add(if (controller.player in 0 until 4) {
+                    "${controller.name} — currently Player ${controller.player + 1}"
+                } else {
+                    "${controller.name} — unassigned"
+                })
+            }
+        }
+        AlertDialog.Builder(this)
+            .setTitle("Player ${player + 1}")
+            .setSingleChoiceItems(
+                labels.toTypedArray(),
+                controllers.indexOfFirst { it.player == player } + 1,
+            ) { dialog, which ->
+                val success = if (which == 0) {
+                    nativeClearControllerPlayer(player)
+                } else {
+                    nativeAssignControllerPlayer(controllers[which - 1].instance, player)
+                }
+                dialog.dismiss()
+                if (!success) {
+                    AlertDialog.Builder(this)
+                        .setTitle("Controller Changed")
+                        .setMessage(
+                            "That controller disconnected before the assignment completed. Reconnect it and try again.",
+                        )
+                        .setPositiveButton("OK") { _, _ -> showControllerPlayers() }
+                        .show()
+                } else {
+                    kartPadOverlay.clearTouchInput()
+                    refreshControllerHandoff()
+                    menuButton.post { showControllerPlayers() }
+                }
+            }
+            .setNegativeButton("Back") { _, _ -> showControllerPlayers() }
+            .show()
+    }
+
+    private fun playerEmptyLabel(player: Int): String = if (player == 0) {
+        "Automatic when one controller is connected"
+    } else {
+        "No controller"
     }
 
     private fun showControllerMapping() {
@@ -1288,6 +1389,9 @@ class KartPadActivity : SDLActivity() {
     )
 
     private external fun nativeApplyControllerMapping(mapping: IntArray)
+    private external fun nativeControllerDevices(): Array<String>
+    private external fun nativeAssignControllerPlayer(instance: Long, player: Int): Boolean
+    private external fun nativeClearControllerPlayer(player: Int): Boolean
 
     private external fun nativeListMiis(database: ByteArray): Array<String>
     private external fun nativeImportMii(database: ByteArray, mii: ByteArray): ByteArray
@@ -1314,6 +1418,7 @@ class KartPadActivity : SDLActivity() {
         private const val MENU_REMOVE_GAME_DATA = 116
         private const val MENU_SAVES = 117
         private const val MENU_IMPORT_GAME_DATA_FOLDER = 118
+        private const val MENU_CONTROLLER_PLAYERS = 119
         private const val SELECTOR_RESTART_DELAY_MS = 250L
         private const val REQUEST_IMPORT_MII = 4_301
         private const val REQUEST_MANAGE_GAME_DATA = 4_302
@@ -1337,6 +1442,8 @@ class KartPadActivity : SDLActivity() {
             "dev.kartpad.android.TEST_RUNTIME_PROFILE"
         private const val DEBUG_EXTRA_TOUCH_OVERLAY =
             "dev.kartpad.android.TEST_TOUCH_OVERLAY"
+        private const val DEBUG_EXTRA_CONTROLLER_SETUP =
+            "dev.kartpad.android.TEST_CONTROLLER_SETUP"
         private const val DEBUG_RESUME_FIXTURE_SHA256 =
             "cb9d5fc3b83611af65032f73119285de4e97d4b2b9f7b2e9567443635358483a"
         private const val MIN_RKG_BYTES = 0x90L
@@ -1345,4 +1452,5 @@ class KartPadActivity : SDLActivity() {
     }
 
     private data class MiiRecord(val slot: Int, val name: String, val creator: String)
+    private data class NativeController(val instance: Long, val player: Int, val name: String)
 }

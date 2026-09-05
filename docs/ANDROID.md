@@ -1069,8 +1069,14 @@ centers rather than phone defaults, keeps every final rectangle in the safe
 frame, and verifies all 14 accessibility targets. Its complete source-only
 fixture passes at 2560x1600, including Dawn/Vulkan presentation, opposite-
 landscape recreation, three foreground cycles, and a full-width 280 dp R hit
-target. Physical tablet touch/ergonomics, multi-controller setup parity, and
-physical-device acceptance are still open. Evidence is in
+target. The Controls submenu now also exposes persistent Player 1--4 assignment
+through a bounded Aurora/JNI bridge. A visible two-controller fixture proved
+independent assignment, occupied-slot replacement, old-slot clearing, and
+explicit clearing through accessible Pixel Tablet dialogs; the production
+bridge also passes a fresh patch reproduction and complete translated-runtime
+build. Physical tablet touch/ergonomics, concurrent physical controller
+behavior, reconnect identity, and physical-device acceptance are still open.
+Evidence is in
 `docs/artifacts/2026-09-04/android/a4-touch-settings-menu-checkpoint.md` and
 `docs/artifacts/2026-09-04/android/a4-controller-mapping.md` and
 `docs/artifacts/2026-09-04/android/a4-mii-management.md` and
@@ -1078,6 +1084,8 @@ physical-device acceptance are still open. Evidence is in
 `docs/artifacts/2026-09-04/android/a4-touch-accessibility.md`.
 Tablet layout and hit-map evidence is in
 `docs/artifacts/2026-09-05/android/a4-tablet-overlay-parity.md`.
+Controller player-setup evidence is in
+`docs/artifacts/2026-09-05/android/a4-controller-player-setup.md`.
 The touch-settings panel also now matches iOS's live render selector and keeps
 every setting visible in two landscape columns; evidence is in
 `docs/artifacts/2026-09-04/android/a4-touch-settings-visibility.md`.
