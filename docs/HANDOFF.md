@@ -77,6 +77,12 @@ four haptic dispatches, focus clear, and final neutral state all pass through
 the production node provider. Evidence:
 `docs/artifacts/2026-09-04/android/a4-touch-accessibility.md`.
 
+Motion steering now passes a real `SensorManager` flow on Pixel 6 and Pixel
+Tablet. After confirmed gravity-sensor registration, an emulator accelerometer
+tilt produces positive steering in standard mode and negative steering under
+the persisted inversion setting; the original sensor vector is restored.
+Evidence: `docs/artifacts/2026-09-05/android/a4-motion-sensor-flow.md`.
+
 Android's selector now follows the iOS two-card interaction rather than adding
 a separate recovery button: choosing Original or Retro without game data opens
 the shared importer and retains that choice. The visible Pixel Tablet also

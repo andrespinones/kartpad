@@ -769,6 +769,11 @@ disconnect states; a second sequence began with A cyan/locked and restored it
    four haptic dispatches, focus clear, and final neutral state pass through
    the production node provider. The final audited translated APK SHA-256 is
    `40907268f2b4047e93e8e0e7e7affacc0d02e5f84fa75a7461f81ab9b21d44b9`.
+   A real Android sensor flow now also passes on both canonical layouts:
+   gravity registration is required, and one injected tilt yields positive
+   steering in standard mode and negative steering when inverted. The final
+   audited translated APK SHA-256 is
+   `79eb1ac8da137b63e9060ae08f688a63bade1fb19777a25d85330bf6d1ef0750`.
    The selector now also matches iOS's two-choice interaction: it has no
    Android-only recovery button, both cards remain actionable without game
    data, and the chosen profile resumes after the shared import flow. The
@@ -829,6 +834,7 @@ disconnect states; a second sequence began with A cyan/locked and restored it
 [`docs/artifacts/2026-09-05/android/a4-selector-visual-contract.md`](artifacts/2026-09-05/android/a4-selector-visual-contract.md).
 [`docs/artifacts/2026-09-05/android/a4-multipointer-replay.md`](artifacts/2026-09-05/android/a4-multipointer-replay.md).
 [`docs/artifacts/2026-09-05/android/a4-touch-hit-map.md`](artifacts/2026-09-05/android/a4-touch-hit-map.md).
+[`docs/artifacts/2026-09-05/android/a4-motion-sensor-flow.md`](artifacts/2026-09-05/android/a4-motion-sensor-flow.md).
 [`docs/artifacts/2026-09-05/android/a4-selector-menu-touch-visual-parity.md`](artifacts/2026-09-05/android/a4-selector-menu-touch-visual-parity.md).
 [`docs/artifacts/2026-09-05/android/a4-touch-modal-lifecycle-clearing.md`](artifacts/2026-09-05/android/a4-touch-modal-lifecycle-clearing.md).
 [`docs/artifacts/2026-09-05/android/a4-touch-state-persistence.md`](artifacts/2026-09-05/android/a4-touch-state-persistence.md).

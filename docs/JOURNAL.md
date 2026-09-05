@@ -3392,6 +3392,24 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   touch-only races remain open. No package or private artifact was published. Evidence:
   `docs/artifacts/2026-09-05/android/a4-multipointer-replay.md`.
 
+## 2026-09-05 — Android A4 real motion-sensor flow
+
+- Added a debug/source-only flow that enables the production motion owner,
+  requires successful Android gravity-sensor registration, and changes the
+  emulator's real accelerometer vector.
+- Visible Pixel 6 and Pixel Tablet runs both converted one tilt to positive
+  steering in standard mode and negative steering in an independent inverted
+  process. The script restores the original sensor vector on exit.
+- The translated runtime rebuilt at APK SHA-256
+  `79eb1ac8da137b63e9060ae08f688a63bade1fb19777a25d85330bf6d1ef0750`;
+  strict package/privacy audit, Android lint, and 89 tests with one intentional
+  skip passed.
+- Classification: **Pass for canonical emulator SensorManager registration and
+  standard/inverted steering direction.** Physical steering feel, latency,
+  sensor noise, and motion-assisted racing remain open. No package or private
+  artifact was published. Evidence:
+  `docs/artifacts/2026-09-05/android/a4-motion-sensor-flow.md`.
+
 ## 2026-09-05 — Android A4 repeatable accessibility actions
 
 - Added a debug/source-only fixture that calls the production virtual

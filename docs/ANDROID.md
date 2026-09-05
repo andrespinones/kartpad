@@ -1120,6 +1120,11 @@ fixture covering focus, B pulse, Move Right and timeout, acceleration
 lock/state, normal-click unlock, four haptic requests, focus clear, and final
 neutral state; evidence is in
 `docs/artifacts/2026-09-04/android/a4-touch-accessibility.md`.
+Motion steering now has a repeatable real Android sensor flow on both layouts:
+the gravity sensor registers, one injected tilt produces positive steering in
+standard mode, and the identical tilt produces negative steering when
+inverted; evidence is in
+`docs/artifacts/2026-09-05/android/a4-motion-sensor-flow.md`.
 The selector now removes the Android-only recovery control and follows iOS's
 two-choice import interaction: either enabled game card opens game-data setup
 when required and retains its pending profile. The consolidated three-dot menu

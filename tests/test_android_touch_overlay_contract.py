@@ -454,6 +454,17 @@ class AndroidTouchOverlayContractTests(unittest.TestCase):
         self.assertIn("abs(leftX) >= abs(motionSteeringX)", overlay)
         self.assertIn("setControllerConnected(controllerCount > 0)", activity)
 
+    def test_motion_steering_has_real_emulator_sensor_flow(self) -> None:
+        activity = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadActivity.kt").read_text()
+        runner = (REPO / "scripts/test-android-motion-sensor.sh").read_text()
+        self.assertIn("DEBUG_EXTRA_MOTION_SENSOR", activity)
+        self.assertIn("A4 motion sensor sample", activity)
+        self.assertIn("KartPadTouchSettings.setMotionInverted", activity)
+        self.assertIn("emu sensor set acceleration", runner)
+        self.assertIn("run_mode standard positive", runner)
+        self.assertIn("run_mode inverted negative", runner)
+        self.assertIn("started registered=true", runner)
+
     def test_controller_mapping_is_persisted_swapped_and_applied_natively(self) -> None:
         activity = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadActivity.kt").read_text()
         store = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadControllerMapping.kt").read_text()

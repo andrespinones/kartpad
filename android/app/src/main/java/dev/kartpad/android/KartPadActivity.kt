@@ -84,8 +84,28 @@ class KartPadActivity : SDLActivity() {
         runDebugRetroRewindExtractionFixture()
         runDebugRetroRewindWorkerFixture()
         kartPadOverlay = KartPadOverlayView(this)
+        val debugMotionSensorMode = if (BuildConfig.DEBUG && !BuildConfig.GAME_RUNTIME) {
+            intent.getStringExtra(DEBUG_EXTRA_MOTION_SENSOR)?.also {
+                check(it == "standard" || it == "inverted") {
+                    "unsupported motion sensor fixture mode $it"
+                }
+                KartPadTouchSettings.setMotionEnabled(this, true)
+                KartPadTouchSettings.setMotionInverted(this, it == "inverted")
+                KartPadTouchSettings.setMotionSensitivity(this, 1f)
+            }
+        } else {
+            null
+        }
         motionSteering = KartPadMotionSteering(this) { value ->
-            kartPadOverlay.post { kartPadOverlay.setMotionSteering(value) }
+            kartPadOverlay.post {
+                kartPadOverlay.setMotionSteering(value)
+                if (debugMotionSensorMode != null) {
+                    Log.i(
+                        TAG,
+                        "A4 motion sensor sample mode=$debugMotionSensorMode steering=$value",
+                    )
+                }
+            }
         }
         val debugTouchOverlay = BuildConfig.DEBUG &&
             intent.getBooleanExtra(DEBUG_EXTRA_TOUCH_OVERLAY, false)
@@ -123,7 +143,7 @@ class KartPadActivity : SDLActivity() {
             BuildConfig.GAME_RUNTIME || debugTouchOverlay || debugModalClear ||
                 debugLifecycleClear || debugPersistence != null || debugTouchSettings ||
                 debugTouchEditor || debugGasLock || debugHitMap || debugAccessibilityActions ||
-                debugTouchSettingsFlow != null
+                debugMotionSensorMode != null || debugTouchSettingsFlow != null
         ) {
             android.view.View.VISIBLE
         } else {
@@ -1742,6 +1762,8 @@ class KartPadActivity : SDLActivity() {
             "dev.kartpad.android.TEST_TOUCH_HIT_MAP"
         private const val DEBUG_EXTRA_ACCESSIBILITY_ACTIONS =
             "dev.kartpad.android.TEST_TOUCH_ACCESSIBILITY_ACTIONS"
+        private const val DEBUG_EXTRA_MOTION_SENSOR =
+            "dev.kartpad.android.TEST_MOTION_SENSOR"
         private const val DEBUG_EXTRA_CONTROLLER_SETUP =
             "dev.kartpad.android.TEST_CONTROLLER_SETUP"
         private const val DEBUG_EXTRA_MENU = "dev.kartpad.android.TEST_MENU"
