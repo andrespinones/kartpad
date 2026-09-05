@@ -224,8 +224,10 @@ KartPad stores this Mac's Bluetooth address on the Joy-Con so a later button
 press reconnects without `SYNC`. A Joy-Con still paired to a Switch 2 is
 ignored until you hold `SYNC`; hold `SYNC` on the Switch 2 again to move it
 back. This bridge follows public reverse engineering of the Switch 2
-controller protocol and still needs reporter hardware acceptance for stick
-calibration, reconnect, and long-session behavior. Rumble is not implemented.
+controller protocol. One reporter has accepted pairing, two sideways Joy-Con 2
+players, a Pro Controller 2, and reconnect without `SYNC` on macOS 26; wider
+hardware acceptance and long-session behavior remain open. Rumble is not
+implemented.
 
 ## Install or build
 
