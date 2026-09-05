@@ -12,7 +12,7 @@ connection interruption, public WFC, or physical-device networking.
 - Branch: `codex/android-a4-touch-settings`
 - Parent commit: `d8599c3375f648f31ddbb81296897095c7441331`
 - Product APK SHA-256:
-  `08c016da3ceb7f2dada9880249d94aacce9e7e6351c7f9a4d813dd86d183aec9`
+  `aa227e2b2232c2d36d86044f44a26caa310325f42ca9774216a1a62dde94df89`
 - Target: visible API 36 ARM64 Pixel Tablet emulator
 - Private input boundary: pre-existing app-private, user-owned extracted game
   data; `sys/main.dol` was verified only by its approved SHA-256
@@ -65,7 +65,7 @@ The repeatable product run passed both cases:
 [net] A5 guest TLS IOCTLV missing built-in root rejection passed result=-1
 [net] A5 guest TLS IOCTLV trusted exchange passed response_bytes=4797 peer_close=-6
 [net] A5 guest TLS IOCTLV hostname rejection passed result=-9
-Android product guest TLS IOCTLV emulator fixture passed: apk_sha256=08c016da3ceb7f2dada9880249d94aacce9e7e6351c7f9a4d813dd86d183aec9 private_key_on_device=no game_data_preserved=yes
+Android product guest TLS IOCTLV emulator fixture passed: apk_sha256=aa227e2b2232c2d36d86044f44a26caa310325f42ca9774216a1a62dde94df89 private_key_on_device=no game_data_preserved=yes
 ```
 
 Afterward, the exact fixture directories were absent, the corrected app-private

@@ -19,9 +19,19 @@ audits pass. This remains an opt-in pre-guest product fixture, not a retail
 Mario Kart/WFC-initiated request. Built-in Wii CA/client certificates,
 local/public WFC, interruption recovery, and physical Android acceptance remain
 open. The installed dual-game APK SHA-256 is
-`08c016da3ceb7f2dada9880249d94aacce9e7e6351c7f9a4d813dd86d183aec9`.
+`aa227e2b2232c2d36d86044f44a26caa310325f42ca9774216a1a62dde94df89`.
 Evidence:
 [`docs/artifacts/2026-09-05/android/a5-guest-tls-ioctlv.md`](artifacts/2026-09-05/android/a5-guest-tls-ioctlv.md).
+
+Android A6 now has a byte-level clean-build reproducibility result. Two
+independent scoped Android app cleans and product rebuilds produced identical
+APK bytes at SHA-256
+`aa227e2b2232c2d36d86044f44a26caa310325f42ca9774216a1a62dde94df89`.
+An incremental pre-clean package had identical 149-file extracted content but a
+different outer ZIP order/alignment, so release-candidate hashes must come from
+the clean path. Signed reproducibility, update-in-place, physical acceptance,
+and release authorization remain open. Evidence:
+[`docs/artifacts/2026-09-05/android/a6-clean-apk-reproducibility.md`](artifacts/2026-09-05/android/a6-clean-apk-reproducibility.md).
 
 The latest Android A4 checkpoint fixes a real SDL lifecycle gap: KartPad now
 enables SDL activity recreation, so Android can rebuild `KartPadActivity`

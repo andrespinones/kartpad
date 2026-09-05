@@ -3798,3 +3798,23 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   certificates, local/public WFC, interruption, and physical-device networking
   remain open. No APK/AAB, key, or private artifact was published. Evidence:
   `docs/artifacts/2026-09-05/android/a5-guest-tls-ioctlv.md`.
+
+## 2026-09-05 — Android A6 clean APK reproducibility
+
+- An immediate same-state product rebuild retained its APK hash, but the first
+  scoped Gradle app clean produced a different outer archive. Extracting both
+  packages proved all 149 entries byte-identical; only ZIP order/alignment and
+  container size differed. Incremental and clean hashes are therefore not
+  interchangeable.
+- The app output/native object tree was cleaned independently a second time.
+  Both clean builds produced byte-identical APKs at SHA-256
+  `aa227e2b2232c2d36d86044f44a26caa310325f42ca9774216a1a62dde94df89`;
+  direct `cmp` passed. The second clean build took 10 minutes 28 seconds.
+- The first clean artifact passed the product guest TLS IOCTLV fixture and
+  strict package/privacy audit before comparison. The emulator preserved the
+  approved game-data hash and returned to the production selector.
+- Classification: **Pass for local unsigned clean APK byte reproducibility.**
+  Signed reproducibility, update-in-place/save recovery, physical acceptance,
+  and release authorization remain open. No package or private artifact was
+  published. Evidence:
+  `docs/artifacts/2026-09-05/android/a6-clean-apk-reproducibility.md`.

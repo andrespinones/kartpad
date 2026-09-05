@@ -27,8 +27,15 @@ device, cleans its exact fixture, and restores the production selector. This is
 an opt-in pre-guest product fixture, not yet a retail Mario Kart/WFC-initiated
 exchange or physical-device acceptance. The exact audited and installed
 dual-game APK SHA-256 is
-`08c016da3ceb7f2dada9880249d94aacce9e7e6351c7f9a4d813dd86d183aec9`.
+`aa227e2b2232c2d36d86044f44a26caa310325f42ca9774216a1a62dde94df89`.
 Evidence: `docs/artifacts/2026-09-05/android/a5-guest-tls-ioctlv.md`.
+
+Two independent scoped clean Android product builds are byte-identical at that
+same `aa227e2b…` hash. An incremental package had the same 149 extracted files
+but different ZIP ordering/alignment, so only the clean path is authoritative
+for candidate checksums. This is local unsigned reproducibility, not a release
+candidate or publication authorization. Evidence:
+`docs/artifacts/2026-09-05/android/a6-clean-apk-reproducibility.md`.
 
 The `codex/iphone-touch-layout-editor` candidate captures the maintainer's
 current physical-iPhone control positions as the default for untouched iPhone

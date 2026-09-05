@@ -876,6 +876,14 @@ JNI, URI, lifecycle, and service code under `android/`.
 
 ## Package and release audit
 
+Candidate checksums must come from a scoped clean Android app build. An
+incremental package can retain different ZIP entry ordering/alignment even when
+all extracted entries are byte-identical. Two consecutive clean product builds
+at commit `6e405f3` matched byte-for-byte at SHA-256
+`aa227e2b2232c2d36d86044f44a26caa310325f42ca9774216a1a62dde94df89`.
+This proves the local unsigned clean path only; signing and update-in-place
+remain separate gates.
+
 Before any tester receives an artifact, verify at minimum:
 
 - only intended ABIs are present;
