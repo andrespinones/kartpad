@@ -37,6 +37,14 @@ for candidate checksums. This is local unsigned reproducibility, not a release
 candidate or publication authorization. Evidence:
 `docs/artifacts/2026-09-05/android/a6-clean-apk-reproducibility.md`.
 
+A same-version emulator update-in-place check also passes. Distinct APK bytes
+were installed sequentially with package data intact; the approved game data
+and a private aggregate covering configuration, managed NAND, saves,
+preferences, and Retro version state were unchanged. The clean profile did not
+contain a retail save, custom touch preferences, or an installed Retro version,
+so populated-state/version-code migration and physical acceptance remain open.
+Evidence: `docs/artifacts/2026-09-05/android/a6-emulator-update-in-place.md`.
+
 The `codex/iphone-touch-layout-editor` candidate captures the maintainer's
 current physical-iPhone control positions as the default for untouched iPhone
 installs only. Existing custom layouts and every iPad layout remain unchanged.

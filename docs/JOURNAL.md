@@ -3818,3 +3818,23 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   and release authorization remain open. No package or private artifact was
   published. Evidence:
   `docs/artifacts/2026-09-05/android/a6-clean-apk-reproducibility.md`.
+
+## 2026-09-05 — Android A6 emulator update-in-place preservation
+
+- Added a non-destructive emulator runner that requires two APKs with distinct
+  byte hashes, installs each with `adb install -r`, never clears package data,
+  verifies the approved app-private `main.dol`, and always restores the visible
+  production selector.
+- The runner compares a private aggregate covering configuration, the approved
+  game entry point, managed NAND, saves, shared preferences, and the Retro
+  version marker without printing private state content or individual hashes.
+- The visible API 36 ARM64 Pixel Tablet preserved its complete baseline state
+  while replacing the incremental APK `08c016da…` with the clean reproducible
+  APK `aa227e2b…`.
+- Classification: **Pass for same-version emulator durable-state preservation.**
+  The profile had no retail save, custom touch preferences, or installed Retro
+  version, and both APKs had the same application version. Populated-state and
+  version-code migration, signing, physical acceptance, and release
+  authorization remain open. No APK/AAB or private artifact was published.
+  Evidence:
+  `docs/artifacts/2026-09-05/android/a6-emulator-update-in-place.md`.

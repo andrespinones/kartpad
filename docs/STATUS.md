@@ -33,6 +33,16 @@ the clean path. Signed reproducibility, update-in-place, physical acceptance,
 and release authorization remain open. Evidence:
 [`docs/artifacts/2026-09-05/android/a6-clean-apk-reproducibility.md`](artifacts/2026-09-05/android/a6-clean-apk-reproducibility.md).
 
+Android A6 also passes a same-version emulator update-in-place check. Two APKs
+with different outer bytes were installed sequentially with `adb install -r`,
+without clearing package data. The approved `main.dol` and a private aggregate
+of configuration, managed NAND, saves, preferences, and Retro version state
+were unchanged, and the runner restored the visible production selector. The
+profile contained no retail save, custom touch preferences, or installed Retro
+version, so version-code migration and preservation of those populated states
+remain open alongside physical acceptance. Evidence:
+[`docs/artifacts/2026-09-05/android/a6-emulator-update-in-place.md`](artifacts/2026-09-05/android/a6-emulator-update-in-place.md).
+
 The latest Android A4 checkpoint fixes a real SDL lifecycle gap: KartPad now
 enables SDL activity recreation, so Android can rebuild `KartPadActivity`
 without SDL terminating the process. Visible Pixel 6 and Pixel Tablet runs held

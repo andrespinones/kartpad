@@ -884,6 +884,15 @@ at commit `6e405f3` matched byte-for-byte at SHA-256
 This proves the local unsigned clean path only; signing and update-in-place
 remain separate gates.
 
+The same-version emulator replacement lane is
+`scripts/test-android-update-in-place-emulator.sh BEFORE_APK AFTER_APK`. It
+requires distinct APK bytes, uses `adb install -r` without clearing package
+data, verifies the approved app-private game fixture, compares a non-disclosing
+aggregate over durable app-private state, and restores the production selector.
+Its clean profile result proves baseline state preservation only; repeat this
+gate with populated retail save, custom touch layout, installed Retro data, a
+real version-code transition, and physical hardware before release acceptance.
+
 Before any tester receives an artifact, verify at minimum:
 
 - only intended ABIs are present;
