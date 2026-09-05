@@ -3354,3 +3354,22 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - Classification: **Pass for owned selector icon parity on the emulator.** No
   package or private artifact was published. Evidence:
   `docs/artifacts/2026-09-05/android/a4-selector-owned-icons.md`.
+
+## 2026-09-05 — Android A4 selector visual contract
+
+- Added a production-gated source-fixture state and standard-library raw RGBA
+  verifier for the real launch activity. It checks selector labels, mark size,
+  centered equal cards, exact iOS-derived blue/pink fills, viewport/format, and
+  the diagonal navy-to-wine gradient.
+- The visible API 36 ARM64 Pixel 6 passed at 2400x1080 with 973 px cards; the
+  visible Pixel Tablet passed at 2560x1600 with 742 px cards. A first tablet run
+  correctly exposed a phone-only rotation assumption; the final wrapper uses
+  each pinned device's native landscape rotation.
+- The complete translated dual-runtime APK rebuilt and passed strict audit at
+  SHA-256
+  `2244ca5d1cf74d85d1b98279f36aa67a165e30dd3510c05612beb48a7b58da94`.
+  Android lint, 74 tests (one skipped), safety, syntax, and whitespace pass.
+- Classification: **Pass for automated selector visual coverage on canonical
+  emulator phone/tablet lanes.** Touch-overlay goldens and physical screens
+  remain separate. No package or private artifact was published. Evidence:
+  `docs/artifacts/2026-09-05/android/a4-selector-visual-contract.md`.

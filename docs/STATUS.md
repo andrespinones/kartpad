@@ -715,6 +715,13 @@ disconnect states; a second sequence began with A cyan/locked and restored it
    match the iOS selector's icon language. The visible Pixel Tablet composition
    and accessibility hierarchy pass; the final audited dual APK SHA-256 is
    `0d0dccc38878a9937a09d3b770dad16792654c1d5c86d72edafbd98710b778f7`.
+   A new source-only raw-frame verifier now makes the selector visual gate
+   repeatable on both canonical lanes: Pixel 6/2400x1080 and Pixel
+   Tablet/2560x1600 pass exact blue/pink palette, centered equal-card, full-mark,
+   label, RGBA, and gradient-direction checks. The production-gated fixture
+   hook cannot bypass real game-data validation in a game-runtime build. The
+   resulting audited dual APK SHA-256 is
+   `2244ca5d1cf74d85d1b98279f36aa67a165e30dd3510c05612beb48a7b58da94`.
    Evidence:
 [`docs/artifacts/2026-09-04/android/a4-touch-settings-menu-checkpoint.md`](artifacts/2026-09-04/android/a4-touch-settings-menu-checkpoint.md).
 [`docs/artifacts/2026-09-04/android/a4-controller-mapping.md`](artifacts/2026-09-04/android/a4-controller-mapping.md).
@@ -727,6 +734,7 @@ disconnect states; a second sequence began with A cyan/locked and restored it
 [`docs/artifacts/2026-09-05/android/a4-tablet-overlay-parity.md`](artifacts/2026-09-05/android/a4-tablet-overlay-parity.md).
 [`docs/artifacts/2026-09-05/android/a4-controller-player-setup.md`](artifacts/2026-09-05/android/a4-controller-player-setup.md).
 [`docs/artifacts/2026-09-05/android/a4-selector-owned-icons.md`](artifacts/2026-09-05/android/a4-selector-owned-icons.md).
+[`docs/artifacts/2026-09-05/android/a4-selector-visual-contract.md`](artifacts/2026-09-05/android/a4-selector-visual-contract.md).
 Accepted evidence:
 [`docs/artifacts/2026-09-04/android/a4-touch-overlay-input.md`](artifacts/2026-09-04/android/a4-touch-overlay-input.md).
 [`docs/artifacts/2026-09-04/android/a4-controller-handoff.md`](artifacts/2026-09-04/android/a4-controller-handoff.md).

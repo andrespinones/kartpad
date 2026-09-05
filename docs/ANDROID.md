@@ -1101,6 +1101,11 @@ legacy platform glyphs are now replaced with KartPad-owned steering-wheel,
 checkered-flag, and go-backward vectors verified on the visible Pixel Tablet;
 evidence is in
 `docs/artifacts/2026-09-05/android/a4-selector-owned-icons.md`.
+The same selector now has a standard-library raw-frame contract on both the
+canonical 2400x1080 phone and 2560x1600 tablet lanes. It verifies exact card
+palette, centered equal geometry, full mark, required labels, RGBA dimensions,
+and gradient direction without private data; evidence is in
+`docs/artifacts/2026-09-05/android/a4-selector-visual-contract.md`.
 
 Do not begin the touch-UI port until A2's controller-driven Original-mode proof
 passes. Physical Android hardware remains authoritative for vendor Vulkan and

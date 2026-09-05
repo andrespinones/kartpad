@@ -50,6 +50,13 @@ go-backward vectors now match the iOS icon language and passed visible
 lint, and strict APK audit. Evidence:
 `docs/artifacts/2026-09-05/android/a4-selector-owned-icons.md`.
 
+The selector now also has a reusable raw-frame visual gate. Both visible pinned
+API 36 ARM64 lanes pass: Pixel 6 at 2400x1080 and Pixel Tablet at 2560x1600.
+The source-only test proves exact iOS-derived blue/pink fills, equal centered
+cards, required labels, full-size mark, RGBA dimensions, and gradient direction;
+its bypass cannot activate in game-runtime builds. Evidence:
+`docs/artifacts/2026-09-05/android/a4-selector-visual-contract.md`.
+
 KartPad `v0.4.0-preview.2` is published from
 `e9fa6058ee09fff0b16481ebe4a78d61cea69c87`. It updates both Apple-platform
 artifacts for Retro Rewind 6.12.5, repairs the universal iPhone/iPad three-dot

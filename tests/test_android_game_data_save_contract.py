@@ -33,6 +33,8 @@ class AndroidGameDataSaveContractTests(unittest.TestCase):
             self.assertIn("android:pathData=", vector)
         self.assertIn("KartPadGameDataStorage.validationError(filesDir)", launcher)
         self.assertIn("original.isEnabled = gameDataValid", launcher)
+        self.assertIn("EXTRA_DEBUG_GAME_DATA_VALID", launcher)
+        self.assertIn("BuildConfig.DEBUG && !BuildConfig.GAME_RUNTIME", launcher)
         self.assertIn('"Import or Reimport Wii Disc Image…"', activity)
         self.assertIn('"Import from Extracted Folder…"', activity)
         self.assertIn('"Remove Stored Game Data…"', activity)

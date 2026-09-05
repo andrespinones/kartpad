@@ -67,6 +67,8 @@ class KartPadLaunchActivity : Activity() {
         val generation = ++validationGeneration
         val forceNotInstalled = BuildConfig.DEBUG &&
             intent.getBooleanExtra(EXTRA_DEBUG_RETRO_NOT_INSTALLED, false)
+        val forceGameDataValid = BuildConfig.DEBUG && !BuildConfig.GAME_RUNTIME &&
+            intent.getBooleanExtra(EXTRA_DEBUG_GAME_DATA_VALID, false)
         retroInstalled = false
         showStatus("Checking game data and Retro Rewind ${RetroRewindRelease.VERSION}…")
         progress.visibility = View.VISIBLE
@@ -74,8 +76,8 @@ class KartPadLaunchActivity : Activity() {
         retro.isEnabled = false
         validator.execute {
             val removalError = KartPadGameDataStorage.applyScheduledRemoval(filesDir)
-            val gameDataValid = removalError == null &&
-                KartPadGameDataStorage.validationError(filesDir) == null
+            val gameDataValid = forceGameDataValid ||
+                (removalError == null && KartPadGameDataStorage.validationError(filesDir) == null)
             val valid = !forceNotInstalled && runCatching {
                 RetroRewindInstallStorage.recover(filesDir)
                 RetroRewindInstallValidator.validate(
@@ -347,5 +349,7 @@ class KartPadLaunchActivity : Activity() {
         private const val LOG_TAG = "KartPadLauncher"
         private const val EXTRA_DEBUG_RETRO_NOT_INSTALLED =
             "dev.kartpad.android.TEST_MODE_CHOOSER_RETRO_NOT_INSTALLED"
+        private const val EXTRA_DEBUG_GAME_DATA_VALID =
+            "dev.kartpad.android.TEST_MODE_CHOOSER_GAME_DATA_VALID"
     }
 }
