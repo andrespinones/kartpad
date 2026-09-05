@@ -39,7 +39,7 @@
  #include <memory>
  
  namespace NetworkHle {
-@@ -1001,7 +1005,186 @@
+@@ -1001,7 +1005,189 @@
      default:
          WriteSslReturn(in, SSL_ERR_FAILED);
          return 0;
@@ -196,19 +196,17 @@
 +    }
 +
 +    std::string response;
++    int32_t terminalRead = SSL_ERR_RAGAIN;
 +    for (int attempt = 0; attempt < 8; ++attempt) {
 +        (void)HandleSslIoctlv(IOCTLV_NET_SSL_READ,
 +                              {{kReturn, 4u}, {kResponse, kResponseSize}},
 +                              {{kId, 4u}});
 +        const int32_t received = result();
++        terminalRead = received;
 +        if (received > 0) {
 +            const char* const bytes = reinterpret_cast<const char*>(
 +                Memory::GetPointer(kResponse, static_cast<uint32_t>(received)));
 +            response.append(bytes, static_cast<size_t>(received));
-+            if (response.find("200 OK") != std::string::npos ||
-+                response.find("200 ok") != std::string::npos) {
-+                break;
-+            }
 +        } else if (received != SSL_ERR_RAGAIN) {
 +            break;
 +        }
@@ -218,9 +216,14 @@
 +        NetFail("A5 guest TLS IOCTLV SSL_READ lacked HTTP success bytes=%zu", response.size());
 +        return finish(false);
 +    }
++    if (terminalRead != SSL_ERR_ZERO) {
++        NetFail("A5 guest TLS IOCTLV did not observe peer close result=%d",
++                terminalRead);
++        return finish(false);
++    }
 +    RT_LOGF(RT_TAG_NET,
-+            "A5 guest TLS IOCTLV trusted exchange passed response_bytes=%zu\n",
-+            response.size());
++            "A5 guest TLS IOCTLV trusted exchange passed response_bytes=%zu peer_close=%d\n",
++            response.size(), terminalRead);
 +    return finish(true);
 +#endif
  }

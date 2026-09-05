@@ -16,14 +16,15 @@ remains open.
 Android A5 now proves the product runtime's translated guest TLS IOCTLV path,
 not only the Mbed TLS wrapper. The visible ARM64 Pixel Tablet used real guest
 memory vectors and the runtime socket table for new-session, guest DER root CA,
-connect, handshake, write, read, and shutdown. It completed a 4,096-byte
-encrypted HTTP read and rejected a wrong hostname as guest error `-9`. The
+connect, handshake, write, read, and shutdown. It consumed a complete
+4,797-byte encrypted response, observed orderly peer close as guest `-6`, and
+rejected a wrong hostname as guest error `-9`. The
 repeatable runner preserves private game data, never copies a key to the
 device, cleans its exact fixture, and restores the production selector. This is
 an opt-in pre-guest product fixture, not yet a retail Mario Kart/WFC-initiated
 exchange or physical-device acceptance. The exact audited and installed
 dual-game APK SHA-256 is
-`0eacd4f8310a8ac6ad1d2d7de49c4db9a969e5373875c0670c42babe46df665b`.
+`0b6f6e5afa00eca9eedf2ced99639d25c5b62e3dbe1e3e418f7f4a1549831778`.
 Evidence: `docs/artifacts/2026-09-05/android/a5-guest-tls-ioctlv.md`.
 
 The `codex/iphone-touch-layout-editor` candidate captures the maintainer's

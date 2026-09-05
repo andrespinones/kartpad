@@ -6,8 +6,9 @@ Android A5 now exercises the product runtime's translated guest `/dev/net/ssl`
 IOCTLV handler, not only its Mbed TLS session wrapper. An opt-in emulator run
 constructed actual guest memory vectors and traversed `SSL_NEW`, guest DER root
 CA loading, socket-table `CONNECT`, handshake, write, read, and shutdown. The
-visible ARM64 Pixel Tablet completed a 4,096-byte encrypted HTTP read and
-returned guest error `-9` for the wrong hostname. The repeatable runner preserves
+visible ARM64 Pixel Tablet consumed the complete 4,797-byte encrypted HTTP
+response, observed orderly peer close as guest `-6`, and returned guest error
+`-9` for the wrong hostname. The repeatable runner preserves
 app-private game data, places no key on the device, cleans its public fixture,
 and returns to the production selector. Fresh runtime patch reproduction, 96
 tests with one skip, product-configured lint, and strict package/repository
@@ -15,7 +16,7 @@ audits pass. This remains an opt-in pre-guest product fixture, not a retail
 Mario Kart/WFC-initiated request. Built-in Wii CA/client certificates,
 local/public WFC, interruption recovery, and physical Android acceptance remain
 open. The installed dual-game APK SHA-256 is
-`0eacd4f8310a8ac6ad1d2d7de49c4db9a969e5373875c0670c42babe46df665b`.
+`0b6f6e5afa00eca9eedf2ced99639d25c5b62e3dbe1e3e418f7f4a1549831778`.
 Evidence:
 [`docs/artifacts/2026-09-05/android/a5-guest-tls-ioctlv.md`](artifacts/2026-09-05/android/a5-guest-tls-ioctlv.md).
 

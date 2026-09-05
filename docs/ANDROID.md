@@ -389,7 +389,8 @@ maps nonblocking reads/writes and certificate failures to the existing guest
 result contract. A deterministic ARM64 API 36 product fixture now constructs
 real guest memory vectors and traverses the production new-session, root-CA,
 socket-connect, handshake, write, read, and shutdown IOCTLV path. It completes
-encrypted HTTP traffic and rejects a wrong hostname. The fixture is opt-in and
+encrypted HTTP traffic, maps orderly peer close to guest `-6`, and rejects a
+wrong hostname. The fixture is opt-in and
 runs before the translated guest starts; a retail Mario Kart/WFC-initiated
 request, built-in Wii CA/client-certificate handling, WFC, interruption
 recovery, and physical-device networking remain incomplete.

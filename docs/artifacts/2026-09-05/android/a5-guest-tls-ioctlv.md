@@ -12,7 +12,7 @@ connection interruption, public WFC, or physical-device networking.
 - Branch: `codex/android-a4-touch-settings`
 - Parent commit: `d8599c3375f648f31ddbb81296897095c7441331`
 - Product APK SHA-256:
-  `0eacd4f8310a8ac6ad1d2d7de49c4db9a969e5373875c0670c42babe46df665b`
+  `0b6f6e5afa00eca9eedf2ced99639d25c5b62e3dbe1e3e418f7f4a1549831778`
 - Target: visible API 36 ARM64 Pixel Tablet emulator
 - Private input boundary: pre-existing app-private, user-owned extracted game
   data; `sys/main.dol` was verified only by its approved SHA-256
@@ -32,7 +32,7 @@ arguments, and invokes the production `HandleSslIoctlv` implementation for:
 3. `CONNECT` through the runtime Wii/native socket table;
 4. `DOHANDSHAKE`;
 5. `WRITE`;
-6. `READ`; and
+6. repeated `READ` through the complete response and orderly peer close; and
 7. `SHUTDOWN`.
 
 Every exit closes the fixture session/socket and restores the snapshotted guest
@@ -52,9 +52,9 @@ production Original/Retro selector.
 The repeatable product run passed both cases:
 
 ```text
-[net] A5 guest TLS IOCTLV trusted exchange passed response_bytes=4096
+[net] A5 guest TLS IOCTLV trusted exchange passed response_bytes=4797 peer_close=-6
 [net] A5 guest TLS IOCTLV hostname rejection passed result=-9
-Android product guest TLS IOCTLV emulator fixture passed: apk_sha256=0eacd4f8310a8ac6ad1d2d7de49c4db9a969e5373875c0670c42babe46df665b private_key_on_device=no game_data_preserved=yes
+Android product guest TLS IOCTLV emulator fixture passed: apk_sha256=0b6f6e5afa00eca9eedf2ced99639d25c5b62e3dbe1e3e418f7f4a1549831778 private_key_on_device=no game_data_preserved=yes
 ```
 
 Afterward, the exact fixture directories were absent, the corrected app-private

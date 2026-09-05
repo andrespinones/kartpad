@@ -3775,13 +3775,14 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   app-private `main.dol` hash, reinstalls without clearing storage, generates
   one-run host certificates, copies only the public DER CA to the emulator,
   removes the exact fixture afterward, and restores the production selector.
-- The visible Pixel Tablet passed the trusted 4,096-byte encrypted read and
-  wrong-host `-9` paths. The private game-data hash was unchanged, no key
+- The visible Pixel Tablet consumed the complete 4,797-byte encrypted response,
+  observed orderly peer close as guest `-6`, and passed the wrong-host `-9`
+  path. The private game-data hash was unchanged, no key
   reached the device, and the corrected relative `[paths]` configuration
   remained installed.
 - A fresh runtime preparation reproduced the exact source. The product APK
   SHA-256 is
-  `0eacd4f8310a8ac6ad1d2d7de49c4db9a969e5373875c0670c42babe46df665b`;
+  `0b6f6e5afa00eca9eedf2ced99639d25c5b62e3dbe1e3e418f7f4a1549831778`;
   96 tests with one intentional skip, product-configured Android lint, strict
   package/privacy audit, repository safety, shell lint/syntax, and whitespace
   checks pass.

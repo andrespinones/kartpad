@@ -77,6 +77,8 @@ class AndroidTlsContractTests(unittest.TestCase):
         self.assertIn("std::memcpy(saved.data(), scratch, saved.size())", fixture_patch)
         self.assertIn("std::memcpy(scratch, saved.data(), saved.size())", fixture_patch)
         self.assertIn('root + "/port"', fixture_patch)
+        self.assertIn("terminalRead != SSL_ERR_ZERO", fixture_patch)
+        self.assertIn("peer_close=%d", fixture_patch)
         for command in (
             "IOCTLV_NET_SSL_NEW",
             "IOCTLV_NET_SSL_SETROOTCA",
