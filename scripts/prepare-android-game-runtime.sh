@@ -61,6 +61,8 @@ patch --batch -p1 -d "$runtime_source" < \
 patch --batch -p1 -d "$runtime_source" < \
   "$repo_root/patches/wiicompiled-android-touch-input.patch"
 patch --batch -p1 -d "$runtime_source" < \
+  "$repo_root/patches/wiicompiled-android-controller-mapping.patch"
+patch --batch -p1 -d "$runtime_source" < \
   "$repo_root/patches/wiicompiled-android-runtime-settings.patch"
 
 generated_link="$(dirname "$runtime_source")/generated"

@@ -641,11 +641,20 @@ disconnect states; a second sequence began with A cyan/locked and restored it
    injection proved neutral, opposite signed tilts, inversion, and preference
    restoration across process restart. The exact local dual APK SHA-256 is
    `ae96d3e2bcd340b64d9b76cb6a05059bef99b90b24ac7111d159b7d4e05f51e5`.
-   This accepts only this emulator A4 slice. Virtual accessibility nodes,
-   physical haptic feel, tablet and physical touch, custom controller mapping,
-   game-data/save and Mii management, direct Wii Remote support, complete menu-
-   function parity, and physical-device acceptance remain open. Evidence:
+   Custom controller mapping now also replaces the former disclosure-only menu
+   item. A/B/X/Y/Z assignments persist app-privately, occupied assignments swap
+   instead of duplicating, and reset restores the iOS-equivalent direct map.
+   The emulator proved a persisted A/B swap through Android InputReader and SDL:
+   physical A left the Retro title unchanged as game B, while physical B advanced
+   as game A. The exact clean local APK is
+   `30493adced96cad0edcb9d90354596dc59550be0522735f1356758124cb8686a`
+   and passes the strict package/privacy audit. This accepts only this emulator
+   A4 slice. Virtual accessibility nodes, physical haptic feel, tablet and
+   physical touch, game-data/save and Mii management, direct Wii Remote support,
+   remaining menu-function parity, and physical-device acceptance remain open.
+   Evidence:
 [`docs/artifacts/2026-09-04/android/a4-touch-settings-menu-checkpoint.md`](artifacts/2026-09-04/android/a4-touch-settings-menu-checkpoint.md).
+[`docs/artifacts/2026-09-04/android/a4-controller-mapping.md`](artifacts/2026-09-04/android/a4-controller-mapping.md).
 Accepted evidence:
 [`docs/artifacts/2026-09-04/android/a4-touch-overlay-input.md`](artifacts/2026-09-04/android/a4-touch-overlay-input.md).
 [`docs/artifacts/2026-09-04/android/a4-controller-handoff.md`](artifacts/2026-09-04/android/a4-controller-handoff.md).

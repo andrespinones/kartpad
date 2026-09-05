@@ -3131,3 +3131,31 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   acceptance remain open. No APK, AAB, private content, save, or screenshot was
   published. Evidence:
   `docs/artifacts/2026-09-04/android/a4-touch-settings-menu-checkpoint.md`.
+
+## 2026-09-04 — Android A4 controller mapping parity
+
+- Replaced the Controls submenu's disclosure-only controller mapping item with
+  persistent A/B/X/Y/Z assignments, swap-on-collision behavior, accessible
+  choices, connected-controller status, and reset-to-default.
+- Routed the saved permutation through JNI into the live SDL snapshot before
+  Classic Controller adaptation. Corrected the Android shoulder/trigger contract
+  to match iOS: left shoulder is Z, left trigger is L, and right shoulder or
+  trigger is R.
+- On the standalone API 36 ARM64 emulator, saved A↔B, restarted the process, and
+  attached an InputReader-visible virtual Xbox controller. The native producer
+  and consumer both observed `1,0,2,3,4`; physical A left the Retro title
+  unchanged as game B, and physical B advanced to license selection as game A.
+  Defaults were restored afterward.
+- The exact clean local APK SHA-256 is
+  `30493adced96cad0edcb9d90354596dc59550be0522735f1356758124cb8686a`.
+  A fresh runtime preparation applied all 464 hunks across 54 patches and
+  reproduced the expected KPAD source. Nineteen Android/Apple source contracts,
+  the native touch contract, host gamepad contract, package/privacy audit,
+  repository safety, pinned sources/input, SunPad snapshot, lint, and whitespace
+  checks pass.
+- Classification: **Pass for persisted single-controller button remapping on
+  the emulator.** Multi-controller assignment/setup, game-data/save and Mii
+  management, accessibility nodes, physical controllers/devices, and full menu
+  parity remain open. No APK, AAB, private data, save, log, or screenshot was
+  published. Evidence:
+  `docs/artifacts/2026-09-04/android/a4-controller-mapping.md`.

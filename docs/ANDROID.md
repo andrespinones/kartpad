@@ -1040,10 +1040,15 @@ gravity motion steering uses the same calibration, `0.045`-radian dead zone,
 The standalone API 36 ARM64 emulator proved the selector and Retro title, all
 motion actions, signed virtual-sensor input, inversion, and process-restart
 persistence using the exact local dual APK recorded in the A4 checkpoint.
-Custom controller remapping, complete Android game-data/save and Mii management,
-accessibility nodes, tablet/physical touch, and physical-device acceptance are
-still open. Evidence is in
-`docs/artifacts/2026-09-04/android/a4-touch-settings-menu-checkpoint.md`.
+The controller mapping item is now functional for the iOS v1 A/B/X/Y/Z scope:
+assignments persist, collisions swap, defaults restore safely, and the runtime
+remaps the SDL snapshot before Classic Controller adaptation. A virtual Android
+controller proved an A/B swap end-to-end on the live Retro title. Complete
+Android game-data/save and Mii management, accessibility nodes, tablet/physical
+touch, multi-controller setup parity, and physical-device acceptance are still
+open. Evidence is in
+`docs/artifacts/2026-09-04/android/a4-touch-settings-menu-checkpoint.md` and
+`docs/artifacts/2026-09-04/android/a4-controller-mapping.md`.
 
 Do not begin the touch-UI port until A2's controller-driven Original-mode proof
 passes. Physical Android hardware remains authoritative for vendor Vulkan and

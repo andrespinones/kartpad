@@ -138,6 +138,24 @@ class AndroidTouchOverlayContractTests(unittest.TestCase):
         self.assertIn("abs(leftX) >= abs(motionSteeringX)", overlay)
         self.assertIn("setControllerConnected(controllerCount > 0)", activity)
 
+    def test_controller_mapping_is_persisted_swapped_and_applied_natively(self) -> None:
+        activity = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadActivity.kt").read_text()
+        store = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadControllerMapping.kt").read_text()
+        native = (REPO / "runtime/include/kartpad/android/controller_mapping.hpp").read_text()
+        patch = (REPO / "patches/wiicompiled-android-controller-mapping.patch").read_text()
+        self.assertIn('arrayOf("A", "B", "X", "Y", "Z")', store)
+        self.assertIn('"Left Shoulder"', store)
+        self.assertIn("mapping.indexOf(physical)", store)
+        self.assertIn("mapping[other] = previous", store)
+        self.assertIn("showControllerMappingChoices(game)", activity)
+        self.assertIn('text = "Reset to Default"', activity)
+        self.assertIn("nativeApplyControllerMapping", activity)
+        self.assertIn("IsValidControllerButtonMapping", native)
+        self.assertIn("ApplyControllerButtonMapping", patch)
+        gamepad = (REPO / "runtime/include/kartpad/android/gamepad_contract.h").read_text()
+        self.assertIn("map(kGamepadLeftShoulder, kClassicZr)", gamepad)
+        self.assertIn("output.buttons |= kClassicL", gamepad)
+
     def test_runtime_preparation_applies_touch_bridge(self) -> None:
         script = (REPO / "scripts/prepare-android-game-runtime.sh").read_text()
         self.assertIn("wiicompiled-android-touch-input.patch", script)

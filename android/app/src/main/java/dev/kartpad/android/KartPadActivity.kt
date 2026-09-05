@@ -85,6 +85,7 @@ class KartPadActivity : SDLActivity() {
         if (BuildConfig.GAME_RUNTIME) {
             addMenuButton()
             addLayoutEditorBar()
+            applyControllerMapping()
             applyDisplaySettings()
             kartPadOverlay.postDelayed({ applyDisplaySettings() }, 1_000L)
         }
@@ -309,14 +310,88 @@ class KartPadActivity : SDLActivity() {
         val controllers = inputManager.inputDeviceIds.toList().mapNotNull { id ->
             inputManager.getInputDevice(id)?.takeIf(::isGameController)?.name
         }
-        showParityBoundary(
-            "Controller Button Mapping",
-            if (controllers.isEmpty()) {
-                "No physical controller is connected. Connect an Android gamepad, then reopen this screen. Custom per-button remapping is still being ported."
-            } else {
-                "Connected: ${controllers.joinToString()}. Standard Android/SDL mappings are active; custom per-button remapping is still being ported."
-            },
-        )
+        val mapping = KartPadControllerMapping.load(this)
+        val content = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(24), dp(4), dp(24), dp(8))
+        }
+        content.addView(settingsLabel(if (controllers.isEmpty()) {
+            "No extended controller is connected. You can review or reset the saved mapping; connect a controller to test it."
+        } else {
+            "Connected: ${controllers.joinToString()}. Only A, B, X, Y, and Z are remapped. Analog triggers, sticks, D-pad, Start, and the right shoulder stay direct."
+        }))
+        lateinit var dialog: AlertDialog
+        KartPadControllerMapping.gameButtonNames.forEachIndexed { game, gameName ->
+            content.addView(Button(this).apply {
+                val physical = KartPadControllerMapping.physicalButtonNames[mapping[game]]
+                text = "$gameName — $physical"
+                contentDescription = "Game $gameName mapped to physical $physical"
+                setOnClickListener {
+                    dialog.dismiss()
+                    showControllerMappingChoices(game)
+                }
+            })
+        }
+        content.addView(Button(this).apply {
+            text = "Reset to Default"
+            contentDescription = "Reset controller mapping to default"
+            setOnClickListener {
+                KartPadControllerMapping.reset(this@KartPadActivity)
+                applyControllerMapping()
+                dialog.dismiss()
+                menuButton.post { showControllerMapping() }
+            }
+        })
+        content.addView(Button(this).apply {
+            text = "Done"
+            contentDescription = "Close controller button mapping"
+            setOnClickListener { dialog.dismiss() }
+        })
+        dialog = AlertDialog.Builder(this)
+            .setTitle("Controller Button Mapping")
+            .setView(ScrollView(this).apply { addView(content) })
+            .create()
+        dialog.show()
+    }
+
+    private fun showControllerMappingChoices(game: Int) {
+        val gameName = KartPadControllerMapping.gameButtonNames[game]
+        val content = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(24), dp(4), dp(24), dp(8))
+        }
+        content.addView(settingsLabel(
+            "Choose the physical controller button. If it is already assigned, the two assignments swap.",
+        ))
+        lateinit var dialog: AlertDialog
+        KartPadControllerMapping.physicalButtonNames.forEachIndexed { physical, name ->
+            content.addView(Button(this).apply {
+                text = name
+                contentDescription = "Map game $gameName to physical $name"
+                setOnClickListener {
+                    KartPadControllerMapping.assign(this@KartPadActivity, game, physical)
+                    applyControllerMapping()
+                    dialog.dismiss()
+                    menuButton.post { showControllerMapping() }
+                }
+            })
+        }
+        content.addView(Button(this).apply {
+            text = "Cancel"
+            setOnClickListener {
+                dialog.dismiss()
+                menuButton.post { showControllerMapping() }
+            }
+        })
+        dialog = AlertDialog.Builder(this)
+            .setTitle(gameName)
+            .setView(ScrollView(this).apply { addView(content) })
+            .create()
+        dialog.show()
+    }
+
+    private fun applyControllerMapping() {
+        nativeApplyControllerMapping(KartPadControllerMapping.load(this))
     }
 
     private fun showMotionSteering() {
@@ -824,6 +899,8 @@ class KartPadActivity : SDLActivity() {
     private external fun nativeApplyDisplaySettings(
         showFps: Boolean, aspectMode: Int, resolutionScale: Float,
     )
+
+    private external fun nativeApplyControllerMapping(mapping: IntArray)
 
     companion object {
         private const val MENU_TITLE = 99
