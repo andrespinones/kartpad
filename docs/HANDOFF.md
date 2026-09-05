@@ -128,10 +128,10 @@ groups; stricter phone/tablet raw-frame gates and a real tablet card tap pass.
 Evidence:
 `docs/artifacts/2026-09-05/android/a4-touch-settings-state-selector-geometry.md`.
 
-The consolidated three-dot menu now has a real reachability gate rather than a
-source-only inventory. Pixel 6 and Pixel Tablet each expose all 8 top-level, 5
-Controls, 2 Display, and 6 Game Data & Saves rows through actual rendered
-submenus. Evidence:
+The consolidated three-dot menu now has a real reachability/action gate rather
+than a source-only inventory. Pixel 6 and Pixel Tablet each expose all 8
+top-level, 5 Controls, 2 Display, and 6 Game Data & Saves rows through actual
+rendered submenus, then open 13 representative destinations. Evidence:
 `docs/artifacts/2026-09-05/android/a4-menu-hierarchy-reachability.md`.
 
 KartPad `v0.4.0-preview.2` is published from

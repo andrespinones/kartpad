@@ -8,8 +8,8 @@ sdk_root="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-$HOME/Library/Android/sdk}}"
 adb="$sdk_root/platform-tools/adb"
 lane="${1:-phone}"
 case "$lane" in
-  phone) user_rotation=1 ;;
-  tablet) user_rotation=0 ;;
+  phone) user_rotation=1; expected_width=2400; expected_height=1080 ;;
+  tablet) user_rotation=0; expected_width=2560; expected_height=1600 ;;
   *) echo "ERROR: lane must be phone or tablet" >&2; exit 64 ;;
 esac
 
@@ -95,6 +95,23 @@ PY
   "$adb" shell input tap "$x" "$y"
 }
 
+open_top_action() {
+  start_menu
+  tap_label "$1"
+  sleep 1
+  dump_tree
+}
+
+open_submenu_action() {
+  start_menu
+  tap_label "$1"
+  sleep 1
+  dump_tree
+  tap_label "$2"
+  sleep 1
+  dump_tree
+}
+
 top=(
   "KartPad"
   "Switch Game Version…"
@@ -138,4 +155,56 @@ assert_labels \
   "Manage Saves…" \
   "Manage Miis…"
 
-echo "Android menu parity passed: lane=$lane top=8 controls=5 display=2 data=6"
+open_top_action "Switch Game Version…"
+assert_labels "Switch Game Version" "RESTART TO SELECTOR" "CANCEL"
+
+open_top_action "Multiplayer…"
+assert_labels "Multiplayer" "SET UP RETRO REWIND" "BACK"
+
+open_top_action "Report a Problem…"
+assert_labels "Report a Problem" "SHARE REPORT…" "REPORT ON GITHUB" "CANCEL"
+
+open_submenu_action "Controls" "Controller Button Mapping…"
+assert_labels "Controller Button Mapping" "A — A" "Z — LEFT SHOULDER"
+"$adb" shell input swipe \
+  "$((expected_width / 2))" "$((expected_height * 3 / 4))" \
+  "$((expected_width / 2))" "$((expected_height / 4))" 300
+sleep 1
+dump_tree
+assert_labels "RESET TO DEFAULT" "DONE"
+
+open_submenu_action "Controls" "Touch Control Settings…"
+assert_labels "Touch Control Settings" "MOVE CONTROLS" "RESET THIS DEVICE LAYOUT"
+
+open_submenu_action "Controls" "Motion Steering…"
+assert_labels "Motion Steering" "CONTINUE PLAYING"
+
+open_submenu_action "Controls" "Experimental Wii Remote + Nunchuk…"
+assert_labels "Experimental Wii Remote + Nunchuk" "BACK"
+
+open_submenu_action "Display" "Aspect Ratio…"
+assert_labels \
+  "Aspect Ratio" \
+  "Original 4:3" \
+  "16:9 (Experimental)" \
+  "Fill Screen (Experimental)"
+
+open_submenu_action "Display" "Render Resolution…"
+assert_labels "Render Resolution" "1× (Native)" "2×" "3×" "4×"
+
+open_submenu_action "Game Data & Saves" "Remove Stored Game Data…"
+assert_labels "Remove Stored Game Data?" "REMOVE" "CANCEL"
+
+open_submenu_action "Game Data & Saves" "Manage Saves…"
+assert_labels "Manage Saves" "EXPORT SAVE BACKUP…" "RESTORE SAVE BACKUP…" "DONE"
+
+open_submenu_action "Game Data & Saves" "Manage Miis…"
+assert_labels \
+  "Manage Miis (Experimental)" \
+  "No Mii database exists yet. Start Mario Kart Wii once, then try again." \
+  "BACK"
+
+open_submenu_action "Game Data & Saves" "Manage Retro Rewind…"
+assert_labels "KartPad" "Retro Rewind 6.12.5"
+
+echo "Android menu parity passed: lane=$lane top=8 controls=5 display=2 data=6 actions=13"

@@ -3580,6 +3580,10 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   traverses Controls, Display, and Game Data & Saves independently.
 - Both visible canonical emulators expose the full 21-row hierarchy: 8 top,
   5 Controls, 2 Display, and 6 Game Data & Saves rows.
-- Classification: **Pass for rendered hierarchy reachability on Pixel 6 and
-  Pixel Tablet.** Physical-device actions remain open. Evidence:
+- The strengthened run reopens the menu for 13 representative actions and
+  requires each intended destination. It also scrolls the mapping dialog to
+  prove Reset/Done remain reachable and verifies the honest empty-database Mii
+  boundary.
+- Classification: **Pass for rendered hierarchy and action reachability on
+  Pixel 6 and Pixel Tablet.** Physical-device actions remain open. Evidence:
   `docs/artifacts/2026-09-05/android/a4-menu-hierarchy-reachability.md`.
