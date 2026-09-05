@@ -1052,14 +1052,19 @@ matching the iOS product boundary. The Game Data & Saves submenu now exposes
 real extracted-folder import/reimport, save-preserving removal, Retro management,
 exact RKSYS backup/restore, and Mii management. The isolated launcher validates
 RMCP01 data, remains usable as the recovery/import surface when data is absent,
-and shows both Original and installed Retro choices when ready. ISO/WBFS
-extraction, positive multi-gigabyte import evidence, accessibility nodes,
-tablet/physical touch, multi-controller setup parity, and physical-device
-acceptance are still open. Evidence is in
+and shows both Original and installed Retro choices when ready. The custom
+Canvas overlay now exposes all 14 classic controls as bounded virtual
+accessibility nodes. Buttons use native mask pulses, sticks provide directional
+custom actions, and A provides a state-reporting acceleration-lock action. The
+API 36 emulator hierarchy and a direct UI Automator node action both pass.
+ISO/WBFS extraction, positive multi-gigabyte import evidence, tablet/physical
+touch, multi-controller setup parity, and physical-device acceptance are still
+open. Evidence is in
 `docs/artifacts/2026-09-04/android/a4-touch-settings-menu-checkpoint.md` and
 `docs/artifacts/2026-09-04/android/a4-controller-mapping.md` and
 `docs/artifacts/2026-09-04/android/a4-mii-management.md` and
-`docs/artifacts/2026-09-04/android/a4-game-data-save-parity.md`.
+`docs/artifacts/2026-09-04/android/a4-game-data-save-parity.md` and
+`docs/artifacts/2026-09-04/android/a4-touch-accessibility.md`.
 
 Do not begin the touch-UI port until A2's controller-driven Original-mode proof
 passes. Physical Android hardware remains authoritative for vendor Vulkan and

@@ -3217,3 +3217,21 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   multi-gigabyte import run remain open. All temporary emulator files and the
   test backup were removed; no private content or package was published.
   Evidence: `docs/artifacts/2026-09-04/android/a4-game-data-save-parity.md`.
+
+## 2026-09-04 — Android A4 touch accessibility
+
+- Added 14 virtual accessibility children to the Canvas overlay with distinct
+  labels and bounds, button clicks, four directional actions per stick, focus
+  and hover handling, hidden-control filtering, and an A acceleration-lock
+  action with a live state description.
+- The API 36 ARM64 emulator exposed every virtual node through its real
+  accessibility hierarchy. A temporary UI Automator test called the A node's
+  custom action directly through `AccessibilityNodeInfo.performAction`; the
+  node reported `Acceleration locked` and A visibly turned cyan. A normal tap
+  restored unlocked green. TalkBack and the temporary test jar were removed.
+- The exact dual local APK SHA-256 is
+  `35ca72fab4c2c3737f373b25e6374daa7edfc13607d23afeaa8091e09b8c3fdf`.
+  Kotlin compilation, lint, the strict package/privacy audit, 49 source
+  contracts, and whitespace checks pass. Game data, save, and Mii hashes stayed
+  exact. No APK, private content, log, test jar, or screenshot was published.
+  Evidence: `docs/artifacts/2026-09-04/android/a4-touch-accessibility.md`.

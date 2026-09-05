@@ -669,13 +669,19 @@ disconnect states; a second sequence began with A cyan/locked and restored it
    local-only APK is
    `6aa904883b174940f728b672bee971a6367dc6008d7c9837eeb7cf684e043203`.
    ISO/WBFS extraction and positive multi-gigabyte folder-import evidence remain
-   open along with accessibility, multi-controller, tablet/physical touch, and
-   physical-device acceptance.
+   open along with multi-controller, tablet/physical touch, and physical-device
+   acceptance. The Canvas overlay now exposes 14 bounded virtual accessibility
+   children with button, stick-direction, and A-lock actions. UI Automator
+   resolved the live nodes and directly performed the A-lock action; its state
+   became `Acceleration locked` and the on-screen A turned cyan. The exact dual
+   APK for this slice is
+   `35ca72fab4c2c3737f373b25e6374daa7edfc13607d23afeaa8091e09b8c3fdf`.
    Evidence:
 [`docs/artifacts/2026-09-04/android/a4-touch-settings-menu-checkpoint.md`](artifacts/2026-09-04/android/a4-touch-settings-menu-checkpoint.md).
 [`docs/artifacts/2026-09-04/android/a4-controller-mapping.md`](artifacts/2026-09-04/android/a4-controller-mapping.md).
 [`docs/artifacts/2026-09-04/android/a4-mii-management.md`](artifacts/2026-09-04/android/a4-mii-management.md).
 [`docs/artifacts/2026-09-04/android/a4-game-data-save-parity.md`](artifacts/2026-09-04/android/a4-game-data-save-parity.md).
+[`docs/artifacts/2026-09-04/android/a4-touch-accessibility.md`](artifacts/2026-09-04/android/a4-touch-accessibility.md).
 Accepted evidence:
 [`docs/artifacts/2026-09-04/android/a4-touch-overlay-input.md`](artifacts/2026-09-04/android/a4-touch-overlay-input.md).
 [`docs/artifacts/2026-09-04/android/a4-controller-handoff.md`](artifacts/2026-09-04/android/a4-controller-handoff.md).

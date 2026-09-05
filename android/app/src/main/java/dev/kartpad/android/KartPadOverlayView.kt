@@ -5,14 +5,20 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.PointF
+import android.graphics.Rect
 import android.graphics.RectF
 import android.os.Build
+import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowInsets
+import android.view.accessibility.AccessibilityEvent
+import android.view.accessibility.AccessibilityManager
+import android.view.accessibility.AccessibilityNodeInfo
+import android.view.accessibility.AccessibilityNodeProvider
 import kotlin.math.abs
 import kotlin.math.hypot
 import kotlin.math.max
@@ -62,6 +68,13 @@ class KartPadOverlayView(context: Context) : View(context) {
     private var controllerConnected = false
     private var gasHoldGeneration = 0
     private var gasLocked = false
+    private var accessibilityButtons = 0
+    private val accessibilityPulseGenerations = mutableMapOf<String, Int>()
+    private var accessibilityFocusId = View.NO_ID
+    private var accessibilityHoverId = View.NO_ID
+    private val accessibilityManager =
+        context.getSystemService(Context.ACCESSIBILITY_SERVICE) as AccessibilityManager
+    private val virtualNodeProvider = TouchAccessibilityNodeProvider()
     private var hiddenForController = false
     private var controlOpacity = KartPadTouchSettings.opacity(context)
     private var controlSizeScale = KartPadTouchSettings.size(context)
@@ -79,7 +92,6 @@ class KartPadOverlayView(context: Context) : View(context) {
         isFocusable = true
         isHapticFeedbackEnabled = true
         importantForAccessibility = IMPORTANT_FOR_ACCESSIBILITY_YES
-        contentDescription = "KartPad touch controls"
         buildControls()
         reloadCustomSettings()
     }
@@ -172,12 +184,39 @@ class KartPadOverlayView(context: Context) : View(context) {
         return true
     }
 
+    override fun getAccessibilityNodeProvider(): AccessibilityNodeProvider = virtualNodeProvider
+
+    override fun onInitializeAccessibilityNodeInfo(info: AccessibilityNodeInfo) {
+        super.onInitializeAccessibilityNodeInfo(info)
+        info.className = KartPadOverlayView::class.java.name
+        info.contentDescription = null
+        info.isFocusable = false
+        info.isClickable = false
+        visibleAccessibilityControls().forEach { (id, _) -> info.addChild(this, id) }
+    }
+
+    override fun dispatchHoverEvent(event: MotionEvent): Boolean {
+        if (!accessibilityManager.isEnabled || !accessibilityManager.isTouchExplorationEnabled) {
+            return super.dispatchHoverEvent(event)
+        }
+        when (event.actionMasked) {
+            MotionEvent.ACTION_HOVER_ENTER,
+            MotionEvent.ACTION_HOVER_MOVE -> updateAccessibilityHover(
+                accessibilityControlAt(event.x, event.y)?.first ?: View.NO_ID,
+            )
+            MotionEvent.ACTION_HOVER_EXIT -> updateAccessibilityHover(View.NO_ID)
+        }
+        return true
+    }
+
     fun clearTouchInput() {
         pointerOwners.clear()
         leftX = 0f
         leftY = 0f
         rightX = 0f
         rightY = 0f
+        accessibilityButtons = 0
+        accessibilityPulseGenerations.clear()
         gasLocked = false
         gasHoldGeneration += 1
         updateGasAccessibility()
@@ -207,6 +246,7 @@ class KartPadOverlayView(context: Context) : View(context) {
             publishState(connected = true)
             invalidate()
         }
+        sendAccessibilityTreeChanged()
     }
 
     fun reloadPresentationSettings() {
@@ -216,6 +256,7 @@ class KartPadOverlayView(context: Context) : View(context) {
         reloadCustomSettings()
         requestLayout()
         invalidate()
+        sendAccessibilityTreeChanged()
     }
 
     fun beginLayoutEditing() {
@@ -225,6 +266,7 @@ class KartPadOverlayView(context: Context) : View(context) {
         visibility = VISIBLE
         onEditSelectionChanged?.invoke(null, 1f, false)
         invalidate()
+        sendAccessibilityTreeChanged()
     }
 
     fun endLayoutEditing() {
@@ -233,6 +275,7 @@ class KartPadOverlayView(context: Context) : View(context) {
         selectedControlId = null
         editPointerId = MotionEvent.INVALID_POINTER_ID
         invalidate()
+        sendAccessibilityTreeChanged()
     }
 
     fun setSelectedControlSize(value: Float) {
@@ -241,6 +284,7 @@ class KartPadOverlayView(context: Context) : View(context) {
         notifyEditSelection()
         requestLayout()
         invalidate()
+        sendAccessibilityTreeChanged()
     }
 
     fun toggleSelectedControlVisibility() {
@@ -250,6 +294,7 @@ class KartPadOverlayView(context: Context) : View(context) {
         )
         notifyEditSelection()
         invalidate()
+        sendAccessibilityTreeChanged()
     }
 
     fun resetLayoutSettings() {
@@ -519,7 +564,7 @@ class KartPadOverlayView(context: Context) : View(context) {
     }
 
     private fun publishState(connected: Boolean) {
-        var buttons = if (gasLocked) BUTTON_A else 0
+        var buttons = (if (gasLocked) BUTTON_A else 0) or accessibilityButtons
         pointerOwners.values.forEach { owner ->
             buttons = buttons or (controls.firstOrNull { it.id == owner }?.mask ?: 0)
         }
@@ -553,6 +598,274 @@ class KartPadOverlayView(context: Context) : View(context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             stateDescription = if (gasLocked) "Acceleration locked" else null
         }
+        sendVirtualAccessibilityEvent(
+            controls.indexOfFirst { it.id == "A" },
+            AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED,
+        )
+    }
+
+    private fun visibleAccessibilityControls(): List<Pair<Int, Control>> {
+        layoutControls()
+        return controls.mapIndexedNotNull { index, control ->
+            if (hiddenForController ||
+                (!editingLayout && KartPadTouchSettings.isHidden(
+                    context, editableIdentifier(control),
+                ))
+            ) null else index to control
+        }
+    }
+
+    private fun accessibilityControlAt(x: Float, y: Float): Pair<Int, Control>? =
+        visibleAccessibilityControls().asReversed().firstOrNull { (_, control) ->
+            if (!control.frame.contains(x, y)) return@firstOrNull false
+            if (control.kind == Kind.BUTTON && control.frame.width() != control.frame.height()) {
+                return@firstOrNull true
+            }
+            val radius = min(control.frame.width(), control.frame.height()) * 0.5f
+            hypot(
+                (x - control.frame.centerX()).toDouble(),
+                (y - control.frame.centerY()).toDouble(),
+            ) <= radius
+        }
+
+    private fun accessibilityLabel(control: Control): String = when (control.id) {
+        "move" -> "Move stick"
+        "c" -> "Camera stick"
+        "Start" -> "Start button"
+        "DpadUp" -> "D-pad up"
+        "DpadDown" -> "D-pad down"
+        "DpadLeft" -> "D-pad left"
+        "DpadRight" -> "D-pad right"
+        else -> "${control.label} button"
+    }
+
+    private fun pulseAccessibilityButton(control: Control) {
+        if (control.id == "A" && gasLocked) {
+            gasLocked = false
+            updateGasAccessibility()
+        }
+        val generation = (accessibilityPulseGenerations[control.id] ?: 0) + 1
+        accessibilityPulseGenerations[control.id] = generation
+        accessibilityButtons = accessibilityButtons or control.mask
+        performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+        publishState(connected = true)
+        invalidate()
+        mainHandler.postDelayed({
+            if (accessibilityPulseGenerations[control.id] != generation) return@postDelayed
+            accessibilityButtons = accessibilityButtons and control.mask.inv()
+            publishState(connected = true)
+            invalidate()
+        }, ACCESSIBILITY_PULSE_MS)
+    }
+
+    private fun pulseAccessibilityStick(control: Control, action: Int) {
+        val generation = (accessibilityPulseGenerations[control.id] ?: 0) + 1
+        accessibilityPulseGenerations[control.id] = generation
+        val x = when (action) {
+            ACTION_STICK_LEFT -> -1f
+            ACTION_STICK_RIGHT -> 1f
+            else -> 0f
+        }
+        val y = when (action) {
+            ACTION_STICK_UP -> 1f
+            ACTION_STICK_DOWN -> -1f
+            else -> 0f
+        }
+        if (control.kind == Kind.LEFT_STICK) {
+            leftX = x
+            leftY = y
+        } else {
+            rightX = x
+            rightY = y
+        }
+        performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+        publishState(connected = true)
+        invalidate()
+        mainHandler.postDelayed({
+            if (accessibilityPulseGenerations[control.id] != generation) return@postDelayed
+            if (control.kind == Kind.LEFT_STICK) {
+                leftX = 0f
+                leftY = 0f
+            } else {
+                rightX = 0f
+                rightY = 0f
+            }
+            publishState(connected = true)
+            invalidate()
+        }, ACCESSIBILITY_STICK_PULSE_MS)
+    }
+
+    private fun toggleAccessibilityGasLock() {
+        gasHoldGeneration += 1
+        gasLocked = !gasLocked
+        updateGasAccessibility()
+        performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+        publishState(connected = true)
+        invalidate()
+    }
+
+    private fun updateAccessibilityHover(id: Int) {
+        if (id == accessibilityHoverId) return
+        if (accessibilityHoverId != View.NO_ID) {
+            sendVirtualAccessibilityEvent(
+                accessibilityHoverId, AccessibilityEvent.TYPE_VIEW_HOVER_EXIT,
+            )
+        }
+        accessibilityHoverId = id
+        if (id != View.NO_ID) {
+            sendVirtualAccessibilityEvent(id, AccessibilityEvent.TYPE_VIEW_HOVER_ENTER)
+        }
+    }
+
+    private fun sendAccessibilityTreeChanged() {
+        sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED)
+    }
+
+    private fun sendVirtualAccessibilityEvent(id: Int, eventType: Int) {
+        val control = controls.getOrNull(id) ?: return
+        if (!accessibilityManager.isEnabled || parent == null) return
+        val event = AccessibilityEvent.obtain(eventType).apply {
+            packageName = context.packageName
+            className = if (control.kind == Kind.BUTTON) {
+                android.widget.Button::class.java.name
+            } else {
+                android.widget.SeekBar::class.java.name
+            }
+            contentDescription = accessibilityLabel(control)
+            setSource(this@KartPadOverlayView, id)
+        }
+        parent.requestSendAccessibilityEvent(this, event)
+    }
+
+    private inner class TouchAccessibilityNodeProvider : AccessibilityNodeProvider() {
+        override fun createAccessibilityNodeInfo(virtualViewId: Int): AccessibilityNodeInfo? {
+            if (virtualViewId == HOST_VIEW_ID) {
+                return AccessibilityNodeInfo.obtain(this@KartPadOverlayView).also {
+                    onInitializeAccessibilityNodeInfo(it)
+                }
+            }
+            val control = visibleAccessibilityControls()
+                .firstOrNull { it.first == virtualViewId }?.second ?: return null
+            val bounds = Rect().also { control.frame.roundOut(it) }
+            val screenBounds = Rect(bounds)
+            val location = IntArray(2)
+            getLocationOnScreen(location)
+            screenBounds.offset(location[0], location[1])
+            return AccessibilityNodeInfo.obtain().apply {
+                setSource(this@KartPadOverlayView, virtualViewId)
+                setParent(this@KartPadOverlayView)
+                packageName = context.packageName
+                className = if (control.kind == Kind.BUTTON) {
+                    android.widget.Button::class.java.name
+                } else {
+                    android.widget.SeekBar::class.java.name
+                }
+                contentDescription = accessibilityLabel(control)
+                isEnabled = isShown
+                isVisibleToUser = isShown
+                isFocusable = true
+                isClickable = control.kind == Kind.BUTTON || editingLayout
+                setBoundsInParent(bounds)
+                setBoundsInScreen(screenBounds)
+                if (control.kind == Kind.BUTTON || editingLayout) {
+                    addAction(AccessibilityNodeInfo.ACTION_CLICK)
+                }
+                if (accessibilityFocusId == virtualViewId) {
+                    isAccessibilityFocused = true
+                    addAction(AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS)
+                } else {
+                    addAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS)
+                }
+                if (control.kind != Kind.BUTTON) {
+                    addAction(AccessibilityNodeInfo.AccessibilityAction(
+                        ACTION_STICK_UP, "Move up",
+                    ))
+                    addAction(AccessibilityNodeInfo.AccessibilityAction(
+                        ACTION_STICK_DOWN, "Move down",
+                    ))
+                    addAction(AccessibilityNodeInfo.AccessibilityAction(
+                        ACTION_STICK_LEFT, "Move left",
+                    ))
+                    addAction(AccessibilityNodeInfo.AccessibilityAction(
+                        ACTION_STICK_RIGHT, "Move right",
+                    ))
+                }
+                if (control.id == "A") {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                        stateDescription = if (gasLocked) "Acceleration locked" else "Unlocked"
+                    }
+                    addAction(AccessibilityNodeInfo.AccessibilityAction(
+                        ACTION_TOGGLE_GAS_LOCK,
+                        if (gasLocked) "Unlock acceleration" else "Lock acceleration",
+                    ))
+                }
+            }
+        }
+
+        override fun performAction(
+            virtualViewId: Int,
+            action: Int,
+            arguments: Bundle?,
+        ): Boolean {
+            if (virtualViewId == HOST_VIEW_ID) {
+                return performAccessibilityAction(action, arguments)
+            }
+            val control = visibleAccessibilityControls()
+                .firstOrNull { it.first == virtualViewId }?.second ?: return false
+            return when (action) {
+                AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS -> {
+                    if (accessibilityFocusId == virtualViewId) false else {
+                        accessibilityFocusId = virtualViewId
+                        invalidate()
+                        sendVirtualAccessibilityEvent(
+                            virtualViewId, AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED,
+                        )
+                        true
+                    }
+                }
+                AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS -> {
+                    if (accessibilityFocusId != virtualViewId) false else {
+                        accessibilityFocusId = View.NO_ID
+                        invalidate()
+                        sendVirtualAccessibilityEvent(
+                            virtualViewId,
+                            AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED,
+                        )
+                        true
+                    }
+                }
+                AccessibilityNodeInfo.ACTION_CLICK -> {
+                    if (editingLayout) {
+                        selectedControlId = editableIdentifier(control)
+                        notifyEditSelection()
+                        invalidate()
+                    } else if (control.kind == Kind.BUTTON) {
+                        pulseAccessibilityButton(control)
+                    } else {
+                        return false
+                    }
+                    sendVirtualAccessibilityEvent(
+                        virtualViewId, AccessibilityEvent.TYPE_VIEW_CLICKED,
+                    )
+                    true
+                }
+                ACTION_TOGGLE_GAS_LOCK -> if (control.id == "A") {
+                    toggleAccessibilityGasLock()
+                    true
+                } else false
+                ACTION_STICK_UP, ACTION_STICK_DOWN,
+                ACTION_STICK_LEFT, ACTION_STICK_RIGHT -> if (control.kind != Kind.BUTTON) {
+                    pulseAccessibilityStick(control, action)
+                    true
+                } else false
+                else -> false
+            }
+        }
+
+        override fun findFocus(focus: Int): AccessibilityNodeInfo? =
+            if (focus == AccessibilityNodeInfo.FOCUS_ACCESSIBILITY &&
+                accessibilityFocusId != View.NO_ID
+            ) createAccessibilityNodeInfo(accessibilityFocusId) else null
     }
 
     private fun brighten(color: Int): Int = Color.argb(
@@ -571,6 +884,13 @@ class KartPadOverlayView(context: Context) : View(context) {
 
     private companion object {
         const val GAS_LOCK_DELAY_MS = 1_000L
+        const val ACCESSIBILITY_PULSE_MS = 140L
+        const val ACCESSIBILITY_STICK_PULSE_MS = 240L
+        const val ACTION_STICK_UP = 0x01020001
+        const val ACTION_STICK_DOWN = 0x01020002
+        const val ACTION_STICK_LEFT = 0x01020003
+        const val ACTION_STICK_RIGHT = 0x01020004
+        const val ACTION_TOGGLE_GAS_LOCK = 0x01020005
         val LOCKED_GAS_COLOR: Int = Color.argb(250, 15, 199, 235)
         val EDIT_SELECTED_COLOR: Int = Color.rgb(51, 199, 255)
         val EDIT_AVAILABLE_COLOR: Int = Color.rgb(255, 199, 51)

@@ -33,8 +33,24 @@ class AndroidTouchOverlayContractTests(unittest.TestCase):
         self.assertIn("HapticFeedbackConstants.VIRTUAL_KEY", source)
         self.assertIn("isHapticFeedbackEnabled = true", source)
         self.assertIn('"Acceleration locked"', source)
-        self.assertIn("var buttons = if (gasLocked) BUTTON_A else 0", source)
+        self.assertIn("if (gasLocked) BUTTON_A else 0", source)
         self.assertIn("gasLocked = false", source)
+
+    def test_canvas_controls_are_accessible_and_operable_as_virtual_nodes(self) -> None:
+        source = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadOverlayView.kt").read_text()
+        self.assertIn("TouchAccessibilityNodeProvider", source)
+        self.assertIn("override fun getAccessibilityNodeProvider()", source)
+        self.assertIn("visibleAccessibilityControls()", source)
+        self.assertIn("info.addChild(this, id)", source)
+        self.assertIn('"Move stick"', source)
+        self.assertIn('"Camera stick"', source)
+        self.assertIn('"D-pad up"', source)
+        self.assertIn("pulseAccessibilityButton(control)", source)
+        self.assertIn("pulseAccessibilityStick(control, action)", source)
+        self.assertIn('"Lock acceleration"', source)
+        self.assertIn('"Unlock acceleration"', source)
+        self.assertIn("ACTION_TOGGLE_GAS_LOCK", source)
+        self.assertIn("TYPE_VIEW_ACCESSIBILITY_FOCUSED", source)
 
     def test_r_is_the_same_compact_digital_pill_as_l(self) -> None:
         source = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadOverlayView.kt").read_text()
