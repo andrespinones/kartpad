@@ -102,11 +102,18 @@ if [[ "$mbedtls_cmake_sha256" != \
   exit 1
 fi
 
+bundletool_jar="$cache_root/bundletool-all-1.18.1.jar"
+fetch_locked \
+  "https://github.com/google/bundletool/releases/download/1.18.1/bundletool-all-1.18.1.jar" \
+  "$bundletool_jar" 32505571 \
+  675786493983787ffa11550bdb7c0715679a44e1643f3ff980a529e9c822595c
+
 echo "SDL3 Android AAR: $(shasum -a 256 "$repo_root/android/app/libs/SDL3-3.4.4.aar" | awk '{print $1}')"
 echo "Dawn archive: $(shasum -a 256 "$dawn_archive" | awk '{print $1}')"
 echo "Dawn sanitized targets: $sanitized_targets_sha256"
 echo "minizip-ng archive: $(shasum -a 256 "$minizip_archive" | awk '{print $1}')"
 echo "Mbed TLS archive: $(shasum -a 256 "$mbedtls_archive" | awk '{print $1}')"
+echo "Android bundletool: $(shasum -a 256 "$bundletool_jar" | awk '{print $1}')"
 echo "DAWN_ANDROID_ROOT=$dawn_root"
 echo "MINIZIP_ANDROID_ROOT=$minizip_root"
 echo "MBEDTLS_ANDROID_ROOT=$mbedtls_root"

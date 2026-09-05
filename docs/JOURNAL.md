@@ -3899,3 +3899,26 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   Physical provider/device acceptance, signed release, and publication remain
   open. No APK/AAB, save, or private artifact was published. Evidence:
   `docs/artifacts/2026-09-05/android/a6-emulator-save-document-picker.md`.
+
+## 2026-09-05 — Android A6 deterministic unsigned release AAB
+
+- Added an explicit `aab` product-builder mode and pinned official bundletool
+  1.18.1 at 32,505,571 bytes and SHA-256
+  `675786493983787ffa11550bdb7c0715679a44e1643f3ff980a529e9c822595c`.
+- The first byte-reproducible unsigned debug intermediary failed strict privacy
+  review because `base/resources.pb` contained absolute Gradle-cache paths. A
+  clean rebuild with general path mapping reproduced the same failure, ruling
+  out stale output.
+- Moved the AAB lane to unsigned `bundleRelease` and enabled release
+  resource-source exclusion. The complete resulting AAB and `resources.pb`
+  contain no developer path.
+- Two independent scoped app cleans and release product builds produced
+  byte-identical AABs at SHA-256
+  `f1c107a7b2cf853f77ef245164821fa46e3502a83be8a3881d794edca7cf9e3e`.
+  Pinned bundletool validation and strict package/manifest/permission,
+  ARM64-only, 16 KiB ELF, export/dependency, asset, private-data/path, and exact
+  key-marker audits pass.
+- Classification: **Pass for clean unsigned release AAB reproducibility and
+  audit.** Signing, store-derived APK execution, physical acceptance, and
+  publication remain open. No APK/AAB or private artifact was published.
+  Evidence: `docs/artifacts/2026-09-05/android/a6-clean-unsigned-aab.md`.

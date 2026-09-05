@@ -37,6 +37,9 @@ class AndroidUpdateInPlaceContractTests(unittest.TestCase):
         self.assertIn("KARTPAD_ANDROID_VERSION_CODE", builder)
         self.assertIn("-PkartpadVersionCode=$version_code_override", builder)
         self.assertIn("must be a positive integer", builder)
+        self.assertIn("KARTPAD_ANDROID_PACKAGE_FORMAT", builder)
+        self.assertIn("bundleRelease", builder)
+        self.assertIn("app-release.aab", builder)
 
 
 if __name__ == "__main__":

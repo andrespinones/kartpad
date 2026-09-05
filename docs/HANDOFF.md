@@ -73,6 +73,16 @@ artifacts, retained the active save, and restored the visible selector.
 Physical provider/device acceptance remains open. Evidence:
 `docs/artifacts/2026-09-05/android/a6-emulator-save-document-picker.md`.
 
+The release AAB lane is now deterministic, unsigned, and path-clean. A debug
+intermediary was rejected after its `resources.pb` exposed absolute Gradle
+cache paths. Release resource-source exclusion fixed that boundary, and two
+independent clean release bundles match byte-for-byte at
+`f1c107a7b2cf853f77ef245164821fa46e3502a83be8a3881d794edca7cf9e3e`.
+Pinned bundletool structural/manifest validation and the strict ARM64/ELF/
+permission/asset/privacy audit pass. The bundle remains local and unpublished;
+signing, store-derived APK execution, and physical acceptance remain open.
+Evidence: `docs/artifacts/2026-09-05/android/a6-clean-unsigned-aab.md`.
+
 The `codex/iphone-touch-layout-editor` candidate captures the maintainer's
 current physical-iPhone control positions as the default for untouched iPhone
 installs only. Existing custom layouts and every iPad layout remain unchanged.

@@ -150,6 +150,17 @@
       "role": "Unique durable foreground orchestration, retry, cancellation, constraints, and persisted progress for Android Retro Rewind installation"
     },
     {
+      "name": "Android bundletool",
+      "repository": "https://github.com/google/bundletool",
+      "version": "1.18.1",
+      "artifact": "bundletool-all-1.18.1.jar",
+      "url": "https://github.com/google/bundletool/releases/download/1.18.1/bundletool-all-1.18.1.jar",
+      "bytes": 32505571,
+      "sha256": "675786493983787ffa11550bdb7c0715679a44e1643f3ff980a529e9c822595c",
+      "license": "Apache-2.0",
+      "role": "Pinned validation and manifest inspection for unpublished Android App Bundle outputs"
+    },
+    {
       "name": "sse2neon",
       "repository": "https://github.com/DLTcollab/sse2neon.git",
       "commit": "13a42df35dc7fcc94f987568e7274a998bb6cc86",

@@ -5,6 +5,15 @@ repo_root="$(git rev-parse --show-toplevel)"
 # shellcheck source=android-toolchain-versions.sh
 source "$repo_root/scripts/android-toolchain-versions.sh"
 version_code_override="${KARTPAD_ANDROID_VERSION_CODE:-}"
+package_format="${KARTPAD_ANDROID_PACKAGE_FORMAT:-apk}"
+case "$package_format" in
+  apk) package_task=assembleDebug; package_kind=APK ;;
+  aab) package_task=bundleRelease; package_kind="unsigned AAB" ;;
+  *)
+    echo "ERROR: KARTPAD_ANDROID_PACKAGE_FORMAT must be apk or aab" >&2
+    exit 64
+    ;;
+esac
 if [[ -n "$version_code_override" &&
     ! "$version_code_override" =~ ^[1-9][0-9]*$ ]]; then
   echo "ERROR: KARTPAD_ANDROID_VERSION_CODE must be a positive integer" >&2
@@ -84,12 +93,16 @@ if [[ -n "$version_code_override" ]]; then
 fi
 
 "$repo_root/android/gradlew" "${gradle_args[@]}" \
-  :app:assembleDebug
+  ":app:$package_task"
 
-apk="$repo_root/android/app/build/outputs/apk/debug/app-debug.apk"
-if [[ ! -f "$apk" ]]; then
-  echo "ERROR: Gradle did not produce $apk" >&2
+if [[ "$package_format" == apk ]]; then
+  package_path="$repo_root/android/app/build/outputs/apk/debug/app-debug.apk"
+else
+  package_path="$repo_root/android/app/build/outputs/bundle/release/app-release.aab"
+fi
+if [[ ! -f "$package_path" ]]; then
+  echo "ERROR: Gradle did not produce $package_path" >&2
   exit 1
 fi
-echo "Built local Android game APK (do not publish): $apk"
-shasum -a 256 "$apk"
+echo "Built local Android game $package_kind (do not publish): $package_path"
+shasum -a 256 "$package_path"

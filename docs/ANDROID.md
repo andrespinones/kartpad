@@ -901,6 +901,20 @@ the wrong package identity, a non-increasing version code, or an installed
 version that does not match the requested APK. This override is test-only;
 normal builds retain the manifest's default version code.
 
+The product builder emits a debug APK by default. Set
+`KARTPAD_ANDROID_PACKAGE_FORMAT=aab` to run the unsigned `bundleRelease` path
+and produce the local, unpublished `app-release.aab`. Release bundles exclude
+resource-source metadata so developer and dependency-cache paths cannot enter
+`resources.pb`; package-format values other than `apk` and `aab` fail before
+toolchain work begins.
+
+Audit the release bundle with `scripts/audit-android-bundle.sh [AAB]`. The
+runner hash-checks the pinned official bundletool, validates the bundle and
+decoded manifest, rejects a signature or unintended ABI/asset/permission,
+checks 16 KiB ELF and export/dependency boundaries, and scans the complete AAB
+for local paths, private-data names, and unexpected key markers. Candidate AAB
+hashes must come from independent scoped clean builds, not a cached task.
+
 The non-destructive save-storage emulator lane is
 `scripts/test-android-save-storage-emulator.sh [APK]`. Its debug-only fixture
 uses deterministic valid RKSYS images under an isolated cache root to execute

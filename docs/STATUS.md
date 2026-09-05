@@ -77,6 +77,18 @@ the active save and visible selector intact. Physical provider/device
 acceptance remains open. Evidence:
 [`docs/artifacts/2026-09-05/android/a6-emulator-save-document-picker.md`](artifacts/2026-09-05/android/a6-emulator-save-document-picker.md).
 
+Android A6 now has a deterministic unsigned release AAB path. The initial
+debug intermediary was correctly rejected because `resources.pb` embedded
+absolute Gradle-cache paths. The release lane excludes resource-source
+metadata; two independent clean builds are byte-identical at SHA-256
+`f1c107a7b2cf853f77ef245164821fa46e3502a83be8a3881d794edca7cf9e3e`.
+Pinned bundletool validation and the new strict bundle audit pass package/SDK/
+permission identity, unsigned state, exact ARM64 libraries/assets, 16 KiB ELF
+alignment, dependencies/exports, parser-marker cardinality, and private-path/
+data exclusion. Signing, store-derived APK testing, physical acceptance, and
+publication remain open. Evidence:
+[`docs/artifacts/2026-09-05/android/a6-clean-unsigned-aab.md`](artifacts/2026-09-05/android/a6-clean-unsigned-aab.md).
+
 The latest Android A4 checkpoint fixes a real SDL lifecycle gap: KartPad now
 enables SDL activity recreation, so Android can rebuild `KartPadActivity`
 without SDL terminating the process. Visible Pixel 6 and Pixel Tablet runs held
