@@ -650,11 +650,19 @@ disconnect states; a second sequence began with A cyan/locked and restored it
    `30493adced96cad0edcb9d90354596dc59550be0522735f1356758124cb8686a`
    and passes the strict package/privacy audit. This accepts only this emulator
    A4 slice. Virtual accessibility nodes, physical haptic feel, tablet and
-   physical touch, game-data/save and Mii management, direct Wii Remote support,
-   remaining menu-function parity, and physical-device acceptance remain open.
+   physical touch, game-data/save management, Mii creation, direct Wii Remote
+   support, remaining menu-function parity, and physical-device acceptance
+   remain open. Android Mii management now lists the live validated database,
+   imports standard 74-byte `.mii` documents, stages removals, applies changes
+   before SDL starts, retains automatic backups, and refuses to remove the final
+   Mii. An emulator import/restart/list/remove/restart cycle returned the database
+   byte-for-byte to its original SHA-256. The exact clean local APK for this
+   follow-up is
+   `24dbe0768dc07fa3d3cf8a27c7fcd163bff5cd53615dce5cddfc51207b580545`.
    Evidence:
 [`docs/artifacts/2026-09-04/android/a4-touch-settings-menu-checkpoint.md`](artifacts/2026-09-04/android/a4-touch-settings-menu-checkpoint.md).
 [`docs/artifacts/2026-09-04/android/a4-controller-mapping.md`](artifacts/2026-09-04/android/a4-controller-mapping.md).
+[`docs/artifacts/2026-09-04/android/a4-mii-management.md`](artifacts/2026-09-04/android/a4-mii-management.md).
 Accepted evidence:
 [`docs/artifacts/2026-09-04/android/a4-touch-overlay-input.md`](artifacts/2026-09-04/android/a4-touch-overlay-input.md).
 [`docs/artifacts/2026-09-04/android/a4-controller-handoff.md`](artifacts/2026-09-04/android/a4-controller-handoff.md).

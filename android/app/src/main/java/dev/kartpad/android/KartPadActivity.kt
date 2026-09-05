@@ -55,6 +55,9 @@ class KartPadActivity : SDLActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         if (BuildConfig.GAME_RUNTIME) {
             RetroRewindInstallStorage.recover(filesDir)
+            KartPadMiiStorage.applyPending(filesDir)?.let { error ->
+                Log.e(TAG, error)
+            }
             KartPadRuntimeResources.install(this)
             Os.setenv("KARTPAD_ANDROID_FILES_DIR", filesDir.absolutePath, true)
             Os.setenv("KARTPAD_ANDROID_CACHE_DIR", cacheDir.absolutePath, true)
@@ -211,10 +214,7 @@ class KartPadActivity : SDLActivity() {
                     MENU_RETRO_REWIND -> startActivity(
                         Intent(this@KartPadActivity, RetroRewindInstallActivity::class.java),
                     )
-                    MENU_MIIS -> showParityBoundary(
-                        "Manage Miis (Experimental)",
-                        "Android Mii import, removal, and creation are not implemented yet. Existing game data is not modified.",
-                    )
+                    MENU_MIIS -> showMiiManager()
                     MENU_REPORT_PROBLEM -> showReportProblem()
                     else -> return@setOnMenuItemClickListener false
                 }
@@ -481,6 +481,184 @@ class KartPadActivity : SDLActivity() {
                 "Android game-data import and save management are still being ported. This screen does not expose private file paths.",
         )
     }
+
+    private fun showMiiManager() {
+        kartPadOverlay.clearTouchInput()
+        val database = runCatching { KartPadMiiStorage.readWorking(filesDir) }
+            .getOrElse { error ->
+                showParityBoundary(
+                    "Manage Miis (Experimental)",
+                    safeMiiError(error, "The Mii database could not be read."),
+                )
+                return
+            }
+        val records = runCatching { parseMiiRecords(nativeListMiis(database)) }
+            .getOrElse { error ->
+                showParityBoundary(
+                    "Miis Could Not Be Read",
+                    safeMiiError(error, "The Mii database failed validation."),
+                )
+                return
+            }
+        val content = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(24), dp(4), dp(24), dp(8))
+        }
+        lateinit var dialog: AlertDialog
+        val pending = if (KartPadMiiStorage.hasPending(filesDir)) {
+            " Changes are staged for the next game restart."
+        } else {
+            ""
+        }
+        content.addView(settingsLabel(
+            "${records.size} Mii${if (records.size == 1) "" else "s"} available.$pending",
+        ))
+        content.addView(Button(this).apply {
+            text = "Import Mii…"
+            contentDescription = "Import a standard Mii file"
+            setOnClickListener {
+                startActivityForResult(
+                    Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                        addCategory(Intent.CATEGORY_OPENABLE)
+                        type = "application/octet-stream"
+                    },
+                    REQUEST_IMPORT_MII,
+                )
+            }
+        })
+        content.addView(Button(this).apply {
+            text = "Remove a Mii…"
+            contentDescription = "Remove a Mii"
+            isEnabled = records.isNotEmpty()
+            setOnClickListener { showMiiRemoval(records) }
+        })
+        content.addView(Button(this).apply {
+            text = "Create a Mii…"
+            contentDescription = "Learn how to create a Mii"
+            setOnClickListener {
+                AlertDialog.Builder(this@KartPadActivity)
+                    .setTitle("Create a Mii")
+                    .setMessage(
+                        "KartPad does not include the Wii Menu or Mii Channel, so it cannot create a new Mii. Create or export a standard 74-byte .mii file with a compatible tool, then import it here.",
+                    )
+                    .setNegativeButton("Back", null)
+                    .show()
+            }
+        })
+        content.addView(Button(this).apply {
+            text = "Done"
+            contentDescription = "Close Mii manager"
+            setOnClickListener { dialog.dismiss() }
+        })
+        dialog = AlertDialog.Builder(this)
+            .setTitle("Manage Miis (Experimental)")
+            .setView(ScrollView(this).apply { addView(content) })
+            .create()
+        dialog.show()
+    }
+
+    private fun showMiiRemoval(records: List<MiiRecord>) {
+        if (records.isEmpty()) return
+        val labels = records.map { record ->
+            if (record.creator == "Unknown") record.name
+            else "${record.name} — creator ${record.creator}"
+        }.toTypedArray()
+        AlertDialog.Builder(this)
+            .setTitle("Remove a Mii")
+            .setItems(labels) { _, which -> confirmMiiRemoval(records[which]) }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun confirmMiiRemoval(record: MiiRecord) {
+        AlertDialog.Builder(this)
+            .setTitle("Remove ${record.name}?")
+            .setMessage(
+                "The removal will apply after restarting the game. KartPad retains a backup and always keeps at least one Mii.",
+            )
+            .setNegativeButton("Cancel", null)
+            .setPositiveButton("Remove") { _, _ ->
+                runCatching {
+                    val working = KartPadMiiStorage.readWorking(filesDir)
+                    KartPadMiiStorage.writePending(
+                        filesDir, nativeRemoveMii(working, record.slot),
+                    )
+                }.onSuccess {
+                    showMiiChangeReady("${record.name} will be removed.")
+                }.onFailure { error ->
+                    showParityBoundary(
+                        "Mii Could Not Be Removed",
+                        safeMiiError(error, "The Mii removal could not be staged."),
+                    )
+                }
+            }
+            .show()
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode != REQUEST_IMPORT_MII || resultCode != RESULT_OK) return
+        val uri = data?.data ?: return
+        runCatching {
+            val mii = readMiiDocument(uri)
+            val working = KartPadMiiStorage.readWorking(filesDir)
+            KartPadMiiStorage.writePending(
+                filesDir, nativeImportMii(working, mii),
+            )
+        }.onSuccess {
+            showMiiChangeReady("The selected Mii will be imported.")
+        }.onFailure { error ->
+            showParityBoundary(
+                "Mii Import Failed",
+                safeMiiError(error, "The selected Mii could not be imported."),
+            )
+        }
+    }
+
+    private fun readMiiDocument(uri: Uri): ByteArray {
+        val input = contentResolver.openInputStream(uri)
+            ?: error("The selected Mii file could not be opened.")
+        input.use { stream ->
+            val buffer = ByteArray(MII_FILE_BYTES + 1)
+            var count = 0
+            while (count < buffer.size) {
+                val read = stream.read(buffer, count, buffer.size - count)
+                if (read < 0) break
+                count += read
+            }
+            require(count == MII_FILE_BYTES) {
+                "A Mii file must contain exactly $MII_FILE_BYTES bytes."
+            }
+            return buffer.copyOf(MII_FILE_BYTES)
+        }
+    }
+
+    private fun showMiiChangeReady(message: String) {
+        AlertDialog.Builder(this)
+            .setTitle("Mii Change Scheduled")
+            .setMessage("$message The current database will be backed up automatically.")
+            .setPositiveButton("Restart Now") { _, _ -> restartToGameSelector() }
+            .setNegativeButton("Later", null)
+            .show()
+    }
+
+    private fun parseMiiRecords(values: Array<String>): List<MiiRecord> {
+        require(values.size % 3 == 0) { "The native Mii list is malformed." }
+        return values.asList().chunked(3).map { valuesForRecord ->
+            MiiRecord(
+                slot = valuesForRecord[0].toInt(),
+                name = valuesForRecord[1],
+                creator = valuesForRecord[2],
+            )
+        }
+    }
+
+    private fun safeMiiError(error: Throwable, fallback: String): String =
+        if (error is IllegalArgumentException && !error.message.isNullOrBlank()) {
+            error.message!!
+        } else {
+            fallback
+        }
 
     private fun showReportProblem() {
         val report = buildString {
@@ -902,6 +1080,10 @@ class KartPadActivity : SDLActivity() {
 
     private external fun nativeApplyControllerMapping(mapping: IntArray)
 
+    private external fun nativeListMiis(database: ByteArray): Array<String>
+    private external fun nativeImportMii(database: ByteArray, mii: ByteArray): ByteArray
+    private external fun nativeRemoveMii(database: ByteArray, slot: Int): ByteArray
+
     companion object {
         private const val MENU_TITLE = 99
         private const val MENU_SWITCH_GAME = 100
@@ -921,6 +1103,8 @@ class KartPadActivity : SDLActivity() {
         private const val MENU_DISPLAY_GROUP = 114
         private const val MENU_DATA_GROUP = 115
         private const val SELECTOR_RESTART_DELAY_MS = 250L
+        private const val REQUEST_IMPORT_MII = 4_301
+        private const val MII_FILE_BYTES = 74
         const val EXTRA_RUNTIME_PROFILE = "dev.kartpad.android.RUNTIME_PROFILE"
         private const val TAG = "KartPadFixture"
         private const val DEBUG_RKG_RELATIVE_PATH = "KartPad/Diagnostics/TestInput.rkg"
@@ -942,4 +1126,6 @@ class KartPadActivity : SDLActivity() {
         private const val MAX_RKG_BYTES = 1024L * 1024L
         private val RKG_MAGIC = byteArrayOf('R'.code.toByte(), 'K'.code.toByte(), 'G'.code.toByte(), 'D'.code.toByte())
     }
+
+    private data class MiiRecord(val slot: Int, val name: String, val creator: String)
 }

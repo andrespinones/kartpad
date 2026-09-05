@@ -156,6 +156,27 @@ class AndroidTouchOverlayContractTests(unittest.TestCase):
         self.assertIn("map(kGamepadLeftShoulder, kClassicZr)", gamepad)
         self.assertIn("output.buttons |= kClassicL", gamepad)
 
+    def test_mii_manager_stages_validated_changes_for_restart(self) -> None:
+        activity = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadActivity.kt").read_text()
+        storage = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadMiiStorage.kt").read_text()
+        native = (REPO / "android/app/src/main/cpp/kartpad_mii_jni.cpp").read_text()
+        cmake = (REPO / "android/app/src/main/cpp/CMakeLists.txt").read_text()
+        self.assertIn("KartPadMiiStorage.applyPending(filesDir)", activity)
+        self.assertLess(
+            activity.index("KartPadMiiStorage.applyPending(filesDir)"),
+            activity.index("super.onCreate(savedInstanceState)"),
+        )
+        self.assertIn("showMiiManager()", activity)
+        self.assertIn("Intent.ACTION_OPEN_DOCUMENT", activity)
+        self.assertIn("nativeImportMii", activity)
+        self.assertIn("nativeRemoveMii", activity)
+        self.assertIn("AtomicFile", storage)
+        self.assertIn("MiiBackups", storage)
+        self.assertIn("stored == crc", storage)
+        self.assertIn("kartpad::mii::ImportMii", native)
+        self.assertIn("kartpad::mii::RemoveMii", native)
+        self.assertIn("kartpad_mii_jni.cpp", cmake)
+
     def test_runtime_preparation_applies_touch_bridge(self) -> None:
         script = (REPO / "scripts/prepare-android-game-runtime.sh").read_text()
         self.assertIn("wiicompiled-android-touch-input.patch", script)

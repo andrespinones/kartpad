@@ -3159,3 +3159,34 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   parity remain open. No APK, AAB, private data, save, log, or screenshot was
   published. Evidence:
   `docs/artifacts/2026-09-04/android/a4-controller-mapping.md`.
+
+## 2026-09-04 — Android A4 Mii management parity
+
+- Replaced the Game Data & Saves submenu's Mii placeholder with a live manager
+  that lists validated records, imports bounded standard 74-byte `.mii` files
+  through Android's document picker, stages named removals, explains the same
+  no-creation boundary as iOS, and offers immediate restart.
+- Reused the portable Mii parser/mutator through JNI. Kotlin owns app-private
+  atomic staging, independent RNOD/CRC validation before startup application,
+  timestamped backups, and sanitized errors. Pending changes are applied before
+  SDL loads the translated runtime; the active database is never edited while
+  the game is running.
+- On the standalone API 36 ARM64 emulator, the manager initially listed one Mii.
+  A generated non-personal `Android` Mii imported through DocumentsUI, staged as
+  a 779,968-byte CRC-valid database, and appeared as the second named record after
+  restart. The pre-import database was backed up byte-for-byte. Removing Android
+  and restarting restored the exact original database SHA-256
+  `6212cbf744e28d8e0687c9e8a7d8b22343ef37291b8dc5c031f04f1c45e5b3b7`;
+  attempting to remove the remaining KartPad Mii was rejected in-product.
+- The synthetic document and test-created backups were removed, no pending edit
+  remains, and the exact clean APK SHA-256 is
+  `24dbe0768dc07fa3d3cf8a27c7fcd163bff5cd53615dce5cddfc51207b580545`.
+  Twenty-four focused source contracts, portable Mii/gamepad and native touch
+  contracts, lint, package/privacy and repository audits, all patch hunks, pinned
+  inputs, SunPad snapshot, and whitespace checks pass.
+- Classification: **Pass for Android Mii list/import/remove/restart/backup on the
+  emulator.** In-app Mii creation remains intentionally unavailable as on iOS.
+  Game-data/save management, accessibility nodes, multi-controller setup,
+  physical controllers/devices, and full A4 parity remain open. No APK, AAB,
+  private data, save, log, or screenshot was published. Evidence:
+  `docs/artifacts/2026-09-04/android/a4-mii-management.md`.

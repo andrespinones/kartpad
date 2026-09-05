@@ -1044,11 +1044,16 @@ The controller mapping item is now functional for the iOS v1 A/B/X/Y/Z scope:
 assignments persist, collisions swap, defaults restore safely, and the runtime
 remaps the SDL snapshot before Classic Controller adaptation. A virtual Android
 controller proved an A/B swap end-to-end on the live Retro title. Complete
-Android game-data/save and Mii management, accessibility nodes, tablet/physical
-touch, multi-controller setup parity, and physical-device acceptance are still
-open. Evidence is in
+Android Mii management now lists the validated live or staged database, imports
+bounded standard 74-byte `.mii` documents through the system picker, stages
+removals, applies a CRC-validated database before SDL starts, retains backups,
+and refuses to remove the last Mii. Native Mii creation remains unavailable,
+matching the iOS product boundary. Complete Android game-data/save management,
+accessibility nodes, tablet/physical touch, multi-controller setup parity, and
+physical-device acceptance are still open. Evidence is in
 `docs/artifacts/2026-09-04/android/a4-touch-settings-menu-checkpoint.md` and
-`docs/artifacts/2026-09-04/android/a4-controller-mapping.md`.
+`docs/artifacts/2026-09-04/android/a4-controller-mapping.md` and
+`docs/artifacts/2026-09-04/android/a4-mii-management.md`.
 
 Do not begin the touch-UI port until A2's controller-driven Original-mode proof
 passes. Physical Android hardware remains authoritative for vendor Vulkan and
