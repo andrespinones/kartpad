@@ -353,6 +353,49 @@ class KartPadOverlayView(context: Context) : View(context) {
             "steerOnly=0x${steerOnly.toString(16)} neutral=0x${neutral.toString(16)}"
     }
 
+    fun runDebugHitMapFixture(): String {
+        check(isLaidOut && width > 0 && height > 0) { "touch overlay is not laid out" }
+        clearTouchInput()
+        layoutControls()
+        controls.forEach { control ->
+            val centerHit = hitTest(control.frame.centerX(), control.frame.centerY())
+            check(centerHit?.id == control.id) {
+                "${control.id} center mapped to ${centerHit?.id}"
+            }
+            val edgeX = if (control.kind == Kind.BUTTON &&
+                control.frame.width() != control.frame.height()
+            ) {
+                control.frame.left + 1f
+            } else {
+                control.frame.centerX() + min(control.frame.width(), control.frame.height()) * 0.45f
+            }
+            val edgeHit = hitTest(edgeX, control.frame.centerY())
+            check(edgeHit?.id == control.id) {
+                "${control.id} edge mapped to ${edgeHit?.id} at $edgeX,${control.frame.centerY()}"
+            }
+        }
+
+        val safe = safeFrame()
+        val outside = PointF(safe.centerX(), safe.centerY())
+        check(hitTest(outside.x, outside.y) == null) {
+            "empty-space hit unexpectedly resolved at ${outside.x},${outside.y}"
+        }
+        val downTime = SystemClock.uptimeMillis()
+        val outsideDown = MotionEvent.obtain(
+            downTime, downTime, MotionEvent.ACTION_DOWN, outside.x, outside.y, 0,
+        ).apply { source = InputDevice.SOURCE_TOUCHSCREEN }
+        val consumed = try {
+            onTouchEvent(outsideDown)
+        } finally {
+            outsideDown.recycle()
+        }
+        check(!consumed && pointerOwners.isEmpty() && lastPublishedButtons == 0) {
+            "empty-space down consumed=$consumed owners=${pointerOwners.size} " +
+                "buttons=0x${lastPublishedButtons.toString(16)}"
+        }
+        return "centers=${controls.size} edges=${controls.size} outside=passed"
+    }
+
     fun runDebugHoldAForModalFixture(): String {
         check(isLaidOut && width > 0 && height > 0) { "touch overlay is not laid out" }
         val a = controls.first { it.id == "A" }.frame

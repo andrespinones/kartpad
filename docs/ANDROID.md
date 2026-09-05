@@ -1106,11 +1106,15 @@ canonical 2400x1080 phone and 2560x1600 tablet lanes. It verifies exact card
 palette, centered equal geometry, full mark, required labels, RGBA dimensions,
 and gradient direction without private data; evidence is in
 `docs/artifacts/2026-09-05/android/a4-selector-visual-contract.md`.
-The production touch overlay now also has a source-only two-pointer replay. On
-both canonical visible emulator lanes it publishes exact `A`, `A+B`, `B`, and
-neutral masks while preserving the second pointer after the first lifts;
-evidence is in
+The production touch overlay now also has a source-only four-pointer replay.
+On both canonical visible emulator lanes it sustains 0.75 steering while A, R,
+and Z are held together, preserves steering through independent button lifts,
+and returns neutral with no owners; evidence is in
 `docs/artifacts/2026-09-05/android/a4-multipointer-replay.md`.
+A separate real-event hit-map fixture verifies the center and near-edge point
+of all 14 controls plus unconsumed empty gameplay space on both layouts;
+evidence is in
+`docs/artifacts/2026-09-05/android/a4-touch-hit-map.md`.
 The selector now removes the Android-only recovery control and follows iOS's
 two-choice import interaction: either enabled game card opens game-data setup
 when required and retains its pending profile. The consolidated three-dot menu

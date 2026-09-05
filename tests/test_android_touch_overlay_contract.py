@@ -87,7 +87,7 @@ class AndroidTouchOverlayContractTests(unittest.TestCase):
         self.assertIn("visibility = INVISIBLE", overlay)
         self.assertIn("visibility = VISIBLE", overlay)
 
-    def test_source_fixture_replays_two_independent_touch_pointers(self) -> None:
+    def test_source_fixture_replays_four_independent_touch_pointers(self) -> None:
         activity = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadActivity.kt").read_text()
         overlay = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadOverlayView.kt").read_text()
         self.assertIn("DEBUG_EXTRA_MULTI_POINTER", activity)
@@ -100,6 +100,18 @@ class AndroidTouchOverlayContractTests(unittest.TestCase):
         self.assertIn("afterA=0x", overlay)
         self.assertIn("afterZ=0x", overlay)
         self.assertIn("actual == expected && leftX == 0f && leftY == 0f && pointerOwners.isEmpty()", overlay)
+
+    def test_source_fixture_verifies_control_hit_map_and_pass_through(self) -> None:
+        activity = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadActivity.kt").read_text()
+        overlay = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadOverlayView.kt").read_text()
+        runner = (REPO / "scripts/test-android-touch-hit-map.sh").read_text()
+        self.assertIn("DEBUG_EXTRA_HIT_MAP", activity)
+        self.assertIn("runDebugHitMapFixture()", activity)
+        self.assertIn("hitTest(control.frame.centerX(), control.frame.centerY())", overlay)
+        self.assertIn("control.frame.left + 1f", overlay)
+        self.assertIn("check(!consumed && pointerOwners.isEmpty()", overlay)
+        self.assertIn("TEST_TOUCH_HIT_MAP", runner)
+        self.assertIn("centers=14 edges=14 outside=passed", runner)
 
     def test_source_fixture_clears_a_real_held_touch_when_menu_opens(self) -> None:
         activity = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadActivity.kt").read_text()

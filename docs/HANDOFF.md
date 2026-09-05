@@ -65,6 +65,12 @@ unreachable in a game-runtime build; the complete translated APK still builds,
 lints, and audits. Evidence:
 `docs/artifacts/2026-09-05/android/a4-multipointer-replay.md`.
 
+The phone and tablet overlay hit maps are now independently exercised from
+their screenshots. Every one of 14 control centers and near-edge points maps
+to the intended control, while a real touch in empty gameplay space passes
+through without creating an owner or button state. Evidence:
+`docs/artifacts/2026-09-05/android/a4-touch-hit-map.md`.
+
 Android's selector now follows the iOS two-card interaction rather than adding
 a separate recovery button: choosing Original or Retro without game data opens
 the shared importer and retains that choice. The visible Pixel Tablet also

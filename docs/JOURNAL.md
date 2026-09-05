@@ -3392,6 +3392,23 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   touch-only races remain open. No package or private artifact was published. Evidence:
   `docs/artifacts/2026-09-05/android/a4-multipointer-replay.md`.
 
+## 2026-09-05 — Android A4 touch hit map
+
+- Added a debug/source-only real-event fixture that resolves every one of 14
+  control centers and near-edge points against the actual laid-out overlay.
+- A real `ACTION_DOWN` at empty gameplay center must remain unconsumed with no
+  pointer owner and a neutral published Classic button state.
+- Visible Pixel 6 and Pixel Tablet runs both passed
+  `centers=14 edges=14 outside=passed`.
+- The translated runtime rebuilt at APK SHA-256
+  `7edb51da87682525093db9cedcd80d1eab795572371443d4aa4a8f857f16ac6e`;
+  strict package/privacy audit, Android lint, and 87 tests with one intentional
+  skip passed.
+- Classification: **Pass for canonical emulator hit maps and empty-space
+  pass-through.** Physical digitizer behavior and touch-only racing remain
+  open. No package or private artifact was published. Evidence:
+  `docs/artifacts/2026-09-05/android/a4-touch-hit-map.md`.
+
 ## 2026-09-05 — Android A4 selector, menu, and touch visual parity
 
 - Removed the Android-only Manage Game Data control from the mode chooser and

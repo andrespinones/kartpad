@@ -91,6 +91,8 @@ class KartPadActivity : SDLActivity() {
             intent.getBooleanExtra(DEBUG_EXTRA_TOUCH_OVERLAY, false)
         val debugMultiPointer = BuildConfig.DEBUG && !BuildConfig.GAME_RUNTIME &&
             intent.getBooleanExtra(DEBUG_EXTRA_MULTI_POINTER, false)
+        val debugHitMap = BuildConfig.DEBUG && !BuildConfig.GAME_RUNTIME &&
+            intent.getBooleanExtra(DEBUG_EXTRA_HIT_MAP, false)
         val debugControllerSetup = BuildConfig.DEBUG && !BuildConfig.GAME_RUNTIME &&
             intent.getBooleanExtra(DEBUG_EXTRA_CONTROLLER_SETUP, false)
         val debugMenu = BuildConfig.DEBUG && !BuildConfig.GAME_RUNTIME &&
@@ -118,7 +120,8 @@ class KartPadActivity : SDLActivity() {
         kartPadOverlay.visibility = if (
             BuildConfig.GAME_RUNTIME || debugTouchOverlay || debugModalClear ||
                 debugLifecycleClear || debugPersistence != null || debugTouchSettings ||
-                debugTouchEditor || debugGasLock || debugTouchSettingsFlow != null
+                debugTouchEditor || debugGasLock || debugHitMap ||
+                debugTouchSettingsFlow != null
         ) {
             android.view.View.VISIBLE
         } else {
@@ -179,6 +182,13 @@ class KartPadActivity : SDLActivity() {
                 runCatching { kartPadOverlay.runDebugMultiPointerFixture() }
                     .onSuccess { Log.i(TAG, "A4 multi-pointer fixture passed $it") }
                     .onFailure { Log.e(TAG, "A4 multi-pointer fixture failed", it) }
+            }
+        }
+        if (debugTouchOverlay && debugHitMap) {
+            kartPadOverlay.post {
+                runCatching { kartPadOverlay.runDebugHitMapFixture() }
+                    .onSuccess { Log.i(TAG, "A4 hit-map fixture passed $it") }
+                    .onFailure { Log.e(TAG, "A4 hit-map fixture failed", it) }
             }
         }
         if (debugLifecycleClear) {
@@ -1718,6 +1728,8 @@ class KartPadActivity : SDLActivity() {
             "dev.kartpad.android.TEST_TOUCH_OVERLAY"
         private const val DEBUG_EXTRA_MULTI_POINTER =
             "dev.kartpad.android.TEST_TOUCH_MULTI_POINTER"
+        private const val DEBUG_EXTRA_HIT_MAP =
+            "dev.kartpad.android.TEST_TOUCH_HIT_MAP"
         private const val DEBUG_EXTRA_CONTROLLER_SETUP =
             "dev.kartpad.android.TEST_CONTROLLER_SETUP"
         private const val DEBUG_EXTRA_MENU = "dev.kartpad.android.TEST_MENU"

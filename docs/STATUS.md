@@ -759,6 +759,11 @@ disconnect states; a second sequence began with A cyan/locked and restored it
    empty the owner table at neutral completion. The resulting audited dual APK
    SHA-256 is
    `205abbb668872500975e734ca52f3132fb18122e80905c35211883f01b4c5967`.
+   A separate real-event hit-map fixture now validates the center and near-edge
+   point of all 14 controls on both canonical geometries and proves that empty
+   gameplay space remains unconsumed with neutral ownership/state. The final
+   audited translated APK SHA-256 is
+   `7edb51da87682525093db9cedcd80d1eab795572371443d4aa4a8f857f16ac6e`.
    The selector now also matches iOS's two-choice interaction: it has no
    Android-only recovery button, both cards remain actionable without game
    data, and the chosen profile resumes after the shared import flow. The
@@ -818,6 +823,7 @@ disconnect states; a second sequence began with A cyan/locked and restored it
 [`docs/artifacts/2026-09-05/android/a4-selector-owned-icons.md`](artifacts/2026-09-05/android/a4-selector-owned-icons.md).
 [`docs/artifacts/2026-09-05/android/a4-selector-visual-contract.md`](artifacts/2026-09-05/android/a4-selector-visual-contract.md).
 [`docs/artifacts/2026-09-05/android/a4-multipointer-replay.md`](artifacts/2026-09-05/android/a4-multipointer-replay.md).
+[`docs/artifacts/2026-09-05/android/a4-touch-hit-map.md`](artifacts/2026-09-05/android/a4-touch-hit-map.md).
 [`docs/artifacts/2026-09-05/android/a4-selector-menu-touch-visual-parity.md`](artifacts/2026-09-05/android/a4-selector-menu-touch-visual-parity.md).
 [`docs/artifacts/2026-09-05/android/a4-touch-modal-lifecycle-clearing.md`](artifacts/2026-09-05/android/a4-touch-modal-lifecycle-clearing.md).
 [`docs/artifacts/2026-09-05/android/a4-touch-state-persistence.md`](artifacts/2026-09-05/android/a4-touch-state-persistence.md).
