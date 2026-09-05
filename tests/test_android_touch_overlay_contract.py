@@ -100,9 +100,17 @@ class AndroidTouchOverlayContractTests(unittest.TestCase):
         self.assertIn('text = "Reset This Device Layout"', activity)
         self.assertIn('text = "Move controls"', activity)
         self.assertIn('text = "Modern C-stick L/R"', activity)
+        self.assertIn('val renderScales = floatArrayOf(1f, 2f, 3f, 4f)', activity)
+        self.assertIn('contentDescription = "Render resolution"', activity)
+        self.assertIn("KartPadTouchSettings.setResolutionScale(this, scale)", activity)
+        self.assertIn("val leftColumn = LinearLayout(this).apply", activity)
+        self.assertIn("val rightColumn = LinearLayout(this).apply", activity)
         self.assertIn('text = "Back"', activity)
         self.assertIn("finishLayoutEditing(returnToSettings = true)", activity)
         self.assertIn("KartPadTouchSettings.hideOnController(this)", activity)
+        reset_body = settings[settings.index("fun resetTouchControls"):]
+        self.assertNotIn("key == HIDE_ON_CONTROLLER", reset_body)
+        self.assertNotIn("key == MODERN_C_STICK", reset_body)
 
     def test_android_menu_preserves_kartpad_hierarchy_and_live_display_actions(self) -> None:
         activity = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadActivity.kt").read_text()

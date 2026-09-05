@@ -3235,3 +3235,19 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   contracts, and whitespace checks pass. Game data, save, and Mii hashes stayed
   exact. No APK, private content, log, test jar, or screenshot was published.
   Evidence: `docs/artifacts/2026-09-04/android/a4-touch-accessibility.md`.
+
+## 2026-09-04 — Android A4 touch-settings visibility and render parity
+
+- Added iOS's live 1x/2x/3x/4x render selector to Android Touch Control
+  Settings and reorganized the landscape dialog into two columns so every
+  setting, Move Controls, and Reset is visible without scrolling.
+- Corrected reset scope to preserve hide-on-controller and modern C-stick
+  preferences, matching iOS's separation between layout and behavior settings.
+- The API 36 emulator showed every item with accessible bounds. Selecting 2x
+  changed the checked node, then 1x restored the persistent value. The exact
+  dual local APK is
+  `0217707c7410afe19923ae868bcc058dd14d9449cf8f03b2fb4c1b60f8db931f`.
+  Compilation, lint, strict package/privacy audit, 49 contracts, and whitespace
+  checks pass; private game/save/Mii hashes stayed exact. No package or private
+  artifact was published. Evidence:
+  `docs/artifacts/2026-09-04/android/a4-touch-settings-visibility.md`.

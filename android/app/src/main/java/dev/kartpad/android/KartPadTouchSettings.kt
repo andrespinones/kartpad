@@ -154,8 +154,7 @@ internal object KartPadTouchSettings {
         val saved = preferences(context)
         saved.edit().apply {
             saved.all.keys.filter { key ->
-                key == OPACITY || key == SIZE || key == HIDE_ON_CONTROLLER ||
-                    key == MODERN_C_STICK || key == HIDDEN_CONTROLS ||
+                key == OPACITY || key == SIZE || key == HIDDEN_CONTROLS ||
                     key.startsWith(ORIGIN_X_PREFIX) || key.startsWith(ORIGIN_Y_PREFIX) ||
                     key.startsWith(CONTROL_SIZE_PREFIX)
             }.forEach(::remove)

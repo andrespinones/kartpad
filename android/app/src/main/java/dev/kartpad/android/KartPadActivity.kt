@@ -17,6 +17,8 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.PopupMenu
+import android.widget.RadioButton
+import android.widget.RadioGroup
 import android.widget.RelativeLayout
 import android.widget.ScrollView
 import android.widget.SeekBar
@@ -813,10 +815,33 @@ class KartPadActivity : SDLActivity() {
     @Suppress("SetTextI18n")
     private fun showTouchControlSettings() {
         val content = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            setPadding(dp(24), dp(8), dp(24), dp(8))
+            orientation = LinearLayout.HORIZONTAL
+            setPadding(dp(18), dp(4), dp(18), dp(4))
         }
         val opacityLabel = settingsLabel("")
+        val renderLabel = settingsLabel("Render")
+        val renderScales = floatArrayOf(1f, 2f, 3f, 4f)
+        val render = RadioGroup(this).apply {
+            orientation = RadioGroup.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            contentDescription = "Render resolution"
+        }
+        val currentRenderScale = KartPadTouchSettings.resolutionScale(this)
+        renderScales.forEach { scale ->
+            render.addView(RadioButton(this).apply {
+                id = View.generateViewId()
+                text = if (scale == 1f) "1×" else "${scale.toInt()}×"
+                setTextColor(Color.WHITE)
+                tag = scale
+                isChecked = kotlin.math.abs(scale - currentRenderScale) < 0.01f
+            })
+        }
+        render.setOnCheckedChangeListener { group, checkedId ->
+            val scale = group.findViewById<RadioButton>(checkedId)?.tag as? Float
+                ?: return@setOnCheckedChangeListener
+            KartPadTouchSettings.setResolutionScale(this, scale)
+            applyDisplaySettings()
+        }
         val opacity = SeekBar(this).apply {
             max = 75
             progress = (KartPadTouchSettings.opacity(this@KartPadActivity) * 100f)
@@ -889,22 +914,36 @@ class KartPadActivity : SDLActivity() {
                     .setPositiveButton("Reset") { _, _ ->
                         opacity.progress = 57
                         size.progress = 30
-                        hide.isChecked = true
-                        modernCStick.isChecked = false
                         kartPadOverlay.resetLayoutSettings()
                         refreshControllerHandoff()
                     }
                     .show()
             }
         }
-        content.addView(opacityLabel)
-        content.addView(opacity)
-        content.addView(sizeLabel)
-        content.addView(size)
-        content.addView(hide)
-        content.addView(modernCStick)
-        content.addView(moveControls)
-        content.addView(reset)
+        val leftColumn = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(0, 0, dp(12), 0)
+            addView(renderLabel)
+            addView(render)
+            addView(opacityLabel)
+            addView(opacity)
+            addView(sizeLabel)
+            addView(size)
+        }
+        val rightColumn = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(12), dp(8), 0, 0)
+            addView(hide)
+            addView(modernCStick)
+            addView(moveControls)
+            addView(reset)
+        }
+        content.addView(leftColumn, LinearLayout.LayoutParams(
+            0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f,
+        ))
+        content.addView(rightColumn, LinearLayout.LayoutParams(
+            0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f,
+        ))
         val scroll = ScrollView(this).apply { addView(content) }
         val dialog = AlertDialog.Builder(this)
             .setTitle("Touch Control Settings")
