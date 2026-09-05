@@ -227,8 +227,12 @@ back. This bridge follows public reverse engineering of the Switch 2
 controller protocol. One reporter has accepted pairing, four sideways Joy-Con 2
 players in a four-player local race without input lag, a Pro Controller 2, and
 reconnect without `SYNC` on macOS 26; wider hardware acceptance and
-long-session behavior remain open. Rumble is not
-implemented.
+long-session behavior remain open.
+
+Rumble is forwarded too. The game's motor commands reach SDL through Aurora's
+pad rumble path, and the Joy-Con 2 bridge answers SDL's rumble callback by
+writing the controller's vibration characteristic while a rumble is active.
+Rumble is untested on hardware until a reporter confirms it.
 
 ## Install or build
 

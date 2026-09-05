@@ -60,6 +60,16 @@ class ExperimentalJoyCon2ContractTests(unittest.TestCase):
         shell_patch = (REPO / "patches/wiicompiled-macos-shell.patch").read_text()
         self.assertIn("KartPadJoyCon2.mm", shell_patch)
 
+    def test_rumble_is_exposed_through_the_sdl_virtual_gamepad(self) -> None:
+        bridge = (REPO / "apple/macos/KartPadJoyCon2.mm").read_text()
+        self.assertIn("desc.Rumble = KartPadJoyCon2Rumble", bridge)
+        self.assertIn("289326CB-A471-485D-A8F4-240C14F18241", bridge)  # Joy-Con 2 (L) vibration
+        self.assertIn("FA19B0FB-CD1F-46A7-84A1-BBB09E00C149", bridge)  # Joy-Con 2 (R) vibration
+        self.assertIn("CC483F51-9258-427D-A939-630C31F72B05", bridge)  # Pro Controller 2 vibration
+        # An active rumble is refreshed on a timer and ends with an explicit stop.
+        self.assertIn("kRumbleRefreshInterval", bridge)
+        self.assertIn("one explicit stop sample", bridge)
+
     def test_runtime_preparation_applies_sideways_preset(self) -> None:
         preset = REPO / "patches/wiicompiled-experimental-joycon2-preset.patch"
         self.assertTrue(preset.exists())

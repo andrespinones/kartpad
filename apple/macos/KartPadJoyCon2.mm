@@ -55,10 +55,17 @@ constexpr NSUInteger kAdvMinimumLength = kAdvReconnectOffset + 6;
 NSString *const kInputUUID = @"AB7DE9BE-89FE-49AD-828F-118F09DF7FD2";
 NSString *const kCommandUUID = @"649D4AC9-8EB7-4E6C-AF44-1EA54FE5F005";
 NSString *const kResponseUUID = @"C765A961-D9D8-4D36-A20A-5315B111836A";
+NSString *const kVibrationLeftUUID = @"289326CB-A471-485D-A8F4-240C14F18241";
+NSString *const kVibrationRightUUID = @"FA19B0FB-CD1F-46A7-84A1-BBB09E00C149";
+NSString *const kVibrationProUUID = @"CC483F51-9258-427D-A939-630C31F72B05";
 
 constexpr size_t kMaxControllers = 4;
 constexpr NSTimeInterval kCommandTimeout = 1.5;
 constexpr NSTimeInterval kConnectCooldown = 5.0;
+
+// The controller lets a vibration decay unless it is refreshed, so an active
+// rumble is re-sent at this interval (switch2-controllers uses the same).
+constexpr NSTimeInterval kRumbleRefreshInterval = 0.02;
 
 // Input report ---------------------------------------------------------------
 
@@ -213,6 +220,59 @@ NSData *MakeSetPlayerLeds(int playerNumber) {
   const int index = std::clamp(playerNumber, 1, static_cast<int>(kPlayerLedPatterns.size())) - 1;
   const uint8_t data[] = {kPlayerLedPatterns[static_cast<size_t>(index)], 0x00, 0x00, 0x00};
   return MakeCommand(kCmdLeds, kSubLedsSetPlayer, data, sizeof(data));
+}
+
+// Vibration -----------------------------------------------------------------
+
+// SDL rumble strength (0..65535) to the controller's 10-bit motor amplitude.
+// Zero stays zero; anything else lands in a conservative 64..768 band.
+uint16_t RumbleAmplitude(uint16_t strength) {
+  if (strength == 0) return 0;
+  return static_cast<uint16_t>(64 + (static_cast<uint32_t>(strength) * 704u) / 65535u);
+}
+
+// One 40-bit motor block: low-frequency (9-bit freq, tone bit, 10-bit amp)
+// then high-frequency (9-bit freq, tone bit, 10-bit amp), little-endian.
+void AppendMotorBlock(NSMutableData *data, uint16_t lowAmplitude, uint16_t highAmplitude) {
+  constexpr uint64_t kLowFrequency = 0x0E1;
+  constexpr uint64_t kHighFrequency = 0x1E1;
+  const uint64_t packed = (kLowFrequency & 0x1FF) |
+                          ((static_cast<uint64_t>(lowAmplitude) & 0x3FF) << 10) |
+                          ((kHighFrequency & 0x1FF) << 20) |
+                          ((static_cast<uint64_t>(highAmplitude) & 0x3FF) << 30);
+  uint8_t bytes[5];
+  for (size_t index = 0; index < sizeof(bytes); ++index) {
+    bytes[index] = static_cast<uint8_t>((packed >> (8 * index)) & 0xFF);
+  }
+  [data appendBytes:bytes length:sizeof(bytes)];
+}
+
+// Vibration write: 0x00, then per motor a 0x5N sequence byte followed by three
+// motor blocks (the current sample plus two silent ones). Pro Controller 2
+// carries two motors, Joy-Con 2 one.
+NSData *MakeVibrationPacket(ControllerKind kind, uint8_t sequence,
+                            uint16_t lowAmplitude, uint16_t highAmplitude) {
+  NSMutableData *data = [NSMutableData dataWithCapacity:33];
+  const uint8_t prefix = 0x00;
+  [data appendBytes:&prefix length:1];
+  const int motors = kind == ControllerKind::ProController ? 2 : 1;
+  for (int motor = 0; motor < motors; ++motor) {
+    const uint8_t header = static_cast<uint8_t>(0x50 | (sequence & 0x0F));
+    [data appendBytes:&header length:1];
+    AppendMotorBlock(data, lowAmplitude, highAmplitude);
+    AppendMotorBlock(data, 0, 0);
+    AppendMotorBlock(data, 0, 0);
+  }
+  return data;
+}
+
+NSString *VibrationUUIDForKind(ControllerKind kind) {
+  switch (kind) {
+    case ControllerKind::JoyConLeft: return kVibrationLeftUUID;
+    case ControllerKind::JoyConRight: return kVibrationRightUUID;
+    case ControllerKind::ProController: return kVibrationProUUID;
+  }
+  return kVibrationLeftUUID;
 }
 
 // Returns the memory payload of a read response, or nil if it does not match.
@@ -436,6 +496,7 @@ typedef void (^KartPadJoyCon2ResponseBlock)(NSData *_Nullable response);
 @property(nonatomic, strong) CBCharacteristic *inputCharacteristic;
 @property(nonatomic, strong) CBCharacteristic *commandCharacteristic;
 @property(nonatomic, strong) CBCharacteristic *responseCharacteristic;
+@property(nonatomic, strong) CBCharacteristic *vibrationCharacteristic;
 @property(nonatomic, copy) NSString *status;
 @property(nonatomic, assign) BOOL ready;
 @property(nonatomic, assign) int playerNumber;
@@ -454,6 +515,8 @@ typedef void (^KartPadJoyCon2ResponseBlock)(NSData *_Nullable response);
 - (void)detachFromSDL;
 - (void)cancelPendingCommands;
 - (void)applyPlayerNumber:(int)playerNumber;
+- (void)setRumbleLow:(uint16_t)low high:(uint16_t)high;
+- (void)stopRumble;
 @end
 
 @implementation KartPadJoyCon2Device {
@@ -469,6 +532,10 @@ typedef void (^KartPadJoyCon2ResponseBlock)(NSData *_Nullable response);
   AutoCalibration _auto1;
   AutoCalibration _auto2;
   GamepadState _lastState;
+  uint16_t _rumbleLow;
+  uint16_t _rumbleHigh;
+  uint8_t _rumbleSequence;
+  NSTimer *_rumbleTimer;
 }
 
 - (instancetype)initWithPeripheral:(CBPeripheral *)peripheral kind:(ControllerKind)kind {
@@ -583,6 +650,52 @@ typedef void (^KartPadJoyCon2ResponseBlock)(NSData *_Nullable response);
             completion:nil];
 }
 
+#pragma mark Rumble
+
+- (void)writeRumblePacket {
+  if (_vibrationCharacteristic == nil || _peripheral.state != CBPeripheralStateConnected) return;
+  NSData *packet = MakeVibrationPacket(_kind, _rumbleSequence++,
+                                       RumbleAmplitude(_rumbleLow), RumbleAmplitude(_rumbleHigh));
+  CBCharacteristicWriteType writeType = CBCharacteristicWriteWithoutResponse;
+  if (!(_vibrationCharacteristic.properties & CBCharacteristicPropertyWriteWithoutResponse) &&
+      (_vibrationCharacteristic.properties & CBCharacteristicPropertyWrite)) {
+    writeType = CBCharacteristicWriteWithResponse;
+  }
+  [_peripheral writeValue:packet forCharacteristic:_vibrationCharacteristic type:writeType];
+}
+
+- (void)setRumbleLow:(uint16_t)low high:(uint16_t)high {
+  if (_vibrationCharacteristic == nil) return;
+  const BOOL wasActive = _rumbleLow != 0 || _rumbleHigh != 0;
+  _rumbleLow = low;
+  _rumbleHigh = high;
+  const BOOL active = low != 0 || high != 0;
+  if (!active) {
+    [_rumbleTimer invalidate];
+    _rumbleTimer = nil;
+    if (wasActive) [self writeRumblePacket];  // one explicit stop sample
+    return;
+  }
+  [self writeRumblePacket];
+  if (_rumbleTimer == nil) {
+    __weak KartPadJoyCon2Device *weakSelf = self;
+    _rumbleTimer = [NSTimer scheduledTimerWithTimeInterval:kRumbleRefreshInterval
+                                                   repeats:YES
+                                                     block:^(NSTimer *timer) {
+      KartPadJoyCon2Device *strongSelf = weakSelf;
+      if (strongSelf == nil) {
+        [timer invalidate];
+        return;
+      }
+      [strongSelf writeRumblePacket];
+    }];
+  }
+}
+
+- (void)stopRumble {
+  [self setRumbleLow:0 high:0];
+}
+
 #pragma mark Calibration
 
 - (void)readCalibrationForStick:(int)stick completion:(dispatch_block_t)completion {
@@ -663,6 +776,16 @@ static void SDLCALL KartPadJoyCon2SetPlayerIndex(void *userdata, int playerIndex
   });
 }
 
+static bool SDLCALL KartPadJoyCon2Rumble(void *userdata, Uint16 lowFrequency, Uint16 highFrequency) {
+  KartPadJoyCon2Device *device = (__bridge KartPadJoyCon2Device *)userdata;
+  if (device == nil) return false;
+  // Called from SDL's joystick lock; the BLE write happens on the main queue.
+  dispatch_async(dispatch_get_main_queue(), ^{
+    [device setRumbleLow:lowFrequency high:highFrequency];
+  });
+  return true;
+}
+
 static void SDLCALL KartPadJoyCon2Cleanup(void *userdata) {
   if (userdata != nullptr) CFBridgingRelease(userdata);
 }
@@ -682,6 +805,7 @@ static void SDLCALL KartPadJoyCon2Cleanup(void *userdata) {
   desc.name = KindName(_kind);
   desc.userdata = const_cast<void *>(CFBridgingRetain(self));
   desc.SetPlayerIndex = KartPadJoyCon2SetPlayerIndex;
+  if (_vibrationCharacteristic != nil) desc.Rumble = KartPadJoyCon2Rumble;
   desc.Cleanup = KartPadJoyCon2Cleanup;
 
   const SDL_JoystickID joystickID = SDL_AttachVirtualJoystick(&desc);
@@ -704,6 +828,15 @@ static void SDLCALL KartPadJoyCon2Cleanup(void *userdata) {
 }
 
 - (void)detachFromSDL {
+  [_rumbleTimer invalidate];
+  _rumbleTimer = nil;
+  if ((_rumbleLow != 0 || _rumbleHigh != 0) && _peripheral.state == CBPeripheralStateConnected) {
+    _rumbleLow = 0;
+    _rumbleHigh = 0;
+    [self writeRumblePacket];
+  }
+  _rumbleLow = 0;
+  _rumbleHigh = 0;
   if (_joystick != nullptr) {
     SDL_CloseJoystick(_joystick);
     _joystick = nullptr;
@@ -956,6 +1089,7 @@ didDiscoverCharacteristicsForService:(CBService *)service
   CBUUID *inputUUID = [CBUUID UUIDWithString:kInputUUID];
   CBUUID *commandUUID = [CBUUID UUIDWithString:kCommandUUID];
   CBUUID *responseUUID = [CBUUID UUIDWithString:kResponseUUID];
+  CBUUID *vibrationUUID = [CBUUID UUIDWithString:VibrationUUIDForKind(device.kind)];
   for (CBCharacteristic *characteristic in service.characteristics) {
     if ([characteristic.UUID isEqual:inputUUID]) {
       device.inputCharacteristic = characteristic;
@@ -963,7 +1097,12 @@ didDiscoverCharacteristicsForService:(CBService *)service
       device.commandCharacteristic = characteristic;
     } else if ([characteristic.UUID isEqual:responseUUID]) {
       device.responseCharacteristic = characteristic;
+    } else if ([characteristic.UUID isEqual:vibrationUUID]) {
+      device.vibrationCharacteristic = characteristic;
     }
+  }
+  if (device.vibrationCharacteristic == nil && device.hasRequiredCharacteristics && !device.ready) {
+    Log(@"%@ vibration characteristic not found; rumble disabled", device.displayName);
   }
   if (!device.hasRequiredCharacteristics || device.ready) return;
   device.ready = YES;
