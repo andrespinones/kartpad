@@ -67,9 +67,16 @@ and a one-second A hold turns cyan, remains asserted after finger-up, invokes a
 light Android haptic, and unlocks on the next tap. Android gamepad/joystick
 hotplug now clears and hides touch, then restores a neutral overlay after the
 last controller disconnects; an emulator test starting from cyan locked A
-proved that stale acceleration does not survive the handoff. Persistent layout
-editing, a configurable handoff policy, full accessibility, tablet/physical
-touch and haptic feel, motion, and physical-device acceptance remain open.
+proved that stale acceleration does not survive the handoff. The current
+uncommitted A4 working tree adds persistent layout editing, presentation
+settings, a configurable handoff policy, right-stick guest status writes, and
+KartPad's consolidated iOS-derived menu hierarchy. An earlier incremental APK
+proved editing, persistence, reset, and both controller-policy states, but the
+latest Z spacing, menu, and display JNI changes were paused before a clean
+build completed and are not accepted. Full accessibility, tablet/physical
+touch and haptic feel, motion, complete controller/game-data/save/Mii parity,
+and physical-device acceptance remain open. Resume evidence is recorded in
+[`docs/artifacts/2026-09-04/android/a4-touch-settings-menu-checkpoint.md`](artifacts/2026-09-04/android/a4-touch-settings-menu-checkpoint.md).
 
 The first independent A3 source slice extracted archive member-path validation
 into `runtime/src/retro_rewind/archive_path.cpp`. The existing iOS/tvOS installer
@@ -1023,6 +1030,20 @@ controller acceptance. Continue at the Retro Rewind transmission/RKG-to-live-
 input boundary; do not relabel the replay as the controller-driven A3 race.
 Evidence is in
 `docs/artifacts/2026-09-04/android/a3-retro-replay-isolation.md`.
+
+The current A4 emulator slice adds the production Original/Retro selector,
+KartPad's consolidated in-game menu, persistent touch layout editing, live FPS,
+aspect and render-scale settings, right-stick guest publication, separated X/Z
+geometry, controller handoff, and iOS-equivalent acceleration lock. Android
+gravity motion steering uses the same calibration, `0.045`-radian dead zone,
+`0.70 / sensitivity` full-lock curve, inversion, and 0.5x--2x range as iOS.
+The standalone API 36 ARM64 emulator proved the selector and Retro title, all
+motion actions, signed virtual-sensor input, inversion, and process-restart
+persistence using the exact local dual APK recorded in the A4 checkpoint.
+Custom controller remapping, complete Android game-data/save and Mii management,
+accessibility nodes, tablet/physical touch, and physical-device acceptance are
+still open. Evidence is in
+`docs/artifacts/2026-09-04/android/a4-touch-settings-menu-checkpoint.md`.
 
 Do not begin the touch-UI port until A2's controller-driven Original-mode proof
 passes. Physical Android hardware remains authoritative for vendor Vulkan and

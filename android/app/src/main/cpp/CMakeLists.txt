@@ -78,8 +78,10 @@ if(KARTPAD_GAME_RUNTIME_SOURCE)
   endif()
   target_sources(${KARTPAD_GAME_RUNTIME_TARGET} PRIVATE
     kartpad_touch_input_jni.cpp
+    kartpad_runtime_settings_jni.cpp
     retro_rewind_archive_jni.cpp
     "${KARTPAD_REPO_ROOT}/runtime/src/android/touch_input.cpp"
+    "${KARTPAD_REPO_ROOT}/runtime/src/android/runtime_settings.cpp"
     "${KARTPAD_REPO_ROOT}/runtime/src/retro_rewind/archive_extract.cpp"
     "${KARTPAD_REPO_ROOT}/runtime/src/retro_rewind/archive_path.cpp"
     "${KARTPAD_REPO_ROOT}/runtime/src/retro_rewind/archive_scan.cpp")

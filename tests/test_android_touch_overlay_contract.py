@@ -50,15 +50,104 @@ class AndroidTouchOverlayContractTests(unittest.TestCase):
         self.assertIn("InputDevice.SOURCE_JOYSTICK", activity)
         self.assertIn("registerInputDeviceListener", activity)
         self.assertIn("unregisterInputDeviceListener", activity)
-        self.assertIn("setHiddenForController(controllerCount > 0)", activity)
+        self.assertIn("kartPadOverlay.setHiddenForController(", activity)
+        self.assertIn("controllerCount > 0 && KartPadTouchSettings.hideOnController(this)", activity)
         self.assertIn("fun setHiddenForController(hidden: Boolean)", overlay)
         self.assertIn("clearTouchInput()", overlay)
         self.assertIn("visibility = INVISIBLE", overlay)
         self.assertIn("visibility = VISIBLE", overlay)
 
+    def test_touch_presentation_settings_match_ios_ranges_and_defaults(self) -> None:
+        settings = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadTouchSettings.kt").read_text()
+        overlay = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadOverlayView.kt").read_text()
+        activity = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadActivity.kt").read_text()
+        self.assertIn("DEFAULT_OPACITY = 0.82f", settings)
+        self.assertIn("MIN_OPACITY = 0.25f", settings)
+        self.assertIn("MAX_OPACITY = 1.0f", settings)
+        self.assertIn("MIN_SIZE = 0.70f", settings)
+        self.assertIn("MAX_SIZE = 1.35f", settings)
+        self.assertIn("MIN_CONTROL_SIZE = 0.60f", settings)
+        self.assertIn("MAX_CONTROL_SIZE = 1.75f", settings)
+        self.assertIn("getBoolean(HIDE_ON_CONTROLLER, true)", settings)
+        self.assertIn("modernCStickHorizontal", settings)
+        self.assertIn("HIDDEN_CONTROLS", settings)
+        self.assertIn("ORIGIN_X_PREFIX", settings)
+        self.assertIn("controlSizeScale = KartPadTouchSettings.size(context)", overlay)
+        self.assertIn("else -> controlOpacity", overlay)
+        self.assertIn("alpha * 255f", overlay)
+        self.assertIn('if (control.id.startsWith("Dpad")) "Dpad"', overlay)
+        self.assertIn("fun setSelectedControlSize", overlay)
+        self.assertIn("fun toggleSelectedControlVisibility", overlay)
+        self.assertIn("if (modernCStickHorizontal) -rightX else rightX", overlay)
+        self.assertIn('add(0, MENU_TOUCH_CONTROLS, 1, "Touch Control Settings…")', activity)
+        self.assertIn('.setTitle("Touch Control Settings")', activity)
+        self.assertIn('text = "Reset This Device Layout"', activity)
+        self.assertIn('text = "Move controls"', activity)
+        self.assertIn('text = "Modern C-stick L/R"', activity)
+        self.assertIn('text = "Back"', activity)
+        self.assertIn("finishLayoutEditing(returnToSettings = true)", activity)
+        self.assertIn("KartPadTouchSettings.hideOnController(this)", activity)
+
+    def test_android_menu_preserves_kartpad_hierarchy_and_live_display_actions(self) -> None:
+        activity = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadActivity.kt").read_text()
+        native = (REPO / "android/app/src/main/cpp/kartpad_runtime_settings_jni.cpp").read_text()
+        for title in (
+            '"KartPad"', '"Switch Game Version…"', '"Multiplayer…"',
+            '"Show FPS Counter"', '"Controls"', '"Display"',
+            '"Game Data & Saves"', '"Controller Button Mapping…"',
+            '"Touch Control Settings…"', '"Motion Steering…"',
+            '"Experimental Wii Remote + Nunchuk…"', '"Aspect Ratio…"',
+            '"Render Resolution…"', '"Manage Retro Rewind…"', '"Manage Miis…"',
+            '"Report a Problem…"',
+        ):
+            self.assertIn(title, activity)
+        self.assertNotIn("SunPad", activity)
+        self.assertIn("nativeApplyDisplaySettings", activity)
+        self.assertIn("restartToGameSelector", activity)
+        self.assertIn("startActivity(chooser)", activity)
+        self.assertIn("kotlin.system.exitProcess(0)", activity)
+        manifest = (REPO / "android/app/src/main/AndroidManifest.xml").read_text()
+        self.assertIn('android:process=":launcher"', manifest)
+        runtime_patch = (REPO / "patches/wiicompiled-android-runtime-settings.patch").read_text()
+        self.assertIn("PublishDisplaySettings", native)
+        self.assertNotIn("AuroraGetSurfaceSize", native)
+        self.assertIn("ConsumeDisplaySettings", runtime_patch)
+        self.assertIn("ConfigureMkwMobileAspectMode", runtime_patch)
+        self.assertIn("VISetFrameBufferScale", runtime_patch)
+
+    def test_z_has_clear_vertical_spacing_from_x(self) -> None:
+        source = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadOverlayView.kt").read_text()
+        self.assertIn('0.969f, 0.410f, Color.argb(240, 97, 46, 148)', source)
+
+    def test_motion_steering_matches_ios_curve_and_merges_with_touch(self) -> None:
+        motion = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadMotionSteering.kt").read_text()
+        activity = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadActivity.kt").read_text()
+        overlay = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadOverlayView.kt").read_text()
+        settings = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadTouchSettings.kt").read_text()
+        self.assertIn("Sensor.TYPE_GRAVITY", motion)
+        self.assertIn("Sensor.TYPE_ACCELEROMETER", motion)
+        self.assertIn("private const val DEAD_ZONE = 0.045", motion)
+        self.assertIn("val fullLock = 0.70 / boundedSensitivity", motion)
+        self.assertIn("sensitivity.coerceIn(0.5f, 2f)", motion)
+        self.assertIn("fun recenter()", motion)
+        self.assertIn("showMotionSteering()", activity)
+        self.assertIn('"Turn On & Recenter"', activity)
+        self.assertIn('"Cycle Sensitivity"', activity)
+        self.assertIn("motion_steering_enabled", settings)
+        self.assertIn("fun setMotionSteering(value: Float)", overlay)
+        self.assertIn("abs(leftX) >= abs(motionSteeringX)", overlay)
+        self.assertIn("setControllerConnected(controllerCount > 0)", activity)
+
     def test_runtime_preparation_applies_touch_bridge(self) -> None:
         script = (REPO / "scripts/prepare-android-game-runtime.sh").read_text()
         self.assertIn("wiicompiled-android-touch-input.patch", script)
+
+    def test_touch_c_stick_reaches_both_guest_status_formats(self) -> None:
+        patch = (REPO / "patches/wiicompiled-android-touch-input.patch").read_text()
+        self.assertIn("statusPtr + 0x74, touchInput.right_stick_x", patch)
+        self.assertIn("statusPtr + 0x78, touchInput.right_stick_y", patch)
+        self.assertIn("statusPtr + 0x30, static_cast<uint16_t>(rightStickX)", patch)
+        self.assertIn("statusPtr + 0x32, static_cast<uint16_t>(rightStickY)", patch)
         patch = (REPO / "patches/wiicompiled-android-touch-input.patch").read_text()
         self.assertIn('"kartpad/android/touch_input.h"', patch)
         self.assertIn("ConsumeTouchInput()", patch)

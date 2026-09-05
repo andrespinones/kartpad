@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.PointF
 import android.graphics.RectF
 import android.os.Build
 import android.os.Handler
@@ -12,9 +13,11 @@ import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowInsets
+import kotlin.math.abs
 import kotlin.math.hypot
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.roundToInt
 
 /** Canvas-owned gameplay controls using KartPad's accepted phone geometry. */
 class KartPadOverlayView(context: Context) : View(context) {
@@ -55,9 +58,21 @@ class KartPadOverlayView(context: Context) : View(context) {
     private var leftY = 0f
     private var rightX = 0f
     private var rightY = 0f
+    private var motionSteeringX = 0f
+    private var controllerConnected = false
     private var gasHoldGeneration = 0
     private var gasLocked = false
     private var hiddenForController = false
+    private var controlOpacity = KartPadTouchSettings.opacity(context)
+    private var controlSizeScale = KartPadTouchSettings.size(context)
+    private var modernCStickHorizontal = KartPadTouchSettings.modernCStickHorizontal(context)
+    private val customOrigins = mutableMapOf<String, PointF>()
+    private var editingLayout = false
+    private var selectedControlId: String? = null
+    private var editPointerId = MotionEvent.INVALID_POINTER_ID
+    private var editLastX = 0f
+    private var editLastY = 0f
+    var onEditSelectionChanged: ((String?, Float, Boolean) -> Unit)? = null
 
     init {
         setWillNotDraw(false)
@@ -66,6 +81,7 @@ class KartPadOverlayView(context: Context) : View(context) {
         importantForAccessibility = IMPORTANT_FOR_ACCESSIBILITY_YES
         contentDescription = "KartPad touch controls"
         buildControls()
+        reloadCustomSettings()
     }
 
     @Suppress("DEPRECATION")
@@ -93,15 +109,30 @@ class KartPadOverlayView(context: Context) : View(context) {
         super.onDraw(canvas)
         layoutControls()
         controls.forEach { control ->
+            val identifier = editableIdentifier(control)
+            val hidden = KartPadTouchSettings.isHidden(context, identifier)
+            if (hidden && !editingLayout) return@forEach
+            val alpha = when {
+                editingLayout && hidden -> 0.35f
+                editingLayout -> 1f
+                else -> controlOpacity
+            }
+            val saved = canvas.saveLayerAlpha(
+                control.frame,
+                (alpha * 255f).roundToInt().coerceIn(0, 255),
+            )
             when (control.kind) {
                 Kind.BUTTON -> drawButton(canvas, control)
                 Kind.LEFT_STICK -> drawStick(canvas, control, leftX, leftY)
                 Kind.RIGHT_STICK -> drawStick(canvas, control, rightX, rightY)
             }
+            if (editingLayout) drawEditOutline(canvas, control, identifier)
+            canvas.restoreToCount(saved)
         }
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
+        if (editingLayout) return onEditTouchEvent(event)
         val actionIndex = event.actionIndex
         when (event.actionMasked) {
             MotionEvent.ACTION_DOWN,
@@ -154,6 +185,17 @@ class KartPadOverlayView(context: Context) : View(context) {
         invalidate()
     }
 
+    fun setMotionSteering(value: Float) {
+        motionSteeringX = if (controllerConnected) 0f else value.coerceIn(-1f, 1f)
+        publishState(connected = true)
+    }
+
+    fun setControllerConnected(connected: Boolean) {
+        controllerConnected = connected
+        if (connected) motionSteeringX = 0f
+        publishState(connected = true)
+    }
+
     fun setHiddenForController(hidden: Boolean) {
         if (hiddenForController == hidden) return
         hiddenForController = hidden
@@ -165,6 +207,56 @@ class KartPadOverlayView(context: Context) : View(context) {
             publishState(connected = true)
             invalidate()
         }
+    }
+
+    fun reloadPresentationSettings() {
+        controlOpacity = KartPadTouchSettings.opacity(context)
+        controlSizeScale = KartPadTouchSettings.size(context)
+        modernCStickHorizontal = KartPadTouchSettings.modernCStickHorizontal(context)
+        reloadCustomSettings()
+        requestLayout()
+        invalidate()
+    }
+
+    fun beginLayoutEditing() {
+        clearTouchInput()
+        editingLayout = true
+        selectedControlId = null
+        visibility = VISIBLE
+        onEditSelectionChanged?.invoke(null, 1f, false)
+        invalidate()
+    }
+
+    fun endLayoutEditing() {
+        clearTouchInput()
+        editingLayout = false
+        selectedControlId = null
+        editPointerId = MotionEvent.INVALID_POINTER_ID
+        invalidate()
+    }
+
+    fun setSelectedControlSize(value: Float) {
+        val identifier = selectedControlId ?: return
+        KartPadTouchSettings.setControlSize(context, identifier, value)
+        notifyEditSelection()
+        requestLayout()
+        invalidate()
+    }
+
+    fun toggleSelectedControlVisibility() {
+        val identifier = selectedControlId ?: return
+        KartPadTouchSettings.setHidden(
+            context, identifier, !KartPadTouchSettings.isHidden(context, identifier),
+        )
+        notifyEditSelection()
+        invalidate()
+    }
+
+    fun resetLayoutSettings() {
+        KartPadTouchSettings.resetTouchControls(context)
+        customOrigins.clear()
+        reloadPresentationSettings()
+        notifyEditSelection()
     }
 
     private fun buildControls() {
@@ -187,7 +279,7 @@ class KartPadOverlayView(context: Context) : View(context) {
         controls += button("R", "R", BUTTON_R, 94f, 46f,
             0.86875f, 0.27291667f, dark)
         controls += button("Z", "Z", BUTTON_ZR, 46f, 46f,
-            0.97125f, 0.43507883f, Color.argb(240, 97, 46, 148))
+            0.969f, 0.410f, Color.argb(240, 97, 46, 148))
         controls += button("Start", "START", BUTTON_PLUS, 92f, 46f,
             0.09022222f, 0.11289414f, Color.argb(235, 71, 71, 71))
 
@@ -209,27 +301,31 @@ class KartPadOverlayView(context: Context) : View(context) {
     ) = Control(id, label, Kind.BUTTON, mask, centerX, centerY, width, height, fill, darkText)
 
     private fun layoutControls() {
-        val safe = RectF(
-            insetLeft.toFloat(), insetTop.toFloat(),
-            max(insetLeft.toFloat(), width - insetRight.toFloat()),
-            max(insetTop.toFloat(), height - insetBottom.toFloat()),
-        )
+        val safe = safeFrame()
         val baseScale = min(1f, min(safe.width() / dp(800f), safe.height() / dp(380f)))
         controls.forEach { control ->
-            val controlWidth = dp(control.width) * baseScale
-            val controlHeight = dp(control.height) * baseScale
+            val identifier = editableIdentifier(control)
+            val individualScale = KartPadTouchSettings.controlSize(context, identifier)
+            val combinedScale = baseScale * controlSizeScale * individualScale
+            val controlWidth = dp(control.width) * combinedScale
+            val controlHeight = dp(control.height) * combinedScale
             val centerX: Float
             val centerY: Float
-            if (control.id == "A") {
+            val customOrigin = customOrigins[identifier]
+            if (customOrigin != null) {
+                centerX = safe.left + customOrigin.x * safe.width()
+                centerY = safe.top + customOrigin.y * safe.height()
+            } else if (control.id == "A") {
                 val margin = max(dp(8f), dp(18f) * baseScale)
-                val camera = dp(86f) * baseScale
+                val cameraScale = KartPadTouchSettings.controlSize(context, "c")
+                val camera = dp(86f) * baseScale * controlSizeScale * cameraScale
                 centerX = safe.right - margin - controlWidth * 0.5f
                 centerY = safe.bottom - margin - camera - controlHeight * 0.5f - dp(18f) * baseScale
             } else {
                 centerX = safe.left + control.centerX * safe.width()
                 centerY = safe.top + control.centerY * safe.height()
             }
-            val dpadCell = dp(36f) * baseScale
+            val dpadCell = dp(36f) * combinedScale
             val adjustedCenterX = centerX + when (control.id) {
                 "DpadLeft" -> -dpadCell
                 "DpadRight" -> dpadCell
@@ -247,6 +343,36 @@ class KartPadOverlayView(context: Context) : View(context) {
                 adjustedCenterY + controlHeight * 0.5f,
             )
         }
+    }
+
+    private fun safeFrame() = RectF(
+        insetLeft.toFloat(), insetTop.toFloat(),
+        max(insetLeft.toFloat(), width - insetRight.toFloat()),
+        max(insetTop.toFloat(), height - insetBottom.toFloat()),
+    )
+
+    private fun editableIdentifier(control: Control): String =
+        if (control.id.startsWith("Dpad")) "Dpad" else control.id
+
+    private fun reloadCustomSettings() {
+        customOrigins.clear()
+        controls.map(::editableIdentifier).distinct().forEach { identifier ->
+            KartPadTouchSettings.origin(context, identifier)?.let {
+                customOrigins[identifier] = it
+            }
+        }
+    }
+
+    private fun drawEditOutline(canvas: Canvas, control: Control, identifier: String) {
+        val selected = identifier == selectedControlId
+        val originalColor = strokePaint.color
+        val originalWidth = strokePaint.strokeWidth
+        strokePaint.color = if (selected) EDIT_SELECTED_COLOR else EDIT_AVAILABLE_COLOR
+        strokePaint.strokeWidth = dp(if (selected) 4f else 3f)
+        val radius = min(control.frame.width(), control.frame.height()) * 0.5f
+        canvas.drawRoundRect(control.frame, radius, radius, strokePaint)
+        strokePaint.color = originalColor
+        strokePaint.strokeWidth = originalWidth
     }
 
     private fun drawButton(canvas: Canvas, control: Control) {
@@ -287,7 +413,76 @@ class KartPadOverlayView(context: Context) : View(context) {
         )
     }
 
+    private fun onEditTouchEvent(event: MotionEvent): Boolean {
+        when (event.actionMasked) {
+            MotionEvent.ACTION_DOWN -> {
+                layoutControls()
+                val control = hitTest(event.x, event.y) ?: return true
+                selectedControlId = editableIdentifier(control)
+                editPointerId = event.getPointerId(0)
+                editLastX = event.x
+                editLastY = event.y
+                notifyEditSelection()
+                invalidate()
+            }
+            MotionEvent.ACTION_MOVE -> {
+                val index = event.findPointerIndex(editPointerId)
+                if (index < 0 || selectedControlId == null) return true
+                val x = event.getX(index)
+                val y = event.getY(index)
+                moveSelectedControl(x - editLastX, y - editLastY)
+                editLastX = x
+                editLastY = y
+            }
+            MotionEvent.ACTION_UP -> {
+                selectedControlId?.let { identifier ->
+                    customOrigins[identifier]?.let {
+                        KartPadTouchSettings.setOrigin(context, identifier, it)
+                    }
+                }
+                editPointerId = MotionEvent.INVALID_POINTER_ID
+                performClick()
+            }
+            MotionEvent.ACTION_CANCEL -> editPointerId = MotionEvent.INVALID_POINTER_ID
+        }
+        return true
+    }
+
+    private fun moveSelectedControl(deltaX: Float, deltaY: Float) {
+        val identifier = selectedControlId ?: return
+        layoutControls()
+        val selected = controls.filter { editableIdentifier(it) == identifier }
+        if (selected.isEmpty()) return
+        val bounds = RectF(selected.first().frame)
+        selected.drop(1).forEach { bounds.union(it.frame) }
+        val safe = safeFrame()
+        val clampedX = deltaX.coerceIn(safe.left - bounds.left, safe.right - bounds.right)
+        val clampedY = deltaY.coerceIn(safe.top - bounds.top, safe.bottom - bounds.bottom)
+        val centerX = bounds.centerX() + clampedX
+        val centerY = bounds.centerY() + clampedY
+        if (safe.width() > 0f && safe.height() > 0f) {
+            customOrigins[identifier] = PointF(
+                ((centerX - safe.left) / safe.width()).coerceIn(0f, 1f),
+                ((centerY - safe.top) / safe.height()).coerceIn(0f, 1f),
+            )
+        }
+        requestLayout()
+        invalidate()
+    }
+
+    private fun notifyEditSelection() {
+        val identifier = selectedControlId
+        onEditSelectionChanged?.invoke(
+            identifier,
+            identifier?.let { KartPadTouchSettings.controlSize(context, it) } ?: 1f,
+            identifier?.let { KartPadTouchSettings.isHidden(context, it) } ?: false,
+        )
+    }
+
     private fun hitTest(x: Float, y: Float): Control? = controls.asReversed().firstOrNull {
+        if (!editingLayout && KartPadTouchSettings.isHidden(context, editableIdentifier(it))) {
+            return@firstOrNull false
+        }
         if (!it.frame.contains(x, y)) return@firstOrNull false
         if (it.kind == Kind.BUTTON && it.frame.width() != it.frame.height()) return@firstOrNull true
         val radius = min(it.frame.width(), it.frame.height()) * 0.5f
@@ -328,7 +523,11 @@ class KartPadOverlayView(context: Context) : View(context) {
         pointerOwners.values.forEach { owner ->
             buttons = buttons or (controls.firstOrNull { it.id == owner }?.mask ?: 0)
         }
-        nativePublishTouchState(buttons, leftX, leftY, rightX, rightY, connected)
+        val publishedRightX = if (modernCStickHorizontal) -rightX else rightX
+        val publishedLeftX = if (abs(leftX) >= abs(motionSteeringX)) leftX else motionSteeringX
+        nativePublishTouchState(
+            buttons, publishedLeftX, leftY, publishedRightX, rightY, connected,
+        )
     }
 
     private fun beginGasPress() {
@@ -373,6 +572,8 @@ class KartPadOverlayView(context: Context) : View(context) {
     private companion object {
         const val GAS_LOCK_DELAY_MS = 1_000L
         val LOCKED_GAS_COLOR: Int = Color.argb(250, 15, 199, 235)
+        val EDIT_SELECTED_COLOR: Int = Color.rgb(51, 199, 255)
+        val EDIT_AVAILABLE_COLOR: Int = Color.rgb(255, 199, 51)
         const val BUTTON_UP = 0x00000001
         const val BUTTON_LEFT = 0x00000002
         const val BUTTON_ZR = 0x00000004

@@ -631,10 +631,22 @@ restores green/unlocked state. Android input-device hotplug now also clears all
 touch state and hides the overlay while a gamepad/joystick is present. A live
 emulator sequence proved visible touch, hidden-on-controller, and restored-on-
 disconnect states; a second sequence began with A cyan/locked and restored it
-green/unlocked after controller connect/disconnect. Persistent editing,
-configurable handoff policy, virtual accessibility nodes, right-stick guest
-behavior, physical haptic feel, tablet and physical touch, motion, and
-physical-device acceptance remain open. Evidence:
+   green/unlocked after controller connect/disconnect. Persistent editing,
+   presentation controls, configurable handoff policy, right-stick status writes,
+   separated X/Z geometry, and an iOS-derived consolidated KartPad menu now run
+   in the exact dual APK. The in-game game-version action returns to the isolated
+   Original/Retro selector; FPS, aspect, resolution, multiplayer, Retro management,
+   and bounded reporting are live. Gravity motion steering now matches iOS
+   calibration, dead-zone, inversion, and sensitivity behavior. Emulator
+   injection proved neutral, opposite signed tilts, inversion, and preference
+   restoration across process restart. The exact local dual APK SHA-256 is
+   `cfcd6da4d833992be9dac514f2d6352d793df69691c8cfe0e947b033a88f7935`.
+   This accepts only this emulator A4 slice. Virtual accessibility nodes,
+   physical haptic feel, tablet and physical touch, custom controller mapping,
+   game-data/save and Mii management, direct Wii Remote support, complete menu-
+   function parity, and physical-device acceptance remain open. Evidence:
+[`docs/artifacts/2026-09-04/android/a4-touch-settings-menu-checkpoint.md`](artifacts/2026-09-04/android/a4-touch-settings-menu-checkpoint.md).
+Accepted evidence:
 [`docs/artifacts/2026-09-04/android/a4-touch-overlay-input.md`](artifacts/2026-09-04/android/a4-touch-overlay-input.md).
 [`docs/artifacts/2026-09-04/android/a4-controller-handoff.md`](artifacts/2026-09-04/android/a4-controller-handoff.md).
 

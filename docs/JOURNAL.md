@@ -3080,3 +3080,51 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   touch editing, accessibility, tablet layout, and physical acceptance remain
   open. No package or private content was published. Evidence:
   `docs/artifacts/2026-09-04/android/a4-controller-handoff.md`.
+
+## 2026-09-04 — Android A4 touch settings/menu paused checkpoint
+
+- Added the uncommitted Android touch-settings/editor slice: persistent move,
+  resize, per-control Hide/Show, grouped D-pad editing, reset, presentation
+  controls, configurable controller handoff, and modern C-stick direction.
+- Live emulator work before the pause proved editing, persistence, reset, and
+  both controller-visibility policy states with the prior incremental APK.
+- Moved Z upward to separate it from X and expanded the one-item overflow into
+  KartPad's iOS-derived Multiplayer, FPS, Controls, Display, Game Data & Saves,
+  and diagnostics hierarchy. Live FPS/aspect/resolution, Retro management,
+  multiplayer status, installation status, and bounded report sharing are
+  wired. Remaining motion, custom mapping, game-data/save, and Mii work is
+  disclosed in-product.
+- Focused source contracts (17 tests), all 460 patch hunks, and diff whitespace
+  pass. The fresh dual runtime build was interrupted after about 23 minutes at
+  the user's pause request, before link/package. No current APK exists, so the
+  newest Z/menu/JNI changes are not emulator-accepted or committed.
+- Classification: **documented work-in-progress, not a pass.** Resume from
+  `docs/artifacts/2026-09-04/android/a4-touch-settings-menu-checkpoint.md`.
+
+## 2026-09-04 — Android A4 selector, consolidated menu, and motion steering
+
+- Completed the paused dual build and exercised its production selector on the
+  standalone API 36 ARM64 emulator. Original and installed Retro Rewind are
+  explicit choices; Switch Game Version returns to that selector through an
+  isolated launcher process.
+- Emulator use exposed and fixed two Android-specific issues: display settings
+  previously crossed the renderer thread boundary, and a message-plus-items
+  AlertDialog hid every motion action. Runtime settings now use a synchronized
+  render-thread consumer, and Motion Steering uses visible accessible buttons.
+- Added persistent gravity motion steering with iOS-equivalent calibration,
+  dead zone, sensitivity, inversion, touch-stick precedence, lifecycle clearing,
+  and physical-controller priority. Virtual sensor injection proved neutral
+  `0.0`, one tilt near `-0.30`, the opposite near `+0.30`, and the first tilt
+  near `+0.30` after inversion. On/inverted/2.0x restored after a full process
+  restart; the emulator was returned to Off/standard/1.0x and neutral.
+- The exact local dual APK SHA-256 is
+  `cfcd6da4d833992be9dac514f2d6352d793df69691c8cfe0e947b033a88f7935`.
+  Android/Apple focused contracts pass 18 tests; lint, the strict package/privacy
+  audit, repository safety, all 462 patch hunks, pinned sources/input, the iOS
+  overlay snapshot, and diff whitespace pass.
+- Classification: **Pass for this selector/menu/display/touch-settings/motion
+  emulator slice.** Custom mapping, full game-data/save and Mii management,
+  accessibility nodes, tablet/physical touch and haptics, and physical-device
+  acceptance remain open. No APK, AAB, private content, save, or screenshot was
+  published. Evidence:
+  `docs/artifacts/2026-09-04/android/a4-touch-settings-menu-checkpoint.md`.

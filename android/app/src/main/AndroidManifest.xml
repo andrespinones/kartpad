@@ -36,6 +36,7 @@
         <activity
             android:name=".KartPadLaunchActivity"
             android:exported="true"
+            android:process=":launcher"
             android:screenOrientation="sensorLandscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
