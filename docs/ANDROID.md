@@ -1057,9 +1057,15 @@ Canvas overlay now exposes all 14 classic controls as bounded virtual
 accessibility nodes. Buttons use native mask pulses, sticks provide directional
 custom actions, and A provides a state-reporting acceleration-lock action. The
 API 36 emulator hierarchy and a direct UI Automator node action both pass.
-ISO/WBFS extraction, positive multi-gigabyte import evidence, tablet/physical
-touch, multi-controller setup parity, and physical-device acceptance are still
-open. Evidence is in
+Android now also builds a narrow JNI DiscIO bridge from pinned Dolphin source
+and accepts raw RMCP01 revision-zero ISO/WBFS documents through the system
+picker. Imports use app-private same-volume staging, validate before activation,
+and preserve the installed data on failure. The final APK showed both Original
+and installed Retro choices after reinstall; an invalid disc document failed
+cleanly without crashing or leaving staging residue. A positive multi-gigabyte
+disc import remains open because no owned source image was available. Tablet/
+physical touch, multi-controller setup parity, and physical-device acceptance
+are also still open. Evidence is in
 `docs/artifacts/2026-09-04/android/a4-touch-settings-menu-checkpoint.md` and
 `docs/artifacts/2026-09-04/android/a4-controller-mapping.md` and
 `docs/artifacts/2026-09-04/android/a4-mii-management.md` and
@@ -1071,6 +1077,11 @@ every setting visible in two landscape columns; evidence is in
 Android's Report a Problem action now also collects the same three user answers
 as iOS and builds bounded share/GitHub-prefill output; evidence is in
 `docs/artifacts/2026-09-04/android/a4-reporting-parity.md`.
+Disc-image, selector, and expanded menu evidence is in
+`docs/artifacts/2026-09-05/android/a4-disc-image-selector-menu-parity.md`.
+The Android selector in that checkpoint also adopts the iOS diagonal dark
+gradient, centered title hierarchy, blue Original card, pink Retro card, rounded
+geometry, leading icons, and responsive 320--760 point content cap.
 
 Do not begin the touch-UI port until A2's controller-driven Original-mode proof
 passes. Physical Android hardware remains authoritative for vendor Vulkan and

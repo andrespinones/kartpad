@@ -15,6 +15,7 @@ absolute_from_repo() {
 translation_root="$(absolute_from_repo "${1:-private/g8-full-translation}")"
 runtime_source="$(absolute_from_repo "${2:-build/android-game-runtime-source}")"
 runtime_build="$(absolute_from_repo "${3:-build/android-game-runtime-build}")"
+discio_jni_root="${KARTPAD_DISCIO_JNI_ROOT:-$repo_root/build/dolphin-android-discio-jni}"
 
 native_target="WiiCompiled"
 runtime_product="base"
@@ -41,6 +42,21 @@ if [[ ! -f "$(dirname "$runtime_source")/generated/data_sections_init.cpp" ]]; t
   echo "ERROR: prepared runtime is not paired with its ignored generated graph" >&2
   exit 1
 fi
+if [[ ! -f "$discio_jni_root/arm64-v8a/libkartpad_discio.so" ]]; then
+  if [[ -f "$repo_root/build/dolphin-android-discio-build/CMakeCache.txt" ]]; then
+    KARTPAD_DISCIO_RESUME=1 "$repo_root/scripts/build-android-discio-probe.sh" \
+      "$repo_root/ref/upstream/dolphin" \
+      "$repo_root/build/dolphin-android-discio-source" \
+      "$repo_root/build/dolphin-android-discio-build" \
+      "$discio_jni_root"
+  else
+    "$repo_root/scripts/build-android-discio-probe.sh" \
+      "$repo_root/ref/upstream/dolphin" \
+      "$repo_root/build/dolphin-android-discio-source" \
+      "$repo_root/build/dolphin-android-discio-build" \
+      "$discio_jni_root"
+  fi
+fi
 
 export JAVA_HOME="$repo_root/.android-bootstrap/jdk-$KARTPAD_ANDROID_JDK_VERSION/Contents/Home"
 export ANDROID_SDK_ROOT="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-$HOME/Library/Android/sdk}}"
@@ -51,6 +67,7 @@ export MINIZIP_ANDROID_ROOT="$minizip_root"
   -PkartpadGameRuntimeSource="$runtime_source" \
   -PkartpadTranslatedShardManifest="$translation_root/build_shards/shards.cmake" \
   -PkartpadAndroidNativeTarget="$native_target" \
+  -PkartpadDiscIoJniRoot="$discio_jni_root" \
   :app:assembleDebug
 
 apk="$repo_root/android/app/build/outputs/apk/debug/app-debug.apk"

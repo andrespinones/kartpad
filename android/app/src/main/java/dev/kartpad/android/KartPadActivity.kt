@@ -198,11 +198,12 @@ class KartPadActivity : SDLActivity() {
                 add(0, MENU_RENDER_RESOLUTION, 1, "Render Resolution…")
             }
             menu.addSubMenu(0, MENU_DATA_GROUP, 6, "Game Data & Saves").apply {
-                add(0, MENU_IMPORT_GAME_DATA, 0, "Import or Reimport Game Data…")
-                add(0, MENU_REMOVE_GAME_DATA, 1, "Remove Stored Game Data…")
-                add(0, MENU_RETRO_REWIND, 2, "Manage Retro Rewind…")
-                add(0, MENU_SAVES, 3, "Manage Saves…")
-                add(0, MENU_MIIS, 4, "Manage Miis…")
+                add(0, MENU_IMPORT_GAME_DATA, 0, "Import or Reimport Wii Disc Image…")
+                add(0, MENU_IMPORT_GAME_DATA_FOLDER, 1, "Import from Extracted Folder…")
+                add(0, MENU_REMOVE_GAME_DATA, 2, "Remove Stored Game Data…")
+                add(0, MENU_RETRO_REWIND, 3, "Manage Retro Rewind…")
+                add(0, MENU_SAVES, 4, "Manage Saves…")
+                add(0, MENU_MIIS, 5, "Manage Miis…")
             }
             menu.add(0, MENU_REPORT_PROBLEM, 7, "Report a Problem…")
             setOnMenuItemClickListener { item ->
@@ -220,6 +221,9 @@ class KartPadActivity : SDLActivity() {
                     MENU_ASPECT_RATIO -> showAspectRatioSettings()
                     MENU_RENDER_RESOLUTION -> showResolutionSettings()
                     MENU_IMPORT_GAME_DATA -> openGameDataManager(KartPadGameDataActivity.ACTION_IMPORT)
+                    MENU_IMPORT_GAME_DATA_FOLDER -> openGameDataManager(
+                        KartPadGameDataActivity.ACTION_IMPORT_FOLDER,
+                    )
                     MENU_REMOVE_GAME_DATA -> openGameDataManager(KartPadGameDataActivity.ACTION_REMOVE)
                     MENU_RETRO_REWIND -> startActivity(
                         Intent(this@KartPadActivity, RetroRewindInstallActivity::class.java),
@@ -1307,6 +1311,7 @@ class KartPadActivity : SDLActivity() {
         private const val MENU_DATA_GROUP = 115
         private const val MENU_REMOVE_GAME_DATA = 116
         private const val MENU_SAVES = 117
+        private const val MENU_IMPORT_GAME_DATA_FOLDER = 118
         private const val SELECTOR_RESTART_DELAY_MS = 250L
         private const val REQUEST_IMPORT_MII = 4_301
         private const val REQUEST_MANAGE_GAME_DATA = 4_302

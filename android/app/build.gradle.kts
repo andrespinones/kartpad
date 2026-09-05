@@ -10,6 +10,7 @@ val minizipAndroidRoot = providers.environmentVariable("MINIZIP_ANDROID_ROOT")
 val gameRuntimeSource = providers.gradleProperty("kartpadGameRuntimeSource").orNull
 val translatedShardManifest = providers.gradleProperty("kartpadTranslatedShardManifest").orNull
 val androidNativeTarget = providers.gradleProperty("kartpadAndroidNativeTarget").orNull
+val discIoJniRoot = providers.gradleProperty("kartpadDiscIoJniRoot").orNull
 
 android {
     namespace = "dev.kartpad.android"
@@ -24,6 +25,7 @@ android {
         versionCode = 1
         versionName = "0.0.1-a0"
         buildConfigField("boolean", "GAME_RUNTIME", (gameRuntimeSource != null).toString())
+        buildConfigField("boolean", "DISC_IMAGE_IMPORT", (discIoJniRoot != null).toString())
 
         ndk {
             abiFilters += "arm64-v8a"
@@ -66,6 +68,11 @@ android {
     if (gameRuntimeSource != null) {
         sourceSets.named("main") {
             assets.srcDir(file("$gameRuntimeSource/assets"))
+        }
+    }
+    if (discIoJniRoot != null) {
+        sourceSets.named("main") {
+            jniLibs.srcDir(file(discIoJniRoot))
         }
     }
 

@@ -3266,3 +3266,31 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   Compilation, lint, strict package/privacy audit, 49 contracts, and whitespace
   checks pass. No package or private artifact was published. Evidence:
   `docs/artifacts/2026-09-04/android/a4-reporting-parity.md`.
+
+## 2026-09-05 — Android A4 disc-image, selector, and menu parity
+
+- Added a source-built Dolphin DiscIO JNI bridge for RMCP01 revision-zero ISO
+  and WBFS documents. The Android document-picker path now extracts into bounded
+  app-private same-volume staging, validates the result, and activates it
+  atomically while preserving installed data on failure.
+- Split game-data import into explicit raw-disc and extracted-folder actions in
+  both the launcher manager and in-game Game Data & Saves submenu. The complete
+  submenu also retains removal, Retro Rewind, save, and Mii management.
+- Replaced Android's flat panel and stock gray mode buttons with the iOS
+  selector's diagonal dark gradient, orange mark, centered title hierarchy, and
+  equal rounded blue/pink cards with leading icons and styled subtitles. The
+  Manage Game Data recovery action remains available as a subordinate control.
+- Installed the final dual APK on the API 36 ARM64 emulator. Its selector showed
+  both Original and Retro Rewind 6.12.5. A deliberately empty ISO selected
+  through DocumentsUI produced a bounded in-product error, left the app alive,
+  retained the exact installed `main.dol`, and left no staging residue.
+- A clean 1,197-step native build, patch dry-run, Android lint, strict package/
+  privacy audit, shell syntax, whitespace, and the 72-test Python suite pass
+  (one skipped). The final local-only APK SHA-256 is
+  `09cdb68124a1e346a003b7c3e42b75b3f6b5f9fa2dcd1a7461500f5e57fd3204`.
+- Classification: **Pass for selector visibility, expanded menu actions, native
+  disc-image plumbing, and rollback-safe invalid-import behavior on the
+  emulator.** A positive multi-gigabyte ISO/WBFS import remains open because no
+  owned source image was available. No package or private artifact was
+  published. Evidence:
+  `docs/artifacts/2026-09-05/android/a4-disc-image-selector-menu-parity.md`.

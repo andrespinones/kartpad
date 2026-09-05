@@ -1,6 +1,6 @@
 # KartPad status
 
-Updated: 2026-09-04
+Updated: 2026-09-05
 
 ## Native Android work
 
@@ -668,8 +668,13 @@ disconnect states; a second sequence began with A cyan/locked and restored it
    restore/backup/restart, and Retro-to-selector-to-Original switching. The exact
    local-only APK is
    `6aa904883b174940f728b672bee971a6367dc6008d7c9837eeb7cf684e043203`.
-   ISO/WBFS extraction and positive multi-gigabyte folder-import evidence remain
-   open along with multi-controller, tablet/physical touch, and physical-device
+   Android now builds a pinned Dolphin DiscIO JNI library and exposes separate
+   raw ISO/WBFS and extracted-folder import actions. Disc imports validate and
+   activate through app-private same-volume staging. The final APK retained both
+   Original and installed Retro choices after reinstall, and an invalid document
+   failed cleanly without a crash, data change, or staging residue. A positive
+   full-disc import remains open because no owned source image was available,
+   along with multi-controller, tablet/physical touch, and physical-device
    acceptance. The Canvas overlay now exposes 14 bounded virtual accessibility
    children with button, stick-direction, and A-lock actions. UI Automator
    resolved the live nodes and directly performed the A-lock action; its state
@@ -687,6 +692,11 @@ disconnect states; a second sequence began with A cyan/locked and restored it
    emulator exposed every field/action; the test canceled without sending or
    opening anything. The exact audited dual APK is
    `539d9bf73e617c052b4439db0c017d1d5bc425288d2852a7fec6146241e78577`.
+   The selector now also matches the iOS first-launch visual system with its
+   diagonal navy/purple/wine background, orange mark, centered title hierarchy,
+   and equal rounded blue Original and pink Retro cards. The final combined
+   selector/disc-import APK SHA-256 is
+   `09cdb68124a1e346a003b7c3e42b75b3f6b5f9fa2dcd1a7461500f5e57fd3204`.
    Evidence:
 [`docs/artifacts/2026-09-04/android/a4-touch-settings-menu-checkpoint.md`](artifacts/2026-09-04/android/a4-touch-settings-menu-checkpoint.md).
 [`docs/artifacts/2026-09-04/android/a4-controller-mapping.md`](artifacts/2026-09-04/android/a4-controller-mapping.md).
@@ -695,6 +705,7 @@ disconnect states; a second sequence began with A cyan/locked and restored it
 [`docs/artifacts/2026-09-04/android/a4-touch-accessibility.md`](artifacts/2026-09-04/android/a4-touch-accessibility.md).
 [`docs/artifacts/2026-09-04/android/a4-touch-settings-visibility.md`](artifacts/2026-09-04/android/a4-touch-settings-visibility.md).
 [`docs/artifacts/2026-09-04/android/a4-reporting-parity.md`](artifacts/2026-09-04/android/a4-reporting-parity.md).
+[`docs/artifacts/2026-09-05/android/a4-disc-image-selector-menu-parity.md`](artifacts/2026-09-05/android/a4-disc-image-selector-menu-parity.md).
 Accepted evidence:
 [`docs/artifacts/2026-09-04/android/a4-touch-overlay-input.md`](artifacts/2026-09-04/android/a4-touch-overlay-input.md).
 [`docs/artifacts/2026-09-04/android/a4-controller-handoff.md`](artifacts/2026-09-04/android/a4-controller-handoff.md).

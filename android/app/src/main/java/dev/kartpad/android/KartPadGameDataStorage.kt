@@ -103,6 +103,49 @@ internal object KartPadGameDataStorage {
         }
     }
 
+    fun importDiscImage(
+        resolver: ContentResolver,
+        image: Uri,
+        filesDir: File,
+        progress: (String) -> Unit,
+    ): ImportResult {
+        check(BuildConfig.DISC_IMAGE_IMPORT) {
+            "Disc-image import is unavailable in this build."
+        }
+        val support = root(filesDir)
+        check(support.isDirectory || support.mkdirs()) { "Game-data storage is unavailable." }
+        recoverInterruptedImport(support)
+        val staging = File(support, "GameData.import-${UUID.randomUUID()}")
+        check(staging.mkdir()) { "The game-data staging folder could not be created." }
+        return try {
+            progress("Extracting the selected Wii disc image…")
+            KartPadDiscImageImporter.extract(resolver, image, staging)
+            progress("Validating extracted game data…")
+            localValidationError(staging)?.let { throw IllegalArgumentException(it) }
+            val counter = countLocalTree(staging)
+            ensureRelativeDvdRoot(support)
+            activate(support, staging)
+            File(support, REMOVAL_MARKER).delete()
+            ImportResult(counter.entries, counter.bytes)
+        } catch (error: Throwable) {
+            staging.deleteRecursively()
+            throw error
+        }
+    }
+
+    private fun countLocalTree(root: File): CopyCounter {
+        val counter = CopyCounter()
+        root.walkTopDown().drop(1).forEach { entry ->
+            counter.entries += 1
+            require(counter.entries <= MAX_ENTRIES) { "The disc contains too many files." }
+            if (entry.isFile) {
+                counter.bytes += entry.length()
+                require(counter.bytes <= MAX_BYTES) { "The disc exceeds KartPad's import limit." }
+            }
+        }
+        return counter
+    }
+
     private fun validateTree(navigator: TreeNavigator, rootId: String) {
         val nodes = requiredPaths.associateWith { path ->
             navigator.resolve(rootId, path.split('/'))
