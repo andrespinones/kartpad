@@ -578,7 +578,7 @@ class KartPadOverlayView(context: Context) : View(context) {
         controls += button("B", "B", BUTTON_B, 67.19f, 67.19f,
             0.8398611f, 0.6898649f, Color.argb(235, 199, 26, 33))
         controls += button("X", "X", BUTTON_X, 46f, 46f,
-            0.9034167f, 0.4258446f, Color.argb(235, 184, 184, 184), true)
+            0.896f, 0.4258446f, Color.argb(235, 184, 184, 184), true)
         controls += button("Y", "Y", BUTTON_Y, 46f, 46f,
             0.84525f, 0.5268581f, Color.argb(235, 184, 184, 184), true)
         controls += button("L", "L", BUTTON_L, 94f, 46f,

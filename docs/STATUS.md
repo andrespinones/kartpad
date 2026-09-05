@@ -20,6 +20,14 @@ including persisted FPS toggling and routes into dialogs, managers, or Android
 DocumentsUI. Evidence:
 [`docs/artifacts/2026-09-05/android/a4-menu-hierarchy-reachability.md`](artifacts/2026-09-05/android/a4-menu-hierarchy-reachability.md).
 
+The untouched phone touch layout now increases the rendered X/Z gap from 32
+px to 49 px while preserving saved layouts and leaving the separate tablet
+defaults unchanged. Both canonical emulator visual contracts pass. The final
+translated APK SHA-256 is
+`a1b88fc4f74d860ba97d530f8defff988995d73cd7fd4245617f50f4d79096bc`;
+the strict audit, lint, and 86-test suite with one skip pass. Evidence:
+[`docs/artifacts/2026-09-05/android/a4-phone-xz-spacing.md`](artifacts/2026-09-05/android/a4-phone-xz-spacing.md).
+
 ## Native Android work
 
 Android A0 passes on the authorized second Apple Silicon host. The explicit

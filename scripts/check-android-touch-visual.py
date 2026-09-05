@@ -74,7 +74,8 @@ def main() -> None:
     x = frames["X button"]
     z = frames["Z button"]
     x_z_gap = max(z[0] - x[2], x[0] - z[2])
-    if x_z_gap < 16:
+    minimum_x_z_gap = 44 if args.lane == "phone" else 16
+    if x_z_gap < minimum_x_z_gap:
         raise SystemExit(f"ERROR: X/Z spacing regressed: X={x} Z={z}")
     l_width = frames["L button"][2] - frames["L button"][0]
     r_width = frames["R button"][2] - frames["R button"][0]

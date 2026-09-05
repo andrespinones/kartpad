@@ -136,6 +136,12 @@ FPS toggling, the bounded source-build disc-import state, and real DocumentsUI
 folder handoff. Evidence:
 `docs/artifacts/2026-09-05/android/a4-menu-hierarchy-reachability.md`.
 
+The untouched Android phone layout now gives X and Z a 49 px rendered gap on
+the canonical Pixel 6, up from 32 px, without changing sizes, custom layouts,
+or the separate iPad-derived tablet geometry. Both visible emulator lanes,
+the translated build, strict package audit, lint, and full source suite pass.
+Evidence: `docs/artifacts/2026-09-05/android/a4-phone-xz-spacing.md`.
+
 KartPad `v0.4.0-preview.2` is published from
 `e9fa6058ee09fff0b16481ebe4a78d61cea69c87`. It updates both Apple-platform
 artifacts for Retro Rewind 6.12.5, repairs the universal iPhone/iPad three-dot

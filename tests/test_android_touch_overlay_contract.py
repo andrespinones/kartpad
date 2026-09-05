@@ -144,7 +144,7 @@ class AndroidTouchOverlayContractTests(unittest.TestCase):
         self.assertIn('"Move stick"', verifier)
         self.assertIn('"Z button"', verifier)
         self.assertIn("max(z[0] - x[2], x[0] - z[2])", verifier)
-        self.assertIn("x_z_gap < 16", verifier)
+        self.assertIn('44 if args.lane == "phone" else 16', verifier)
         self.assertIn("r_width != 560", verifier)
         self.assertIn('"A button": (18, 120, 71)', verifier)
         self.assertIn('"B button": (153, 32, 40)', verifier)
@@ -325,8 +325,9 @@ class AndroidTouchOverlayContractTests(unittest.TestCase):
         self.assertIn("assign_player_index(controller, -1)", patch)
         self.assertIn("aurora-android-gamepad-assignment.patch", prepare)
 
-    def test_z_has_clear_vertical_spacing_from_x(self) -> None:
+    def test_z_has_clear_spacing_from_x(self) -> None:
         source = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadOverlayView.kt").read_text()
+        self.assertIn('0.896f, 0.4258446f, Color.argb(235, 184, 184, 184)', source)
         self.assertIn('0.969f, 0.410f, Color.argb(240, 97, 46, 148)', source)
 
     def test_touch_overlay_preserves_ipad_default_geometry_on_tablets(self) -> None:

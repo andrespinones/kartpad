@@ -3590,3 +3590,20 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
 - Classification: **Pass for rendered hierarchy and action reachability on
   Pixel 6 and Pixel Tablet.** Physical-device actions remain open. Evidence:
   `docs/artifacts/2026-09-05/android/a4-menu-hierarchy-reachability.md`.
+
+## 2026-09-05 — Android A4 phone X/Z spacing
+
+- Shifted only the untouched phone X fallback slightly left, increasing the
+  canonical Pixel 6 X/Z edge gap from 32 px to 49 px while retaining Z at the
+  right safe edge.
+- The separate iPad-derived tablet branch remained byte-for-byte unchanged and
+  retained its 212 px gap. Persisted custom origins remain authoritative.
+- Visible Pixel 6 and Pixel Tablet raw-frame/accessibility contracts passed.
+- The translated runtime rebuilt at APK SHA-256
+  `a1b88fc4f74d860ba97d530f8defff988995d73cd7fd4245617f50f4d79096bc`;
+  strict package/privacy audit, Android lint, 86 tests with one intentional
+  skip, repository safety, shell syntax, and whitespace passed.
+- Classification: **Pass for canonical emulator phone spacing and tablet
+  regression coverage.** Physical ergonomics remain open. No package or
+  private artifact was published. Evidence:
+  `docs/artifacts/2026-09-05/android/a4-phone-xz-spacing.md`.
