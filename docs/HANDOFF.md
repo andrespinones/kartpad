@@ -130,6 +130,17 @@ or changing installed version 5. Run it only after disconnecting/stopping the
 emulator and attaching one authorized physical phone. Evidence:
 `docs/artifacts/2026-09-05/android/a6-physical-preview-handoff.md`.
 
+The exact versioned product now also passes sustained runtime/rendering checks
+on a real 16,384-byte kernel page-size AVD, not merely ELF alignment or source
+fixtures. Both universal and device-split non-debuggable packages retained one
+process, initialized SDL surface/audio, exposed the KartPad menu, rendered
+diverse frames, and preserved durable state. The stronger gate passed again on
+the 4 KiB Pixel Tablet. The disposable API 35 AVD and restricted private
+fixture transfer were deleted; the persistent tablet is restored to debug
+version 5 and the selector. Physical vendor Vulkan, performance, audio,
+haptics, controller, and thermal acceptance remain open. Evidence:
+`docs/artifacts/2026-09-05/android/a6-product-16k-runtime.md`.
+
 The `codex/iphone-touch-layout-editor` candidate captures the maintainer's
 current physical-iPhone control positions as the default for untouched iPhone
 installs only. Existing custom layouts and every iPad layout remain unchanged.

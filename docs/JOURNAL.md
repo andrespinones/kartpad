@@ -4031,3 +4031,35 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   hardware rows remain open. No package or private artifact was published.
   Evidence:
   `docs/artifacts/2026-09-05/android/a6-physical-preview-handoff.md`.
+
+## 2026-09-05 — Android A6 product runtime on 16 KiB kernel
+
+- Identified that full product packages had 16 KiB alignment but only source
+  fixtures had actually executed on the pinned 16,384-byte kernel lane.
+- Created a separate disposable API 35 ARM64 Pixel 7 AVD and transferred only
+  the approved GameData/runtime configuration/resources from the persistent
+  tablet. Every regular-file content hash matched through one private aggregate;
+  saves, logs, preferences, and unrelated state were excluded.
+- The first fresh-state preservation run correctly detected selector-created
+  default preferences. The runner now initializes the debug selector before
+  baseline capture and can report only changed category names on mismatch.
+- Strengthened release execution beyond `SDL_main`: the same PID must survive
+  at least 15 seconds, SDL surface and low-latency audio must initialize, the
+  accessible KartPad Menu must exist, no fatal signature may appear, and a
+  private frame must cross content-free color/luma/nonblack thresholds within a
+  bounded retry window.
+- Universal and four-part device-split version 6 packages passed every stronger
+  gate at page size 16,384, restored debug version 5, and preserved durable
+  state. The identical gate then passed again at page size 4,096 on the
+  persistent Pixel Tablet.
+- Deleted the exact temporary AVD, restricted 2.7 GB transfer, recovery APK,
+  device specs/splits, private frames, and raw log. The persistent tablet ends
+  on the visible two-game selector.
+- The 106-test suite with one intentional skip, strict AAB/preview-APK audits,
+  source/input verification, repository safety, Python/shell syntax, shell
+  lint, and whitespace checks pass.
+- Classification: **Pass for complete non-debuggable product runtime and
+  rendering on Android 16 KiB and 4 KiB emulator kernels.** Physical hardware,
+  vendor Vulkan/performance, hands-on audio/haptics/controller, signing, and
+  publication remain open. No package or private artifact was published.
+  Evidence: `docs/artifacts/2026-09-05/android/a6-product-16k-runtime.md`.

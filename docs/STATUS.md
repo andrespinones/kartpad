@@ -141,6 +141,18 @@ and installed version 5 unchanged. No physical target is connected, so this is
 handoff hardening rather than physical acceptance. Evidence:
 [`docs/artifacts/2026-09-05/android/a6-physical-preview-handoff.md`](artifacts/2026-09-05/android/a6-physical-preview-handoff.md).
 
+The complete versioned product runtime now executes on Android's 16 KiB kernel
+lane, closing the gap between source-fixture/page-alignment evidence and the
+actual translated release package. On a disposable API 35 ARM64 Pixel 7 with
+16,384-byte pages, both the non-debuggable universal APK and exact four-part
+device split retained one process, initialized surface/audio, exposed the
+KartPad menu, rendered a diverse frame, and preserved durable state. The same
+strengthened gate passed again on the persistent API 36 / 4 KiB Pixel Tablet.
+A private game/runtime fixture transfer matched file content exactly and was
+deleted with the temporary AVD afterward; no private frame or content was
+retained. Physical vendor-driver/performance acceptance remains open. Evidence:
+[`docs/artifacts/2026-09-05/android/a6-product-16k-runtime.md`](artifacts/2026-09-05/android/a6-product-16k-runtime.md).
+
 The latest Android A4 checkpoint fixes a real SDL lifecycle gap: KartPad now
 enables SDL activity recreation, so Android can rebuild `KartPadActivity`
 without SDL terminating the process. Visible Pixel 6 and Pixel Tablet runs held

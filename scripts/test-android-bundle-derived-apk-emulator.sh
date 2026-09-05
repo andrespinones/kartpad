@@ -17,6 +17,7 @@ bundletool="$repo_root/.android-bootstrap/dependencies/bundletool-all-1.18.1.jar
 debug_keystore="${KARTPAD_ANDROID_LOCAL_TEST_KEYSTORE:-$HOME/.android/debug.keystore}"
 package="dev.kartpad.android"
 expected_main_dol_sha256="80d18895b39c63bd80f457398bfcbb91b7d16ac116a41a88967e954080155b05"
+runtime_stability_seconds="${KARTPAD_ANDROID_RUNTIME_STABILITY_SECONDS:-15}"
 
 fail() {
   echo "ERROR: $*" >&2
@@ -30,6 +31,10 @@ command -v "$python" >/dev/null || fail "Python is unavailable: $python"
 [[ -f "$bundle" ]] || fail "AAB is unavailable at $bundle"
 [[ -f "$bundletool" ]] || fail "pinned bundletool is unavailable at $bundletool"
 [[ -f "$debug_keystore" ]] || fail "local Android test keystore is unavailable"
+[[ "$runtime_stability_seconds" =~ ^[0-9]+$ ]] ||
+  fail "KARTPAD_ANDROID_RUNTIME_STABILITY_SECONDS must be an integer"
+((runtime_stability_seconds >= 5 && runtime_stability_seconds <= 120)) ||
+  fail "KARTPAD_ANDROID_RUNTIME_STABILITY_SECONDS must be between 5 and 120"
 
 devices="$($adb devices -l)"
 ready_count="$(printf '%s\n' "$devices" |
@@ -90,7 +95,8 @@ tree_digest() {
   fi
 }
 
-state_digest() {
+write_state_manifest() {
+  local output="$1"
   {
     printf 'config=%s\n' "$(file_digest files/KartPad/Config.toml)"
     printf 'main_dol=%s\n' "$(file_digest files/KartPad/GameData/sys/main.dol)"
@@ -99,7 +105,11 @@ state_digest() {
     printf 'preferences=%s\n' "$(tree_digest shared_prefs)"
     printf 'retro_version=%s\n' \
       "$(file_digest files/KartPad/RetroRewind/RetroRewind6/version.txt)"
-  } | shasum -a 256 | awk '{ print $1 }'
+  } >"$output"
+}
+
+state_digest() {
+  shasum -a 256 "$1" | awk '{ print $1 }'
 }
 
 installed_version_code() {
@@ -169,6 +179,47 @@ exercise_original_runtime() {
   done
   [[ "$runtime_started" == 1 ]] ||
     fail "bundle-derived release activity did not execute SDL_main from libmain.so"
+  local initial_pid
+  initial_pid="$("${adb_target[@]}" shell pidof "$package" | tr -d '\r')"
+  [[ "$initial_pid" =~ ^[0-9]+$ ]] ||
+    fail "bundle-derived release runtime has no stable process"
+  sleep "$runtime_stability_seconds"
+  [[ "$("${adb_target[@]}" shell pidof "$package" | tr -d '\r')" == "$initial_pid" ]] ||
+    fail "bundle-derived release runtime did not retain its process"
+  local runtime_log
+  runtime_log="$("${adb_target[@]}" logcat -d -v raw \
+    SDL:V SDL/APP:I AndroidRuntime:E libc:F '*:S')"
+  [[ "$runtime_log" == *'surfaceCreated()'* &&
+     "$runtime_log" == *'Low latency audio enabled'* ]] ||
+    fail "bundle-derived runtime did not initialize its surface and audio path"
+  if printf '%s\n' "$runtime_log" |
+      grep -Eq 'FATAL EXCEPTION|Fatal signal|CheckJNI|SIGABRT|SIGSEGV'; then
+    fail "bundle-derived runtime emitted a fatal signature"
+  fi
+  local ui_tree="/sdcard/kartpad-bundle-runtime.xml"
+  "${adb_target[@]}" shell uiautomator dump "$ui_tree" >/dev/null 2>&1 ||
+    fail "could not capture the running touch overlay"
+  local overlay_hierarchy
+  overlay_hierarchy="$("${adb_target[@]}" exec-out cat "$ui_tree")"
+  [[ "$overlay_hierarchy" == *'content-desc="Menu"'* ]] ||
+    fail "running release runtime did not expose the KartPad menu control"
+  local frame="$temp_root/runtime-frame.raw"
+  local frame_ready=0
+  for _ in {1..12}; do
+    "${adb_target[@]}" exec-out screencap >"$frame"
+    if "$repo_root/scripts/check-android-runtime-frame.py" "$frame" >/dev/null 2>&1; then
+      frame_ready=1
+      break
+    fi
+    [[ "$("${adb_target[@]}" shell pidof "$package" | tr -d '\r')" == "$initial_pid" ]] ||
+      fail "bundle-derived release runtime exited while waiting for a rendered frame"
+    sleep 5
+  done
+  if [[ "$frame_ready" != 1 ]]; then
+    "$repo_root/scripts/check-android-runtime-frame.py" "$frame" >/dev/null || true
+    fail "bundle-derived release runtime did not present a diverse frame"
+  fi
+  "${adb_target[@]}" shell toybox rm -f "$ui_tree" >/dev/null 2>&1 || true
   "${adb_target[@]}" shell am force-stop "$package"
 }
 
@@ -189,7 +240,11 @@ restore_version="$(installed_version_code)"
 [[ "$(file_digest files/KartPad/GameData/sys/main.dol)" == \
     "$expected_main_dol_sha256" ]] ||
   fail "app-private GameData is not the approved fixture"
-before_state="$(state_digest)"
+restore_selector
+wait_for_selector
+before_manifest="$temp_root/before-state"
+write_state_manifest "$before_manifest"
+before_state="$(state_digest "$before_manifest")"
 
 "$java" -jar "$bundletool" build-apks \
   --bundle="$bundle" \
@@ -323,10 +378,17 @@ exercise_original_runtime
 restore_required=0
 [[ "$(installed_version_code)" == "$restore_version" ]] ||
   fail "recoverable debug APK version was not restored"
-after_state="$(state_digest)"
-[[ "$before_state" == "$after_state" ]] ||
-  fail "app-private durable state changed across bundle-derived APK testing"
+after_manifest="$temp_root/after-state"
+write_state_manifest "$after_manifest"
+after_state="$(state_digest "$after_manifest")"
+if [[ "$before_state" != "$after_state" ]]; then
+  changed_categories="$(awk -F= '
+    NR == FNR { before[$1] = $2; next }
+    before[$1] != $2 { print $1 }
+  ' "$before_manifest" "$after_manifest" | paste -sd, -)"
+  fail "app-private durable state changed across bundle-derived APK testing: ${changed_categories:-unknown}"
+fi
 restore_selector
 wait_for_selector
 
-echo "Android bundle-derived APK emulator test passed: aab_sha256=$bundle_sha256 derived_apk_sha256=$derived_apk_sha256 version_code=$derived_version release_non_debuggable=yes universal_selector_visible=yes universal_sdl_main_executed=yes device_splits=4 split_signer_consistent=yes split_native_bytes_exact=yes split_selector_visible=yes split_sdl_main_executed=yes debug_apk_restored=yes durable_state_preserved=yes"
+echo "Android bundle-derived APK emulator test passed: aab_sha256=$bundle_sha256 derived_apk_sha256=$derived_apk_sha256 version_code=$derived_version page_size=$("${adb_target[@]}" shell getconf PAGE_SIZE | tr -d '\r') release_non_debuggable=yes universal_selector_visible=yes universal_runtime_stable=yes universal_frame_diverse=yes device_splits=4 split_signer_consistent=yes split_native_bytes_exact=yes split_selector_visible=yes split_runtime_stable=yes split_frame_diverse=yes debug_apk_restored=yes durable_state_preserved=yes"

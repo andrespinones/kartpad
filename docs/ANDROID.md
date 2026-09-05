@@ -963,6 +963,16 @@ metadata and selector, and opens the UID-scoped capture window. It intentionally
 has no uninstall, data-clear, or downgrade path. Complete the manual matrix,
 then run `scripts/capture-android-a2-session.sh summarize`.
 
+The versioned release package has now crossed the complete 16 KiB product gate.
+On a disposable API 35 ARM64 `google_apis_ps16k` AVD, both universal and
+device-targeted split installs retained one process through a stability
+interval, initialized SDL surface/audio, exposed the overlay, and reached a
+content-free diverse-frame threshold without fatal signatures. The same gate
+passes on the API 36 / 4 KiB tablet. Private frames and the restricted fixture
+transfer are deleted after use. This is emulator/kernel compatibility evidence,
+not physical vendor-driver or performance acceptance. Evidence is in
+`docs/artifacts/2026-09-05/android/a6-product-16k-runtime.md`.
+
 The non-destructive save-storage emulator lane is
 `scripts/test-android-save-storage-emulator.sh [APK]`. Its debug-only fixture
 uses deterministic valid RKSYS images under an isolated cache root to execute
