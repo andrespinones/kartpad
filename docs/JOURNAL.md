@@ -3338,3 +3338,19 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   rumble, and physical-device acceptance remain open. No package or private
   artifact was published. Evidence:
   `docs/artifacts/2026-09-05/android/a4-controller-player-setup.md`.
+
+## 2026-09-05 — Android A4 selector owned icon parity
+
+- Replaced Android's legacy compass, directions, and undo assets with
+  KartPad-owned steering-wheel, checkered-flag, and go-backward vectors matching
+  the current iOS selector source.
+- The visible 2560x1600 Pixel Tablet showed the complete centered selector and
+  bounded accessible rows with the new icon language. The local screenshot
+  remains untracked at SHA-256 `d0b259f3...`.
+- The complete translated dual-runtime APK rebuilt and passed the strict audit
+  at SHA-256
+  `0d0dccc38878a9937a09d3b770dad16792654c1d5c86d72edafbd98710b778f7`.
+  The 74-test suite (one skipped), lint, safety, and whitespace checks pass.
+- Classification: **Pass for owned selector icon parity on the emulator.** No
+  package or private artifact was published. Evidence:
+  `docs/artifacts/2026-09-05/android/a4-selector-owned-icons.md`.

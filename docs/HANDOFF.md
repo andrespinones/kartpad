@@ -43,6 +43,13 @@ dual-runtime build, lint, 74-test suite, and package/privacy audit pass. Physica
 multi-controller/reconnect/rumble behavior remains open. Evidence:
 `docs/artifacts/2026-09-05/android/a4-controller-player-setup.md`.
 
+The Android game selector no longer depends on legacy platform compass,
+direction, or undo drawables. KartPad-owned steering-wheel, checkered-flag, and
+go-backward vectors now match the iOS icon language and passed visible
+2560x1600 Pixel Tablet inspection plus the complete translated-runtime build,
+lint, and strict APK audit. Evidence:
+`docs/artifacts/2026-09-05/android/a4-selector-owned-icons.md`.
+
 KartPad `v0.4.0-preview.2` is published from
 `e9fa6058ee09fff0b16481ebe4a78d61cea69c87`. It updates both Apple-platform
 artifacts for Retro Rewind 6.12.5, repairs the universal iPhone/iPad three-dot

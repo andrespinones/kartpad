@@ -189,7 +189,7 @@ class KartPadLaunchActivity : Activity() {
             setPadding(0, dp(12), 0, dp(12))
         }
         column.addView(ImageView(this).apply {
-            setImageResource(android.R.drawable.ic_menu_compass)
+            setImageResource(R.drawable.ic_kartpad_steering_wheel)
             imageTintList = ColorStateList.valueOf(Color.rgb(255, 107, 46))
             contentDescription = "KartPad"
             scaleType = ImageView.ScaleType.CENTER_INSIDE
@@ -222,7 +222,7 @@ class KartPadLaunchActivity : Activity() {
                 this,
                 Color.rgb(8, 125, 255),
                 Color.rgb(4, 99, 214),
-                android.R.drawable.ic_menu_directions,
+                R.drawable.ic_kartpad_checkered_flag,
             )
             setModeText(this, "Mario Kart Wii", "Original game")
         }
@@ -232,7 +232,7 @@ class KartPadLaunchActivity : Activity() {
                 this,
                 Color.rgb(245, 56, 99),
                 Color.rgb(207, 38, 78),
-                android.R.drawable.ic_menu_revert,
+                R.drawable.ic_kartpad_gobackward,
             )
             setModeText(this, "Retro Rewind", "Checking installation…")
             isEnabled = false

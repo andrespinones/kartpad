@@ -22,6 +22,15 @@ class AndroidGameDataSaveContractTests(unittest.TestCase):
         self.assertIn("cornerRadius = dp(18).toFloat()", launcher)
         self.assertIn("setModeText(this, \"Mario Kart Wii\", \"Original game\")", launcher)
         self.assertIn("minOf(760, maxOf(320, availableWidthDp))", launcher)
+        for icon in (
+            "ic_kartpad_steering_wheel",
+            "ic_kartpad_checkered_flag",
+            "ic_kartpad_gobackward",
+        ):
+            self.assertIn(f"R.drawable.{icon}", launcher)
+            vector = (REPO / f"android/app/src/main/res/drawable/{icon}.xml").read_text()
+            self.assertIn('android:viewportWidth="48"', vector)
+            self.assertIn("android:pathData=", vector)
         self.assertIn("KartPadGameDataStorage.validationError(filesDir)", launcher)
         self.assertIn("original.isEnabled = gameDataValid", launcher)
         self.assertIn('"Import or Reimport Wii Disc Image…"', activity)

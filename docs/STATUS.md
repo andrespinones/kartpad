@@ -710,6 +710,11 @@ disconnect states; a second sequence began with A cyan/locked and restored it
    and the complete translated dual-runtime build consume the production Aurora
    bridge; its audited local APK SHA-256 is
    `b41b7b3b33a9c3eec2e8a66d0a9d11e8f96d71a4be6d05e727a57fc83ca5a14c`.
+   The chooser now also replaces its three legacy Android drawable glyphs with
+   KartPad-owned steering-wheel, checkered-flag, and go-backward vectors that
+   match the iOS selector's icon language. The visible Pixel Tablet composition
+   and accessibility hierarchy pass; the final audited dual APK SHA-256 is
+   `0d0dccc38878a9937a09d3b770dad16792654c1d5c86d72edafbd98710b778f7`.
    Evidence:
 [`docs/artifacts/2026-09-04/android/a4-touch-settings-menu-checkpoint.md`](artifacts/2026-09-04/android/a4-touch-settings-menu-checkpoint.md).
 [`docs/artifacts/2026-09-04/android/a4-controller-mapping.md`](artifacts/2026-09-04/android/a4-controller-mapping.md).
@@ -721,6 +726,7 @@ disconnect states; a second sequence began with A cyan/locked and restored it
 [`docs/artifacts/2026-09-05/android/a4-disc-image-selector-menu-parity.md`](artifacts/2026-09-05/android/a4-disc-image-selector-menu-parity.md).
 [`docs/artifacts/2026-09-05/android/a4-tablet-overlay-parity.md`](artifacts/2026-09-05/android/a4-tablet-overlay-parity.md).
 [`docs/artifacts/2026-09-05/android/a4-controller-player-setup.md`](artifacts/2026-09-05/android/a4-controller-player-setup.md).
+[`docs/artifacts/2026-09-05/android/a4-selector-owned-icons.md`](artifacts/2026-09-05/android/a4-selector-owned-icons.md).
 Accepted evidence:
 [`docs/artifacts/2026-09-04/android/a4-touch-overlay-input.md`](artifacts/2026-09-04/android/a4-touch-overlay-input.md).
 [`docs/artifacts/2026-09-04/android/a4-controller-handoff.md`](artifacts/2026-09-04/android/a4-controller-handoff.md).

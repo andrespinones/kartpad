@@ -1096,7 +1096,11 @@ Disc-image, selector, and expanded menu evidence is in
 `docs/artifacts/2026-09-05/android/a4-disc-image-selector-menu-parity.md`.
 The Android selector in that checkpoint also adopts the iOS diagonal dark
 gradient, centered title hierarchy, blue Original card, pink Retro card, rounded
-geometry, leading icons, and responsive 320--760 point content cap.
+geometry, leading icons, and responsive 320--760 point content cap. Its remaining
+legacy platform glyphs are now replaced with KartPad-owned steering-wheel,
+checkered-flag, and go-backward vectors verified on the visible Pixel Tablet;
+evidence is in
+`docs/artifacts/2026-09-05/android/a4-selector-owned-icons.md`.
 
 Do not begin the touch-UI port until A2's controller-driven Original-mode proof
 passes. Physical Android hardware remains authoritative for vendor Vulkan and
