@@ -84,6 +84,32 @@ class AndroidTouchOverlayContractTests(unittest.TestCase):
         self.assertIn("listOf(BUTTON_A, BUTTON_A or BUTTON_B, BUTTON_B, 0)", overlay)
         self.assertIn("actual == expected && pointerOwners.isEmpty()", overlay)
 
+    def test_source_fixture_clears_a_real_held_touch_when_menu_opens(self) -> None:
+        activity = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadActivity.kt").read_text()
+        overlay = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadOverlayView.kt").read_text()
+        runner = (REPO / "scripts/test-android-touch-modal-clear.sh").read_text()
+        self.assertIn("DEBUG_EXTRA_MODAL_CLEAR", activity)
+        self.assertIn("runDebugHoldAForModalFixture()", activity)
+        self.assertIn("showKartPadMenu()", activity)
+        self.assertIn("debugTouchStateIsNeutral()", activity)
+        self.assertIn("MotionEvent.ACTION_DOWN", overlay)
+        self.assertIn("lastPublishedButtons == BUTTON_A", overlay)
+        self.assertIn("pointerOwners.values.singleOrNull() == \"A\"", overlay)
+        self.assertIn("TEST_TOUCH_MODAL_CLEAR", runner)
+        self.assertIn("held=0x10 owners=1 neutral=0x0 owners=0", runner)
+
+    def test_source_fixture_clears_a_real_held_touch_on_lifecycle_loss(self) -> None:
+        activity = (REPO / "android/app/src/main/java/dev/kartpad/android/KartPadActivity.kt").read_text()
+        runner = (REPO / "scripts/test-android-touch-lifecycle-clear.sh").read_text()
+        self.assertIn("DEBUG_EXTRA_LIFECYCLE_CLEAR", activity)
+        self.assertIn("debugLifecycleClearArmed = true", activity)
+        self.assertIn('verifyDebugLifecycleClear("pause")', activity)
+        self.assertIn('verifyDebugLifecycleClear("focus-loss")', activity)
+        self.assertIn("debugTouchStateIsNeutral()", activity)
+        self.assertIn("TEST_TOUCH_LIFECYCLE_CLEAR", runner)
+        self.assertIn("input keyevent KEYCODE_HOME", runner)
+        self.assertIn("neutral=0x0 owners=0", runner)
+
     def test_touch_visual_contract_covers_phone_tablet_geometry_and_palette(self) -> None:
         verifier = (REPO / "scripts/check-android-touch-visual.py").read_text()
         runner = (REPO / "scripts/test-android-touch-visual.sh").read_text()

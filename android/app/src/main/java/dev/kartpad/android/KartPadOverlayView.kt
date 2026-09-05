@@ -300,6 +300,34 @@ class KartPadOverlayView(context: Context) : View(context) {
             "b=0x${bOnly.toString(16)} neutral=0x${neutral.toString(16)}"
     }
 
+    fun runDebugHoldAForModalFixture(): String {
+        check(isLaidOut && width > 0 && height > 0) { "touch overlay is not laid out" }
+        val a = controls.first { it.id == "A" }.frame
+        val downTime = SystemClock.uptimeMillis()
+        val event = MotionEvent.obtain(
+            downTime,
+            downTime,
+            MotionEvent.ACTION_DOWN,
+            a.centerX(),
+            a.centerY(),
+            0,
+        ).apply { source = InputDevice.SOURCE_TOUCHSCREEN }
+        clearTouchInput()
+        try {
+            check(onTouchEvent(event)) { "touch overlay rejected modal-clear pointer event" }
+        } finally {
+            event.recycle()
+        }
+        check(lastPublishedButtons == BUTTON_A && pointerOwners.values.singleOrNull() == "A") {
+            "modal-clear setup mask=0x${lastPublishedButtons.toString(16)} " +
+                "owners=${pointerOwners.values}"
+        }
+        return "held=0x${lastPublishedButtons.toString(16)} owners=${pointerOwners.size}"
+    }
+
+    fun debugTouchStateIsNeutral(): Boolean =
+        lastPublishedButtons == 0 && pointerOwners.isEmpty() && !gasLocked
+
     fun setMotionSteering(value: Float) {
         motionSteeringX = if (controllerConnected) 0f else value.coerceIn(-1f, 1f)
         publishState(connected = true)

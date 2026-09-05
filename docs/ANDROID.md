@@ -1119,6 +1119,11 @@ same complete text hierarchy retained on Android 9. A separate touch raw-frame
 gate covers the accepted phone/tablet defaults, palette, safe containment,
 grouped D-pad, and R geometry; evidence is in
 `docs/artifacts/2026-09-05/android/a4-selector-menu-touch-visual-parity.md`.
+Real `MotionEvent` fixtures now additionally prove held-input clearing rather
+than relying on source inspection: the menu path passes on the canonical phone
+and tablet, and Home/`onPause` passes on the phone. Each starts with Classic A
+and one pointer owner and ends neutral with no owner; evidence is in
+`docs/artifacts/2026-09-05/android/a4-touch-modal-lifecycle-clearing.md`.
 
 Do not begin the touch-UI port until A2's controller-driven Original-mode proof
 passes. Physical Android hardware remains authoritative for vendor Vulkan and

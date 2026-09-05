@@ -49,6 +49,7 @@ class KartPadActivity : SDLActivity() {
     private lateinit var inputManager: InputManager
     private lateinit var motionSteering: KartPadMotionSteering
     private var inputListenerRegistered = false
+    private var debugLifecycleClearArmed = false
     private val inputDeviceListener = object : InputManager.InputDeviceListener {
         override fun onInputDeviceAdded(deviceId: Int) = refreshControllerHandoff()
         override fun onInputDeviceRemoved(deviceId: Int) = refreshControllerHandoff()
@@ -89,7 +90,14 @@ class KartPadActivity : SDLActivity() {
             intent.getBooleanExtra(DEBUG_EXTRA_CONTROLLER_SETUP, false)
         val debugMenu = BuildConfig.DEBUG && !BuildConfig.GAME_RUNTIME &&
             intent.getBooleanExtra(DEBUG_EXTRA_MENU, false)
-        kartPadOverlay.visibility = if (BuildConfig.GAME_RUNTIME || debugTouchOverlay) {
+        val debugModalClear = BuildConfig.DEBUG && !BuildConfig.GAME_RUNTIME &&
+            intent.getBooleanExtra(DEBUG_EXTRA_MODAL_CLEAR, false)
+        val debugLifecycleClear = BuildConfig.DEBUG && !BuildConfig.GAME_RUNTIME &&
+            intent.getBooleanExtra(DEBUG_EXTRA_LIFECYCLE_CLEAR, false)
+        kartPadOverlay.visibility = if (
+            BuildConfig.GAME_RUNTIME || debugTouchOverlay || debugModalClear ||
+                debugLifecycleClear
+        ) {
             android.view.View.VISIBLE
         } else {
             android.view.View.GONE
@@ -113,12 +121,33 @@ class KartPadActivity : SDLActivity() {
         } else if (debugMenu) {
             addMenuButton()
             menuButton.postDelayed({ showKartPadMenu() }, 1_000L)
+        } else if (debugModalClear) {
+            addMenuButton()
+            kartPadOverlay.post {
+                runCatching {
+                    val held = kartPadOverlay.runDebugHoldAForModalFixture()
+                    showKartPadMenu()
+                    check(kartPadOverlay.debugTouchStateIsNeutral()) {
+                        "touch state remained active after menu presentation"
+                    }
+                    Log.i(TAG, "A4 modal clear fixture passed $held neutral=0x0 owners=0")
+                }.onFailure { Log.e(TAG, "A4 modal clear fixture failed", it) }
+            }
         }
         if (debugTouchOverlay && debugMultiPointer) {
             kartPadOverlay.post {
                 runCatching { kartPadOverlay.runDebugMultiPointerFixture() }
                     .onSuccess { Log.i(TAG, "A4 multi-pointer fixture passed $it") }
                     .onFailure { Log.e(TAG, "A4 multi-pointer fixture failed", it) }
+            }
+        }
+        if (debugLifecycleClear) {
+            kartPadOverlay.post {
+                runCatching {
+                    val held = kartPadOverlay.runDebugHoldAForModalFixture()
+                    debugLifecycleClearArmed = true
+                    Log.i(TAG, "A4 lifecycle clear fixture armed $held")
+                }.onFailure { Log.e(TAG, "A4 lifecycle clear fixture failed", it) }
             }
         }
         mLayout.bringChildToFront(kartPadOverlay)
@@ -147,6 +176,7 @@ class KartPadActivity : SDLActivity() {
         }
         if (::kartPadOverlay.isInitialized) {
             kartPadOverlay.clearTouchInput()
+            verifyDebugLifecycleClear("pause")
         }
         if (::motionSteering.isInitialized) motionSteering.stop()
         super.onPause()
@@ -155,8 +185,18 @@ class KartPadActivity : SDLActivity() {
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         if (!hasFocus && ::kartPadOverlay.isInitialized) {
             kartPadOverlay.clearTouchInput()
+            verifyDebugLifecycleClear("focus-loss")
         }
         super.onWindowFocusChanged(hasFocus)
+    }
+
+    private fun verifyDebugLifecycleClear(reason: String) {
+        if (!debugLifecycleClearArmed) return
+        check(kartPadOverlay.debugTouchStateIsNeutral()) {
+            "touch state remained active after $reason"
+        }
+        debugLifecycleClearArmed = false
+        Log.i(TAG, "A4 lifecycle clear fixture passed reason=$reason neutral=0x0 owners=0")
     }
 
     private fun refreshControllerHandoff() {
@@ -1485,6 +1525,10 @@ class KartPadActivity : SDLActivity() {
         private const val DEBUG_EXTRA_CONTROLLER_SETUP =
             "dev.kartpad.android.TEST_CONTROLLER_SETUP"
         private const val DEBUG_EXTRA_MENU = "dev.kartpad.android.TEST_MENU"
+        private const val DEBUG_EXTRA_MODAL_CLEAR =
+            "dev.kartpad.android.TEST_TOUCH_MODAL_CLEAR"
+        private const val DEBUG_EXTRA_LIFECYCLE_CLEAR =
+            "dev.kartpad.android.TEST_TOUCH_LIFECYCLE_CLEAR"
         private const val DEBUG_RESUME_FIXTURE_SHA256 =
             "cb9d5fc3b83611af65032f73119285de4e97d4b2b9f7b2e9567443635358483a"
         private const val MIN_RKG_BYTES = 0x90L

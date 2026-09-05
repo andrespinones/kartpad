@@ -3420,3 +3420,22 @@ This file is append-only. Evidence paths refer to sanitized, publishable artifac
   haptics, vendor rendering, and touch-only race acceptance remain open. No
   package or private artifact was published. Evidence:
   `docs/artifacts/2026-09-05/android/a4-selector-menu-touch-visual-parity.md`.
+
+## 2026-09-05 — Android A4 touch modal and lifecycle clearing
+
+- Added a production-gated source fixture that sends a real A-button
+  `MotionEvent.ACTION_DOWN` through the normal overlay, requiring `0x10` and one
+  pointer owner before any clear is accepted.
+- Opening the actual three-dot menu passed on the visible Pixel Tablet and
+  Pixel 6: both changed held A to neutral and removed the final pointer owner.
+- A separate Pixel 6 run armed the same held touch, sent Android Home, and
+  passed through the normal `onPause` path with neutral state and zero owners.
+- The complete translated runtime rebuilt. Android lint, 79 tests with one
+  intentional skip, strict package/privacy audit, repository safety, shell
+  syntax, and whitespace checks pass. The local-only APK SHA-256 is
+  `760b440accaaf430b13f3346cae39632411cb53a678b288c12694059152b43b3`.
+- Classification: **Pass for canonical emulator modal clearing and phone
+  lifecycle clearing.** OEM lifecycle ordering and physical touch remain
+  physical-device gates. No package or private artifact was published.
+  Evidence:
+  `docs/artifacts/2026-09-05/android/a4-touch-modal-lifecycle-clearing.md`.

@@ -73,6 +73,13 @@ including their intentionally different X/Z ordering. The final translated APK
 build, lint, 77-test suite, and strict audit pass. Evidence:
 `docs/artifacts/2026-09-05/android/a4-selector-menu-touch-visual-parity.md`.
 
+Android's modal/lifecycle input clearing now has real event-replay evidence.
+Held A (`0x10`, one owner) becomes neutral with no owner when the three-dot menu
+opens on both canonical emulator layouts and when the Pixel 6 receives Home and
+`onPause`. The source-only entry points cannot run in the translated game build;
+that build still compiles, lints, and audits. Evidence:
+`docs/artifacts/2026-09-05/android/a4-touch-modal-lifecycle-clearing.md`.
+
 KartPad `v0.4.0-preview.2` is published from
 `e9fa6058ee09fff0b16481ebe4a78d61cea69c87`. It updates both Apple-platform
 artifacts for Retro Rewind 6.12.5, repairs the universal iPhone/iPad three-dot

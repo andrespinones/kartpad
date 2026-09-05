@@ -736,6 +736,12 @@ disconnect states; a second sequence began with A cyan/locked and restored it
    phone/tablet X/Z ordering, tablet R width, D-pad geometry, and palette. The
    final audited translated APK SHA-256 is
    `5c0554814023e3cd80c035a5b2c21c882e2bfce511e2c780c817e6e53279eaf9`.
+   Real `MotionEvent` clearing fixtures now also prove that opening the actual
+   menu clears held A on both canonical emulator layouts and that sending the
+   Pixel 6 to Home clears held A through `onPause`. Every case transitions from
+   `0x10`/one owner to neutral/zero owners. The resulting audited translated APK
+   SHA-256 is
+   `760b440accaaf430b13f3346cae39632411cb53a678b288c12694059152b43b3`.
    Evidence:
 [`docs/artifacts/2026-09-04/android/a4-touch-settings-menu-checkpoint.md`](artifacts/2026-09-04/android/a4-touch-settings-menu-checkpoint.md).
 [`docs/artifacts/2026-09-04/android/a4-controller-mapping.md`](artifacts/2026-09-04/android/a4-controller-mapping.md).
@@ -751,6 +757,7 @@ disconnect states; a second sequence began with A cyan/locked and restored it
 [`docs/artifacts/2026-09-05/android/a4-selector-visual-contract.md`](artifacts/2026-09-05/android/a4-selector-visual-contract.md).
 [`docs/artifacts/2026-09-05/android/a4-multipointer-replay.md`](artifacts/2026-09-05/android/a4-multipointer-replay.md).
 [`docs/artifacts/2026-09-05/android/a4-selector-menu-touch-visual-parity.md`](artifacts/2026-09-05/android/a4-selector-menu-touch-visual-parity.md).
+[`docs/artifacts/2026-09-05/android/a4-touch-modal-lifecycle-clearing.md`](artifacts/2026-09-05/android/a4-touch-modal-lifecycle-clearing.md).
 Accepted evidence:
 [`docs/artifacts/2026-09-04/android/a4-touch-overlay-input.md`](artifacts/2026-09-04/android/a4-touch-overlay-input.md).
 [`docs/artifacts/2026-09-04/android/a4-controller-handoff.md`](artifacts/2026-09-04/android/a4-controller-handoff.md).
