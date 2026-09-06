@@ -1,12 +1,12 @@
 # Install the KartPad unsigned IPA
 
-KartPad `v0.4.5` is an unsigned ARM64 IPA for iPhone and iPad. It is a free
+KartPad `v0.4.6` is an unsigned ARM64 IPA for iPhone and iPad. It is a free
 community release, not an App Store or TestFlight build, and it will not
 install until it is re-signed with your own Apple identity or compatible
 personal sideloading tool.
 
-1. Download `KartPad-v0.4.5-ios-unsigned.ipa` and `SHA256SUMS` from the
-   [0.4.5 release](https://github.com/chrissotraidis/kartpad/releases/tag/v0.4.5).
+1. Download `KartPad-v0.4.6-ios-unsigned.ipa` and `SHA256SUMS` from the
+   [0.4.6 release](https://github.com/chrissotraidis/kartpad/releases/tag/v0.4.6).
 2. Verify the IPA with `shasum -a 256 -c SHA256SUMS` on a Mac.
 3. Re-sign and install it with AltStore Classic plus AltServer or another
    compatible IPA-signing workflow. AltStore PAL cannot import arbitrary
@@ -17,12 +17,23 @@ personal sideloading tool.
    optional expanded game. KartPad can download, verify, and install the
    official version-locked Retro Rewind 6.12.7 full pack.
 
-To set the name shown on licenses and online, open **Game Data & Saves → Player
-Identity… → Set Player Name…**. Choose 1–10 characters and restart KartPad.
-KartPad updates every original-game and Retro Rewind license linked to that Mii
-while preserving friend codes, online accounts, and progress. The same screen
-can import a standard 74-byte `.mii` file when you also want a different
-appearance.
+To change an existing online name, open **••• → Game Data & Saves → Player
+Identity… → Manage Existing Licenses…**. Choose the exact Original or Retro
+Rewind profile and numbered slot, then choose **Rename License…**. KartPad
+preserves that license's friend code, account data, records, and progress.
+
+To remove a duplicate, choose that exact profile and slot, then **Delete
+License…**. Read the second confirmation carefully: deleting a license removes
+its friend code, account data, records, and progress. Close and reopen KartPad
+to apply either operation. The live save is revalidated and backed up first.
+
+Use **Set Player Name…** to rename a Mii and licenses already linked to it. Use
+**Import Mii Appearance…** for a standard 74-byte `.mii` file. **Remove Mii
+Appearance…** does not delete a game license and is blocked while the Mii is
+still linked to one.
+
+The persistent **•••** button is restored immediately after iPadOS reports a
+screenshot if the system temporarily changes its presentation state.
 The experimental direct Wii Remote/Nunchuk pairing flow is macOS-only; the IPA
 does not claim direct Wii Remote pairing on iPhone or iPad.
 

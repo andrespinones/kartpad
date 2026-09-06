@@ -19,6 +19,21 @@ The exact 67-row matrix in `docs/PRD.md` remains the authority for full
 engineering completion. A community preview may ship with narrower, explicit
 limitations when its exact artifact passes every preview gate below.
 
+## 0.4.6 license-management hotfix candidate
+
+- [x] Enumerate active Original and Retro Rewind licenses by profile and slot
+- [x] Rename one exact license without changing its creation ID or other data
+- [x] Delete only one guarded license block after an explicit second warning
+- [x] Revalidate the live save, back it up, write atomically, and repair CRC-32
+- [x] Prevent Mii-appearance removal while a license still references that Mii
+- [x] Reassert the persistent three-dot button after an iPadOS screenshot
+- [ ] Build and audit exact-source iOS 0.4.6 build 20
+- [ ] Install in place on iPad and preserve its existing data
+- [ ] Exercise license rename/delete staging UI without deleting live data
+- [ ] Package twice byte-identically and audit the exact unsigned IPA
+- [ ] Publish `v0.4.6`, `KartPad-v0.4.6-ios-unsigned.ipa`, and `SHA256SUMS`
+- [ ] Download hosted assets, byte-compare, and re-audit them
+
 ## 0.4.5 player-identity hotfix candidate
 
 - [x] Reproduce the fixed-name gap on physical iPad Retro Rewind 6.12.7
