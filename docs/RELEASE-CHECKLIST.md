@@ -27,12 +27,21 @@ limitations when its exact artifact passes every preview gate below.
 - [x] Revalidate the live save, back it up, write atomically, and repair CRC-32
 - [x] Prevent Mii-appearance removal while a license still references that Mii
 - [x] Reassert the persistent three-dot button after an iPadOS screenshot
-- [ ] Build and audit exact-source iOS 0.4.6 build 20
-- [ ] Install in place on iPad and preserve its existing data
+- [x] Build and audit exact-source iOS 0.4.6 build 20
+- [x] Install in place on iPad and preserve its existing data
 - [ ] Exercise license rename/delete staging UI without deleting live data
-- [ ] Package twice byte-identically and audit the exact unsigned IPA
-- [ ] Publish `v0.4.6`, `KartPad-v0.4.6-ios-unsigned.ipa`, and `SHA256SUMS`
-- [ ] Download hosted assets, byte-compare, and re-audit them
+- [x] Package twice byte-identically and audit the exact unsigned IPA
+- [x] Publish `v0.4.6`, `KartPad-v0.4.6-ios-unsigned.ipa`, and `SHA256SUMS`
+- [x] Download hosted assets, byte-compare, and re-audit them
+
+Published source: `c3ce6fd4fcbc93a1606093af3859c91c1e109c9e`.
+iPhone/iPad executable SHA-256:
+`a61686b65d6b666b2fee3a3acbee7034a171e712f4596ce0213dbdc830f5ecb6`.
+iPhone/iPad IPA SHA-256:
+`8c62ff341c8acae085127998e39411238ef93a3297d81687237d96c0c406289e`.
+The in-place iPad installation retained the existing WBFS and byte-identical
+console identity, Mii database, original save, Retro Rewind save, and
+preferences. The same files remained intact after the first 0.4.6 launch.
 
 ## 0.4.5 player-identity hotfix candidate
 
