@@ -60,8 +60,6 @@ patch -p1 -d "${runtime_source}" < "${repo_root}/patches/wiicompiled-apple-runti
 patch -p1 -d "${runtime_source}" < \
   "${repo_root}/patches/wiicompiled-experimental-wiimote-preset.patch"
 patch -p1 -d "${runtime_source}" < \
-  "${repo_root}/patches/wiicompiled-experimental-joycon2-preset.patch"
-patch -p1 -d "${runtime_source}" < \
   "${repo_root}/patches/wiicompiled-macos-cursor-visibility.patch"
 patch -p1 -d "${runtime_source}" < \
   "${repo_root}/patches/wiicompiled-apple-network-tls.patch"

@@ -74,16 +74,15 @@ class ExperimentalJoyCon2ContractTests(unittest.TestCase):
         shell = (REPO / "apple/macos/KartPadMacShell.mm").read_text()
         self.assertIn('initWithTitle:@"Joy-Con 2 Rumble"', shell)
 
-    def test_runtime_preparation_applies_sideways_preset(self) -> None:
-        preset = REPO / "patches/wiicompiled-experimental-joycon2-preset.patch"
-        self.assertTrue(preset.exists())
-        text = preset.read_text()
-        self.assertIn("kJoyCon2SidewaysPreset", text)
-        self.assertIn('"Joy-Con 2 Sideways (Experimental)"', text)
+    def test_sideways_layout_matches_classic_controller_pro_preset(self) -> None:
+        # The bridge emits positional SDL buttons, so Nintendo's sideways
+        # convention (right = A, bottom = B) is exactly the Classic Controller
+        # Pro preset; no dedicated preset patch should exist.
+        self.assertFalse((REPO / "patches/wiicompiled-experimental-joycon2-preset.patch").exists())
         prepare = (REPO / "scripts/prepare-g7-game-runtime.sh").read_text()
-        self.assertIn(preset.name, prepare)
-        self.assertLess(prepare.index("wiicompiled-experimental-wiimote-preset.patch"),
-                        prepare.index(preset.name))
+        self.assertNotIn("joycon2-preset", prepare)
+        bridge = (REPO / "apple/macos/KartPadJoyCon2.mm").read_text()
+        self.assertIn("Classic Controller Pro preset", bridge)
 
 
 if __name__ == "__main__":

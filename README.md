@@ -248,10 +248,10 @@ Each Joy-Con 2 is an independent player held sideways with SL/SR at the top,
 so two Joy-Con 2 halves give two local players. Open **Controls → Connect
 Joy-Con 2…**, hold `SYNC` on each Joy-Con until its LEDs run back and forth,
 and wait for the panel to report `Connected as Player N`. The player LEDs
-follow KartPad's port assignment. Choose the **Joy-Con 2 Sideways
-(Experimental)** preset in Controller Settings for each player: the bottom face
-button accelerates, the right one brakes, SL/SR are L/R, the rail bumper is a
-trick button, and Plus/Capture pauses.
+follow KartPad's port assignment. Choose the **Classic Controller Pro** preset
+in Controller Settings for each player. It matches Nintendo's own sideways
+layout: the right face button accelerates (A), the bottom one brakes (B),
+SL/SR are L/R, the rail bumper is a trick button, and Plus/Capture pauses.
 
 Original Switch 1 Joy-Con reach KartPad through SDL's own driver after normal
 macOS Bluetooth pairing. SDL merges a left and right pair into one gamepad by
@@ -670,8 +670,8 @@ iPhone or iPad.
 ### Can I use Switch 2 Joy-Con 2 controllers as two separate players?
 
 Experimentally, on macOS only. Enable **Controls → Experimental Joy-Con 2
-(Switch 2)**, hold `SYNC` on each Joy-Con 2, and pick the **Joy-Con 2 Sideways
-(Experimental)** preset for each player in Controller Settings. KartPad speaks
+(Switch 2)**, hold `SYNC` on each Joy-Con 2, and pick the **Classic Controller
+Pro** preset for each player in Controller Settings. KartPad speaks
 the controllers' Bluetooth LE protocol directly, so no driver or SIP change is
 needed. It is not available on iPhone or iPad.
 

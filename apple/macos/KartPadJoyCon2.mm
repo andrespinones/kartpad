@@ -379,9 +379,11 @@ void SetButton(GamepadState &state, SDL_GamepadButton button, bool pressed) {
 // Joy-Con is held with SL/SR at the top:
 //   Right Joy-Con rotates clockwise:  A=south X=east B=west Y=north
 //   Left Joy-Con rotates anticlockwise: Left=south Down=east Up=west Right=north
-// SL/SR become the shoulders, the rail bumper (L or R) is D-pad Up so Mario
-// Kart Wii has a trick button, and the rail trigger (ZL or ZR) is the right
-// trigger.
+// With the Classic Controller Pro preset the east (right) button is Classic A
+// and the south (bottom) button is Classic B, which is Nintendo's own sideways
+// convention. SL/SR become the shoulders, the rail bumper (L or R) is D-pad Up
+// so Mario Kart Wii has a trick button, and the rail trigger (ZL or ZR) is the
+// right trigger.
 GamepadState TranslateReport(ControllerKind kind, uint32_t buttons,
                              float leftX, float leftY, float rightX, float rightY) {
   GamepadState state;
@@ -1292,7 +1294,7 @@ didWriteValueForCharacteristic:(CBCharacteristic *)characteristic
     NSTextField *note = [NSTextField labelWithString:
         @"Each Joy-Con becomes its own player, held sideways with SL/SR at the top. "
         @"A Joy-Con that already paired with this Mac reconnects when you press any button. "
-        @"Pick the Joy-Con 2 Sideways preset in Controller Settings for each player."];
+        @"Pick the Classic Controller Pro preset in Controller Settings for each player."];
     note.maximumNumberOfLines = 4;
     note.lineBreakMode = NSLineBreakByWordWrapping;
     note.textColor = NSColor.secondaryLabelColor;
