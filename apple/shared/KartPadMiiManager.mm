@@ -4,6 +4,7 @@
 #include "kartpad/mii/player_identity.h"
 
 #include <span>
+#include <cstdlib>
 #include <vector>
 
 NSString *const KartPadMiiManagerErrorDomain = @"dev.kartpad.mii-manager";
@@ -11,6 +12,11 @@ NSString *const KartPadMiiManagerErrorDomain = @"dev.kartpad.mii-manager";
 namespace {
 
 NSString *SupportRoot() {
+#if defined(KARTPAD_MII_MANAGER_TESTING)
+  const char *root = std::getenv("KARTPAD_MII_TEST_SUPPORT_ROOT");
+  if (root == nullptr || root[0] != '/') std::abort();
+  return [NSString stringWithUTF8String:root];
+#endif
   return [[NSHomeDirectory() stringByAppendingPathComponent:
       @"Library/Application Support"] stringByAppendingPathComponent:@"KartPad"];
 }
@@ -198,6 +204,8 @@ NSArray<NSDictionary<NSString *, id> *> *KartPadMiiRecords(NSError **error) {
 NSArray<NSDictionary<NSString *, id> *> *KartPadLicenseRecords(NSError **error) {
   NSMutableArray<NSDictionary<NSString *, id> *> *result = [NSMutableArray array];
   NSFileManager *files = NSFileManager.defaultManager;
+  NSDictionary *identity = [NSDictionary dictionaryWithContentsOfFile:PendingIdentityPath()];
+  NSDictionary *license = [NSDictionary dictionaryWithContentsOfFile:PendingLicensePath()];
   for (NSDictionary<NSString *, NSString *> *location in SaveLocations()) {
     NSString *path = location[@"path"];
     if (![files fileExistsAtPath:path]) continue;
@@ -209,12 +217,31 @@ NSArray<NSDictionary<NSString *, id> *> *KartPadLicenseRecords(NSError **error) 
       NSString *name = [NSString stringWithUTF8String:record.name.c_str()];
       NSData *createId = [NSData dataWithBytes:record.createId.data()
                                         length:record.createId.size()];
+      NSString *pendingOperation = @"";
+      NSData *pendingName = nil;
+      if ([identity[@"createId"] isEqual:createId]) {
+        pendingOperation = @"rename";
+        pendingName = identity[@"name"];
+      }
+      if ([license[@"profileIdentifier"] isEqual:location[@"identifier"]] &&
+          [license[@"slot"] isEqual:@(record.slot)] &&
+          [license[@"createId"] isEqual:createId]) {
+        pendingOperation = license[@"operation"] ?: @"";
+        pendingName = license[@"name"];
+      }
+      if (![pendingOperation isKindOfClass:NSString.class]) pendingOperation = @"";
+      if ([pendingName isKindOfClass:NSData.class] &&
+          kartpad::mii::ValidateUtf16BigEndianName(Bytes(pendingName))) {
+        name = [[NSString alloc] initWithData:pendingName
+                                    encoding:NSUTF16BigEndianStringEncoding];
+      }
       [result addObject:@{
         @"profileIdentifier": location[@"identifier"],
         @"profileTitle": location[@"title"],
         @"slot": @(record.slot),
         @"name": name.length > 0 ? name : @"Unnamed",
         @"createId": createId,
+        @"pendingOperation": pendingOperation,
       }];
     }
   }
@@ -244,6 +271,20 @@ BOOL KartPadStageMiiImport(NSData *miiData, NSString **name, NSError **error) {
 BOOL KartPadStageMiiRemoval(NSUInteger slot, NSError **error) {
   NSData *databaseData = ReadWorkingDatabase(error);
   if (databaseData == nil || !ValidateData(databaseData, error)) return NO;
+  const auto createId = kartpad::mii::MiiCreateId(Bytes(databaseData), slot);
+  NSData *identity = [NSData dataWithBytes:createId.data() length:createId.size()];
+  NSError *licenseError = nil;
+  for (NSDictionary *license in KartPadLicenseRecords(&licenseError)) {
+    if ([license[@"createId"] isEqual:identity]) {
+      if (error != nullptr) *error = ManagerError(20,
+          "This Mii is linked to an existing license. Change the license first.");
+      return NO;
+    }
+  }
+  if (licenseError != nil) {
+    if (error != nullptr) *error = licenseError;
+    return NO;
+  }
 
   std::vector<uint8_t> database(
       static_cast<const uint8_t *>(databaseData.bytes),
@@ -259,6 +300,11 @@ BOOL KartPadStageMiiRemoval(NSUInteger slot, NSError **error) {
 BOOL KartPadStagePlayerName(NSUInteger slot, NSString *name,
                            NSUInteger *updatedLicenses, NSError **error) {
   if (updatedLicenses != nullptr) *updatedLicenses = 0;
+  if (KartPadHasPendingMiiChanges()) {
+    if (error != nullptr) *error = ManagerError(13,
+        "Fully close and reopen KartPad to apply the pending identity change first.");
+    return NO;
+  }
   NSData *nameData = PlayerNameData(name, error);
   if (nameData == nil) return NO;
 

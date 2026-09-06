@@ -3,6 +3,7 @@
 #import "KartPadClassicInput.h"
 #import "KartPadDiscExtractor.h"
 #import "KartPadMenuButton.h"
+#import "KartPadFloatingStick.h"
 #import "KartPadMotionSteering.h"
 #import "KartPadPhysicalControllers.h"
 #import "KartPadRetroRewindInstaller.h"
@@ -31,6 +32,7 @@
 @end
 
 @interface KartPadGameOverlay : SunPadGameOverlay
+@property(nonatomic, strong) KartPadFloatingStickView *kartPadMoveStick;
 @property(nonatomic, copy) void (^multiplayerRequested)(void);
 @property(nonatomic, copy) void (^motionSteeringRequested)(void);
 @property(nonatomic, copy) void (^miiManagerRequested)(void);
@@ -53,6 +55,8 @@
 // declaration lets the owning subclass replace Sunshine's analog FLUDD
 // pressure semantics with Mario Kart Wii's ordinary digital Classic R button.
 @interface SunPadGameOverlay (KartPadControlHooks)
+- (SunPadStickView *)makeStick;
+- (void)stickChanged:(SunPadStickView *)stick x:(float)x y:(float)y;
 - (void)rPressureChanged:(uint8_t)pressure fullPress:(BOOL)fullPress;
 - (void)clearTouchInput;
 - (void)buttonDown:(UIButton *)button;
@@ -78,15 +82,23 @@ NSString *const kKartPadRequestedRuntimeProfileKey =
 NSString *const kKartPadHiddenTouchControlsKey =
     @"KartPadHiddenTouchControls";
 
-void KartPadSeedPhoneTouchLayoutDefaults(BOOL force) {
-  if (UIDevice.currentDevice.userInterfaceIdiom != UIUserInterfaceIdiomPhone) {
-    return;
-  }
-
+void KartPadSeedTouchLayoutDefaults(BOOL force) {
+  BOOL tablet = UIDevice.currentDevice.userInterfaceIdiom == UIUserInterfaceIdiomPad;
   NSUserDefaults *defaults = NSUserDefaults.standardUserDefaults;
   BOOL changed = NO;
   if (force || [defaults dictionaryForKey:@"SunPadControlOrigins"] == nil) {
-    [defaults setObject:@{
+    NSDictionary *origins = tablet ? @{
+      @"move": NSStringFromCGPoint(CGPointMake(0.13, 0.83)),
+      @"c": NSStringFromCGPoint(CGPointMake(0.91, 0.90)),
+      @"X": NSStringFromCGPoint(CGPointMake(0.14, 0.60)),
+      @"Y": NSStringFromCGPoint(CGPointMake(0.06, 0.63)),
+      @"A": NSStringFromCGPoint(CGPointMake(0.93, 0.75)),
+      @"B": NSStringFromCGPoint(CGPointMake(0.82, 0.82)),
+      @"R": NSStringFromCGPoint(CGPointMake(0.815, 0.64)),
+      @"L": NSStringFromCGPoint(CGPointMake(0.93, 0.60)),
+      @"Z": NSStringFromCGPoint(CGPointMake(0.84, 0.52)),
+      @"Start": NSStringFromCGPoint(CGPointMake(0.94, 0.50)),
+    } : @{
       @"L" : NSStringFromCGPoint(CGPointMake(0.93580568318565682,
                                                0.42246621616846858)),
       @"R" : NSStringFromCGPoint(CGPointMake(0.8208055524263117,
@@ -97,7 +109,12 @@ void KartPadSeedPhoneTouchLayoutDefaults(BOOL force) {
                                                0.56739864864054057)),
       @"Z" : NSStringFromCGPoint(CGPointMake(0.84591666666666665,
                                                0.3783220720432432)),
-    } forKey:@"SunPadControlOrigins"];
+    };
+    [defaults setObject:origins forKey:@"SunPadControlOrigins"];
+    changed = YES;
+  }
+  if (force || [defaults objectForKey:kKartPadHiddenTouchControlsKey] == nil) {
+    [defaults setObject:@[@"ExperimentalDPad"] forKey:kKartPadHiddenTouchControlsKey];
     changed = YES;
   }
   if (force || [defaults dictionaryForKey:@"SunPadControlSizeScales"] == nil) {
@@ -1393,10 +1410,23 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
 @implementation KartPadGameOverlay
 
 - (instancetype)initWithFrame:(CGRect)frame {
-  // Seed only a genuinely untouched phone layout. Existing custom layouts and
-  // every iPad layout retain their current values.
-  KartPadSeedPhoneTouchLayoutDefaults(NO);
+  // Seed untouched layouts only; custom arrangements remain user-owned.
+  KartPadSeedTouchLayoutDefaults(NO);
   return [super initWithFrame:frame];
+}
+
+- (SunPadStickView *)makeStick {
+  if (self.kartPadMoveStick != nil) return [super makeStick];
+  KartPadFloatingStickView *stick = [[KartPadFloatingStickView alloc]
+      initWithFrame:CGRectMake(0, 0, 128, 128)];
+  self.kartPadMoveStick = stick;
+  __weak KartPadGameOverlay *weakSelf = self;
+  __weak SunPadStickView *weakStick = stick;
+  stick.valueChanged = ^(float x, float y) {
+    SunPadStickView *strongStick = weakStick;
+    if (strongStick != nil) [weakSelf stickChanged:strongStick x:x y:y];
+  };
+  return stick;
 }
 
 - (void)kartPadFinishLayoutEditing {
@@ -1508,7 +1538,7 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
   [super resetLayout];
   [NSUserDefaults.standardUserDefaults
       removeObjectForKey:kKartPadHiddenTouchControlsKey];
-  KartPadSeedPhoneTouchLayoutDefaults(YES);
+  KartPadSeedTouchLayoutDefaults(YES);
   for (UIView *control in self.subviews) {
     if (KartPadVisibilityIdentifier(control).length == 0) continue;
     control.hidden = NO;
@@ -1547,6 +1577,8 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
 
 - (void)layoutSubviews {
   [super layoutSubviews];
+  self.kartPadMoveStick.floatingEnabled =
+      ![SunPadSettings sharedSettings].editingControlLayout;
   UIButton *menuButton = nil;
   UIButton *leftShoulder = nil;
   UIButton *rightShoulder = nil;
@@ -1864,9 +1896,9 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
           weakSelf.miiManagerRequested();
         }
       }];
-      [dataItems addObject:miiManager];
+      [dataItems insertObject:miiManager atIndex:0];
       gameData = [UIMenu menuWithTitle:dataMenu.title
-                                 image:dataMenu.image
+                                 image:[UIImage systemImageNamed:@"externaldrive"]
                             identifier:dataMenu.identifier
                                options:dataMenu.options
                               children:dataItems];
@@ -2513,10 +2545,13 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
 }
 
 - (NSString *)licenseTitleForRecord:(NSDictionary<NSString *, id> *)record {
-  return [NSString stringWithFormat:@"%@ · Slot %lu · %@",
+  NSString *pending = record[@"pendingOperation"];
+  NSString *suffix = [pending isEqualToString:@"delete"] ? @" · deletion pending" :
+      [pending isEqualToString:@"rename"] ? @" · name pending" : @"";
+  return [NSString stringWithFormat:@"%@ · Slot %lu · %@%@",
       record[@"profileTitle"] ?: @"Mario Kart Wii",
       (unsigned long)([record[@"slot"] unsignedIntegerValue] + 1),
-      record[@"name"] ?: @"Unnamed"];
+      record[@"name"] ?: @"Unnamed", suffix];
 }
 
 - (void)showLicenseNameEditorForRecord:(NSDictionary<NSString *, id> *)record {
@@ -2595,7 +2630,7 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
   if (controller == nil) return;
   UIAlertController *actions = [UIAlertController
       alertControllerWithTitle:[self licenseTitleForRecord:record]
-                       message:@"Rename keeps the selected license’s account and progress. Delete removes only this license slot after another confirmation."
+                       message:@"Changes apply after you fully close and reopen KartPad, not while this game is running. Rename keeps this license’s account and progress. Delete removes only this slot after another confirmation."
                 preferredStyle:UIAlertControllerStyleActionSheet];
   __weak KartPadRuntimeOverlayHost *weakSelf = self;
   [actions addAction:[UIAlertAction actionWithTitle:@"Rename License…"
@@ -2746,7 +2781,7 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
   NSString *summary = names.count == 0 ? @"No Miis found."
       : [names componentsJoinedByString:@", "];
   NSString *pending = KartPadHasPendingMiiChanges()
-      ? @"\n\nPending changes will be applied on the next launch." : @"";
+      ? @"\n\nNames shown here include pending edits. Fully close and reopen KartPad to apply them to the game before making another change." : @"";
   NSString *message = [NSString stringWithFormat:
       @"%lu Mii appearance%@ available: %@\n%lu existing license%@ found.%@",
       (unsigned long)records.count, records.count == 1 ? @"" : @"s",
