@@ -1,12 +1,12 @@
 # Install the KartPad unsigned IPA
 
-KartPad `v0.4.4` is an unsigned ARM64 IPA for iPhone and iPad. It is a free
+KartPad `v0.4.5` is an unsigned ARM64 IPA for iPhone and iPad. It is a free
 community release, not an App Store or TestFlight build, and it will not
 install until it is re-signed with your own Apple identity or compatible
 personal sideloading tool.
 
-1. Download `KartPad-v0.4.4-ios-unsigned.ipa` and `SHA256SUMS` from the
-   [0.4.4 release](https://github.com/chrissotraidis/kartpad/releases/tag/v0.4.4).
+1. Download `KartPad-v0.4.5-ios-unsigned.ipa` and `SHA256SUMS` from the
+   [0.4.5 release](https://github.com/chrissotraidis/kartpad/releases/tag/v0.4.5).
 2. Verify the IPA with `shasum -a 256 -c SHA256SUMS` on a Mac.
 3. Re-sign and install it with AltStore Classic plus AltServer or another
    compatible IPA-signing workflow. AltStore PAL cannot import arbitrary
@@ -17,9 +17,12 @@ personal sideloading tool.
    optional expanded game. KartPad can download, verify, and install the
    official version-locked Retro Rewind 6.12.7 full pack.
 
-This release also includes experimental Mii import. Open **Game Data & Saves →
-Manage Miis…**, import a standard 74-byte `.mii` file, restart KartPad, and
-select it from **License Settings → Change Mii**. KartPad does not create Miis.
+To set the name shown on licenses and online, open **Game Data & Saves → Player
+Identity… → Set Player Name…**. Choose 1–10 characters and restart KartPad.
+KartPad updates every original-game and Retro Rewind license linked to that Mii
+while preserving friend codes, online accounts, and progress. The same screen
+can import a standard 74-byte `.mii` file when you also want a different
+appearance.
 The experimental direct Wii Remote/Nunchuk pairing flow is macOS-only; the IPA
 does not claim direct Wii Remote pairing on iPhone or iPad.
 

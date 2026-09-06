@@ -1855,7 +1855,7 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
         }
       }
       UIAction *miiManager =
-          [UIAction actionWithTitle:@"Manage Miis…"
+          [UIAction actionWithTitle:@"Player Identity…"
                               image:[UIImage systemImageNamed:@"person.crop.circle.badge.plus"]
                          identifier:@"dev.kartpad.manage-miis"
                             handler:^(__kindof UIAction *action) {
@@ -2398,8 +2398,95 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
 }
 
 - (void)showMiiCreationHelp {
-  [self showIntegrationAlert:@"Create a Mii"
-                     message:@"KartPad does not include the Wii Menu or Mii Channel, so it cannot create a new Mii yet. Create or export a standard 74-byte .mii file with a compatible tool, then choose Import Mii… here. After restarting KartPad, use Mario Kart Wii's License Settings → Change Mii screen to select it."];
+  [self showIntegrationAlert:@"Mii Appearance"
+                     message:@"KartPad can set the online player name for its built-in Mii. To change the face or other appearance details, import a standard 74-byte .mii file made with a compatible tool. Player Identity can then rename it and update every linked Mario Kart Wii license."];
+}
+
+- (void)showPlayerNameEditorForRecord:(NSDictionary<NSString *, id> *)record {
+  UIViewController *controller = KartPadVisibleViewController(_window);
+  if (controller == nil) return;
+  NSString *currentName = record[@"name"] ?: @"";
+  NSUInteger slot = [record[@"slot"] unsignedIntegerValue];
+  UIAlertController *editor = [UIAlertController
+      alertControllerWithTitle:@"Set Player Name"
+                       message:@"Use 1–10 characters. On restart, KartPad will update this Mii and every license linked to it without changing friend codes or progress."
+                preferredStyle:UIAlertControllerStyleAlert];
+  [editor addTextFieldWithConfigurationHandler:^(UITextField *field) {
+    field.text = currentName;
+    field.placeholder = @"Player name";
+    field.clearButtonMode = UITextFieldViewModeWhileEditing;
+    field.autocapitalizationType = UITextAutocapitalizationTypeWords;
+    field.returnKeyType = UIReturnKeyDone;
+  }];
+  __weak KartPadRuntimeOverlayHost *weakSelf = self;
+  [editor addAction:[UIAlertAction actionWithTitle:@"Save"
+                                             style:UIAlertActionStyleDefault
+                                           handler:^(UIAlertAction *action) {
+    (void)action;
+    NSString *name = editor.textFields.firstObject.text ?: @"";
+    NSError *renameError = nil;
+    NSUInteger updatedLicenses = 0;
+    if (!KartPadStagePlayerName(slot, name, &updatedLicenses, &renameError)) {
+      [weakSelf showIntegrationAlert:@"Player Name Could Not Be Changed"
+                             message:renameError.localizedDescription];
+      return;
+    }
+    NSString *trimmed = [name stringByTrimmingCharactersInSet:
+        NSCharacterSet.whitespaceAndNewlineCharacterSet];
+    NSString *licenseDetail = updatedLicenses == 0
+        ? @"New licenses will use this name."
+        : [NSString stringWithFormat:@"%lu linked license%@ will also be updated.",
+            (unsigned long)updatedLicenses,
+            updatedLicenses == 1 ? @"" : @"s"];
+    [weakSelf showIntegrationAlert:@"Player Name Scheduled"
+                           message:[NSString stringWithFormat:
+        @"%@ will be applied the next time KartPad launches. %@ A backup will be kept automatically.",
+        trimmed, licenseDetail]];
+  }]];
+  [editor addAction:[UIAlertAction actionWithTitle:@"Cancel"
+                                             style:UIAlertActionStyleCancel
+                                           handler:nil]];
+  [controller presentViewController:editor animated:YES completion:nil];
+}
+
+- (void)showPlayerNameChoices {
+  NSError *error = nil;
+  NSArray<NSDictionary<NSString *, id> *> *records = KartPadMiiRecords(&error);
+  if (error != nil) {
+    [self showIntegrationAlert:@"Player Identity Could Not Be Read"
+                       message:error.localizedDescription];
+    return;
+  }
+  if (records.count == 1) {
+    [self showPlayerNameEditorForRecord:records.firstObject];
+    return;
+  }
+  UIViewController *controller = KartPadVisibleViewController(_window);
+  if (controller == nil) return;
+  UIAlertController *choices = [UIAlertController
+      alertControllerWithTitle:@"Choose a Mii"
+                       message:@"Choose which identity to rename. Every license linked to it will be updated."
+                preferredStyle:UIAlertControllerStyleActionSheet];
+  __weak KartPadRuntimeOverlayHost *weakSelf = self;
+  for (NSDictionary<NSString *, id> *record in records) {
+    [choices addAction:[UIAlertAction actionWithTitle:record[@"name"]
+                                                style:UIAlertActionStyleDefault
+                                              handler:^(UIAlertAction *action) {
+      (void)action;
+      dispatch_after(dispatch_time(DISPATCH_TIME_NOW,
+                                   (int64_t)(0.35 * NSEC_PER_SEC)),
+                     dispatch_get_main_queue(), ^{
+        [weakSelf showPlayerNameEditorForRecord:record];
+      });
+    }]];
+  }
+  [choices addAction:[UIAlertAction actionWithTitle:@"Cancel"
+                                              style:UIAlertActionStyleCancel
+                                            handler:nil]];
+  choices.popoverPresentationController.sourceView = _overlay;
+  choices.popoverPresentationController.sourceRect = CGRectMake(
+      CGRectGetMidX(_overlay.bounds), CGRectGetMidY(_overlay.bounds), 1.0, 1.0);
+  [controller presentViewController:choices animated:YES completion:nil];
 }
 
 - (void)showMiiRemovalChoices {
@@ -2467,11 +2554,19 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
   UIViewController *controller = KartPadVisibleViewController(_window);
   if (controller == nil) return;
   UIAlertController *manager = [UIAlertController
-      alertControllerWithTitle:@"Manage Miis (Experimental)"
+      alertControllerWithTitle:@"Player Identity"
                        message:message
                 preferredStyle:UIAlertControllerStyleActionSheet];
   __weak KartPadRuntimeOverlayHost *weakSelf = self;
-  [manager addAction:[UIAlertAction actionWithTitle:@"Import Mii…"
+  [manager addAction:[UIAlertAction actionWithTitle:@"Set Player Name…"
+                                              style:UIAlertActionStyleDefault
+                                            handler:^(UIAlertAction *action) {
+    (void)action;
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW,
+                                 (int64_t)(0.35 * NSEC_PER_SEC)),
+                   dispatch_get_main_queue(), ^{ [weakSelf showPlayerNameChoices]; });
+  }]];
+  [manager addAction:[UIAlertAction actionWithTitle:@"Import Mii Appearance…"
                                               style:UIAlertActionStyleDefault
                                             handler:^(UIAlertAction *action) {
     (void)action;
@@ -2487,7 +2582,7 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
                                  (int64_t)(0.35 * NSEC_PER_SEC)),
                    dispatch_get_main_queue(), ^{ [weakSelf showMiiRemovalChoices]; });
   }]];
-  [manager addAction:[UIAlertAction actionWithTitle:@"Create a Mii…"
+  [manager addAction:[UIAlertAction actionWithTitle:@"About Mii Appearance…"
                                               style:UIAlertActionStyleDefault
                                             handler:^(UIAlertAction *action) {
     (void)action;
