@@ -21,19 +21,31 @@ limitations when its exact artifact passes every preview gate below.
 
 ## 0.4.7 macOS first-class candidate
 
-- [ ] Build the one-command Mac workflow as dual Original / Retro Rewind
-- [ ] Validate the exact Retro Rewind folder before selecting that profile
-- [ ] Verify standard Game, Data, Controls, and Help menus in the built app
-- [ ] Verify original-game and Retro Rewind launch separately on macOS
-- [ ] Exercise keyboard gameplay input and the visible mouse/menu path
-- [ ] Verify controller mapping contracts; keep untested physical hardware
+- [x] Build the one-command Mac workflow as dual Original / Retro Rewind
+- [x] Validate the exact Retro Rewind folder before selecting that profile
+- [x] Verify standard Game, Data, Controls, and Help menus in the built app
+- [x] Verify original-game and Retro Rewind launch separately on macOS
+- [x] Exercise keyboard gameplay input and the visible mouse/menu path
+- [x] Verify controller mapping contracts; keep untested physical hardware
       claims explicit
-- [ ] Build and audit exact-source macOS 0.4.7 build 21
-- [ ] Build and audit exact-source iOS 0.4.7 build 21
-- [ ] Package each artifact twice byte-identically and audit the exact files
-- [ ] Publish `v0.4.7`, both artifacts, and `SHA256SUMS`
-- [ ] Download hosted assets, byte-compare, and re-audit them
-- [ ] Respond to and close issue #79 with the exact commands and evidence
+- [x] Build and audit exact-source macOS 0.4.7 build 21
+- [x] Build and audit exact-source iOS 0.4.7 build 21
+- [x] Package each artifact twice byte-identically and audit the exact files
+- [x] Publish `v0.4.7`, both artifacts, and `SHA256SUMS`
+- [x] Download hosted assets, byte-compare, and re-audit them
+- [x] Respond to and close issue #79 with the exact commands and evidence
+
+The annotated `v0.4.7` tag resolves to source commit
+`061e9bfe3c2e522e58087e908402dc545ae6c1a8`. The downloaded hosted artifacts
+matched their local release bytes and passed their extracted-package audits:
+
+- macOS ZIP: `37ae10bb384c776cdbd7596701363f8449c496faa6d6e551ec8d5073b05c38ab`
+- iPhone/iPad IPA: `c5750fe718e05d8f18fa986d828de5276e8e721035b33c7cb8572f6d29ad683b`
+
+The keyboard path reached the translated controller core, and the native
+controller mapping plus four-slot contracts pass. No specific physical Mac
+controller model was accepted in this release, so that hardware claim remains
+bounded to the tested contracts and community reports.
 
 ## 0.4.6 license-management hotfix candidate
 
