@@ -63,6 +63,55 @@ int main() {
         renamed.size());
     assert(std::equal(renamed.begin(), renamed.end(), storedName.begin()));
 
+    const std::size_t secondLicense = kartpad::mii::kRksysLicenseOffset +
+        kartpad::mii::kRksysLicenseSize;
+    std::copy_n("RKPD", 4, rksys.begin() + secondLicense);
+    auto secondId = createId;
+    secondId[7] ^= 0x5Au;
+    std::copy(secondId.begin(), secondId.end(),
+              rksys.begin() + secondLicense +
+                  kartpad::mii::kRksysCreateIdOffset);
+    constexpr std::array<uint8_t, 12> playerName{
+        0, 'P', 0, 'l', 0, 'a', 0, 'y', 0, 'e', 0, 'r'};
+    std::copy(playerName.begin(), playerName.end(),
+              rksys.begin() + secondLicense +
+                  kartpad::mii::kRksysMiiNameOffset);
+    kartpad::mii::UpdateRksysCrc(rksys);
+    const auto licenses = kartpad::mii::ListLicenses(rksys);
+    assert(licenses.size() == 2);
+    assert(licenses[0].slot == 0);
+    assert(licenses[0].name == "Kahris");
+    assert(licenses[1].slot == 1);
+    assert(licenses[1].name == "Player");
+    assert(licenses[1].createId == secondId);
+
+    const auto firstLicenseBeforeRename = std::vector<uint8_t>(
+        rksys.begin() + kartpad::mii::kRksysLicenseOffset,
+        rksys.begin() + kartpad::mii::kRksysLicenseOffset +
+            kartpad::mii::kRksysLicenseSize);
+    assert(kartpad::mii::RenameLicense(rksys, 1, secondId, renamed));
+    assert(kartpad::mii::ValidateRksys(rksys));
+    assert(kartpad::mii::ListLicenses(rksys)[1].name == "Kahris");
+    assert(std::equal(firstLicenseBeforeRename.begin(),
+                      firstLicenseBeforeRename.end(),
+                      rksys.begin() + kartpad::mii::kRksysLicenseOffset));
+
+    const auto beforeRejectedRename = rksys;
+    auto wrongSecondId = secondId;
+    wrongSecondId[0] ^= 1;
+    assert(!kartpad::mii::RenameLicense(
+        rksys, 1, wrongSecondId, playerName));
+    assert(rksys == beforeRejectedRename);
+
+    assert(kartpad::mii::DeleteLicense(rksys, 1, secondId));
+    assert(kartpad::mii::ValidateRksys(rksys));
+    assert(kartpad::mii::ListLicenses(rksys).size() == 1);
+    assert(std::all_of(rksys.begin() + secondLicense,
+                       rksys.begin() + secondLicense +
+                           kartpad::mii::kRksysLicenseSize,
+                       [](uint8_t byte) { return byte == 0; }));
+    assert(!kartpad::mii::DeleteLicense(rksys, 1, secondId));
+
     auto noMatch = rksys;
     auto unrelatedId = createId;
     unrelatedId[0] ^= 1;

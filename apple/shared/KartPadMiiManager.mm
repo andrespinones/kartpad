@@ -28,16 +28,22 @@ NSArray<NSDictionary<NSString *, NSString *> *> *SaveLocations() {
   NSString *support = SupportRoot();
   return @[
     @{
+      @"identifier": @"original",
+      @"title": @"Original Mario Kart Wii",
       @"path": [support stringByAppendingPathComponent:
           @"NAND/title/00010004/524d4350/data/rksys.dat"],
       @"backup": @"rksys-nand",
     },
     @{
+      @"identifier": @"retro_rewind",
+      @"title": @"Retro Rewind",
       @"path": [support stringByAppendingPathComponent:
           @"RetroRewind/riivolution/save/RetroWFC/RMCP/rksys.dat"],
       @"backup": @"rksys-retro-rewind",
     },
     @{
+      @"identifier": @"retro_rewind_separate",
+      @"title": @"Retro Rewind (Separate Save)",
       @"path": [support stringByAppendingPathComponent:
           @"RetroRewind/riivolution/save/RetroWFC2/RMCP/rksys.dat"],
       @"backup": @"rksys-retro-rewind-separate",
@@ -48,6 +54,18 @@ NSArray<NSDictionary<NSString *, NSString *> *> *SaveLocations() {
 NSString *PendingIdentityPath() {
   return [SupportRoot() stringByAppendingPathComponent:
       @"PendingPlayerIdentity.plist"];
+}
+
+NSString *PendingLicensePath() {
+  return [SupportRoot() stringByAppendingPathComponent:
+      @"PendingLicenseChange.plist"];
+}
+
+NSDictionary<NSString *, NSString *> *SaveLocation(NSString *identifier) {
+  for (NSDictionary<NSString *, NSString *> *location in SaveLocations()) {
+    if ([location[@"identifier"] isEqualToString:identifier]) return location;
+  }
+  return nil;
 }
 
 NSError *ManagerError(NSInteger code, const std::string& message) {
@@ -124,6 +142,20 @@ NSData *PlayerNameData(NSString *name, NSError **error) {
   return encoded;
 }
 
+BOOL ReadCreateId(NSData *data,
+                  std::array<uint8_t, kartpad::mii::kCreateIdByteSize>& result,
+                  NSError **error) {
+  if (data.length != result.size()) {
+    if (error != nullptr) {
+      *error = ManagerError(12, "The selected license identity is invalid.");
+    }
+    return NO;
+  }
+  std::copy_n(static_cast<const uint8_t *>(data.bytes), result.size(),
+              result.begin());
+  return YES;
+}
+
 BOOL BackupFile(NSString *source, NSString *folder, NSString *name,
                 NSString *stamp, NSError **error) {
   NSFileManager *files = NSFileManager.defaultManager;
@@ -148,13 +180,43 @@ NSArray<NSDictionary<NSString *, id> *> *KartPadMiiRecords(NSError **error) {
   for (const auto& record : kartpad::mii::ListMiis(Bytes(data))) {
     NSString *name = [NSString stringWithUTF8String:record.name.c_str()];
     NSString *creator = [NSString stringWithUTF8String:record.creatorName.c_str()];
+    const auto createIdBytes = kartpad::mii::MiiCreateId(Bytes(data), record.slot);
+    NSData *createIdData = [NSData dataWithBytes:createIdBytes.data()
+                                          length:createIdBytes.size()];
     [result addObject:@{
       @"slot": @(record.slot),
       @"name": name.length > 0 ? name : @"Unnamed Mii",
       @"creator": creator.length > 0 ? creator : @"Unknown",
       @"favoriteColor": @(record.favoriteColor),
       @"createId": @(record.createId),
+      @"createIdBytes": createIdData,
     }];
+  }
+  return result;
+}
+
+NSArray<NSDictionary<NSString *, id> *> *KartPadLicenseRecords(NSError **error) {
+  NSMutableArray<NSDictionary<NSString *, id> *> *result = [NSMutableArray array];
+  NSFileManager *files = NSFileManager.defaultManager;
+  for (NSDictionary<NSString *, NSString *> *location in SaveLocations()) {
+    NSString *path = location[@"path"];
+    if (![files fileExistsAtPath:path]) continue;
+    NSData *saveData = [NSData dataWithContentsOfFile:path
+                                              options:NSDataReadingMappedIfSafe
+                                                error:error];
+    if (saveData == nil || !ValidateSaveData(saveData, error)) return @[];
+    for (const auto& record : kartpad::mii::ListLicenses(Bytes(saveData))) {
+      NSString *name = [NSString stringWithUTF8String:record.name.c_str()];
+      NSData *createId = [NSData dataWithBytes:record.createId.data()
+                                        length:record.createId.size()];
+      [result addObject:@{
+        @"profileIdentifier": location[@"identifier"],
+        @"profileTitle": location[@"title"],
+        @"slot": @(record.slot),
+        @"name": name.length > 0 ? name : @"Unnamed",
+        @"createId": createId,
+      }];
+    }
   }
   return result;
 }
@@ -261,13 +323,131 @@ BOOL KartPadStagePlayerName(NSUInteger slot, NSString *name,
   return YES;
 }
 
+static BOOL KartPadStageLicenseChange(NSString *profileIdentifier,
+                                     NSUInteger slot, NSData *createIdData,
+                                     NSString *operation, NSString *name,
+                                     NSError **error) {
+  NSFileManager *files = NSFileManager.defaultManager;
+  if ([files fileExistsAtPath:PendingPath()] ||
+      [files fileExistsAtPath:PendingIdentityPath()] ||
+      [files fileExistsAtPath:PendingLicensePath()]) {
+    if (error != nullptr) {
+      *error = ManagerError(13,
+          "Restart KartPad to apply the pending identity change first.");
+    }
+    return NO;
+  }
+  NSDictionary<NSString *, NSString *> *location =
+      SaveLocation(profileIdentifier);
+  if (location == nil || slot >= kartpad::mii::kRksysLicenseCount) {
+    if (error != nullptr) {
+      *error = ManagerError(14, "The selected license location is invalid.");
+    }
+    return NO;
+  }
+  std::array<uint8_t, kartpad::mii::kCreateIdByteSize> createId{};
+  if (!ReadCreateId(createIdData, createId, error)) return NO;
+
+  NSData *nameData = nil;
+  if ([operation isEqualToString:@"rename"]) {
+    nameData = PlayerNameData(name, error);
+    if (nameData == nil) return NO;
+  } else if (![operation isEqualToString:@"delete"]) {
+    if (error != nullptr) {
+      *error = ManagerError(15, "The requested license change is invalid.");
+    }
+    return NO;
+  }
+
+  NSData *saveData = [NSData dataWithContentsOfFile:location[@"path"]
+                                            options:NSDataReadingMappedIfSafe
+                                              error:error];
+  if (saveData == nil || !ValidateSaveData(saveData, error)) return NO;
+  BOOL found = NO;
+  for (const auto& record : kartpad::mii::ListLicenses(Bytes(saveData))) {
+    if (record.slot == slot && record.createId == createId) {
+      found = YES;
+      break;
+    }
+  }
+  if (!found) {
+    if (error != nullptr) {
+      *error = ManagerError(16,
+          "The selected license changed. Reopen Player Identity and try again.");
+    }
+    return NO;
+  }
+
+  NSMutableDictionary *intent = [@{
+    @"operation": operation,
+    @"profileIdentifier": profileIdentifier,
+    @"slot": @(slot),
+    @"createId": createIdData,
+  } mutableCopy];
+  if (nameData != nil) intent[@"name"] = nameData;
+  NSData *intentData = [NSPropertyListSerialization
+      dataWithPropertyList:intent format:NSPropertyListBinaryFormat_v1_0
+                   options:0 error:error];
+  if (intentData == nil ||
+      ![files createDirectoryAtPath:SupportRoot()
+         withIntermediateDirectories:YES attributes:nil error:error] ||
+      ![intentData writeToFile:PendingLicensePath()
+                        options:NSDataWritingAtomic error:error]) return NO;
+
+  if (nameData != nil && [files fileExistsAtPath:DatabasePath()]) {
+    NSData *databaseData = [NSData dataWithContentsOfFile:DatabasePath()
+                                                   options:NSDataReadingMappedIfSafe
+                                                     error:error];
+    if (databaseData == nil || !ValidateData(databaseData, error)) {
+      [files removeItemAtPath:PendingLicensePath() error:nil];
+      return NO;
+    }
+    std::vector<uint8_t> database(
+        static_cast<const uint8_t *>(databaseData.bytes),
+        static_cast<const uint8_t *>(databaseData.bytes) + databaseData.length);
+    BOOL renamedMii = NO;
+    for (const auto& record : kartpad::mii::ListMiis(database)) {
+      if (kartpad::mii::MiiCreateId(database, record.slot) != createId) continue;
+      const auto renamed = kartpad::mii::RenameMii(
+          database, record.slot, Bytes(nameData));
+      if (!renamed) {
+        [files removeItemAtPath:PendingLicensePath() error:nil];
+        if (error != nullptr) *error = ManagerError(17, renamed.message);
+        return NO;
+      }
+      renamedMii = YES;
+      break;
+    }
+    if (renamedMii && !WritePending(database, error)) {
+      [files removeItemAtPath:PendingLicensePath() error:nil];
+      return NO;
+    }
+  }
+  return YES;
+}
+
+BOOL KartPadStageLicenseRename(NSString *profileIdentifier, NSUInteger slot,
+                              NSData *createId, NSString *name,
+                              NSError **error) {
+  return KartPadStageLicenseChange(profileIdentifier, slot, createId,
+                                   @"rename", name, error);
+}
+
+BOOL KartPadStageLicenseDeletion(NSString *profileIdentifier, NSUInteger slot,
+                                NSData *createId, NSError **error) {
+  return KartPadStageLicenseChange(profileIdentifier, slot, createId,
+                                   @"delete", nil, error);
+}
+
 BOOL KartPadApplyPendingMiiDatabase(NSError **error) {
   NSString *pending = PendingPath();
   NSString *pendingIdentity = PendingIdentityPath();
+  NSString *pendingLicense = PendingLicensePath();
   NSFileManager *files = NSFileManager.defaultManager;
   const BOOL hasDatabase = [files fileExistsAtPath:pending];
   const BOOL hasIdentity = [files fileExistsAtPath:pendingIdentity];
-  if (!hasDatabase && !hasIdentity) return YES;
+  const BOOL hasLicense = [files fileExistsAtPath:pendingLicense];
+  if (!hasDatabase && !hasIdentity && !hasLicense) return YES;
 
   NSData *pendingData = nil;
   if (hasDatabase) {
@@ -329,6 +509,66 @@ BOOL KartPadApplyPendingMiiDatabase(NSError **error) {
       }
     }
   }
+  if (hasLicense) {
+    NSData *intentData = [NSData dataWithContentsOfFile:pendingLicense
+                                                options:0 error:error];
+    id propertyList = intentData == nil ? nil :
+        [NSPropertyListSerialization propertyListWithData:intentData
+                                                  options:0 format:nil
+                                                    error:error];
+    NSDictionary *intent = [propertyList isKindOfClass:NSDictionary.class]
+        ? propertyList : nil;
+    NSString *operation = [intent[@"operation"] isKindOfClass:NSString.class]
+        ? intent[@"operation"] : nil;
+    NSString *profileIdentifier =
+        [intent[@"profileIdentifier"] isKindOfClass:NSString.class]
+            ? intent[@"profileIdentifier"] : nil;
+    NSNumber *slotNumber = [intent[@"slot"] isKindOfClass:NSNumber.class]
+        ? intent[@"slot"] : nil;
+    NSData *createIdData = [intent[@"createId"] isKindOfClass:NSData.class]
+        ? intent[@"createId"] : nil;
+    NSData *nameData = [intent[@"name"] isKindOfClass:NSData.class]
+        ? intent[@"name"] : nil;
+    NSDictionary<NSString *, NSString *> *location =
+        SaveLocation(profileIdentifier);
+    std::array<uint8_t, kartpad::mii::kCreateIdByteSize> createId{};
+    if (operation == nil || location == nil || slotNumber == nil ||
+        slotNumber.unsignedIntegerValue >= kartpad::mii::kRksysLicenseCount ||
+        !ReadCreateId(createIdData, createId, error) ||
+        ([operation isEqualToString:@"rename"] &&
+         (nameData.length == 0 || nameData.length > kartpad::mii::kMiiNameByteSize ||
+          (nameData.length % 2) != 0)) ||
+        (![operation isEqualToString:@"rename"] &&
+         ![operation isEqualToString:@"delete"])) {
+      if (error != nullptr && *error == nil) {
+        *error = ManagerError(18, "The pending license change is invalid.");
+      }
+      return NO;
+    }
+    NSString *path = location[@"path"];
+    NSData *saveData = [NSData dataWithContentsOfFile:path
+                                              options:NSDataReadingMappedIfSafe
+                                                error:error];
+    if (saveData == nil || !ValidateSaveData(saveData, error)) return NO;
+    std::vector<uint8_t> updatedSave(
+        static_cast<const uint8_t *>(saveData.bytes),
+        static_cast<const uint8_t *>(saveData.bytes) + saveData.length);
+    const auto result = [operation isEqualToString:@"rename"]
+        ? kartpad::mii::RenameLicense(updatedSave,
+              slotNumber.unsignedIntegerValue, createId, Bytes(nameData))
+        : kartpad::mii::DeleteLicense(updatedSave,
+              slotNumber.unsignedIntegerValue, createId);
+    if (!result) {
+      if (error != nullptr) *error = ManagerError(19, result.message);
+      return NO;
+    }
+    [saveChanges addObject:@{
+      @"path": path,
+      @"backup": location[@"backup"],
+      @"data": [NSData dataWithBytes:updatedSave.data()
+                                length:updatedSave.size()],
+    }];
+  }
 
   NSString *database = DatabasePath();
   NSString *stamp = [NSString stringWithFormat:@"%.0f-%@",
@@ -361,10 +601,13 @@ BOOL KartPadApplyPendingMiiDatabase(NSError **error) {
   if (hasDatabase && ![files removeItemAtPath:pending error:error]) return NO;
   if (hasIdentity &&
       ![files removeItemAtPath:pendingIdentity error:error]) return NO;
+  if (hasLicense &&
+      ![files removeItemAtPath:pendingLicense error:error]) return NO;
   return YES;
 }
 
 BOOL KartPadHasPendingMiiChanges(void) {
   return [NSFileManager.defaultManager fileExistsAtPath:PendingPath()] ||
-      [NSFileManager.defaultManager fileExistsAtPath:PendingIdentityPath()];
+      [NSFileManager.defaultManager fileExistsAtPath:PendingIdentityPath()] ||
+      [NSFileManager.defaultManager fileExistsAtPath:PendingLicensePath()];
 }

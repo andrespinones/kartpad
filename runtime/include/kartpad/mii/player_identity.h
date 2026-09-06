@@ -18,6 +18,12 @@ inline constexpr std::size_t kRksysLicenseCount = 4;
 inline constexpr std::size_t kRksysMiiNameOffset = 0x14;
 inline constexpr std::size_t kRksysCreateIdOffset = 0x28;
 
+struct LicenseRecord {
+    std::size_t slot = 0;
+    std::string name;
+    std::array<uint8_t, kCreateIdByteSize> createId{};
+};
+
 inline uint32_t Crc32(std::span<const uint8_t> bytes) {
     uint32_t crc = 0xFFFFFFFFu;
     for (const uint8_t byte : bytes) {
@@ -52,6 +58,90 @@ inline void UpdateRksysCrc(std::span<uint8_t> rksys) {
     WriteBigEndian32(rksys, kRksysCoreCrcOffset,
                      Crc32(std::span<const uint8_t>(
                          rksys.data(), kRksysCoreCrcOffset)));
+}
+
+inline bool IsActiveLicense(std::span<const uint8_t> rksys,
+                            std::size_t slot) {
+    if (slot >= kRksysLicenseCount) {
+        return false;
+    }
+    const std::size_t license = kRksysLicenseOffset + slot * kRksysLicenseSize;
+    return license + kRksysLicenseSize <= rksys.size() &&
+           rksys[license] == 'R' && rksys[license + 1] == 'K' &&
+           rksys[license + 2] == 'P' && rksys[license + 3] == 'D';
+}
+
+inline std::vector<LicenseRecord> ListLicenses(
+        std::span<const uint8_t> rksys) {
+    std::vector<LicenseRecord> records;
+    if (!ValidateRksys(rksys)) {
+        return records;
+    }
+    for (std::size_t slot = 0; slot < kRksysLicenseCount; ++slot) {
+        if (!IsActiveLicense(rksys, slot)) {
+            continue;
+        }
+        const std::size_t license = kRksysLicenseOffset + slot * kRksysLicenseSize;
+        LicenseRecord record;
+        record.slot = slot;
+        record.name = ReadMiiName(rksys, license + kRksysMiiNameOffset);
+        std::copy_n(rksys.begin() + license + kRksysCreateIdOffset,
+                    record.createId.size(), record.createId.begin());
+        records.push_back(record);
+    }
+    return records;
+}
+
+inline DatabaseResult RenameLicense(
+        std::span<uint8_t> rksys, std::size_t slot,
+        const std::array<uint8_t, kCreateIdByteSize>& expectedCreateId,
+        std::span<const uint8_t> utf16BigEndianName) {
+    if (const auto validation = ValidateRksys(rksys); !validation) {
+        return validation;
+    }
+    if (const auto validation =
+            ValidateUtf16BigEndianName(utf16BigEndianName); !validation) {
+        return validation;
+    }
+    if (!IsActiveLicense(rksys, slot)) {
+        return {false, "The selected license no longer exists."};
+    }
+    const std::size_t license = kRksysLicenseOffset + slot * kRksysLicenseSize;
+    const auto storedId = std::span<const uint8_t>(rksys).subspan(
+        license + kRksysCreateIdOffset, kCreateIdByteSize);
+    if (!std::equal(expectedCreateId.begin(), expectedCreateId.end(),
+                    storedId.begin())) {
+        return {false, "The selected license changed before it could be renamed."};
+    }
+    auto storedName = rksys.subspan(
+        license + kRksysMiiNameOffset, kMiiNameByteSize);
+    std::fill(storedName.begin(), storedName.end(), 0);
+    std::copy(utf16BigEndianName.begin(), utf16BigEndianName.end(),
+              storedName.begin());
+    UpdateRksysCrc(rksys);
+    return {true, {}};
+}
+
+inline DatabaseResult DeleteLicense(
+        std::span<uint8_t> rksys, std::size_t slot,
+        const std::array<uint8_t, kCreateIdByteSize>& expectedCreateId) {
+    if (const auto validation = ValidateRksys(rksys); !validation) {
+        return validation;
+    }
+    if (!IsActiveLicense(rksys, slot)) {
+        return {false, "The selected license no longer exists."};
+    }
+    const std::size_t license = kRksysLicenseOffset + slot * kRksysLicenseSize;
+    const auto storedId = std::span<const uint8_t>(rksys).subspan(
+        license + kRksysCreateIdOffset, kCreateIdByteSize);
+    if (!std::equal(expectedCreateId.begin(), expectedCreateId.end(),
+                    storedId.begin())) {
+        return {false, "The selected license changed before it could be deleted."};
+    }
+    std::fill(rksys.begin() + license,
+              rksys.begin() + license + kRksysLicenseSize, 0);
+    UpdateRksysCrc(rksys);
+    return {true, {}};
 }
 
 inline std::array<uint8_t, kCreateIdByteSize> MiiCreateId(
