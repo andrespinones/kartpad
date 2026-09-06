@@ -19,6 +19,22 @@ The exact 67-row matrix in `docs/PRD.md` remains the authority for full
 engineering completion. A community preview may ship with narrower, explicit
 limitations when its exact artifact passes every preview gate below.
 
+## 0.4.4 Retro Rewind compatibility candidate
+
+- [x] Hash and inspect the official Retro Rewind 6.12.7 full archive
+- [x] Pin the matching Retro Rewind source commit and tree
+- [x] Regenerate the complete 6.12.7 graph with zero translation failures
+- [x] Preserve strict archive, `Code.pul`, XML, and signed payload checks
+- [x] Make the version watcher open one deduplicated maintenance issue
+- [x] Add a resumable one-command latest-profile updater
+- [x] Pass full repository, source, patch, translator, and native tests
+- [x] Build and audit exact-source iOS 0.4.4 build 18 and tvOS build 7
+- [ ] Package each IPA twice byte-identically and audit exact packages
+- [ ] Publish `v0.4.4`, both IPAs, and `SHA256SUMS`
+- [ ] Download hosted assets, byte-compare, and re-audit them
+- [ ] Keep production Retro WFC and physical-device acceptance separate until
+      the exact candidate completes those gates
+
 ## 0.4.3 community maintenance candidate
 
 - [x] Review all open non-maintainer pull requests at their exact heads

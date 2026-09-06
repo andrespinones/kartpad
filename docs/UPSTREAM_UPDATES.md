@@ -24,14 +24,15 @@ forking an upstream tree into KartPad.
 
 Advance one upstream at a time on a dedicated branch.
 
-1. Run `python3 scripts/check-retro-rewind-version.py`. The read-only daily
-   GitHub Actions watcher runs the same check and fails when the official feed
-   advances beyond KartPad's pinned profile.
-2. Download the official full archive to private storage, then run
-   `python3 scripts/update-retro-rewind-profile.py PATH_TO_ARCHIVE OFFICIAL_URL`.
-   The helper
+1. Run `python3 scripts/check-retro-rewind-version.py`. The daily GitHub Actions
+   watcher runs the same check and opens one deduplicated compatibility issue
+   when the official feed advances beyond KartPad's pinned profile.
+2. Run `python3 scripts/update-retro-rewind-profile.py --latest`. The helper
+   resumes or reuses the official full archive in ignored private storage, then
    validates the official archive layout and writes the version, URL, byte
    counts, and SHA-256 values for the archive, `Code.pul`, and Riivolution XML.
+   An already-downloaded archive can still be supplied explicitly with
+   `python3 scripts/update-retro-rewind-profile.py PATH_TO_ARCHIVE OFFICIAL_URL`.
 3. Update the relevant lock entry and replace only its detached reference
    checkout. Record the new commit and tree.
 4. Validate the production payload signature and its pinned size and hash.
@@ -57,12 +58,13 @@ graph, validate the new hashes, and ship a compatible KartPad build. Never
 silently accept an unpinned `Code.pul` or asset archive merely because its
 version string is newer.
 
-This keeps normal updates mechanical: a source pin, a release-input pin, a
-small patch rebase, regenerated private outputs, and the same acceptance gates.
-It cannot eliminate the native rebuild: a changed `Code.pul` contains changed
-PowerPC program code, and KartPad's no-JIT Apple targets must translate that
-code ahead of time into a newly signed ARM64 executable. The watcher and
-profile updater make that required rebuild visible and repeatable instead of
-turning it into an unsafe runtime download.
+This keeps normal updates mechanical: automatic detection, one local update
+command, a source pin, regenerated private outputs, and the same acceptance
+gates. It cannot eliminate the native rebuild when `Code.pul` changes: that file
+contains changed PowerPC program code, and KartPad's no-JIT Apple targets must
+translate it ahead of time into a newly signed ARM64 executable. Automating a
+public release from GitHub Actions would require placing the user's private game
+input or generated retail graph in hosted CI, so KartPad deliberately automates
+detection and preparation while retaining the audited local build boundary.
 No Nintendo game data, Retro Rewind asset pack, translated retail graph, save,
 credential, or local test key belongs in Git or a public artifact.
