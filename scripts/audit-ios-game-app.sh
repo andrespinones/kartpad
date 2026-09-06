@@ -90,9 +90,11 @@ for motion_contract in \
 done
 
 for experimental_feature_contract in \
-  'Manage Miis (Experimental)' \
+  'Player Identity' \
+  'Set Player Name' \
   'dev.kartpad.manage-miis' \
   'PendingRFL_DB.dat' \
+  'PendingPlayerIdentity.plist' \
   'Experimental Wii Remote + Nunchuk' \
   'Direct Wii Remote pairing is currently available only in the macOS build.'; do
   if ! rg -a -F -q "${experimental_feature_contract}" "${binary}"; then

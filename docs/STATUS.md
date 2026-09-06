@@ -1,6 +1,6 @@
 # KartPad status
 
-Updated: 2026-09-05
+Updated: 2026-09-06
 
 ## Native Android work
 
@@ -29,7 +29,7 @@ hotfix incorporates that path correction, and the reporter accepted its exact
 public IPA for config writes, both profile launches, normal-relaunch
 persistence, and cache-root backup. The 0.4.2 release adds a generic compiler
 baseline, explicitly disables RCpc instructions, and rejects those instructions
-during final-binary audit; physical testing of the exact 0.4.3 artifact, restore,
+during final-binary audit; physical testing of the exact 0.4.4 artifact, restore,
 sleep/wake, multi-controller, and sustained performance remain open. Apple TV
 support is therefore still experimental. The release includes
 an original three-layer tvOS icon and Top Shelf image compiled into its audited
@@ -40,20 +40,23 @@ gate are in
 
 ## Current goal
 
-**0.4.3 is published as the latest stable community release.** The `v0.4.3`
+**0.4.4 is published as the latest stable community release.** The `v0.4.4`
 tag dereferences to audited source commit
-`2075cacbadbc6053e8fedf6179ab525003bac181`. Four external contributions were
-reviewed at their exact heads and accepted individually: profile-aware Retro
-Rewind dispatch, an installed-version viewport startup guard, lower-latency iOS
-audio buffering, and opt-in default-off shake tricks. Exact merged-source iOS
-0.4.3 build 17 and tvOS build 6 builds and app audits passed. Two packages per
-platform were byte-identical, and fresh hosted downloads matched and re-audited.
-The iPhone/iPad IPA SHA-256 is
-`a8cfe67b068064a9379a88b99e5e15e9fb982b0ef079aac64622e6f4efea8f4d`;
-the experimental tvOS IPA SHA-256 is
-`878f27afc6900c43e07cb3330f3fa811d0cdd074cbc2f14a7e11f99e574cff31`.
-Android work is separate and unchanged. Exact tvOS physical acceptance and
-older-device audio monitoring remain open.
+`3b857f9ae2b7933c6eb4f8f8f61a07df6b455624`. It advances the verified full
+pack and ahead-of-time native graph to Retro Rewind 6.12.7, improves the future
+version-mismatch explanation, makes the daily watcher open one deduplicated
+maintenance issue, and adds a resumable one-command profile updater. Exact
+source iOS 0.4.4 build 18 and tvOS build 7 builds and app audits passed. Two
+packages per platform were byte-identical; anonymous hosted downloads matched,
+passed their checksums, and re-audited. The iPhone/iPad executable and IPA
+SHA-256 values are respectively
+`1e251b27a05411f4e03b9d6ff468cb49a7bb111d3648534d32184e2493c089c7`
+and `5d2428abe9e4e0a7736912669c05fe8b40d3d5b34fcf85d05f3d31f336c6ed11`.
+The experimental tvOS executable and IPA SHA-256 values are respectively
+`0bd0409e4cfb14fd4850ebae96b1cd5e85e6c6476dee94b872426a78c91c6d47`
+and `b508d45fc4426190e7c25c6f57c31ec838f71f02a666feb07b06ca379a976f66`.
+Android work is separate and unchanged. Exact Retro WFC production gameplay,
+0.4.4 physical-device acceptance, and broader tvOS gates remain open.
 
 **0.4.2 is retained as the preceding stable community release.** The `v0.4.2`
 tag dereferences to audited source commit
@@ -181,13 +184,13 @@ each direction per client and consumed the complete 5,001-frame fixture. The
 test-only finish trigger is documented in `docs/ONLINE.md`; public-service,
 physical-device online, impairment, and external-client rows remain open.
 
-The exact released dual-mode build also reaches production Retro WFC NAS
-authentication. It then receives `61070` because the public GameSpy
-gameplay-login endpoint times out. Retro Rewind's official documentation lists
-the service as in testing/maintenance mode, and its status page has no live
-room data. Production online acceptance is waiting on Retro WFC recovery. That
-external outage does not block the accepted Retro Rewind installation, launch,
-or offline-gameplay support in the current KartPad build.
+The previously tested dual-mode build reached production Retro WFC NAS
+authentication but then received `61070` while the public GameSpy gameplay
+login endpoint was unavailable. On 6 September 2026, Retro WFC's health and
+room endpoints were reachable and reported active service. Production service
+recovery is therefore verified, while login, matchmaking, complete race,
+results, reconnect, and physical-device acceptance of the exact 0.4.4 artifact
+remain open.
 
 The same source produced a fresh signed KartPad `0.3.0` physical-iOS build. It
 was installed over the existing app on the attached iPad without
@@ -211,8 +214,8 @@ in place without removing KartPad's data and carries the final iPad
 multiplayer-guidance polish, which is validated in the exact iPad Simulator
 candidate. This closes physical pack installation, Retro Rewind launch, and
 initial offline-gameplay acceptance. Production Retro WFC matchmaking and
-online gameplay remain unaccepted while the external service is in maintenance,
-but they are not a blocker for this build.
+online gameplay remain unaccepted for the exact current artifact, but they are
+not a blocker for offline support.
 
 ## Goal ledger
 

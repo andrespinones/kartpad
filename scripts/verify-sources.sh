@@ -51,8 +51,8 @@ check_reference ref/upstream/WheelWizard \
   945ba734c60c492f97e2921f1284dbfd00a79132 \
   e51fe2fc48fbf67ccd64c350cc5e9a50f13fcdb2
 check_reference ref/upstream/rr-pulsar \
-  29e76d4cd051f16d53a0470d223d5c037eaa59e9 \
-  6ca96c66aa0cf99beec217744979a5a9767731b9
+  93ba8c8a486bd771c97ffc8b68fd504f47f742b5 \
+  320825ec78da1eed8f82cc1abb0335c3d806d9fe
 check_reference ref/upstream/wfc-server \
   fbd30fa41a35fe8a407e3a49bc83fe4ff91fd35b \
   a36a2ae07e9e86f8f199aa275caede19a118731f

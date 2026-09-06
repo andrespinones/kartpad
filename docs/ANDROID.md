@@ -36,7 +36,7 @@ The first serious Android preview should have this deliberately narrow scope:
 - Android 9 / API 28 minimum initially, subject to the first physical-device
   results and the pinned Dawn package's API 28 build baseline.
 - Compile and target SDK 36 for the intended 2026 distribution environment.
-- Original Mario Kart Wii and Retro Rewind 6.12.5 in the same APK, matching
+- Original Mario Kart Wii and Retro Rewind 6.12.7 in the same APK, matching
   KartPad 0.4.0's current dual-profile graph.
 - Offline play first; Retro WFC is an independent acceptance gate.
 - User-provided PAL `RMCP01` revision-0 `.iso` or `.wbfs`, plus the existing
@@ -295,7 +295,7 @@ contract, not merely reproduce the happy-path download.
 
 The selected profile currently pins:
 
-- version `6.12.5`;
+- version `6.12.7`;
 - official archive size `1,859,041,899` bytes;
 - archive SHA-256
   `d8f7c61636ef76f8a451f4071ec5bbdcfea9d5f2500cfc6c245431f04580f9d9`;
@@ -598,7 +598,7 @@ Deliver:
 - portable archive validation/install core;
 - Android manifest check, resumable/cancellable download, free-space preflight,
   staging, atomic activation, rollback, and recovery;
-- exact 6.12.5 profile selection and no accidental Original fallback;
+- exact 6.12.7 profile selection and no accidental Original fallback;
 - complete offline Retro Rewind race, results, save, relaunch, and mode switch;
   and
 - interruption tests for rotation, process death, network loss, corrupt ZIP,

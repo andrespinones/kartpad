@@ -69,10 +69,12 @@ external acceptance gates.
    install the matching official pack when needed, launch it, and reach a
    playable single-player match. When Retro WFC is available, test live online
    separately rather than treating the external outage as an install failure.
-10. **Experimental Mii import:** open Game Data & Saves → Manage Miis, import a
-    standard 74-byte `.mii`, restart, and select it through License Settings →
-    Change Mii. Confirm the expected name and appearance; then remove only the
-    imported entry and confirm the existing license remains intact.
+10. **Player identity:** open Game Data & Saves → Player Identity and rename
+    the active Mii. Restart, then confirm the original-game and Retro Rewind
+    licenses linked to that Mii show the new name while preserving their friend
+    codes and progress. Appearance import remains experimental: import a
+    standard 74-byte `.mii`, select it through License Settings → Change Mii,
+    and confirm that removing only the imported entry leaves saves intact.
 
 Direct Wii Remote/Nunchuk pairing is a separate macOS-only acceptance pass.
 Record the remote revision, macOS version, pairing result, Nunchuk inputs,

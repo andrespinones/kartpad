@@ -75,6 +75,17 @@ class IOSMenuLifecycleContractTests(unittest.TestCase):
         self.assertIn("_overlay.superview != container", runtime)
         self.assertIn("[container bringSubviewToFront:_overlay];", runtime)
 
+    def test_screenshot_reasserts_persistent_menu_button(self) -> None:
+        runtime = (REPO / "apple/ios/KartPadRuntimeOverlayHost.mm").read_text()
+        self.assertIn("UIApplicationUserDidTakeScreenshotNotification", runtime)
+        self.assertIn("- (void)userDidTakeScreenshot:", runtime)
+        handler = runtime.split("- (void)userDidTakeScreenshot:", 1)[1].split(
+            "- (void)showMotionSteering", 1
+        )[0]
+        self.assertGreaterEqual(handler.count("reattachOverlayIfNeeded"), 2)
+        self.assertIn("menuButton.hidden = NO;", runtime)
+        self.assertIn("menuButton.alpha = 1.0;", runtime)
+
 
 if __name__ == "__main__":
     unittest.main()

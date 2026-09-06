@@ -154,6 +154,20 @@ if(MKW_HOST_DARWIN)
     -Wall -Wextra -Wpedantic -Werror -fno-fast-math -ffp-contract=off)
 
   if(MKW_BUILD_MACOS)
+    add_executable(kartpad_player_identity_tests
+      runtime/tests/apple_player_identity_tests.mm
+      apple/shared/KartPadMiiManager.mm)
+    target_include_directories(kartpad_player_identity_tests PRIVATE
+      apple/shared runtime/include)
+    target_compile_features(kartpad_player_identity_tests PRIVATE cxx_std_20)
+    target_compile_definitions(kartpad_player_identity_tests PRIVATE
+      KARTPAD_MII_MANAGER_TESTING=1)
+    target_compile_options(kartpad_player_identity_tests PRIVATE -fobjc-arc -UNDEBUG)
+    find_library(IDENTITY_FOUNDATION_FRAMEWORK Foundation REQUIRED)
+    target_link_libraries(kartpad_player_identity_tests PRIVATE
+      "${IDENTITY_FOUNDATION_FRAMEWORK}")
+    add_test(NAME kartpad.mii.player-identity COMMAND kartpad_player_identity_tests)
+
     add_executable(KartPadG7Frame MACOSX_BUNDLE runtime/apps/KartPadG7Frame.mm)
     target_include_directories(KartPadG7Frame PRIVATE runtime/translation_shim)
     target_link_libraries(KartPadG7Frame PRIVATE kartpad_g7_translated)

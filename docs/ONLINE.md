@@ -18,26 +18,22 @@ compatibility is currently claimed. This loop uses the pinned authorized local
 server first and never commits credentials, payloads, private keys, captures,
 game data, translated code, or saves.
 
-## Production Retro WFC service boundary on 1 September 2026
+## Production Retro WFC service boundary on 6 September 2026
 
-Production online acceptance is waiting on Retro WFC service recovery. This is
-an external-service limitation, not a blocker for KartPad's accepted Retro
-Rewind installation, launch, or offline gameplay. The official Retro Rewind
-documentation says Retro WFC is in testing/maintenance mode after sustained
-DDoS and cyber attacks, and the official status page currently shows no live
-room data.
+Retro WFC's public health endpoint and room feed are reachable again and report
+active service. This clears the external outage that previously prevented a
+production retest; it does not itself establish KartPad compatibility.
 
-The exact released KartPad 0.3.0 build reaches the production Retro WFC flow,
+During the earlier outage, the exact released KartPad 0.3.0 build reached the
 receives a successful NAS authentication response, and advances to GameSpy
-profile login. The public gameplay-login endpoint then does not accept a TCP
-connection, and the game reports `61070`. The same endpoint also times out from
-the macOS host. This is the furthest currently available production gate; it is
-not evidence of production matchmaking or race acceptance.
+profile login. The public gameplay-login endpoint then did not accept a TCP
+connection, and the game reported `61070`. The same endpoint timed out from the
+macOS host. That historical result is not evidence for the recovered service or
+the 0.4.4 candidate.
 
-Retest NAS authentication, GameSpy login, matchmaking, room entry, a complete
-race, results, and reconnect when both the
-[official service notice](https://mkwiiki.org/wiki/Retro_Rewind) and
-[Retro WFC status page](https://status.rwfc.net/) show recovery.
+The exact 0.4.4 candidate must now retest NAS authentication, GameSpy login,
+matchmaking, room entry, a complete race, results, and reconnect before making
+a production-online claim. Physical-device acceptance remains separate.
 
 The released `0.3.0` dual-mode build has also been signed locally, installed
 over the existing KartPad app on a physical iPad without uninstalling it, and
@@ -47,9 +43,8 @@ crash, launched Retro Rewind, and reached a playable single-player match. Build
 8 was then installed in place without removing KartPad's data and carries the
 final iPad multiplayer-guidance polish, validated in the exact iPad Simulator
 candidate. This closes the physical pack-install, launch, and initial
-offline-gameplay gates. The production connection sequence above remains the
-authoritative online boundary until Retro WFC recovers, but it does not hold
-this build open.
+offline-gameplay gates for the tested version only. It is not relabeled as
+6.12.7 or 0.4.4 acceptance.
 
 Retro Rewind online compatibility is version-locked. KartPad reads the official
 `RetroRewindVersion.txt` feed before starting that mode. When the official
@@ -122,7 +117,7 @@ client, compare encoded state/timing/error mapping/cleanup, record sanitized
 evidence, and continue. Two identical failures require a changed hypothesis or
 instrumentation before a third attempt.
 
-## Baseline on 1 September 2026
+## Baseline updated 6 September 2026
 
 - Base translation: 29,065 shared base functions.
 - The private online graph and isolated WFC payload build and run locally.
@@ -130,6 +125,6 @@ instrumentation before a third attempt.
   cleanup pass on macOS and iPad Simulator.
 - Local login, matchmaking, room, voting, race, results, ratings, and lobby
   return pass end to end.
-- External service, impairment, reconnect, physical-device online, and
-  cross-client interoperability rows remain open. Production Retro WFC testing
-  is specifically waiting on the documented service outage to end.
+- The external service is reachable again. Production compatibility,
+  impairment, reconnect, physical-device online, and cross-client
+  interoperability rows remain open until the exact 0.4.4 candidate is run.

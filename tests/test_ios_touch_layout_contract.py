@@ -11,11 +11,14 @@ class IOSTouchLayoutContractTests(unittest.TestCase):
     def setUpClass(cls) -> None:
         cls.source = RUNTIME.read_text()
 
-    def test_captured_layout_is_seeded_only_for_untouched_iphones(self) -> None:
+    def test_captured_phone_layout_and_tablet_layout_seed_only_when_untouched(self) -> None:
         seed = self.source.split(
-            "void KartPadSeedPhoneTouchLayoutDefaults(BOOL force) {", 1
+            "void KartPadSeedTouchLayoutDefaults(BOOL force) {", 1
         )[1].split("NSSet<NSString *> *KartPadHiddenTouchControls()", 1)[0]
-        self.assertIn("UIUserInterfaceIdiomPhone", seed)
+        self.assertIn("UIUserInterfaceIdiomPad", seed)
+        self.assertIn('@"Start": NSStringFromCGPoint(CGPointMake(0.94, 0.50))', seed)
+        self.assertIn('@"L": NSStringFromCGPoint(CGPointMake(0.93, 0.60))', seed)
+        self.assertIn('@"move": NSStringFromCGPoint(CGPointMake(0.13, 0.83))', seed)
         self.assertIn('dictionaryForKey:@"SunPadControlOrigins"] == nil', seed)
         self.assertIn("0.93580568318565682", seed)
         self.assertIn("0.8208055524263117", seed)
@@ -26,12 +29,10 @@ class IOSTouchLayoutContractTests(unittest.TestCase):
         self.assertIn("0.7827200293540955", seed)
         self.assertIn("0.6000000238418579", seed)
 
-    def test_existing_custom_layouts_and_ipad_defaults_are_preserved(self) -> None:
-        self.assertIn("KartPadSeedPhoneTouchLayoutDefaults(NO);", self.source)
-        self.assertIn(
-            "UIDevice.currentDevice.userInterfaceIdiom != UIUserInterfaceIdiomPhone",
-            self.source,
-        )
+    def test_existing_custom_layouts_and_visibility_are_preserved(self) -> None:
+        self.assertIn("KartPadSeedTouchLayoutDefaults(NO);", self.source)
+        self.assertIn('if (force || [defaults objectForKey:kKartPadHiddenTouchControlsKey] == nil)', self.source)
+        self.assertIn('setObject:@[@"ExperimentalDPad"]', self.source)
         self.assertIn(
             'if (force || [defaults dictionaryForKey:@"SunPadControlOrigins"] == nil)',
             self.source,
@@ -59,7 +60,7 @@ class IOSTouchLayoutContractTests(unittest.TestCase):
         )[0]
         self.assertIn("[super resetLayout];", reset)
         self.assertIn("removeObjectForKey:kKartPadHiddenTouchControlsKey", reset)
-        self.assertIn("KartPadSeedPhoneTouchLayoutDefaults(YES);", reset)
+        self.assertIn("KartPadSeedTouchLayoutDefaults(YES);", reset)
 
 
 if __name__ == "__main__":

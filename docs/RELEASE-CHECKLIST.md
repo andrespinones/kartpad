@@ -19,6 +19,108 @@ The exact 67-row matrix in `docs/PRD.md` remains the authority for full
 engineering completion. A community preview may ship with narrower, explicit
 limitations when its exact artifact passes every preview gate below.
 
+## 0.4.7 macOS first-class candidate
+
+- [x] Build the one-command Mac workflow as dual Original / Retro Rewind
+- [x] Validate the exact Retro Rewind folder before selecting that profile
+- [x] Verify standard Game, Data, Controls, and Help menus in the built app
+- [x] Verify original-game and Retro Rewind launch separately on macOS
+- [x] Exercise keyboard gameplay input and the visible mouse/menu path
+- [x] Verify controller mapping contracts; keep untested physical hardware
+      claims explicit
+- [x] Build and audit exact-source macOS 0.4.7 build 21
+- [x] Build and audit exact-source iOS 0.4.7 build 21
+- [x] Package each artifact twice byte-identically and audit the exact files
+- [x] Publish `v0.4.7`, both artifacts, and `SHA256SUMS`
+- [x] Download hosted assets, byte-compare, and re-audit them
+- [x] Respond to and close issue #79 with the exact commands and evidence
+
+The annotated `v0.4.7` tag resolves to source commit
+`061e9bfe3c2e522e58087e908402dc545ae6c1a8`. The downloaded hosted artifacts
+matched their local release bytes and passed their extracted-package audits:
+
+- macOS ZIP: `37ae10bb384c776cdbd7596701363f8449c496faa6d6e551ec8d5073b05c38ab`
+- iPhone/iPad IPA: `c5750fe718e05d8f18fa986d828de5276e8e721035b33c7cb8572f6d29ad683b`
+
+The keyboard path reached the translated controller core, and the native
+controller mapping plus four-slot contracts pass. No specific physical Mac
+controller model was accepted in this release, so that hardware claim remains
+bounded to the tested contracts and community reports.
+
+## 0.4.6 license-management hotfix candidate
+
+- [x] Enumerate active Original and Retro Rewind licenses by profile and slot
+- [x] Rename one exact license without changing its creation ID or other data
+- [x] Delete only one guarded license block after an explicit second warning
+- [x] Revalidate the live save, back it up, write atomically, and repair CRC-32
+- [x] Prevent Mii-appearance removal while a license still references that Mii
+- [x] Reassert the persistent three-dot button after an iPadOS screenshot
+- [x] Build and audit exact-source iOS 0.4.6 build 20
+- [x] Install in place on iPad and preserve its existing data
+- [ ] Exercise license rename/delete staging UI without deleting live data
+- [x] Package twice byte-identically and audit the exact unsigned IPA
+- [x] Publish `v0.4.6`, `KartPad-v0.4.6-ios-unsigned.ipa`, and `SHA256SUMS`
+- [x] Download hosted assets, byte-compare, and re-audit them
+
+Published source: `c3ce6fd4fcbc93a1606093af3859c91c1e109c9e`.
+iPhone/iPad executable SHA-256:
+`a61686b65d6b666b2fee3a3acbee7034a171e712f4596ce0213dbdc830f5ecb6`.
+iPhone/iPad IPA SHA-256:
+`8c62ff341c8acae085127998e39411238ef93a3297d81687237d96c0c406289e`.
+The in-place iPad installation retained the existing WBFS and byte-identical
+console identity, Mii database, original save, Retro Rewind save, and
+preferences. The same files remained intact after the first 0.4.6 launch.
+
+## 0.4.5 player-identity hotfix candidate
+
+- [x] Reproduce the fixed-name gap on physical iPad Retro Rewind 6.12.7
+- [x] Tie renames to the full eight-byte Mii creation ID
+- [x] Update matching license names without changing account or progress fields
+- [x] Validate Mii database CRC-16 and RKSYS CRC-32 after mutation
+- [x] Stage only the rename intent so later gameplay cannot be overwritten
+- [x] Back up the Mii database and every modified live save before replacement
+- [x] Build and audit exact-source iOS 0.4.5 build 19
+- [x] Install in place and verify the existing iPad Mii and linked license
+      record contain `Kahris`, with backups created before replacement
+- [x] Install in place on iPhone and byte-compare its configuration, identity,
+      Mii database, original save, Retro Rewind save, and preferences before
+      and after installation
+- [x] Package twice byte-identically and audit the exact unsigned IPA
+- [x] Publish `v0.4.5`, `KartPad-v0.4.5-ios-unsigned.ipa`, and `SHA256SUMS`
+- [x] Download hosted assets, byte-compare, and re-audit them
+
+Published source: `f1cfe0495bf9159b4d4c8d02663003a97b62d7ad`.
+iPhone/iPad executable SHA-256:
+`764d402d6fa91ecec4a6067e819e0c5f2d2fed235ba2a67849484188b3d3f2ff`.
+iPhone/iPad IPA SHA-256:
+`c79a19db4d8fdbf64aa7927f13c90c97a18e43ec4898f5b22120ef35a98002ff`.
+
+## 0.4.4 Retro Rewind compatibility candidate
+
+- [x] Hash and inspect the official Retro Rewind 6.12.7 full archive
+- [x] Pin the matching Retro Rewind source commit and tree
+- [x] Regenerate the complete 6.12.7 graph with zero translation failures
+- [x] Preserve strict archive, `Code.pul`, XML, and signed payload checks
+- [x] Make the version watcher open one deduplicated maintenance issue
+- [x] Add a resumable one-command latest-profile updater
+- [x] Pass full repository, source, patch, translator, and native tests
+- [x] Build and audit exact-source iOS 0.4.4 build 18 and tvOS build 7
+- [x] Package each IPA twice byte-identically and audit exact packages
+- [x] Publish `v0.4.4`, both IPAs, and `SHA256SUMS`
+- [x] Download hosted assets, byte-compare, and re-audit them
+- [ ] Keep production Retro WFC and physical-device acceptance separate until
+      the exact candidate completes those gates
+
+Published source: `3b857f9ae2b7933c6eb4f8f8f61a07df6b455624`.
+iPhone/iPad executable SHA-256:
+`1e251b27a05411f4e03b9d6ff468cb49a7bb111d3648534d32184e2493c089c7`.
+iPhone/iPad IPA SHA-256:
+`5d2428abe9e4e0a7736912669c05fe8b40d3d5b34fcf85d05f3d31f336c6ed11`.
+tvOS executable SHA-256:
+`0bd0409e4cfb14fd4850ebae96b1cd5e85e6c6476dee94b872426a78c91c6d47`.
+tvOS IPA SHA-256:
+`b508d45fc4426190e7c25c6f57c31ec838f71f02a666feb07b06ca379a976f66`.
+
 ## 0.4.3 community maintenance candidate
 
 - [x] Review all open non-maintainer pull requests at their exact heads
