@@ -63,8 +63,18 @@ tvOS remains experimental pending exact-artifact physical acceptance.
 - [x] Add automatic issue creation and the one-command profile updater.
 - [x] Pass full repository, source, patch, translator, and native tests.
 - [x] Build and audit exact-source iOS 0.4.4 build 18 and tvOS build 7.
-- [ ] Package each IPA twice byte-identically and audit exact packages.
-- [ ] Publish `v0.4.4`, both IPAs, and `SHA256SUMS`.
-- [ ] Download hosted assets, compare bytes, and re-audit them.
+- [x] Package each IPA twice byte-identically and audit exact packages.
+- [x] Publish `v0.4.4`, both IPAs, and `SHA256SUMS`.
+- [x] Download hosted assets, compare bytes, and re-audit them.
 - [ ] Receive physical acceptance before broadening device or production-online
       claims.
+
+Published source: `3b857f9ae2b7933c6eb4f8f8f61a07df6b455624`.
+iPhone/iPad executable SHA-256:
+`1e251b27a05411f4e03b9d6ff468cb49a7bb111d3648534d32184e2493c089c7`.
+iPhone/iPad IPA SHA-256:
+`5d2428abe9e4e0a7736912669c05fe8b40d3d5b34fcf85d05f3d31f336c6ed11`.
+Experimental tvOS executable SHA-256:
+`0bd0409e4cfb14fd4850ebae96b1cd5e85e6c6476dee94b872426a78c91c6d47`.
+Experimental tvOS IPA SHA-256:
+`b508d45fc4426190e7c25c6f57c31ec838f71f02a666feb07b06ca379a976f66`.
