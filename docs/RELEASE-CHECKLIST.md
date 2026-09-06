@@ -27,11 +27,21 @@ limitations when its exact artifact passes every preview gate below.
 - [x] Validate Mii database CRC-16 and RKSYS CRC-32 after mutation
 - [x] Stage only the rename intent so later gameplay cannot be overwritten
 - [x] Back up the Mii database and every modified live save before replacement
-- [ ] Build and audit exact-source iOS 0.4.5 build 19
-- [ ] Install in place and verify the existing iPad license displays `Kahris`
-- [ ] Package twice byte-identically and audit the exact unsigned IPA
-- [ ] Publish `v0.4.5`, `KartPad-v0.4.5-ios-unsigned.ipa`, and `SHA256SUMS`
-- [ ] Download hosted assets, byte-compare, and re-audit them
+- [x] Build and audit exact-source iOS 0.4.5 build 19
+- [x] Install in place and verify the existing iPad Mii and linked license
+      record contain `Kahris`, with backups created before replacement
+- [x] Install in place on iPhone and byte-compare its configuration, identity,
+      Mii database, original save, Retro Rewind save, and preferences before
+      and after installation
+- [x] Package twice byte-identically and audit the exact unsigned IPA
+- [x] Publish `v0.4.5`, `KartPad-v0.4.5-ios-unsigned.ipa`, and `SHA256SUMS`
+- [x] Download hosted assets, byte-compare, and re-audit them
+
+Published source: `f1cfe0495bf9159b4d4c8d02663003a97b62d7ad`.
+iPhone/iPad executable SHA-256:
+`764d402d6fa91ecec4a6067e819e0c5f2d2fed235ba2a67849484188b3d3f2ff`.
+iPhone/iPad IPA SHA-256:
+`c79a19db4d8fdbf64aa7927f13c90c97a18e43ec4898f5b22120ef35a98002ff`.
 
 ## 0.4.4 Retro Rewind compatibility candidate
 
