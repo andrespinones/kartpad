@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import argparse
 import json
 import urllib.request
 from pathlib import Path
@@ -19,16 +20,27 @@ def version_key(version: str) -> tuple[int, ...]:
     return tuple(int(part) for part in parts)
 
 
-def latest_version(text: str) -> str:
-    versions = [line.split()[0] for line in text.splitlines() if line.strip()]
-    if not versions:
+def latest_release(text: str) -> tuple[str, str]:
+    releases: list[tuple[str, str]] = []
+    for line in text.splitlines():
+        fields = line.split()
+        if not fields:
+            continue
+        version_key(fields[0])
+        if len(fields) < 2 or not fields[1].startswith(
+            "https://cdn.update.rwfc.net/RetroRewind/zip/"
+        ):
+            raise ValueError("official Retro Rewind feed contains an invalid archive URL")
+        releases.append((fields[0], fields[1]))
+    if not releases:
         raise ValueError("official Retro Rewind feed is empty")
-    for version in versions:
-        version_key(version)
-    return max(versions, key=version_key)
+    return max(releases, key=lambda release: version_key(release[0]))
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--json", action="store_true", help="emit machine-readable status")
+    args = parser.parse_args()
     profile = json.loads(PROFILE.read_text())
     config = profile["retroRewind"]
     request = urllib.request.Request(
@@ -36,14 +48,19 @@ def main() -> int:
         headers={"User-Agent": "KartPad-Retro-Rewind-Version-Watch/1"},
     )
     with urllib.request.urlopen(request, timeout=30) as response:
-        current = latest_version(response.read().decode("utf-8"))
+        current, update_url = latest_release(response.read().decode("utf-8"))
     pinned = config["version"]
-    print(f"KartPad pins Retro Rewind {pinned}; official feed reports {current}")
-    if version_key(current) > version_key(pinned):
-        raise SystemExit(
-            f"Retro Rewind {current} requires a KartPad profile and native graph update"
-        )
-    return 0
+    update_required = version_key(current) > version_key(pinned)
+    if args.json:
+        print(json.dumps({
+            "pinned": pinned,
+            "current": current,
+            "updateUrl": update_url,
+            "updateRequired": update_required,
+        }, separators=(",", ":")))
+    else:
+        print(f"KartPad pins Retro Rewind {pinned}; official feed reports {current}")
+    return 2 if update_required else 0
 
 
 if __name__ == "__main__":

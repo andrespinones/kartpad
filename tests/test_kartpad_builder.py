@@ -105,6 +105,27 @@ class ProfileTests(unittest.TestCase):
             source,
         )
 
+    def test_version_watch_opens_one_actionable_issue(self) -> None:
+        workflow = (REPO / ".github/workflows/retro-rewind-version-watch.yml").read_text()
+        checker = (REPO / "scripts/check-retro-rewind-version.py").read_text()
+        updater = (REPO / "scripts/update-retro-rewind-profile.py").read_text()
+        self.assertIn("issues: write", workflow)
+        self.assertIn("gh issue create", workflow)
+        self.assertIn("update_required", workflow)
+        self.assertIn('parser.add_argument("--json"', checker)
+        self.assertIn("return 2 if update_required else 0", checker)
+        self.assertIn('"--latest"', updater)
+        self.assertIn("-full.zip", updater)
+
+    def test_newer_retro_rewind_message_explains_the_aot_boundary(self) -> None:
+        source = (REPO / "apple/ios/KartPadRuntimeOverlayHost.mm").read_text()
+        method = source.split(
+            "- (void)showKartPadUpdateRequiredForRetroVersion:", 1
+        )[1].split("- (void)checkRetroRewindVersionAndContinue", 1)[0]
+        self.assertIn("translate ahead of time", method)
+        self.assertIn("Original Mario Kart Wii remains available", method)
+        self.assertIn('actionWithTitle:@"View KartPad Releases"', method)
+
     def test_dual_mode_chooser_keeps_a_width_on_wide_ipads(self) -> None:
         source = (REPO / "apple/ios/KartPadRuntimeOverlayHost.mm").read_text()
         self.assertIn("self.contentWidthConstraint.constant", source)

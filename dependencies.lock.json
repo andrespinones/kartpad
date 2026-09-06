@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-08-28",
+  "generatedAt": "2026-09-06",
   "dependencies": [
     {
       "name": "WiiCompiled",
@@ -34,8 +34,8 @@
     {
       "name": "Retro Rewind Pulsar",
       "repository": "https://github.com/Retro-Rewind-Team/rr-pulsar.git",
-      "commit": "29e76d4cd051f16d53a0470d223d5c037eaa59e9",
-      "tree": "6ca96c66aa0cf99beec217744979a5a9767731b9",
+      "commit": "93ba8c8a486bd771c97ffc8b68fd504f47f742b5",
+      "tree": "320825ec78da1eed8f82cc1abb0335c3d806d9fe",
       "path": "ref/upstream/rr-pulsar",
       "license": "GPL-3.0 with documented MIT-origin components",
       "role": "Retro Rewind product/profile and online client reference",

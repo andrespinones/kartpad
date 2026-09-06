@@ -1,12 +1,12 @@
 # Install the experimental KartPad Apple TV build
 
-KartPad `v0.4.3` includes an unsigned ARM64 tvOS IPA for hardware bring-up. It
+KartPad `v0.4.4` includes an unsigned ARM64 tvOS IPA for hardware bring-up. It
 carries forward the cache-root storage correction and adds a generic compiler
 baseline with RCpc instructions disabled and audited out of the final binary.
 Treat it as an experimental build, not supported Apple TV functionality.
 
-1. Download `KartPad-v0.4.3-tvos-unsigned.ipa` and `SHA256SUMS` from
-   the [0.4.3 release](https://github.com/chrissotraidis/kartpad/releases/tag/v0.4.3)
+1. Download `KartPad-v0.4.4-tvos-unsigned.ipa` and `SHA256SUMS` from
+   the [0.4.4 release](https://github.com/chrissotraidis/kartpad/releases/tag/v0.4.4)
    and verify the checksum.
 2. Re-sign the IPA with your own Apple development identity and bundle
    identifier, then install it on a paired Apple TV through Xcode or a

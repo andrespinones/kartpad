@@ -854,13 +854,13 @@ NSError *KartPadPerformGameDataImport(NSURL *url,
 
 - (void)showKartPadUpdateRequiredForRetroVersion:(NSString *)latest {
   NSString *message = [NSString stringWithFormat:
-      @"Retro Rewind %@ is current, but this KartPad build supports %@. KartPad precompiles Retro Rewind's code, so update KartPad before installing the newer pack or playing online.",
+      @"Retro Rewind %@ was released after this KartPad build, which supports %@. Retro Rewind changed executable code that KartPad must translate ahead of time, so a matching KartPad release is required before installing the new pack or playing online. Original Mario Kart Wii remains available.",
       latest, KartPadRetroRewindInstaller.requiredVersion];
   UIAlertController *alert = [UIAlertController
-      alertControllerWithTitle:@"KartPad Update Required"
+      alertControllerWithTitle:@"Retro Rewind Update Needed"
                        message:message
                 preferredStyle:UIAlertControllerStyleAlert];
-  [alert addAction:[UIAlertAction actionWithTitle:@"Check KartPad Releases"
+  [alert addAction:[UIAlertAction actionWithTitle:@"View KartPad Releases"
                                              style:UIAlertActionStyleDefault
                                            handler:^(UIAlertAction *action) {
     (void)action;

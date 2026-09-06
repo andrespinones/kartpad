@@ -103,7 +103,7 @@ The Android UI must preserve the accepted KartPad behavior:
   state, light haptic confirmation, and tap-to-unlock;
 - the accepted compact defaults for untouched phones, while preserving
   existing customized layouts and using the existing tablet defaults;
-- first-run import, Retro Rewind 6.12.5 install/version handling, Mii
+- first-run import, Retro Rewind 6.12.7 install/version handling, Mii
   management, save-preserving data removal, and bounded diagnostics.
 
 Where Android system UI differs, preserve the product action and outcome while
@@ -149,7 +149,7 @@ pause/resume, surface recreation, audible SDL output, and one controller all
 succeed. Without physical hardware, record the emulator result and keep A2
 open.
 
-### A3 — Retro Rewind 6.12.5 offline proof
+### A3 — Retro Rewind 6.12.7 offline proof
 
 Use the current repository profile as the only version/hash authority. Port or
 extract the bounded archive validation, download, free-space preflight,

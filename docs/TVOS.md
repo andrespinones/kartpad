@@ -10,10 +10,10 @@ Application Support. The `v0.4.1` hotfix moves all filesystem-backed tvOS state
 to Caches, matching the successful physical workaround. The reporter then
 accepted the exact public `v0.4.1` IPA on the same hardware: error 513 was gone,
 both modes launched, save/config changes survived a normal relaunch, and the
-backup script succeeded. The 0.4.3 release also uses a generic compiler
+backup script succeeded. The 0.4.4 release also uses a generic compiler
 baseline, disables RCpc instructions, and rejects them during final-binary
 audit. Until the remaining physical acceptance matrix passes on the exact
-0.4.3 artifact, the correct
+0.4.4 artifact, the correct
 claim is **public experimental tvOS build**, not supported Apple TV
 functionality.
 
@@ -25,7 +25,7 @@ maintainer-owned.
 ## First candidate scope
 
 - Apple TV hardware running tvOS 17 or later.
-- Original Mario Kart Wii and Retro Rewind 6.12.5 through the existing
+- Original Mario Kart Wii and Retro Rewind 6.12.7 through the existing
   `KartPadDual` ahead-of-time translated product.
 - Offline play first. Retro WFC remains a separate network-acceptance gate.
 - One to four Extended Gamepad controllers. The Siri Remote can operate native
@@ -181,7 +181,7 @@ IPA in place. Config writes produced no error 513, Original and Retro Rewind
 both launched, NAND/save and settings changes survived normal termination and
 relaunch, and `backup-tvos-state.sh` captured the cache-root state. This closes
 the storage defect in Issue #17. Sleep/wake, forced termination, restore,
-multi-controller, purge recovery, sustained performance, and the exact 0.4.3
+multi-controller, purge recovery, sustained performance, and the exact 0.4.4
 artifact remain open. This is still a hardware bring-up build, not a supported
 release. The acceptance record is in
 [`docs/artifacts/2026-09-04/tvos-v0.4.1-storage-acceptance.md`](artifacts/2026-09-04/tvos-v0.4.1-storage-acceptance.md).

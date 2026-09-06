@@ -111,7 +111,7 @@ class TvOSContractTests(unittest.TestCase):
         profile = json.loads(
             (ROOT / "builder/profiles/mkwii-rmcp01-rev0.json").read_text()
         )
-        self.assertEqual(profile["retroRewind"]["version"], "6.12.5")
+        self.assertEqual(profile["retroRewind"]["version"], "6.12.7")
         host = (ROOT / "apple/tvos/KartPadTVRuntimeHost.mm").read_text()
         self.assertIn("installArchiveAtURL", host)
         self.assertIn("officialArchiveURL", host)
@@ -174,19 +174,19 @@ class TvOSContractTests(unittest.TestCase):
         ).read_text()
         tvos_audit = (ROOT / "scripts/audit-public-unsigned-tvos-ipa.py").read_text()
         for script in (ios_package, ios_audit):
-            self.assertIn('RELEASE_TAG = "v0.4.3"', script)
-            self.assertIn('APP_VERSION = "0.4.3"', script)
+            self.assertIn('RELEASE_TAG = "v0.4.4"', script)
+            self.assertIn('APP_VERSION = "0.4.4"', script)
         for script in (tvos_package, tvos_audit):
-            self.assertIn('RELEASE_TAG = "v0.4.3"', script)
-            self.assertIn('APP_VERSION = "0.4.3"', script)
-        self.assertIn('APP_BUILD = "17"', ios_package)
-        self.assertIn('APP_BUILD = "17"', ios_audit)
-        self.assertIn('APP_BUILD = "6"', tvos_package)
-        self.assertIn('APP_BUILD = "6"', tvos_audit)
+            self.assertIn('RELEASE_TAG = "v0.4.4"', script)
+            self.assertIn('APP_VERSION = "0.4.4"', script)
+        self.assertIn('APP_BUILD = "18"', ios_package)
+        self.assertIn('APP_BUILD = "18"', ios_audit)
+        self.assertIn('APP_BUILD = "7"', tvos_package)
+        self.assertIn('APP_BUILD = "7"', tvos_audit)
         self.assertIn('"physicalAppleTVAcceptance": False', tvos_package)
         self.assertIn('"physicalAppleTVAcceptance": False', tvos_audit)
         self.assertTrue((ROOT / "docs/INSTALL_TVOS.md").is_file())
-        self.assertTrue((ROOT / "docs/releases/v0.4.3.md").is_file())
+        self.assertTrue((ROOT / "docs/releases/v0.4.4.md").is_file())
 
 
 if __name__ == "__main__":
