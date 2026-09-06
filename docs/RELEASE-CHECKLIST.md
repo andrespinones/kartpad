@@ -19,6 +19,22 @@ The exact 67-row matrix in `docs/PRD.md` remains the authority for full
 engineering completion. A community preview may ship with narrower, explicit
 limitations when its exact artifact passes every preview gate below.
 
+## 0.4.7 macOS first-class candidate
+
+- [ ] Build the one-command Mac workflow as dual Original / Retro Rewind
+- [ ] Validate the exact Retro Rewind folder before selecting that profile
+- [ ] Verify standard Game, Data, Controls, and Help menus in the built app
+- [ ] Verify original-game and Retro Rewind launch separately on macOS
+- [ ] Exercise keyboard gameplay input and the visible mouse/menu path
+- [ ] Verify controller mapping contracts; keep untested physical hardware
+      claims explicit
+- [ ] Build and audit exact-source macOS 0.4.7 build 21
+- [ ] Build and audit exact-source iOS 0.4.7 build 21
+- [ ] Package each artifact twice byte-identically and audit the exact files
+- [ ] Publish `v0.4.7`, both artifacts, and `SHA256SUMS`
+- [ ] Download hosted assets, byte-compare, and re-audit them
+- [ ] Respond to and close issue #79 with the exact commands and evidence
+
 ## 0.4.6 license-management hotfix candidate
 
 - [x] Enumerate active Original and Retro Rewind licenses by profile and slot

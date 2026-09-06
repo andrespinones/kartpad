@@ -47,6 +47,9 @@ cp -R "${runtime_ref}" "${runtime_source}"
 # mutates the immutable pinned reference checkout.
 cp -R "${repo_root}/ref/upstream/Wiicompiled/aurora-main" \
   "${runtime_source}/aurora-main"
+PYTHONPATH="${repo_root}/builder" python3 -m kartpad_builder.release_header \
+  "${repo_root}/builder/profiles/mkwii-rmcp01-rev0.json" \
+  "${runtime_source}/third_party/kartpad-profile/kartpad_retro_rewind_release.h"
 patch --batch -p1 -d "${runtime_source}/aurora-main" < \
   "${repo_root}/patches/aurora-present-telemetry.patch"
 patch --batch -p1 -d "${runtime_source}/aurora-main" < \

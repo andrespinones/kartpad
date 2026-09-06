@@ -74,8 +74,8 @@ plutil -insert CFBundleIdentifier -string dev.kartpad.app "${plist}"
 plutil -insert CFBundleInfoDictionaryVersion -string 6.0 "${plist}"
 plutil -insert CFBundleName -string KartPad "${plist}"
 plutil -insert CFBundlePackageType -string APPL "${plist}"
-plutil -insert CFBundleShortVersionString -string "${KARTPAD_VERSION:-0.2.0}" "${plist}"
-plutil -insert CFBundleVersion -string "${KARTPAD_BUILD_NUMBER:-3}" "${plist}"
+plutil -insert CFBundleShortVersionString -string "${KARTPAD_VERSION:-0.4.7}" "${plist}"
+plutil -insert CFBundleVersion -string "${KARTPAD_BUILD_NUMBER:-21}" "${plist}"
 plutil -insert LSApplicationCategoryType -string public.app-category.games "${plist}"
 plutil -insert LSMinimumSystemVersion -string 14.0 "${plist}"
 plutil -insert NSHighResolutionCapable -bool true "${plist}"
@@ -160,7 +160,7 @@ unsigned_runtime_hash="$(shasum -a 256 "${macos}/KartPad" | awk '{print $1}')"
 source_commit="$(git -C "${repo_root}" rev-parse HEAD)"
 fingerprint="${macos}/build-fingerprint.json"
 printf '{\n  "SetupVersion": "%s",\n  "SourceCommit": "%s",\n  "UnsignedRuntimeSHA256": "%s"\n}\n' \
-  "${KARTPAD_VERSION:-0.2.0}" "${source_commit}" "${unsigned_runtime_hash}" > "${fingerprint}"
+  "${KARTPAD_VERSION:-0.4.7}" "${source_commit}" "${unsigned_runtime_hash}" > "${fingerprint}"
 
 if find "${staged_app}" \( -name portable.txt -o -name UserData -o -name Config.toml \) -print -quit | rg -q .; then
   echo "package contains writable or developer-only runtime state" >&2
