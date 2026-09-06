@@ -69,6 +69,10 @@ class ExperimentalJoyCon2ContractTests(unittest.TestCase):
         # An active rumble is refreshed on a timer and ends with an explicit stop.
         self.assertIn("kRumbleRefreshInterval", bridge)
         self.assertIn("one explicit stop sample", bridge)
+        # Rumble is opt-in from the Controls menu and defaults to off.
+        self.assertIn('@"KartPadJoyCon2RumbleEnabled"', bridge)
+        shell = (REPO / "apple/macos/KartPadMacShell.mm").read_text()
+        self.assertIn('initWithTitle:@"Joy-Con 2 Rumble"', shell)
 
     def test_runtime_preparation_applies_sideways_preset(self) -> None:
         preset = REPO / "patches/wiicompiled-experimental-joycon2-preset.patch"

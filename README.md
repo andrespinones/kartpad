@@ -268,10 +268,11 @@ players in a four-player local race without input lag, a Pro Controller 2, and
 reconnect without `SYNC` on macOS 26; wider hardware acceptance and
 long-session behavior remain open.
 
-Rumble is forwarded too. The game's motor commands reach SDL through Aurora's
-pad rumble path, and the Joy-Con 2 bridge answers SDL's rumble callback by
-writing the controller's vibration characteristic while a rumble is active.
-Rumble is untested on hardware until a reporter confirms it.
+Rumble is available but off by default: **Controls → Joy-Con 2 Rumble** turns
+it on. The game's motor commands reach SDL through Aurora's pad rumble path,
+and the Joy-Con 2 bridge answers SDL's rumble callback by writing the
+controller's vibration characteristic while a rumble is active. One reporter
+confirmed the motor responds on a Joy-Con 2.
 
 ## Install or build
 

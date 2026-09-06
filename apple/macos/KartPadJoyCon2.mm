@@ -33,6 +33,7 @@ NSString *const KartPadJoyCon2RememberMacDefaultsKey =
     @"KartPadJoyCon2RememberMac";
 NSString *const KartPadSeparateOriginalJoyConsDefaultsKey =
     @"KartPadSeparateOriginalJoyCons";
+NSString *const KartPadJoyCon2RumbleDefaultsKey = @"KartPadJoyCon2RumbleEnabled";
 
 namespace {
 
@@ -666,6 +667,12 @@ typedef void (^KartPadJoyCon2ResponseBlock)(NSData *_Nullable response);
 
 - (void)setRumbleLow:(uint16_t)low high:(uint16_t)high {
   if (_vibrationCharacteristic == nil) return;
+  if (![NSUserDefaults.standardUserDefaults boolForKey:KartPadJoyCon2RumbleDefaultsKey]) {
+    // Rumble is opt-in. Treat any request as a stop so a toggle-off while a
+    // rumble is active still silences the motor.
+    low = 0;
+    high = 0;
+  }
   const BOOL wasActive = _rumbleLow != 0 || _rumbleHigh != 0;
   _rumbleLow = low;
   _rumbleHigh = high;

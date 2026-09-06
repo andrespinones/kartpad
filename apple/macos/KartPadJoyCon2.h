@@ -13,6 +13,9 @@
 FOUNDATION_EXPORT NSString *const KartPadExperimentalJoyCon2DefaultsKey;
 FOUNDATION_EXPORT NSString *const KartPadJoyCon2RememberMacDefaultsKey;
 FOUNDATION_EXPORT NSString *const KartPadSeparateOriginalJoyConsDefaultsKey;
+/* Off by default: forwards SDL rumble to the Joy-Con 2 / Pro Controller 2
+ * vibration motor only when the user opts in. */
+FOUNDATION_EXPORT NSString *const KartPadJoyCon2RumbleDefaultsKey;
 
 /* Original (Switch 1) Joy-Con pairs reach KartPad through SDL's HIDAPI
  * driver, which combines a left and right half into one gamepad by default.

@@ -849,6 +849,13 @@ static NSString *DiagnosticsReport() {
   KartPadApplySeparateOriginalJoyConsPreference();
 }
 
+- (void)toggleJoyCon2Rumble:(NSMenuItem *)sender {
+  NSUserDefaults *defaults = NSUserDefaults.standardUserDefaults;
+  const BOOL enabled = ![defaults boolForKey:KartPadJoyCon2RumbleDefaultsKey];
+  [defaults setBool:enabled forKey:KartPadJoyCon2RumbleDefaultsKey];
+  sender.state = enabled ? NSControlStateValueOn : NSControlStateValueOff;
+}
+
 - (NSArray<NSMenuItem *> *)controlsMenuItems {
   for (NSMenuItem *item in NSApp.mainMenu.itemArray.firstObject.submenu.itemArray) {
     if ([item.title isEqualToString:@"Controls"] && item.submenu != nil) {
@@ -1430,6 +1437,14 @@ static void InstallMenu() {
       boolForKey:KartPadSeparateOriginalJoyConsDefaultsKey]
       ? NSControlStateValueOn : NSControlStateValueOff;
   [controlsMenu addItem:separateOriginalJoyCons];
+  NSMenuItem *joyCon2Rumble = [[NSMenuItem alloc]
+      initWithTitle:@"Joy-Con 2 Rumble"
+             action:@selector(toggleJoyCon2Rumble:) keyEquivalent:@""];
+  joyCon2Rumble.target = Controller();
+  joyCon2Rumble.state = [NSUserDefaults.standardUserDefaults
+      boolForKey:KartPadJoyCon2RumbleDefaultsKey]
+      ? NSControlStateValueOn : NSControlStateValueOff;
+  [controlsMenu addItem:joyCon2Rumble];
   controlsMenuItem.submenu = controlsMenu;
   [mainMenu insertItem:controlsMenuItem atIndex:productMenuIndex];
 
