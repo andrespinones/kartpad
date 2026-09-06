@@ -41,11 +41,11 @@ class MacOSDualModeContractTests(unittest.TestCase):
         package = (ROOT / "scripts/package-public-macos.py").read_text()
         audit = (ROOT / "scripts/audit-public-macos.py").read_text()
         for script in (package, audit):
-            self.assertIn('RELEASE_TAG = "v0.4.7"', script)
-            self.assertIn('APP_VERSION = "0.4.7"', script)
-            self.assertIn('APP_BUILD = "21"', script)
+            self.assertIn('RELEASE_TAG = "v0.4.8"', script)
+            self.assertIn('APP_VERSION = "0.4.8"', script)
+            self.assertIn('APP_BUILD = "22"', script)
         self.assertTrue((ROOT / "docs/INSTALL_MACOS.md").is_file())
-        self.assertTrue((ROOT / "docs/releases/v0.4.7.md").is_file())
+        self.assertTrue((ROOT / "docs/releases/v0.4.8.md").is_file())
 
     def test_macos_archive_preserves_signed_runtime_resource_links(self):
         bundle = (ROOT / "scripts/package-macos-runtime.sh").read_text()
