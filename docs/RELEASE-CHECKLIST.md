@@ -19,6 +19,20 @@ The exact 67-row matrix in `docs/PRD.md` remains the authority for full
 engineering completion. A community preview may ship with narrower, explicit
 limitations when its exact artifact passes every preview gate below.
 
+## 0.4.5 player-identity hotfix candidate
+
+- [x] Reproduce the fixed-name gap on physical iPad Retro Rewind 6.12.7
+- [x] Tie renames to the full eight-byte Mii creation ID
+- [x] Update matching license names without changing account or progress fields
+- [x] Validate Mii database CRC-16 and RKSYS CRC-32 after mutation
+- [x] Stage only the rename intent so later gameplay cannot be overwritten
+- [x] Back up the Mii database and every modified live save before replacement
+- [ ] Build and audit exact-source iOS 0.4.5 build 19
+- [ ] Install in place and verify the existing iPad license displays `Kahris`
+- [ ] Package twice byte-identically and audit the exact unsigned IPA
+- [ ] Publish `v0.4.5`, `KartPad-v0.4.5-ios-unsigned.ipa`, and `SHA256SUMS`
+- [ ] Download hosted assets, byte-compare, and re-audit them
+
 ## 0.4.4 Retro Rewind compatibility candidate
 
 - [x] Hash and inspect the official Retro Rewind 6.12.7 full archive

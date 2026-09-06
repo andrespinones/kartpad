@@ -22,9 +22,9 @@
 > Rewind build for iPhone and iPad.** It must be re-signed before installation
 > and requires your own legally obtained supported game image. Retro Rewind is
 > optional and installs through KartPad from the official version-locked pack.
-> KartPad 0.4.4 updates Retro Rewind to 6.12.7 and adds automatic upstream
-> update issue creation plus a one-command maintainer repin flow. It retains the
-> universal
+> KartPad 0.4.5 adds an editable player identity for licenses and online play,
+> retains Retro Rewind 6.12.7, and keeps the automatic upstream update issue
+> plus one-command maintainer repin flow. It retains the universal
 > iPhone/iPad settings menu, and includes the native Apple TV hardware-bring-up
 > build. Apple TV support still
 > needs external physical testing before it can be called supported.
@@ -38,13 +38,13 @@
 | Question | Answer |
 |---|---|
 | Is this Dolphin or streaming? | No. WiiCompiled translates the game's PowerPC code ahead of time, then KartPad compiles it for ARM64 and presents it through Metal. |
-| Is an IPA included in the GitHub release? | **Yes.** `v0.4.4` includes separate audited unsigned ARM64 IPAs for iPhone/iPad and experimental Apple TV hardware bring-up. Both require local re-signing and user-supplied supported game data. |
+| Is an IPA included in the GitHub release? | **Yes.** `v0.4.5` includes an audited unsigned ARM64 IPA for iPhone/iPad. The experimental Apple TV hardware-bring-up IPA remains available from `v0.4.4`. Both require local re-signing and user-supplied supported game data. |
 | Can the source create an IPA? | Yes. The Personal IPA Builder can also translate a supported user-owned game executable and create a separate private unsigned IPA on an Apple Silicon Mac. |
 | Does it include Mario Kart Wii? | No. You must provide your own legally obtained supported PAL `RMCP01` revision 0 WBFS/ISO. |
 | Does it support Retro Rewind? | **Yes.** Choose Original Mario Kart Wii or Retro Rewind when KartPad opens. KartPad can download, verify, and install the official Retro Rewind 6.12.7 pack. The 6.12.7 graph and package are current; physical acceptance remains separate. |
-| Does online play work? | The online-capable build passes login, matchmaking, a two-player race, results, ratings, and lobby return against a compatible isolated WFC server. Retro WFC is active again as of 6 September 2026. Production compatibility of the exact 0.4.4 KartPad artifact still needs end-to-end and physical-device acceptance. |
+| Does online play work? | The online-capable build passes login, matchmaking, a two-player race, results, ratings, and lobby return against a compatible isolated WFC server. Retro WFC is active again as of 6 September 2026. Production compatibility of the exact 0.4.5 KartPad artifact still needs end-to-end and physical-device acceptance. |
 | Do touch, tilt, and controllers work? | Touch, motion steering, and ordinary GameController-compatible pads are implemented, with general physical acceptance on iPhone and iPad. Direct Wii Remote/Nunchuk pairing is a separate experimental, macOS-only path that still needs external hardware testing. |
-| Can I use a custom Mii? | **Experimentally.** On Mac, iPhone, or iPad, open **Game Data & Saves → Manage Miis…** and import a standard 74-byte `.mii` file. Restart KartPad, then select it in **License Settings → Change Mii**. KartPad does not yet create Miis. |
+| Can I choose my player name or Mii? | **Yes on iPhone and iPad for names; appearance import remains experimental.** Open **Game Data & Saves → Player Identity…** to rename the built-in or an imported Mii. Restart KartPad and linked licenses are updated without replacing their friend codes or progress. Import a standard 74-byte `.mii` file there for a different appearance. |
 | Are Android and Apple TV supported? | Apple TV has an experimental native hardware-bring-up IPA in `v0.4.4`, but it is not accepted as supported until physical testers complete the matrix. Native Android implementation is now an active, evidence-gated project; no Android APK or runtime claim exists yet. |
 | How much storage does it need? | The app is about 80 MiB and extracted Mario Kart Wii data uses about 2.5 GiB. Retro Rewind downloads an additional 1.72 GiB archive and needs temporary installation space. Keeping the WBFS/ISO on the device requires more space. |
 
@@ -76,7 +76,7 @@ Retro WFC is Retro Rewind's online service. KartPad's online-capable graph
 passes login, matchmaking, a complete two-player race, results, ratings, and
 lobby return against a compatible isolated WFC service. Retro WFC's public
 health and room feeds are active again as of 6 September 2026. That service
-recovery does not by itself prove the exact 0.4.4 KartPad artifact's production
+recovery does not by itself prove the exact 0.4.5 KartPad artifact's production
 login, matchmaking, complete-race, results, reconnect, or physical-device gates.
 
 KartPad packages a native Apple ARM64 app around a
@@ -106,8 +106,8 @@ retail game data.
 | Packaging | The K-circuit iPhone/iPad icon and branded package pass structural audit; installed-storage, configured gameplay, save-preservation, and normal-close evidence applies to the previously accepted app candidate, while the native first-run/settings/data-management shell remains open |
 | iPhone/iPad | The full 29,065-function ARM64 retail app has been packaged as an unsigned IPA; locally signed builds have been installed and physically accepted on both iPhone and iPad, reaching live races, importing a supported private WBFS, and preserving saves |
 | Game content | Version-locked dual-mode Original Mario Kart Wii / Retro Rewind 6.12.7 flow without bundling either game's private data; exact 6.12.7 physical acceptance remains open while the preceding physical iPad install, launch, and initial single-player gameplay result remains accepted only for its tested version |
-| Online multiplayer | Local Mac-to-iPad-Simulator login, matchmaking, room, race, native results, ratings, and lobby return pass; public Retro WFC service recovery is verified, while exact 0.4.4 production and physical-device acceptance remain open |
-| Distribution | `v0.4.4` provides source plus separate unsigned iPhone/iPad and experimental tvOS community IPAs containing translated game logic. They contain no disc image, extracted game assets, Retro Rewind pack, saves, signing identity, or provisioning profile |
+| Online multiplayer | Local Mac-to-iPad-Simulator login, matchmaking, room, race, native results, ratings, and lobby return pass; public Retro WFC service recovery is verified, while exact 0.4.5 production and physical-device acceptance remain open |
+| Distribution | `v0.4.5` provides source plus an unsigned iPhone/iPad community IPA containing translated game logic; the experimental tvOS IPA remains at `v0.4.4`. They contain no disc image, extracted game assets, Retro Rewind pack, saves, signing identity, or provisioning profile |
 
 The evidence ledger, exact open rows, and known risks live in
 [`docs/STATUS.md`](docs/STATUS.md). The 67-row release matrix is in
@@ -164,25 +164,27 @@ their filename extension is recognized. The expected digest is recorded in
 the build scripts for identification; no disc content is tracked or
 distributed.
 
-## Experimental Miis and Wii Remote controls
+## Player identity, experimental Mii appearances, and Wii Remote controls
 
-Preview 5 retains two opt-in features from Preview 4 for community testing. They are deliberately
-marked **Experimental** until users with real exported Miis and original Wii
-hardware complete the remaining acceptance checks.
+Player-name editing is supported on iPhone and iPad in 0.4.5. Imported Mii
+appearances and direct Wii Remote controls remain opt-in features for community
+testing until users with real exported Miis and original Wii hardware complete
+the remaining acceptance checks.
 
-### Import and manage Miis
+### Set a player name and manage Miis
 
-On Mac, iPhone, or iPad, open **Game Data & Saves → Manage Miis…**. KartPad can
-list the current Mii database, import a standard 74-byte `.mii` file, and remove
-an unwanted entry. Changes are staged safely, the current database is backed
-up, and the replacement is applied on the next launch. KartPad will not remove
-the final remaining Mii.
+On iPhone or iPad, open **Game Data & Saves → Player Identity…**. Choose **Set
+Player Name…** to give the built-in or an imported Mii a 1–10 character name.
+On the next launch, KartPad updates that Mii and every linked original-game or
+Retro Rewind license while retaining friend codes, online account data, and
+progress. New licenses created with that Mii inherit the chosen name.
 
-KartPad cannot create a Mii because it does not include the Wii Menu or Mii
-Channel. Create or export the Mii with a compatible tool, import the `.mii`
-file, restart KartPad, and choose it from Mario Kart Wii's **License Settings →
-Change Mii** screen. Do not attach a complete NAND, save, or app container to a
-public issue.
+KartPad still does not include the Wii Menu's full appearance editor. To change
+the face or other appearance details, create or export a standard 74-byte
+`.mii` with a compatible tool and choose **Import Mii Appearance…**. Changes
+are staged, the Mii database and save are checksum-validated, and both are
+backed up before replacement. Do not attach a complete NAND, save, or app
+container to a public issue.
 
 ### Pair a Wii Remote and Nunchuk on macOS
 
@@ -202,8 +204,8 @@ provide the required direct Wii Remote HID pairing path.
 
 ### Download the unsigned iPhone/iPad IPA
 
-Download `KartPad-v0.4.4-ios-unsigned.ipa` and `SHA256SUMS` from the
-[latest release](https://github.com/chrissotraidis/kartpad/releases/tag/v0.4.4).
+Download `KartPad-v0.4.5-ios-unsigned.ipa` and `SHA256SUMS` from the
+[latest release](https://github.com/chrissotraidis/kartpad/releases/tag/v0.4.5).
 Verify the checksum, re-sign the IPA with AltStore Classic plus AltServer or
 another compatible personal-signing workflow, and select your own supported
 PAL `RMCP01` revision 0 image on first launch. See
@@ -409,8 +411,9 @@ available without a separate controller:
   restores touch; additional controllers keep stable Player 2–4 slots.
 - **Menu:** the persistent **•••** opens display, controls, game data,
   diagnostics, multiplayer access, and motion steering.
-- **Experimental Miis:** **Game Data & Saves → Manage Miis…** imports and
-  stages standard `.mii` records without replacing saves or game data.
+- **Player identity:** **Game Data & Saves → Player Identity…** sets the
+  online name and updates linked original-game and Retro Rewind licenses. It
+  also imports standard `.mii` appearances without replacing saves or game data.
 - **Experimental Wii hardware:** direct Wii Remote/Nunchuk pairing is available
   only in the macOS build; the iPhone/iPad entry explains that platform limit.
 
@@ -505,8 +508,9 @@ Useful starting points:
 
 ### Can I download an IPA or playable app?
 
-Yes. `v0.4.4` provides separate unsigned iPhone/iPad and experimental
-Apple TV IPAs that must be re-signed before installation. They contain
+Yes. `v0.4.5` provides an unsigned iPhone/iPad IPA that must be re-signed before
+installation. The experimental Apple TV IPA remains available from `v0.4.4`.
+They contain
 KartPad's compiled ARM64 translation but no disc image or extracted game assets,
 so you must supply your own legally obtained supported game data. The Personal
 IPA Builder remains available as a separate local workflow. Follow
@@ -523,7 +527,7 @@ Public Retro WFC compatibility, Wiimmfi, physical-device online play, and
 external-client interoperability remain separate acceptance gates. As of 6
 September 2026, Retro WFC's health endpoint reports its external API healthy
 and the public room feed reports active rooms. The earlier maintenance outage
-is over, so the exact 0.4.4 build can now be evaluated against production; the
+is over, so the exact 0.4.5 build can now be evaluated against production; the
 service status alone is not that gameplay proof.
 
 - [Retro Rewind service notice](https://mkwiiki.org/wiki/Retro_Rewind)
@@ -531,7 +535,7 @@ service status alone is not that gameplay proof.
 
 ### Does KartPad support Retro Rewind?
 
-Yes. The 0.4.4 release opens with an Original / Retro Rewind chooser and
+Yes. The 0.4.5 iPhone/iPad release opens with an Original / Retro Rewind chooser and
 installs a separately downloaded,
 hash-verified Retro Rewind 6.12.7 pack. KartPad does not bundle Mario Kart Wii
 or Retro Rewind content. Physical iPad build 7 completes the pack download,
@@ -544,13 +548,13 @@ the official version feed. If
 Retro Rewind advances beyond the version compiled into the app, KartPad asks
 for a compatible KartPad update instead of launching an outdated online pack.
 
-### Can KartPad import or create a custom Mii?
+### Can KartPad set my player name or import a custom Mii?
 
-Preview 5 can experimentally import and manage standard 74-byte `.mii` files
-on Mac, iPhone, and iPad. Use **Game Data & Saves → Manage Miis…**, restart
-KartPad, then select the imported Mii through Mario Kart Wii's License Settings.
-KartPad cannot create a new Mii because it does not include the Wii Menu or Mii
-Channel.
+On iPhone and iPad, use **Game Data & Saves → Player Identity…** to rename the
+built-in or an imported Mii. Restarting applies the name to every linked
+license while retaining its friend code and progress. Standard 74-byte `.mii`
+appearance import remains experimental; KartPad does not reproduce the full Wii
+Menu appearance editor.
 
 ### Can I connect a Wii Remote and Nunchuk without a DolphinBar?
 
