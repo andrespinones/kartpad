@@ -79,23 +79,45 @@ def main() -> int:
     if missing:
         fail(f"missing release files: {', '.join(missing)}")
     entries: list[tuple[str, bytes, int]] = []
-    for path in sorted((item for item in app.rglob("*") if item.is_file())):
-        entries.append((f"KartPad.app/{path.relative_to(app).as_posix()}",
-                        path.read_bytes(), stat.S_IMODE(path.stat().st_mode)))
+    for root, directory_names, file_names in os.walk(app, followlinks=False):
+        root_path = Path(root)
+        relative_root = root_path.relative_to(app).as_posix()
+        directory_entry = "KartPad.app/" if relative_root == "." else \
+            f"KartPad.app/{relative_root}/"
+        entries.append((directory_entry, b"",
+                        stat.S_IFDIR | stat.S_IMODE(root_path.stat().st_mode)))
+        for directory_name in sorted(list(directory_names)):
+            path = root_path / directory_name
+            if path.is_symlink():
+                entries.append((f"KartPad.app/{path.relative_to(app).as_posix()}",
+                                os.readlink(path).encode(), stat.S_IFLNK | 0o777))
+                directory_names.remove(directory_name)
+        for file_name in sorted(file_names):
+            path = root_path / file_name
+            name = f"KartPad.app/{path.relative_to(app).as_posix()}"
+            if path.is_symlink():
+                entries.append((name, os.readlink(path).encode(),
+                                stat.S_IFLNK | 0o777))
+            else:
+                entries.append((name, path.read_bytes(),
+                                stat.S_IFREG | stat.S_IMODE(path.stat().st_mode)))
     for name, path in sorted(extras.items()):
-        entries.append((name, path.read_bytes(), stat.S_IMODE(path.stat().st_mode)))
+        entries.append((name, path.read_bytes(),
+                        stat.S_IFREG | stat.S_IMODE(path.stat().st_mode)))
     entries.append(("KartPadMacProvenance.json",
                     (json.dumps(provenance, indent=2, sort_keys=True) + "\n").encode(),
-                    0o644))
+                    stat.S_IFREG | 0o644))
     output.parent.mkdir(parents=True, exist_ok=True)
     temporary = output.with_name(output.name + ".partial")
     if temporary.exists():
         temporary.unlink()
     with zipfile.ZipFile(temporary, "w", zipfile.ZIP_DEFLATED, compresslevel=9) as archive:
-        for name, data, mode in sorted(entries):
+        for name, data, unix_mode in sorted(entries):
             info = zipfile.ZipInfo(name, ZIP_TIMESTAMP)
             info.create_system = 3
-            info.external_attr = (stat.S_IFREG | mode) << 16
+            info.external_attr = unix_mode << 16
+            if stat.S_ISDIR(unix_mode):
+                info.external_attr |= 0x10
             info.compress_type = zipfile.ZIP_DEFLATED
             archive.writestr(info, data, compresslevel=9)
     os.replace(temporary, output)
