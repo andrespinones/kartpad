@@ -27,12 +27,19 @@ test "$(plutil -extract NSBluetoothAlwaysUsageDescription raw "${plist}")" = \
   "KartPad uses Bluetooth to pair and connect an experimental Wii Remote and Nunchuk."
 test -x "${executable}"
 test -f "${contents}/Resources/${icon_name%.icns}.icns"
-test -f "${contents}/MacOS/dsp_coef.bin"
+test "$(readlink "${contents}/MacOS/dsp_coef.bin")" = \
+  "../Resources/Runtime/dsp_coef.bin"
+test "$(readlink "${contents}/MacOS/build-fingerprint.json")" = \
+  "../Resources/Runtime/build-fingerprint.json"
+test "$(readlink "${contents}/MacOS/wii_bootstrap")" = \
+  "../Resources/Runtime/wii_bootstrap"
+test -f "${contents}/Resources/Runtime/dsp_coef.bin"
+test -f "${contents}/Resources/Runtime/build-fingerprint.json"
 if [[ ! -f "${contents}/Resources/initial_pipeline_cache.db" ]]; then
   echo "package lacks its read-only initial pipeline cache resource" >&2
   exit 66
 fi
-test -d "${contents}/MacOS/wii_bootstrap/shared2/wc24"
+test -d "${contents}/Resources/Runtime/wii_bootstrap/shared2/wc24"
 if [[ "$(file -b "${executable}")" != *"Mach-O 64-bit executable arm64"* ]]; then
   echo "main executable is not arm64 Mach-O" >&2
   exit 65

@@ -47,6 +47,15 @@ class MacOSDualModeContractTests(unittest.TestCase):
         self.assertTrue((ROOT / "docs/INSTALL_MACOS.md").is_file())
         self.assertTrue((ROOT / "docs/releases/v0.4.7.md").is_file())
 
+    def test_macos_archive_preserves_signed_runtime_resource_links(self):
+        bundle = (ROOT / "scripts/package-macos-runtime.sh").read_text()
+        package = (ROOT / "scripts/package-public-macos.py").read_text()
+        audit = (ROOT / "scripts/audit-public-macos.py").read_text()
+        self.assertIn("../Resources/Runtime/dsp_coef.bin", bundle)
+        self.assertIn("stat.S_IFLNK", package)
+        self.assertIn("EXPECTED_SYMLINKS", audit)
+        self.assertIn("os.symlink(target, destination)", audit)
+
 
 if __name__ == "__main__":
     unittest.main()

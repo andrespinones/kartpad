@@ -54,15 +54,18 @@ staged_app="${staging_root}/KartPad.app"
 contents="${staged_app}/Contents"
 macos="${contents}/MacOS"
 resources="${contents}/Resources"
+runtime_resources="${resources}/Runtime"
 frameworks="${contents}/Frameworks"
-mkdir -p "${macos}" "${resources}" "${frameworks}"
+mkdir -p "${macos}" "${runtime_resources}" "${frameworks}"
 
 cp "${runtime_binary}" "${macos}/KartPad"
 chmod 0755 "${macos}/KartPad"
-cp "${runtime_build}/dsp_coef.bin" "${macos}/dsp_coef.bin"
+cp "${runtime_build}/dsp_coef.bin" "${runtime_resources}/dsp_coef.bin"
 cp "${runtime_build}/initial_pipeline_cache.db" "${resources}/initial_pipeline_cache.db"
-cp -R "${runtime_build}/wii_bootstrap" "${macos}/wii_bootstrap"
+cp -R "${runtime_build}/wii_bootstrap" "${runtime_resources}/wii_bootstrap"
 cp "${icon_file}" "${resources}/KartPad.icns"
+ln -s ../Resources/Runtime/dsp_coef.bin "${macos}/dsp_coef.bin"
+ln -s ../Resources/Runtime/wii_bootstrap "${macos}/wii_bootstrap"
 
 plist="${contents}/Info.plist"
 plutil -create xml1 "${plist}"
@@ -158,9 +161,10 @@ done
 
 unsigned_runtime_hash="$(shasum -a 256 "${macos}/KartPad" | awk '{print $1}')"
 source_commit="$(git -C "${repo_root}" rev-parse HEAD)"
-fingerprint="${macos}/build-fingerprint.json"
+fingerprint="${runtime_resources}/build-fingerprint.json"
 printf '{\n  "SetupVersion": "%s",\n  "SourceCommit": "%s",\n  "UnsignedRuntimeSHA256": "%s"\n}\n' \
   "${KARTPAD_VERSION:-0.4.7}" "${source_commit}" "${unsigned_runtime_hash}" > "${fingerprint}"
+ln -s ../Resources/Runtime/build-fingerprint.json "${macos}/build-fingerprint.json"
 
 if find "${staged_app}" \( -name portable.txt -o -name UserData -o -name Config.toml \) -print -quit | rg -q .; then
   echo "package contains writable or developer-only runtime state" >&2
